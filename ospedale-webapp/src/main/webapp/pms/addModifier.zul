@@ -1,0 +1,61 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addModifierWin"?>
+<?component name="enumeration" class="com.nzion.view.component.EnumerationDropdown"?>
+<zk>
+	<zscript><![CDATA[
+import com.nzion.util.UtilValidator;
+import com.nzion.service.common.CommonCrudService;;
+import com.nzion.util.Infrastructure;
+import com.nzion.domain.pms.Modifier;
+Map arguments = Executions.getCurrent().getArg();
+Modifier modifier = UtilValidator.isEmpty(arg) ? new Modifier() : (Modifier)arguments.get("entity");
+]]></zscript>
+<window  mode="modal" title="Modifier" width="60%" position="center,top" closable="true"  id="addModifierWin">
+	<div width="97%" style="margin:5px">
+	
+	<panel title="Add/Edit Modifier">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div sclass="col2">
+						<label value="Code"/>
+						<label value=" *" zclass="labelReq"/>
+						<textbox value="@{modifier.code,save-when='Save.onClick'}" constraint="no empty"/>
+					</div>
+					<div sclass="col2">
+						<label value="Name"/>
+						<label value=" *" zclass="labelReq"/>
+						<textbox value="@{modifier.description,save-when='Save.onClick'}" constraint="no empty"/>
+					</div>
+					<div sclass="col2">
+						<label value="Comments"/>
+						<textbox value="@{modifier.comments,save-when='Save.onClick'}" rows="4" cols="90"/>
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+	<div sclass="panelFoot"/>
+	<separator/>
+	<div sclass="panelFoot">
+		<button label="Save" id="Save">
+			<attribute name="onClick">
+			<![CDATA[
+				try{
+				commonCrudService.save(modifier);
+				com.nzion.util.UtilMessagesAndPopups.showSuccess();
+				addModifierWin.detach();
+				}catch(org.springframework.dao.DataIntegrityViolationException e){
+					if(e.getCause()!=null && e.getCause() instanceof org.hibernate.exception.ConstraintViolationException){
+					int code = org.hibernate.exception.JDBCExceptionHelper.extractErrorCode(((org.hibernate.exception.ConstraintViolationException)(e.getCause())).getSQLException());
+						if(1062==code){
+							com.nzion.util.UtilMessagesAndPopups.showError("Modifier '"+modifier.getCode()+"' already exists.");
+						}
+					}
+				}
+				]]>
+			</attribute>
+		</button>
+		<button label="Cancel" forward="onClick=onCancel" />
+	</div>
+	</div>
+	</window>
+</zk>

@@ -1,0 +1,128 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./rxSectionWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+		<![CDATA[
+			import com.nzion.zkoss.composer.SoapRxComposer;
+			import com.nzion.domain.emr.soap.PatientRx;
+			import com.nzion.zkoss.composer.PatientSoapNoteController;
+			import com.nzion.domain.emr.soap.RxSection;
+			PatientRx patientRx = new PatientRx();
+			PatientSoapNoteController patientSoapNoteController = (PatientSoapNoteController) desktop.getAttribute("controller");
+			RxSection rxSection = (RxSection) patientSoapNoteController.getSoapSection(RxSection.class);
+			SoapRxComposer rxComposer = new SoapRxComposer();
+		]]>	
+	</zscript>
+	<style>
+	  .form {
+	     border: 1px solid #E1E1E1;
+         background-color:#fff;
+         padding: 20px 20px;
+          -webkit-border-radius:4px;
+         -moz-border-radius:4px;
+         border-radius:4px;
+    }
+    .form .name {
+        display: block;
+        width: 100px;
+        text-align: center;
+    } 
+	</style>
+	<window id="rxSectionWin" width="100%">
+		<div sclass="chiefComp soapNoteCont curSOAP ui-resizable" style="position:relative;">		
+			<h:table width="100%">
+				<h:tr>
+					<h:td class="soapNoteContL" >
+						<div visible="${!isOrdered}">
+						<span sclass="linkBtn linkBtnOn">
+							<a disabled="${controller.readonly}" label="New" id="newBtn" sclass="addBtn" >
+								<attribute name="onClick">
+									patientRx = new com.nzion.domain.emr.soap.PatientRx();
+									Window w =com.nzion.zkoss.ext.Navigation.navigateToModalWindow("/soap/soapAddEditRx",com.nzion.util.UtilMisc.toMap("patientRx",patientRx,"rxSection",rxSection,"patientSoapNoteController",patientSoapNoteController));
+								    w.addForward("onDetach", rxSectionDisplayGrid, "onReloadRequest");
+								</attribute>
+								<n:i class="icon-plus-sign"></n:i>
+							</a>
+							<span />
+						</span>
+						</div>
+						<div>
+							<span sclass="linkBtn linkBtnOn">
+									<a id="printBtn" label="Print">
+										<attribute name="onClick">
+											<![CDATA[
+												//Executions.getCurrent().sendRedirect("/soap/printPatientRxs.zul?scheduleId=" + patientSoapNoteController.getSchedule().getId(), "_blank");
+												Executions.getCurrent().sendRedirect("/soap/printPreviewPatientRxs.zul?scheduleId=" + patientSoapNoteController.getSchedule().getId(), "_blank");
+											]]></attribute>
+									</a>
+									<span />
+								</span>
+						</div>
+					</h:td>
+				</h:tr>
+				<h:tr>
+					<h:td class="soapNoteContL" >
+						<panel title="Prescription">
+							<panelchildren>
+								<listbox sclass="dataTable_scroll" height="250px"
+									model="@{rxSection.patientRxs,load-after='self.onReloadRequest'}" id="rxSectionDisplayGrid" rows="4">
+									<listhead>
+										<listheader label="Generic Name" />
+										<listheader label="Trade Name" />
+										<listheader label="Total Supply" />
+										<listheader label="SIG" />
+										<listheader label="Start Date" />
+										<listheader label="End Date" />
+										<listheader label="Action" />
+									</listhead>
+									<listitem self="@{each='patientRx'}" value="@{patientRx}">
+										<listcell>
+											<label value="@{patientRx.drug.genericName}"/>
+										</listcell>
+										<listcell>
+											<label value="@{patientRx.drug.tradeName}"/>
+											<!-- <label value="@{patientRx.drug.tradeName}" if="${patientRx.drug ne null &amp;&amp; patientRx.drug.tradeName eq patientRx.drugName}"/>
+											<label value="@{patientRx.drugName}" unless="${patientRx.drug ne null &amp;&amp; patientRx.drug.tradeName eq patientRx.drugName}"/> -->
+										</listcell>
+										<!-- <listcell label="@{patientRx.quantity}" />
+										<listcell label="@{patientRx.drugDosageForm}" />
+										<listcell label="@{patientRx.drugDirection}" /> -->
+										<listcell>
+											<label value="@{patientRx.totalSupply}"/>
+										</listcell>
+										<listcell>
+											<label value="@{patientRx.startCondition}"/>
+										</listcell>
+										<listcell label="@{patientRx.startDate,converter='com.nzion.view.component.DateConverter'}"/>
+										<listcell label="@{patientRx.endDate,converter='com.nzion.view.component.DateConverter'}"/>
+										<listcell>
+											<a label="Edit | " disabled="${patientSoapNoteController.readonly}">
+												<attribute name="onClick">
+													patientRx = (PatientRx) self.getParent().getParent().getValue();
+													Window w =com.nzion.zkoss.ext.Navigation.navigateToModalWindow("/soap/soapAddEditRx",com.nzion.util.UtilMisc.toMap("patientRx",patientRx,"rxSection",rxSection,"patientSoapNoteController",patientSoapNoteController));
+												    w.addForward("onDetach", rxSectionDisplayGrid, "onReloadRequest");
+												</attribute>
+											</a>
+											<a label="Remove" disabled="${patientSoapNoteController.readonly}">
+												<attribute name="onClick">
+													rxSection.getPatientRxs().remove(self.getParent().getParent().getValue());
+													Events.postEvent("onReloadRequest",rxSectionDisplayGrid,null);
+												</attribute>
+											</a>
+										</listcell>
+									</listitem>
+								</listbox>
+							</panelchildren>
+						</panel>
+					</h:td>
+				</h:tr>
+			</h:table>
+			<div sclass="buttonPanel">
+				<button disabled="${controller.readonly}" label="Save" zclass="btn btn-success"
+					onClick="patientSoapNoteController.saveSoapSection();patientSoapNoteController.createSalesOrder(rxSection);" />
+				<space width="15px" />
+			</div>
+		</div>
+	</window>
+</zk>

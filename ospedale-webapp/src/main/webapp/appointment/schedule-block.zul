@@ -1,0 +1,25 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./scheduleBlockModalWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		import com.nzion.util.UtilDateTime;
+		com.nzion.zkoss.composer.appointment.ScheduleController controller = arg.get("controller");
+		com.nzion.domain.util.SlotAvailability availability = arg.get("availability");
+		com.nzion.domain.CalendarSlot slot = availability == null ? controller.getSelectedComponent().getSlot() : availability.getSlot();
+		String time = UtilDateTime.format(slot.getStartTime(), UtilDateTime.AM_PM_FORMATTER) + " - " + UtilDateTime.format(slot.getEndTime(), UtilDateTime.AM_PM_FORMATTER);
+	</zscript>
+	<window mode="modal" id="scheduleBlockModalWindow" title="Block Schedule (${time})">
+		<label value="Reason for blocking" />
+		<textbox rows="4" cols="50" id="comment"/>				
+		<div class="panelFoot">
+			<button label="Cancel" forward="onClick=onCancel"/>
+			<button label="Block" onClick="controller.blockSlot(comment.getValue());scheduleBlockModalWindow.detach();" if="${availability == null}"/>
+			<button label="Block" unless="${availability == null}">
+				<attribute name="onClick">
+					controller.blockSlotDirectly(availability.getSlot(), availability.getOn(), comment.getValue());
+					scheduleBlockModalWindow.detach();									
+				</attribute>
+			</button>
+		</div>
+	</window>
+</zk>

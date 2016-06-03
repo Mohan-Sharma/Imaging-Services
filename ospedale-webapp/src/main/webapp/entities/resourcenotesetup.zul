@@ -1,0 +1,23 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./ResourceNoteSetup"?>
+<?component name="screen" macro-uri="/home-grid-macro.zul"?>
+<?component name="enumeration" class="com.nzion.view.component.EnumerationDropdown"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+setPageTitle("Resource Note Setup", "");
+</zscript>
+
+	<window id="ResourceNoteSetup" self="@{define(content)}">
+		<screen width="100%" pagetitle="Resource Note"
+			listtitle="List of Resource Notes" addpage="addResourceNoteSetup"
+			editpage="addResourceNoteSetup"
+			entityclass="com.nzion.domain.ResourceNoteType"
+			fields="name, description,slotTypeFeatures.reportHeader,
+									slotTypeFeatures.apptLength,slotTypeFeatures.defaultFormat
+									,slotTypeFeatures.colorCode,slotTypeFeatures.DefaultNote
+									,slotTypeFeatures.FollowUpNote"
+			labels="Name, Description,Report Header,Appt Length,Default Format,Color Code,Default Note,FollowUp Note"
+			addmodepopup="true" editmodepopup="true" />
+	</window>
+</zk>

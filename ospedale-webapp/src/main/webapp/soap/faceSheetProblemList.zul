@@ -1,0 +1,41 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./facesheetWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	com.nzion.zkoss.composer.PatientSoapNoteController patientSoapNoteController = arg.get("patientSoapNoteController");
+	com.nzion.domain.Patient patient = patientSoapNoteController.getPatient();
+	List latestProblemLists = soapNoteService.getLatestPastIllness(patient, 5);
+</zscript>
+	<div id="facesheetWindow" sclass="soapNoteContL col2">
+		<panel title="Problem List" collapsible="true" height="300px">
+			<panelchildren>
+				<div sclass="dataTables_scrollBody" style="overflow: auto; height: 200px;">
+					<listbox model="@{latestProblemLists}">
+						<listhead>
+							<listheader label="Name" />
+							<listheader label="Occured On" />
+							<listheader label="Severity" />
+							<listheader label="Certainity" />
+							<listheader label="Status" />
+							<listheader label="Visit Date" />
+						</listhead>
+						<listitem self="@{each='patientPastIllness'}">
+							<listcell>
+								<label value="@{patientPastIllness.icdElementcode}" />
+								<label value="-" />
+								<label value="@{patientPastIllness.icdElementdescription}" />
+								<label value="@{patientPastIllness.description}"/>
+							</listcell>
+							<listcell label="@{patientPastIllness.onSetDate}" />
+							<listcell label="@{patientPastIllness.severity}"/>
+							<listcell label="@{patientPastIllness.certainity}" />
+							<listcell label="@{patientPastIllness.status}" />
+							<listcell label="@{patientPastIllness.visitDate}" />
+						</listitem>
+					</listbox>
+				</div>
+			</panelchildren>
+		</panel>
+	</div>
+</zk>

@@ -1,0 +1,120 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+		import com.nzion.zkoss.composer.SoapSentenceComposer;
+		import com.nzion.domain.emr.soap.ChiefComplainSection;
+		import com.nzion.domain.emr.soap.PastHistorySection;
+		
+		SoapSentenceComposer sentenceComposer = (SoapSentenceComposer)arg.get("controller");
+		PastHistorySection pastHxSection = (PastHistorySection)sentenceComposer.getSoapNoteController().getSoapSection(PastHistorySection.class,false);
+		sentenceComposer.setSelectedSection(pastHxSection);
+	</zscript>
+
+<div style="margin-left:10px">
+		<n:h2>${pastHxSection.soapModule.moduleDescription}</n:h2>
+		<n:br/>
+		<n:h3>Past Surgeries</n:h3>
+		<n:h4>
+			<label value="Patient has never undergone a surgery in the past." if="${empty pastHxSection.patientPastOperationHitories}"/>
+		</n:h4>
+		<n:table width="100%" border="0px" cellspacing="10px" cellpadding="10px" if="${not empty pastHxSection.patientPastOperationHitories}">
+		<n:thead>
+			<n:tr style="text-align:left">
+				<n:th>Procedures</n:th>
+				<n:th>Primary Physician</n:th>
+				<n:th>Location</n:th>
+				<n:th>Date of Procedure</n:th>
+			</n:tr>
+		</n:thead>
+		<n:tr forEach="${pastHxSection.patientPastOperationHitories}">
+				<n:td>
+					<div forEach="${each.cpts}">
+					<label value="${each.id}" /><space/><label value="${each.description}" />
+					</div>
+				</n:td>
+				<n:td><label value="${each.operatedBy}"/></n:td>
+				<n:td><label value="${each.locationName}"/></n:td>
+				<n:td><label value="${display:fd(each.occuranceDate)}"/></n:td>
+		</n:tr>
+		</n:table>
+		<n:br/>
+		
+		<n:h3>Past Treatments</n:h3>
+		<n:h4>
+			<label value="Paient has never undergone any treatments in the past." if="${empty pastHxSection.patientPastTreatmentHistories}"/>
+		</n:h4>
+		<n:table width="100%" border="0px" cellspacing="10px" cellpadding="10px" if="${not empty pastHxSection.patientPastTreatmentHistories}">
+		<n:thead>
+			<n:tr style="text-align:left">
+				<n:th>Admitted Reason</n:th>
+				<n:th>Admitted Date</n:th>
+			</n:tr>
+		</n:thead>
+		<n:tr forEach="${pastHxSection.patientPastTreatmentHistories}">
+				<n:td><label value="${each.admissionReason}"/></n:td>
+				<n:td><label value="${display:fd(each.admissionDate)}"/></n:td>
+		</n:tr>
+		</n:table>
+		<n:br/>
+
+
+		<n:h3>Observations</n:h3>
+		<n:h4>
+			<label value="Patient has no past observations." if="${empty pastHxSection.patientPastObservationHistories}"/>
+		</n:h4>
+		<n:table width="100%" border="0px" cellspacing="10px" cellpadding="10px" if="${not empty pastHxSection.patientPastObservationHistories}">
+		<n:thead>
+			<n:tr style="text-align:left">
+				<n:th>Observation Name</n:th>
+				<n:th>Observation Values</n:th>
+				<n:th>Recorded Date</n:th>
+				<n:th>Recorded Time</n:th>
+			</n:tr>
+		</n:thead>
+		<n:tr forEach="${pastHxSection.patientPastObservationHistories}">
+		
+				<n:td><label value="${each.observation.name}"/></n:td>
+				<n:td>
+					<n:table>
+						<n:tr forEach="${each.observationValues}">
+							<n:td><label value="${each.collectionName}"/><space width="5px"></space><label value="${each.value}"/></n:td>
+						</n:tr>
+					</n:table>
+				</n:td>
+				<n:td><label value="${display:fd(each.recordedOn)}"/></n:td>
+				<n:td><label value="${each.recordedTime}"/></n:td>
+		</n:tr>
+		</n:table>
+		<n:br/>
+		<n:h3>Chronic Diseases</n:h3>
+		<n:h4>
+			<label value="Patient has no past Chronic Diseases ." if="${empty pastHxSection.patientChronicDiseases}"/>
+		</n:h4>
+		<n:table width="100%" border="0px" cellspacing="10px" cellpadding="10px" if="${not empty pastHxSection.patientChronicDiseases}">
+		<n:thead>
+			<n:tr style="text-align:left">
+				<n:th>Chronic Diseases</n:th>
+				<n:th>Durations</n:th>
+				<n:th>Mantained By</n:th>
+				<n:th>Treated For How Long</n:th>
+			</n:tr>
+		</n:thead>
+		<n:tr forEach="${pastHxSection.patientChronicDiseases}">
+				<n:td><label value="${each.chronicDisease.name}"/></n:td>
+				<n:td>
+				  <label value="${each.duration}"/>
+				  <label value="${each.durationType}"/>
+			   </n:td>
+				<n:td><label value="${each.mantainedProcess}"/></n:td>
+			   <n:td>
+				 <label value="${each.treatedForHowLong}"/>
+				 <label value="${each.treatedForHowLongType}"/>
+			  </n:td>
+		</n:tr>
+		</n:table>
+		<n:br/>
+</div>
+</zk>

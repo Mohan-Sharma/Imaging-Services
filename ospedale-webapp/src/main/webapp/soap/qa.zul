@@ -1,0 +1,57 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<div width="100%" id="qaWindow">
+	<zscript>
+		<![CDATA[
+			com.nzion.domain.emr.soap.PatientQuestionAnswerBindingFactory factory = arg.get("qaFactory");
+			Collection questions = (Collection) arg.get("qas");
+			com.nzion.zkoss.composer.emr.PatientAnswersController patientAnswersController = new com.nzion.zkoss.composer.emr.PatientAnswersController(factory);
+			boolean qaNotAvailable = com.nzion.util.UtilValidator.isEmpty(questions);
+		]]>
+	</zscript>
+	<style>
+		td .z-combobox-rounded-inp{
+			width:60%;
+		}
+	</style>
+	<div style="width:95%;">
+		<div style="padding:10px">
+			<radiogroup>
+				<radio label="Question/Answer" onCheck="qaDiv.setVisible(true);remarksDiv.setVisible(false);" checked="true" disabled="${qaNotAvailable}" visible="false"/>
+				<radio label="Free Text" onCheck="qaDiv.setVisible(false);remarksDiv.setVisible(true);" id="freeTextRadio" visible="false"/>
+			</radiogroup>
+			<label onCheck="qaDiv.setVisible(false);remarksDiv.setVisible(true);" />
+		</div>
+		<div style="overflow:auto;height:400px;padding:10px;" id="qaDiv">
+			<h:div class="panelTop">Questions</h:div>
+			<listbox id="questionsGrid" width="100%">
+				<listitem forEach="${questions}" value="${each}" >
+					<listcell>
+						<label value="${each.desc}"/>
+						<n:hr/>
+						<div onCreate='patientAnswersController.renderAnswerInput(self);'>
+						<custom-attributes question="${each}"/>
+						</div>
+					</listcell>
+				</listitem>
+			</listbox>
+		</div>
+		<div id="remarksDiv" visible="false" style="padding:10px">
+			<hlayout>
+			<label value="Remarks" sclass="formLabel"></label>
+				<textbox value="${factory.remarks}" cols="60" rows="5" onChange="factory.setRemarks(self.getValue());" width="350px" />
+			</hlayout>
+		</div>
+	</div>
+</div>
+<zscript>
+	<![CDATA[
+		if(qaNotAvailable){
+			freeTextRadio.setChecked(true);
+			remarksDiv.setVisible(true);
+			qaDiv.setVisible(false);
+		}
+	]]>
+</zscript>
+</zk>

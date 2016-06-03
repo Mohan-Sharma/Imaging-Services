@@ -1,0 +1,122 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?page title="SOAP Note"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<panel id="fullSoapNotePreview" style="margin:15px">
+	<panelchildren>
+		<zscript>
+		<![CDATA[
+			import com.nzion.enums.*;
+			import com.nzion.domain.*;
+			import com.nzion.domain.person.*;
+			import com.nzion.domain.emr.*;
+			import com.nzion.domain.emr.soap.*;
+			import com.nzion.zkoss.composer.*;
+			import com.nzion.util.Infrastructure;
+			import com.nzion.domain.emr.ReferalLetterTemplate;
+			import com.nzion.service.SoapNoteService;
+			 com.nzion.domain.Practice practice=com.nzion.util.Infrastructure.getPractice();
+			SoapNoteService soapNoteService = Infrastructure.getSpringBean("soapNoteService");
+			com.nzion.service.common.CommonCrudService commonCrudService = Infrastructure.getSpringBean("commonCrudService");
+			List referralModules = null;
+			String scheduleId = param.get("scheduleId") != null ? param	.get("scheduleId")[0] : null;
+			if(Executions.getCurrent().getParameter("soapReferralId") != null){
+				Long soapReferralId = new Long(Executions.getCurrent().getParameter("soapReferralId"));
+				SoapReferral soapReferral = commonCrudService.getById(SoapReferral.class,Long.valueOf(soapReferralId));
+				referralModules = soapReferral.getModules();
+			}
+			ReferalLetterTemplate referralTemplate = (ReferalLetterTemplate) desktop.getAttribute("referalLetterTemplate");
+			PatientSoapNoteController patientSoapNoteController = null;
+			patientSoapNoteController = new PatientSoapNoteController(scheduleId);
+			PatientSoapNote soapNote = patientSoapNoteController.getSoapNote();
+			SoapSentenceComposer sentenceComposer = new SoapSentenceComposer();
+			sentenceComposer.setSoapNoteController(patientSoapNoteController);
+			Map sentenceComposerMap = new HashMap();
+			List customizedModules = new ArrayList();
+			if (com.nzion.util.UtilValidator.isEmpty(referralModules)) {
+				customizedModules =  patientSoapNoteController.getModules();
+			} else {
+				customizedModules = new ArrayList(referralModules);
+			}
+			sentenceComposerMap.put("controller", sentenceComposer);
+			ChiefComplainSection section = soapNoteService.getSoapSection(soapNote,ChiefComplainSection.class);
+			String pageName = Executions.getCurrent().getParameter("pageName");
+			Long scheduleIdLong = new Long(param.get("scheduleId")[0]);
+			com.nzion.domain.Schedule schedule = commonCrudService.getById(com.nzion.domain.Schedule.class, scheduleIdLong);
+			com.nzion.domain.Patient patient = schedule.getPatient();
+			com.nzion.domain.Provider provider = (com.nzion.domain.Provider) schedule.getPerson();
+			com.nzion.domain.Location location = schedule.getLocation();
+			List soapAddendums = commonCrudRepository.findByEquality(SoapAddendum.class, new String[]{"soapNote"}, new Object[]{soapNote});
+			boolean showPrintButton = false;
+			Person person = Infrastructure.getLoggedInPerson();
+		   	boolean providerLoggedIn = com.nzion.util.Infrastructure.getLoggedInPerson().equals(soapNote.getProvider()) && !Schedule.STATUS.SOAPSIGNEDOUT.equals(patientSoapNoteController.getSchedule().getStatus());
+			boolean soapSignedOut = Schedule.STATUS.SOAPSIGNEDOUT.equals(soapNote.getSchedule().getStatus());
+			if(person instanceof Patient)
+				showPrintButton = true;
+			if(com.nzion.util.UtilValidator.isNotEmpty(pageName))
+				showPrintButton = true;
+			Date signedOutDate = soapNote.getSchedule().getSignedOutTime();
+			String dateInAMPM = com.nzion.util.UtilDateTime.format(signedOutDate,signedOutDate);
+			]]>
+		</zscript>
+		<button label="Print" if="${showPrintButton}">
+			<attribute name="onClick">
+			<![CDATA[
+				if (person instanceof Patient) {
+					soapNote.setPrintedByPatient(true);
+					soapNote.setPrintedByPatientOn(new Date());
+				} else if (person instanceof Provider) {
+					soapNote.setPrintedByProvider(true);
+					soapNote.setPrintedByProviderOn(new Date());
+				}
+				soapNoteService.saveSoapNote(soapNote);
+				com.nzion.service.common.impl.ApplicationEvents.postEvent(EventType.CLINICAL,soapNote.getPatient(),Infrastructure.getUserLogin(),"printed the SOAP Note");
+				Clients.print();
+			]]>
+			</attribute>
+		</button>
+		<div id="container">
+			<div align="center">
+				<include src="/soap/soapPrintBanner.zul" width="100%" height="100%" if="${!(empty pageName)}" soapnotedate="${patientSoapNoteController.soapNote.date}"/>
+			</div>
+			<div style="margin-left:10px">
+				<n:h2>Chief Complaints entered by Clinic</n:h2>
+				<n:br />
+				<label value="${section.sentence}" />
+				<n:br />
+				<n:br />
+			</div>
+		 </div>
+		 
+		 <n:h2 style="margin-left:10px" if="${not empty soapAddendums}">Addendum Notes</n:h2>
+			<div style="margin-left:20px" forEach="${soapAddendums}" >
+				<n:br/>
+				<label value="${each.soapModule.moduleName}"/>
+				<n:br/>
+				<label value="${each.comments}"/>-Added by 
+				<name object="${each.person}"/> on ${display:fd(each.addedOn)}
+			</div>
+			<separator height="75px" />
+			<div style="margin-left:10px"  if="${providerLoggedIn}">
+			<n:h3>Notes in Progress</n:h3>
+			</div>	
+			<div style="margin-left:10px" if="${soapSignedOut}">
+			<n:h3>Notes finalized by <name object="${soapNote.provider}" style="font-size: 24.5px;font-weight: bold" /> on ${dateInAMPM}</n:h3>
+			</div>
+			<separator height="75px" />
+			<div style="margin-left:10px">
+			<separator height="10px"  width="250px" bar="true" />
+			<n:h4><name object="${soapNote.provider}"/></n:h4>
+	        <h:h4 if="${!(empty soapNote.provider.regdNo)}"><label value="RegdNo:" /><label value="${soapNote.provider.regdNo}" /></h:h4>
+			</div>	
+			
+			<zscript>
+				for (Iterator iter = customizedModules.iterator(); iter.hasNext();) {
+					SoapModule each = (SoapModule) iter.next();
+					if(!"Allergy".equalsIgnoreCase(each.getModuleName())||!"ExaminationSection".equals(each.getModuleName()))
+					sentenceComposer.displaySoapSentencePreview(each, container);
+				}
+			</zscript>
+			</panelchildren>
+			</panel>
+</zk>

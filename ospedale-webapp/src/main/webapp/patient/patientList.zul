@@ -1,0 +1,20 @@
+<?page title="Patient" contentType="text/html;charset=UTF-8"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk>
+<zscript>
+	setPageTitle("Patients", "");
+</zscript>
+	<window>
+	<zscript><![CDATA[
+	 import com.nzion.domain.UserLogin;
+	 import com.nzion.util.Infrastructure;
+	 import com.nzion.domain.Patient;
+	 
+	 List patients = new LinkedList();
+	 UserLogin userLogin = Infrastructure.getUserLogin();
+	]]></zscript>
+		<screen width="100%" listtitle="List of Patients" addpage="patientAdd" editpage="patientView" entityclass="com.nzion.domain.Patient"
+			fields="afyaId,civilId,lastName,firstName,contacts.postalAddress.city,gender.description,contacts.email,contacts.homePhone,active"
+			labels="Afya Id,Civil Id,Last Name,First Name,City,Gender,Email,Home phone,Active" lazy="true" hidedeletebtn="true" containername="contentArea" defaultSortDesc="true" defaultsort="createdTxTimestamp" />
+	</window>
+</zk>

@@ -1,0 +1,83 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./localDrugSearchWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window id="localDrugSearchWin" mode="modal" style="border: 5px solid #2d2d2d" width="90%">
+	<zscript><![CDATA[
+	import com.nzion.domain.Provider;
+	import com.nzion.zkoss.ext.EntityDropdownRenderer;
+	List providerFavouriteDrugs = arg.get("providerDrugs");
+	Provider provider = (Provider) Executions.getCurrent().getArg().get("provider");
+	com.nzion.zkoss.ext.EntityDropdownRenderer dropdownRenderer = com.nzion.zkoss.ext.EntityDropdownRenderer.DEFAULT_INSTANCE;
+	EntityDropdownRenderer masterDataDescriptionRenderer = new EntityDropdownRenderer("description");
+	List selectedDrugs;
+	List drugs;
+	List quantities=commonCrudService.getAll(com.nzion.domain.drug.Quantity.class);
+	List QuantityQualifierList=commonCrudService.getAll(com.nzion.domain.drug.QuantityQualifier.class);
+	List drugDirectionList=commonCrudService.getAll(com.nzion.domain.drug.DrugDirection.class);
+	
+	
+]]></zscript>
+		<panel title="Search For Drugs" id="searchDrugs">
+			<attribute name="onAddClick">
+				<![CDATA[
+					if (providerFavouriteDrugDisplayGrid.getSelectedCount() < 1) {
+						com.nzion.util.UtilMessagesAndPopups.showError("Choose Drugs");
+						return;
+					}
+					providerFavouriteDrugs.addAll(selectedDrugs);
+					localDrugSearchWin.detach();
+				]]>
+			</attribute>
+			<attribute name="onCancelClick">
+				localDrugSearchWin.detach();
+			</attribute>
+			<attribute name="onSearchClick">
+				drugs = providerService.getUnAddedDrugs(provider, event.getData().toString());
+			</attribute>
+			<panelchildren>
+				<toolbar listenercomponent="${searchDrugs}" hidedelete="true" />
+				<listbox multiple="true" checkmark="true" width="100%" id="providerFavouriteDrugDisplayGrid"  mold="paging"
+					model="@{drugs, load-after='searchDrugs.onSearchClick'}" pageSize="10" pagingPosition="top"
+					onSelect="selectedDrugs=com.nzion.util.ViewUtil.getSelectedItems(providerFavouriteDrugDisplayGrid);">
+					<listhead>
+						<listheader label="Drug Name" width="13%"/>
+						<listheader label="Drug Strength" width="15%"/>
+						<listheader label="Drug Routes" width="15%"/>
+						<listheader label="Qty Qualifier" width="15%"/>
+						<listheader label="Qty" width="15%"/><!--
+						<listheader label="Form"/>
+						--><listheader label="Direction" width="15%"/>
+						<listheader label="Special Instructions" width="12%"/>
+					</listhead>
+					<listitem self="@{each='providerDrug'}" value="@{providerDrug}">
+						<listcell>
+							<label value="@{providerDrug.drug.tradeName}" />
+						</listcell>
+						<listcell>
+							<combobox model="@{providerDrug.drug.strengths}" itemRenderer="${dropdownRenderer}" selectedItem="@{providerDrug.strength}" />
+						</listcell>
+						<listcell>
+							<combobox model="@{providerDrug.drug.routes}" itemRenderer="${dropdownRenderer}" selectedItem="@{providerDrug.drugDosageRoute}" />
+						</listcell>
+						<listcell>
+							<combobox model="@{quantities}"  itemRenderer="${masterDataDescriptionRenderer}" selectedItem="@{providerDrug.quantity}"/>
+						</listcell>
+						<listcell>
+							<combobox model="@{QuantityQualifierList}"  itemRenderer="${masterDataDescriptionRenderer}" selectedItem="@{providerDrug.quantityQualifier}"/>
+						</listcell><!--
+						<listcell>			
+							<textbox value="@{providerDrug.drug.dosageForm}" />			
+						</listcell>
+						--><listcell>
+							<combobox model="@{drugDirectionList}"  itemRenderer="${dropdownRenderer}" selectedItem="@{providerDrug.drugDirection}"/>		
+						</listcell>
+						<listcell>	
+							<textbox value="@{providerDrug.specialInstruction}" />
+						</listcell>
+					</listitem>
+				</listbox>
+			</panelchildren>
+		</panel>
+	</window>
+</zk>

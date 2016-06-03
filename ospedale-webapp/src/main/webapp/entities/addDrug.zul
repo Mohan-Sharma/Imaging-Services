@@ -1,0 +1,122 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addDrug"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="c" name="s" class="com.nzion.util.UtilDisplay"  signature="String clobToString(java.sql.Clob)"?>
+	<zscript>
+	<![CDATA[
+		import com.nzion.domain.drug.Drug;
+		import com.nzion.domain.billing.TaxItem;
+		import com.nzion.domain.emr.UnitOfMeasurement;
+		import com.nzion.domain.drug.DrugGenericName;
+		Drug drug=Executions.getCurrent().getArg().get("entity");
+		drug = (drug == null) ? new Drug() : commonCrudService.getById(Drug.class,drug.getId());
+		List taxItems = commonCrudService.getAll(TaxItem.class);
+		List uomList = commonCrudService.findByEquality(UnitOfMeasurement.class, new String[] { "uomType" },
+				new String[] { "PRODUCT" });
+		com.nzion.zkoss.composer.DrugController drugController = new com.nzion.zkoss.composer.DrugController();
+		List routes = commonCrudService.getAll(com.nzion.domain.drug.DrugDosageRoute.class);
+	]]>
+	</zscript>
+	<window id="addDrug"  mode="modal" closable="true"  width="50%" position="center,top" apply="${drugController}">
+		<div style="padding:5px" zclass="page-header titled-well">
+			<h:h1>
+				<h:small>New Drug</h:small>
+				<button type="button" zclass="close" onClick="addDrug.detach();">×</button>
+			</h:h1>
+		</div>
+		<div zclass="container-fluid">
+		<div zclass="row-fluid">
+			<div zclass="span4">
+							<label value="Trade Name" mold="required" />
+						<textbox value="@{drug.tradeName}" constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" id="tradeName" focus="true" disabled="${!(empty drug.id)}"/>
+					</div>
+					<!-- <div zclass="span4">
+						<label value="Generic Name" mold="required" />
+						<textbox id="genericName" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" 
+							value="@{drug.genericName}" constraint="no empty"/>
+					</div> -->
+					<div zclass="span4">
+					<label value="Generic Name" mold="required"  />
+					<suggest id="drugSuggestionBox" constraint="no empty:Drug Generic Name Required" entity="com.nzion.domain.drug.DrugGenericName" searchcolumns="code,description"
+						displaycolumns="code,description" requiredcolumn="code" value="@{drug.genericName}" hideListHeader="false">
+						<attribute name="onLookedUp">
+							DrugGenericName drugGenericName = self.getResult();
+							//drugGenericName = commonCrudService.refreshEntity(drugGenericName);
+							drug.setGenericName(drugGenericName.toString());
+							
+						</attribute>
+					</suggest>
+					</div>
+					</div>
+					<div zclass="row-fluid">
+						<div zclass="span4">
+							<label value="Brand Name" />
+							<textbox value="@{drug.brandName}" sclass="span12"/>
+						</div>
+						<div zclass="span4">
+							<label value="Tax Item" mold="required"/>
+							<combobox sclass="span12" model="@{taxItems}" selectedItem="@{drug.taxItem,save-when='Save.onClick'}" 
+								w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty">
+								<comboitem self="@{each='taxItem'}" value="@{taxItem}" label="@{taxItem.billingHead}"/>
+							</combobox>
+						</div>
+					</div>
+					<div zclass="row-fluid">
+						<div zclass="span4">
+							<label value="Price" mold="required"/>
+							<decimalbox sclass="span12" value="@{drug.amount,save-when='Save.onClick'}" disabled="${!(empty drug.id)}"
+								w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"/>
+						</div>
+						<div zclass="span4">
+							<label value="Base UOM" mold="required"/>
+							<combobox sclass="span12" model="@{uomList}" selectedItem="@{drug.baseSaleUom,save-when='Save.onClick'}" disabled="${!(empty drug.id)}"
+								w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" >
+								<comboitem self="@{each='baseSaleUom'}" label="@{baseSaleUom}" value="@{baseSaleUom}"/> 
+						</combobox>
+						</div>
+					</div>
+					<div zclass="row-fluid">
+						<div zclass="span4">
+							<label value="Available Qty" mold="required"/>
+							<intbox sclass="span12" value="@{drug.availableQty,save-when='Save.onClick'}" disabled="${!(empty drug.id)}"
+								w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" />
+						</div>
+						<div zclass="span4">
+							<label value="Available Qty UOM" mold="required"/>
+							<combobox sclass="span12" model="@{uomList}" selectedItem="@{drug.purchaseUom,save-when='Save.onClick'}" disabled="${!(empty drug.id)}"
+								w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" >
+								<comboitem self="@{each='poUom'}" label="@{poUom}" value="@{poUom}"/> 
+							</combobox>
+						</div>
+					</div>
+					<div zclass="row-fluid">
+						<div zclass="span4">
+							<label value="Route" mold="required" />
+							<listbox model="@{routes}" sclass="span12" multiple="true" id="routeListbox" rows="5"
+									 mold="select" sizedByContent="true" vflex="true"
+									 selectedItem="@{drug.routes, converter=com.nzion.view.component.MultipleListitemBindingConverter}">
+								<listitem self="@{each}" value="@{each}" label="@{each.description}"></listitem>
+							</listbox>
+						</div>
+						<div zclass="span4" style="padding-top: 50px; padding-left: 50px;">
+							<checkbox checked="@{drug.active}" sclass="span12" label="Active" />
+						</div>
+					</div>
+				</div>	
+		<div sclass="panelFoot">
+			<button label="Save" id="Save" zclass="btn-success btn">
+				<attribute name="onClick">
+				<![CDATA[
+						//tradeName.getValue();
+						//genericName.getValue();
+						if(drug.getId() == null)
+						drugController.save(drug);
+						addDrug.detach();
+				]]>
+				</attribute>
+			</button>
+			 <button label="Cancel" onClick='addDrug.detach()' sclass="btn"></button>
+		</div>
+	</window>
+</zk>

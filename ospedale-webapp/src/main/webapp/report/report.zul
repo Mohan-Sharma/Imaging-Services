@@ -1,0 +1,35 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<h:table style="margin-top:-40px;background-color:#FFFFFF">
+		<h:tr>
+			<h:td>
+				<div width="100%" align="left">
+					<tabbox>
+						<tabs>
+							<tab label="Patient" id="patientReportTab"	onClick='renderUtilityCenter("/report/patientReport.zul")' />
+							 <tab label="Encounter" id="soapReportTab" onClick='renderUtilityCenter("/report/soapReport.zul")'/> 
+						</tabs>
+					</tabbox>
+				</div>
+			</h:td>
+		</h:tr>
+		<h:tr>
+			<h:td>
+				<div id="utilitycenterMain">
+				</div>
+			</h:td>
+		</h:tr>
+	</h:table>
+	<zscript>
+	setPageTitle("Reports", null);
+	void renderUtilityCenter(String url) {
+	if(utilitycenterMain.getFirstChild() != null){
+	   utilitycenterMain.getFirstChild().detach();
+	}
+		Component component = Executions.createComponents(url, null, null);
+		component.setParent(utilitycenterMain);
+	}
+	Events.postEvent("onClick", patientReportTab, null);
+</zscript>
+</zk>

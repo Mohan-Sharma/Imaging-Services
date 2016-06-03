@@ -1,0 +1,5 @@
+package com.nzion.enums;
+
+public enum PatientEntryValidationType {
+     FIRST_NAME,MIDDLE_NAME,LAST_NAME,GENDER,ETHINCITY,DATE_OF_BIRTH,ADDRESS_1,ADDRESS_2,CITY,STATE,POSTAL_CODE;
+}

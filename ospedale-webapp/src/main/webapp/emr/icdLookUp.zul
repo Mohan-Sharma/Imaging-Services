@@ -1,0 +1,74 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./icdLookUpWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	<![CDATA[
+	com.nzion.zkoss.composer.emr.IcdGroupController icdGroupController = arg.get("controller");
+	List icds;
+]]>
+	</zscript>
+	<window id="icdLookUpWindow" closable="true" mode="modal" width="50%">
+		<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Search Diagnosis</h:small>
+                <button type="button" zclass="close" onClick="icdLookUpWindow.detach();">×</button>
+            </h:h1>
+        </div>
+	<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span4">
+						<label value="Diagnosis Code" />
+						<textbox id="codeTextBox" />
+					</div>
+					 <div zclass="span4">
+						<label value="Diagnosis Description" />
+						<textbox id="descriptionTextBox" />
+					</div>
+				</div>
+				</div>
+				<div sclass="panelFoot">
+					<button label="Search" id="searchBtn" zclass="btn btn-primary">
+						<attribute name="onClick">
+						<![CDATA[
+							String code = codeTextBox.getValue();
+							String description = descriptionTextBox.getValue();
+							if (code.isEmpty() && description.isEmpty()) {
+								com.nzion.util.UtilMessagesAndPopups.showError(org.zkoss.util.resource.Labels.getLabel("nosearchcondition"));
+								return;
+							}
+							icds = icdGroupController.searchIcd(code, description);
+							noresultLabel.setVisible(com.nzion.util.UtilValidator.isEmpty(icds));
+							panelFootDiv.setVisible(!com.nzion.util.UtilValidator.isEmpty(icds));
+							searchResultPanel.setVisible(true);
+						]]>
+						</attribute>
+					</button>
+				</div>
+			
+		<panel title="Search Result" id="searchResultPanel" visible="false" collapsible="true">
+			<panelchildren>
+				<label value="No Record Found" id="noresultLabel" visible="false" style="font-weight:bold" />
+				<listbox model="@{icds,load-after='searchBtn.onClick'}"  multiple="true" rows="5"
+					checkmark="true" selectedItem="@{icdGroupController.selectedIcdElements,converter=com.nzion.view.component.MultipleListitemBindingConverter}">
+					<listhead>
+						<listheader label="Diagnosis Code" />
+						<listheader label="Diagnosis Description" />
+					</listhead>
+					<listitem self="@{each='icd'}" value="@{icd}">
+						<listcell label="@{icd.code}" />
+						<listcell label="@{icd.description}" />
+					</listitem>
+				</listbox>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot" id="panelFootDiv" visible="false">
+			<button label="Add" zclass="btn btn-success">
+				<attribute name="onClick">
+					icdGroupController.addIcd(icdLookUpWindow);
+				</attribute>
+			</button>
+			<button label="Cancel" forward="onClick=onCancel" />
+		</div>
+	</window>
+</zk>

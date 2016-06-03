@@ -1,0 +1,10 @@
+<?component name="masterEntity" macroURI="../entities/master-entity.zul" inline="true"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk>
+	<zscript><![CDATA[
+	        com.nzion.domain.drug.DrugDosageForm drugDosageForm = Executions.getCurrent().getArg().get("entity");
+	        drugDosageForm = drugDosageForm == null ? new com.nzion.domain.drug.DrugDosageForm() : drugDosageForm;
+]]></zscript>
+	<masterEntity entityvalue="${drugDosageForm}" panelvalue="Drug Type" codevalue="Drug Type Code" descriptionvalue="Drug Type Name"
+	errorMessage="Drug Form"/>
+</zk>

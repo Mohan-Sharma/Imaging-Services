@@ -1,0 +1,114 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addQuestionWin"?>
+<zk xmlns:h="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import com.nzion.domain.emr.Question;
+	import com.nzion.util.UtilValidator;
+	import com.nzion.domain.emr.SoapModule;
+	import org.zkoss.zul.Combobox;
+	import org.zkoss.zk.ui.event.Events;
+	import com.nzion.zkoss.ext.EnumDropdownRenderer;
+	import com.nzion.enums.GenderApplicabilityForQuestion;
+	import com.nzion.domain.emr.*;
+	EnumDropdownRenderer enumDropdownRenderer = new EnumDropdownRenderer();
+	GenderApplicabilityForQuestion[] genderApplicabilityForQuestions = GenderApplicabilityForQuestion.values();
+	Question question = null;
+	SoapModule soapModule = null;
+	OrganSystem organSystem;
+	List allquestions = null;
+if (UtilValidator.isNotEmpty(arg)) {
+	question = (Question) arg.get("question");
+	soapModule = (SoapModule) arg.get("soapmodule");
+	allquestions = (List) arg.get("allquestions");
+	organSystem = (OrganSystem) arg.get("organsystem");
+}
+if (question != null) {
+	soapModule = question.getSoapModule();
+	organSystem = question.getOrganSystem();
+} else {
+	question = new Question();
+	question.setSoapModule(soapModule);
+	question.setOrganSystem(organSystem);
+}
+Sentence sentence = question.getSentence();
+if (sentence == null) {
+	sentence = new Sentence();
+	question.setSentence(sentence);
+}
+	Component component = (Component) Executions.getCurrent().getArg().get("postevent");
+	Boolean isMultiLevelQuestion = (Boolean) Executions.getCurrent().getArg().get("ismultilevelquestion");
+]]></zscript>
+	<window mode="modal" id="addQuestionWin" title="Add Question" closable="true">
+		<panel width="100%">
+			<panelchildren>
+				<div sclass="panelCont">
+					<h:table width="100%">
+						<h:tr>
+							<h:td width="30%">
+								<label value="Question Text" />
+								<label value="*" style="color:red" />
+							</h:td>
+							<h:td width="40%">
+								<label value="Applies To" />
+							</h:td>
+							<h:td width="15%">
+								<label value="Multiple" />
+							</h:td>
+							<h:td width="15%">
+								<label value="Positive/Negative" />
+							</h:td>
+						</h:tr>
+						<h:tr>
+							<h:td width="30%">
+								<textbox id="questionName" value="@{question.desc}" cols="40" multiline="true"
+									constraint="no empty:Questiontext Required" />
+							</h:td>
+							<h:td width="40%">
+								<combobox id="genderApplicabilityCombo" model="@{genderApplicabilityForQuestions}"
+									itemRenderer="${enumDropdownRenderer}" selectedItem="@{question.genderApplicabilityForQuestion}" />
+							</h:td>
+							<h:td width="15%">
+								<checkbox checked="@{question.isMultiple}" id="questionMultiple" />
+							</h:td>
+							<h:td width="15%">
+								<checkbox checked="@{question.isYesNo}" />
+							</h:td>
+						</h:tr>
+						<h:tr>
+							<h:td width="30%">
+								<label value="Before the Answer" />
+							</h:td>
+							<h:td width="40%">
+								<label value="After the Answer" />
+							</h:td>
+						</h:tr>
+						<h:tr>
+							<h:td width="30%">
+								<textbox id="prefix" value="@{question.sentence.prefix}" cols="40" multiline="true"/>
+							</h:td>
+							<h:td width="40%">
+								<textbox id="suffix" value="@{question.sentence.suffix}" cols="40" multiline="true"/>
+							</h:td>
+						</h:tr>
+					</h:table>
+				</div>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot">
+			<button label="Save" id="Save">
+				<attribute name="onClick"><![CDATA[
+questionName.getValue();
+commonCrudService.save(question);
+if (allquestions != null) {
+	allquestions.add(question);
+}
+if (component != null) {
+	Events.postEvent("onReload", component, null);
+}
+addQuestionWin.detach();
+]]></attribute>
+			</button>
+			<button label="Cancel" forward="onClick=onCancel" />
+		</div>
+	</window>
+</zk>

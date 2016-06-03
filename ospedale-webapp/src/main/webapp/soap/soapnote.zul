@@ -1,0 +1,548 @@
+<?page title="Encounter Note"?>
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/soapnotetemplate.zul"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapNotePanel"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+	xmlns:h="http://www.w3.org/1999/xhtml">
+    <script type="text/javascript" src="../images/dataTables/media/js/jquery.dataTables.js"></script>
+    <style src="../images/dataTables/media/css/demo_table.css"></style>
+    <style src="../images/dataTables/media/css/demo_page.css"></style>
+    <style src="../images/dataTables/media/css/demo_table_jui.css"></style>
+    <style src="../images/dataTables/media/css/jquery-ui-1.8.16.custom.css"></style>
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+		<![CDATA[
+			import com.nzion.domain.*;
+			setPageTitle("Encounter Note", null);
+			com.nzion.zkoss.composer.PatientSoapNoteController controller = new com.nzion.zkoss.composer.PatientSoapNoteController(param.get("scheduleId")[0]);	
+			desktop.setAttribute("controller", controller);
+			com.nzion.repository.common.CommonCrudRepository  commonCrudRepository = com.nzion.util.Infrastructure.getSpringBean("commonCrudRepository");
+			com.nzion.domain.emr.SoapModule hpi = commonCrudRepository.findUniqueByEquality(com.nzion.domain.emr.SoapModule.class,new String[] { "moduleName" }, new Object[] { "HPI" });
+			com.nzion.domain.emr.soap.PatientSoapNote soapNote = controller.getSoapNote();
+			boolean isSoapSignedOut = Schedule.STATUS.SOAPSIGNEDOUT.equals(soapNote.getSchedule().getStatus());
+			Date signedOutDate = soapNote.getSchedule().getSignedOutTime();
+			String dateInAMPM = com.nzion.util.UtilDateTime.format(signedOutDate,signedOutDate);
+			Component removeComponent = null;
+			List slotTypes = commonCrudService.getAll(SlotType.class);
+			com.nzion.service.SoapNoteService sNoteService = com.nzion.util.Infrastructure.getSpringBean("soapNoteService");
+			List soapComponentAuthorizations = sNoteService.getSoapComponentAuthorizations();		
+			void checkMLC(){
+				if(controller.getSoapNote().getIsMlc() != null && controller.getSoapNote().getIsMlc()){
+					//((HtmlNativeComponent)soapNotePanel.getParent().getFellow("subpagetitle").getParent().getParent().getParent().getParent()).setId("soapHeaderMLC");
+					((Div) soapNotePanel.getParent().getFellow("lblMlc").getParent()).setSclass("legal");
+					((Label)soapNotePanel.getParent().getFellow("lblMlc")).setValue("Medical Legal Case");
+				}else{
+					((Div) soapNotePanel.getParent().getFellow("lblMlc").getParent()).setSclass("legal-none");
+				    ((Label)soapNotePanel.getParent().getFellow("lblMlc")).setValue("");
+				 }
+			}
+		]]>
+	</zscript>
+	<script type="text/javascript">
+	function changeActionDivClass(){
+	var div = document.getElementById("actionsDiv");
+	var cssclass = div.getAttribute("class");
+	div.setAttribute("class", (cssclass == 'fr posRel SNActions') ? 'fr posRel SNActions SNActionsOn' : 'fr posRel SNActions');
+	}
+	function toggleDivDisplay(divId){
+	var div = document.getElementById(divId);
+	var style = div.getAttribute("style");
+	div.setAttribute("style", (style == 'display: block;') ? 'display: none;' : 'display: block;');
+	}
+	
+	function toggleSelection(alink){
+		jq("div.z-hlayout-inner > a").removeClass("toolbarButtonSellected");
+		jq("div.z-hlayout-inner > a").addClass("toolbarButtonUnSellected");
+		jq("#"+alink.uuid).addClass("toolbarButtonSellected");
+		var provider = $("$"+alink.id);
+		var providerCont = zk.Widget.$(provider);
+		providerCont.setSclass("toolbarButtonSellected");
+	}
+	</script>
+	<style>
+		.notePreview{ bottom: -10px; position: relative; }
+		.sidebar_tab { 			    
+			    padding: 2px 4px 2px 2px;	    
+			    font-size:12px;
+		}
+		.sidebar_tab_content { padding: 2px 2px 2px 5px; }
+		.soapEdited{
+			background: url("/afya-lab/images/tick.png") no-repeat scroll 0 8px transparent;
+			padding: 5px 5px 10px 15px;
+			display: block;
+		}
+	</style>
+	<window apply="${controller}" id="soapNotePanel" self="@{define(content)}" >
+	<attribute name="onCreate">
+		    checkMLC();
+		    if(controller.checkAllergy()){
+		    	((Label)soapNotePanel.getParent().getFellow("lblAllergy")).setValue("Allergy");
+		    	((Div) soapNotePanel.getParent().getFellow("lblAllergy").getParent()).setSclass("allergy");
+		    }else{
+		    	((Label)soapNotePanel.getParent().getFellow("lblAllergy")).setValue("");
+		    	((Div) soapNotePanel.getParent().getFellow("lblAllergy").getParent()).setSclass("allergy-none");
+		    }
+		    if(controller.checkChronic()){
+		    	((Label)soapNotePanel.getParent().getFellow("lblChronic")).setValue("Chronic");
+		    	((Div) soapNotePanel.getParent().getFellow("lblChronic").getParent()).setSclass("chronic");
+		    }else{
+		    	((Label)soapNotePanel.getParent().getFellow("lblChronic")).setValue("");
+		    	((Div) soapNotePanel.getParent().getFellow("lblChronic").getParent()).setSclass("chronic-none");
+		    }
+	</attribute>
+		<div sclass="wrapper" height="100%" style="width:100%;">
+			<n:div height="100%" sclass="lCont" id="lCont" style="background-color: #ECECEC; border-color: #CCCCCC;height:100%;padding-top:3px;">
+					<n:div id="panel">
+					<n:table cellspacing="0" cellpadding="0" border="0" height="100%" width="100%" >
+						<n:tbody>
+							<n:tr id="sidebar_Alerts_open" style="background-color: #ECECEC;border-color: #CCCCCC;height:100%;">
+								<n:td width="100%" >
+									<div >
+										<n:div id="hidePanel" style="background-color: #ECECEC;
+    border-color: #CCCCCC;height:25px;padding-left:10px;"> <hlayout style="vertical-align:middle;"> <n:div id="collapse-button"></n:div> <a label="Hide Menu" style="padding-top:10px;font-weight:bold"/></hlayout></n:div>
+    
+										<div sclass="soapLeftMenu">
+											<hlayout>
+												<a visible="${controller.readonly}" 
+												label="Addendum" id="soapAddendum" onClick='controller.soapModuleClicked(event);setSelected(self);setShortSelected((A)soapNotePanel.getFellowIfAny(self.getAttribute("shortLinkId").toString()));'
+												>
+												<custom-attributes linkId='soapAddendum'/>
+												<custom-attributes shortLinkId='${display:getId("short", "AD")}'/>
+												</a>
+											<span></span>
+											</hlayout>
+										</div>
+								    <div sclass="soapLeftMenu">
+										<hlayout width="94%" >
+										  <a width="94%" label="Chief Complaints"
+											id="soapChiefComplaints" onClick='controller.soapModuleClicked(event);setSelected(self);setShortSelected((A)soapNotePanel.getFellowIfAny(self.getAttribute("shortLinkId").toString()));' >
+											<custom-attributes value="${hpi}" />
+											<custom-attributes linkId='soapChiefComplaints'/>
+											<custom-attributes shortLinkId='${display:getId("short", "CC")}'/>
+										 </a>
+										<span></span>
+										</hlayout>
+										</div>
+										
+										
+										 <div sclass="soapLeftMenu" forEach="${controller.subjectiveModules}">
+											<hlayout>
+											<a width="94%" label="${each.moduleName}"
+												 disabled="${controller.notSaved || !controller.subjectiveCompAuth}"
+												onClick='controller.soapModuleClicked(event);desktop.setAttribute("wkModule",self);setSelected(self);setShortSelected((A)soapNotePanel.getFellowIfAny(self.getAttribute("shortLinkId").toString()));'
+												id='${display:getId("soap", each.moduleName)}' >
+												<custom-attributes value="${each}"/>
+												<custom-attributes linkId='${display:getId("soap", each.moduleName)}'/>
+												<custom-attributes shortLinkId='${display:getId("short", each.moduleShortName)}'/>
+											</a>
+											<span></span>
+											</hlayout>
+										</div>
+										
+										
+										
+									</div>
+								</n:td>
+							</n:tr>
+							<n:tr>
+								<n:td >
+									<div >
+									 <div sclass="soapLeftMenu" forEach="${controller.objectiveModules}" >
+										<hlayout>
+										<a sclass="toolbarButtonUnSellected" label="${each.moduleName}"
+											disabled="${controller.notSaved  || !controller.objectiveCompAuth}"
+											onClick='controller.soapModuleClicked(event);desktop.setAttribute("wkModule",self);setSelected(self);setShortSelected((A)soapNotePanel.getFellowIfAny(self.getAttribute("shortLinkId").toString()));'
+											id='${display:getId("soap", each.moduleName)}' >
+											<custom-attributes value="${each}" />
+											<custom-attributes linkId='${display:getId("soap", each.moduleName)}'/>
+											<custom-attributes shortLinkId='${display:getId("short", each.moduleShortName)}'/>
+										</a>
+										<span></span>
+										</hlayout>
+									</div>
+									</div>
+								</n:td>
+							</n:tr>
+							<n:tr>
+								<n:td >
+									<div >
+										<div forEach="${controller.assesementModules}" sclass="soapLeftMenu">
+										<hlayout>
+										<a  label="${each.moduleName}" width="94%"
+											 disabled="${controller.notSaved  || !controller.assesmentCompAuth}" w:onClick="toggleSelection(this)"
+											onClick='controller.soapModuleClicked(event);desktop.setAttribute("wkModule",self);setSelected(self);setShortSelected((A)soapNotePanel.getFellowIfAny(self.getAttribute("shortLinkId").toString()));' id='${display:getId("soap", each.moduleName)}'>
+											<custom-attributes value="${each}" />
+											<custom-attributes linkId='${display:getId("soap", each.moduleName)}'/>
+											<custom-attributes shortLinkId='${display:getId("short", each.moduleShortName)}'/>
+										</a>
+										<span></span>
+										</hlayout>
+										</div>
+									</div>
+								</n:td>
+							</n:tr>
+							<n:tr>
+								<n:td >
+									<div >
+									 <div forEach="${controller.plans}" sclass="soapLeftMenu">
+										<hlayout>
+										<a  label="${each.moduleName}"
+											 disabled="${controller.notSaved || !controller.planCompAuth}"
+											id='${display:getId("soap", each.moduleName)}'
+											onClick='controller.soapModuleClicked(event);setSelected(self);setShortSelected((A)soapNotePanel.getFellowIfAny(self.getAttribute("shortLinkId").toString()));'>
+											<custom-attributes value="${each}" />
+											<custom-attributes linkId='${display:getId("soap", each.moduleName)}'/>
+											<custom-attributes shortLinkId='${display:getId("short", each.moduleShortName)}'/>
+										</a>
+										<span></span>
+										</hlayout>
+									</div>
+									</div>
+								</n:td>
+							</n:tr>
+						</n:tbody>
+					</n:table>
+					</n:div>
+				</n:div>
+				<!-- Div section Below is For the Short Menu's   -->				
+				<n:div id="showPanel" style="background-color: #ECECEC;
+    				border-color: #CCCCCC;height:600px;;float:left; overflow:hidden;width:25px;">
+    				<n:div id="showPanelLink"> <hlayout> <n:div id="open-button"></n:div> </hlayout>	 </n:div>
+    				<n:div id="shortPanel">
+					<n:table cellspacing="0" cellpadding="0" border="0" height="100%" width="100%" >
+						<n:tbody>
+							<n:tr style="display: all; background-color: #ECECEC;border-color: #CCCCCC;height:100%;">
+								<n:td width="100%" >
+									<div >
+										<div sclass="soapLeftMenuShort">
+											<hlayout>
+												<a visible="${controller.readonly}" 
+												label="AD" id="shortAD" onClick='controller.soapModuleClicked(event);setShortSelected(self);setSelected((A)soapNotePanel.getFellowIfAny(self.getAttribute("linkId").toString()));'
+												>
+												<custom-attributes linkId='soapAddendum'/>
+												</a>
+										
+											</hlayout>
+										</div>
+										<div sclass="soapLeftMenuShort">
+										<hlayout width="94%" >
+										  <a width="94%" label="CC"
+											id="shortCC" onClick='controller.soapModuleClicked(event);setShortSelected(self);setSelected((A)soapNotePanel.getFellowIfAny(self.getAttribute("linkId").toString()));' >
+											<custom-attributes value="${hpi}" />
+											<custom-attributes linkId='soapChiefComplaints'/>
+										 </a>
+										</hlayout>
+										</div>
+										 <div sclass="soapLeftMenuShort" forEach="${controller.subjectiveModules}">
+											<hlayout>
+											<a width="94%" id='${display:getId("short", each.moduleShortName)}' label="${each.moduleShortName}"
+												 disabled="${controller.notSaved || !controller.subjectiveCompAuth}"
+												onClick='controller.soapModuleClicked(event);desktop.setAttribute("wkModule",self);setShortSelected(self);setSelected((A)soapNotePanel.getFellowIfAny(self.getAttribute("linkId").toString()));'
+												>
+												<custom-attributes value="${each}" />
+												<custom-attributes linkId='${display:getId("soap", each.moduleName)}'/>
+											</a>
+										
+											</hlayout>
+										</div> 
+									</div>
+								</n:td>
+							</n:tr>
+							<n:tr>
+								<n:td >
+									<div >
+									<div sclass="soapLeftMenuShort" forEach="${controller.objectiveModules}" >
+										<hlayout>
+										<a sclass="toolbarButtonUnSellected" id='${display:getId("short", each.moduleShortName)}' label="${each.moduleShortName}"
+											disabled="${controller.notSaved || !controller.objectiveCompAuth}"
+											onClick='controller.soapModuleClicked(event);desktop.setAttribute("wkModule",self);setShortSelected(self);setSelected((A)soapNotePanel.getFellowIfAny(self.getAttribute("linkId").toString()));'
+											 >
+											<custom-attributes value="${each}" />
+											<custom-attributes linkId='${display:getId("soap", each.moduleName)}'/>
+										</a>
+										</hlayout>
+									</div>
+									</div>
+								</n:td>
+							</n:tr>
+							<n:tr>
+								<n:td >
+									<div >
+										<div forEach="${controller.assesementModules}" sclass="soapLeftMenuShort">
+										<hlayout>
+										<a label="${each.moduleShortName}" id='${display:getId("short", each.moduleShortName)}' width="94%"
+											 disabled="${controller.notSaved || !controller.assesmentCompAuth}" 
+											onClick='controller.soapModuleClicked(event);desktop.setAttribute("wkModule",self);setShortSelected(self);setSelected((A)soapNotePanel.getFellowIfAny(self.getAttribute("linkId").toString()));' >
+											<custom-attributes value="${each}" />
+											<custom-attributes linkId='${display:getId("soap", each.moduleName)}'/>
+										</a>										
+										</hlayout>
+										</div>
+									</div>
+								</n:td>
+							</n:tr>
+							<n:tr>
+								<n:td >
+									<div >
+										<div forEach="${controller.plans}" sclass="soapLeftMenuShort">
+										<hlayout>
+										<a id='${display:getId("short", each.moduleShortName)}' label="${each.moduleShortName}"
+											 disabled="${controller.notSaved || !controller.planCompAuth}"											
+											onClick='controller.soapModuleClicked(event);setShortSelected(self); setSelected((A)soapNotePanel.getFellowIfAny(self.getAttribute("linkId").toString()));desktop.setAttribute("wkModule",self);'>
+											<custom-attributes value="${each}" />
+											<custom-attributes linkId='${display:getId("soap", each.moduleName)}'/>
+										</a>
+										</hlayout>
+									</div>
+									</div>
+								</n:td>
+							</n:tr>
+						</n:tbody>
+					</n:table>
+					</n:div>
+    			</n:div>
+    			<!-- Div Section for short menu closed  -->									
+				<n:div class="rCont" id="colright" height="100%" style="float:left;">
+					<n:div id="chiefCom" height="100%" style="margin-left:10px;width:99%;margin-top:1px;">
+						<n:div id="CCTop" height="100%">
+							<n:div id="actionsDiv" style="float:right;margin-bottom:5px;">
+								<div visible="${!(controller.notSaved)}">
+									   <a id="hiddenA" visible="false"/>
+									    <div sclass="blackInPMenu">
+											<a label="Facesheet"
+												style="color: #fff;padding-top:10px;font-weight:bold;" 
+												onClick='Executions.getCurrent().sendRedirect("/soap/faceSheet.zul?patientId="+controller.getPatient().getId(),"_clinicalRecords");setMenuAsSelected(self);'>												
+											</a>
+										</div> 
+									   <div sclass="blackInPMenu">
+											<a style="color: #fff;padding-top:10px;font-weight:bold"
+											   onClick="controller.showActorsWindow();setMenuAsSelected(self);">
+												Actors
+											</a>
+									   </div> 
+									    <div sclass="blackInPMenu">
+											<a label="Save"
+												style="color: #fff;padding-top:10px;font-weight:bold;"
+												onClick="controller.saveSoapSection();setMenuAsSelected(self);" onCreate='self.setDisabled(controller.isReadonly())'>
+											</a>
+										</div> 		
+									   <div sclass="blackInPMenu">
+											<a label="Sign Out"
+												style="color: #fff;padding-top:10px;font-weight:bold"
+												onClick="controller.signOutSoapNote();setMenuAsSelected(self);"
+												onCreate='self.setDisabled(!(Roles.hasRole(Roles.PROVIDER)) || controller.isReadonly())'>
+											</a>
+										</div> 
+									   <div sclass="blackInPMenu">
+											<a label="Delete" onCreate='self.setDisabled(controller.isReadonly())'
+												style="color: #fff;padding-top:10px;font-weight:bold;">
+												<attribute name="onClick">
+													Messagebox.show("Are you sure  to delete this Encounter Note?", "Delete Confirm?", Messagebox.YES | Messagebox.NO,
+																						Messagebox.QUESTION, new org.zkoss.zk.ui.event.EventListener() {
+														public void onEvent(Event evt) throws Exception {
+															if ("onYes".equals(evt.getName())) {
+																try {
+																	controller.deleteSoapNote();
+																} catch (Exception e) {
+																	e.printStackTrace();
+																}
+															}
+														}
+													});
+												</attribute>
+											</a>
+										</div> 	
+										 <div sclass="blackInPMenu">
+											<a label="Print"
+												style="color: #fff;padding-top:10px;font-weight:bold;"
+												onClick='setMenuAsSelected(self);Executions.getCurrent().sendRedirect("/soap/fullSoapNotePreview.zul?scheduleId="+controller.getSchedule().getId()+"&amp;pageName=SoapNotePreview", "_soapPreview");'>
+												
+											</a>
+										</div> 					   
+								</div>
+							</n:div>
+							<div align="center" style="margin-left:10px;width:100%;margin-bottom:5px;margin-top:5px;" if="${isSoapSignedOut}">
+								<n:h3>
+									Notes finalized by
+									<name object="${soapNote.provider}" style="font-size: 24.5px;font-weight: bold" />
+									on ${dateInAMPM}
+								</n:h3>
+							</div>
+							<n:div style="margin-bottom:0px;width:100%;border:1px dashed #777;height:30px;font-weight:bold;font-size:13px;" class="clr" >
+							    <n:table width="100%" cellpadding="3" >
+							     <n:tr> 
+							            <n:td align="center" width="30%" valign="middle"  style="padding:3px;">
+												<label value="Patient : " class="name" style="font-weight:bold;font-size:13px;color:#D54E21"/>
+												<name object="${controller.patient}" />
+										</n:td>
+										<n:td align="center" width="30%" valign="middle"  style="padding:3px;">
+											<!--
+												<label value="With : " class="name"  style="font-weight:bold;font-size:13px;color:#D54E21"/>
+												<name object="${controller.schedule.lastPatientVisit.metWith}" multiline="true" />-->
+                                            <div ><label value="Referred By :"  style="font-weight:bold;font-size:13px;color:#D54E21"/>
+                                            </div>
+                                            <div if="${!empty controller.schedule.internalReferral}"  >	<name object="${controller.schedule.internalReferral}" /></div>
+                                            <div if="${!empty controller.schedule.referral}">	<name object="${controller.schedule.referral}"  /></div>
+										</n:td>
+										<n:td width="10%" valign="bottom" >
+											  <a id="more" label="More" zclass="greyButton" onClick="" w:onClick="jq(this.$f('patDetailsDiv')).slideToggle(200);">
+											  <attribute name="onClick">
+											  	  self.setLabel((self.getLabel().equals("More") ? "Less" : "More")); 
+											  </attribute>
+											  </a>
+  									    </n:td>
+									</n:tr>
+								</n:table>
+							</n:div>
+							<n:div class="clr" style="margin-left:auto;margin-right:auto; width:100%;background-color: #ECECEC;display:none;" id="patDetailsDiv">
+								 <n:table width="100%" >
+							  			   <n:tr height="51px"> 
+							  			        <n:td>
+							  			        	 <image id="patientImage" sclass="patImg" width="46px" height="50px" hover="@{controller.patient,converter='com.nzion.view.component.GenderImageConverter'}"
+														onClick='Executions.getCurrent().sendRedirect("/patient/viewPatientWrapper.zul?patientId="+controller.getPatient().getId(),"_blank");' />
+							  			        </n:td>
+									  			<n:td >
+												<vlayout spacing="5px">
+												<hlayout>
+													<div style="width:50px;text-align:left;"><label value="MRN : " sclass="name" style="font-weight:bold;text-align:left; width:150px;"/>
+													 </div>
+													<div>
+													<label value="${controller.patient.accountNumber}" /> </div>
+												</hlayout>
+												<hlayout>
+													  <div style="width:50px;text-align:left"><label value="Age :"  style="font-weight:bold;text-align:left; width:150px;"/>
+														</div>
+													  <div>	<label value="${controller.patientAge}" /></div> 
+												</hlayout>
+											
+												</vlayout>
+										      </n:td>
+										      <n:td>
+											  <vlayout spacing="5px">
+												  <hlayout >
+													<div style="width:150px;text-align:right;"><label value="Visit Date:" sclass="name" style="font-weight:bold;text-align:left; width:150px;"/>
+													</div><div style="text-align:left">
+													<label value="${display:fd(controller.soapNote.date)}" /></div>
+												 </hlayout>
+												<hlayout >
+													<div style="width:150px;text-align:right"><label value="Encounter Type :" sclass="name" style="font-weight:bold;text-align:left; width:150px;"/>
+													</div>
+													<div style="text-align:right">
+													<combobox model="@{slotTypes}" selectedItem="@{controller.soapNote.encounterType}" onSelect="commonCrudService.save(soapNote)" disabled="${controller.readonly}"> 	
+														<comboitem self="@{slotType}" value="@{slotType}" label="@{slotType.description}"/>
+													</combobox>
+													</div>
+												</hlayout>
+											</vlayout>
+											</n:td>
+											 <n:td>
+											 	<vlayout spacing="5px">
+												<hlayout >
+													<div style="width:150px;text-align:right"><label value="Room : " sclass="name" style="font-weight:bold;text-align:left; width:150px;"/>
+													</div>
+													<div style="text-align:left">
+														<label value="${controller.schedule.lastPatientVisit.room.fixedAssetName}" />
+													</div>
+												</hlayout>
+											</vlayout>
+											 </n:td>
+									</n:tr>
+								</n:table>
+							</n:div>
+							<style>.fd-btn { cursor: pointer; position: fixed; right: 0; top: 40%; }</style>
+							<div id="moduleAreaVbox" width="100%" height="25%"
+								sclass="clr chiefComp soapNoteCont curSOAP ui-resizable" style="overflow:hidden;margin-top:2px;" />
+							<div id="sentenceAreaDiv" width="100%" sclass="clr notePreview " />
+						</n:div>
+					</n:div>
+					<div class="grayBox" id="empty" style="display: none;">
+						<n:h2></n:h2>
+					</div>
+				</n:div>
+				<n:p class="clr"></n:p>
+		</div>
+		<script type="text/javascript">
+			zk.afterMount(function() { 
+				jq("#hidePanel").click(function(){
+				 $("#panel").animate({marginLeft:"-175px"}, 500 );
+				 $("#lCont").animate({width:"0px", opacity:0}, 400 );
+				 $("#showPanel").show("normal").animate({width:"28px", opacity:1}, 200);
+				 $("#colright").animate({width:"96%"}, 500);
+				 });
+				 $("#showPanelLink").click(function(){
+				 $("#colright").animate({width:"85%"}, 200);
+				 $("#panel").animate({marginLeft:"0px"}, 400 );
+				 $("#lCont").animate({width:"175px", opacity:1}, 400 );
+				 $("#showPanel").animate({width:"0px", opacity:0}, 600).hide("slow");
+				 });
+			});
+		</script>
+		<zscript>
+			
+				A oldSelf = soapChiefComplaints;
+				void setSelected(A self) {
+				oldSelf.getParent().getParent().setZclass("soapLeftMenu");
+				oldSelf.setStyle("");
+				self.getParent().getParent().setZclass("soapLeftMenuSelected");
+				self.setStyle("color: #FFFFFF; text-shadow: 0 -1px 0 #333333;");
+				oldSelf = self;
+				
+				}
+				
+				A shortOldSelf = shortCC;
+				void setShortSelected(A self) {
+				
+				shortOldSelf.getParent().getParent().setZclass("soapLeftMenuShort");
+				shortOldSelf.setStyle("");
+				self.getParent().getParent().setZclass("soapLeftMenuShortSelected");
+				self.setStyle("color: #FFFFFF; text-shadow: 0 -1px 0 #333333;");
+				shortOldSelf = self;
+			  }
+				
+				A oldActionMenu = hiddenA;
+				void setMenuAsSelected(A self){
+					oldActionMenu.setStyle("color: #fff;padding-top:10px;font-weight:bold");
+					self.setStyle("color: #CCC;padding-top:10px;font-weight:bold");
+					oldActionMenu = self;
+				}
+		
+		
+		</zscript>
+		<menupopup id="contextMenu">
+			<attribute name="onOpen">
+				if (!((OpenEvent) event).isOpen())
+					return;
+				Component origin = event.getReference();
+				reviewMenuItem.setVisible(!(origin instanceof Listitem || origin instanceof Row));
+				self.setAttribute("accessRecord",(origin instanceof Listitem || origin instanceof Row) ? origin.getValue().getSoapAccessRecord() : origin.getAttribute("accessRecord"));
+				if (origin instanceof Listitem || origin instanceof Row)
+					infoDetails.setVisible(true);
+				else
+					infoDetails.setVisible(false);
+			</attribute>
+			<menuitem label="Grant" value="Grant" onClick="controller.openSecurityPersonLookup((MouseEvent)event);" />
+			<menuitem label="Revoke" value="Revoke" onClick="controller.openSecurityPersonLookup((MouseEvent)event);" />
+			<menuitem label="Grant All" value="GrantAll"
+				onClick='controller.applySecurity(self.getValue(), null, self.getParent().getAttribute("accessRecord"))' />
+			<menuitem label="Revoke All" value="RevokeAll"
+				onClick='controller.applySecurity(self.getValue(), null, self.getParent().getAttribute("accessRecord"))' />
+			<menuitem label="Mark as reviewed" onClick="controller.markAsReviewed();" id="reviewMenuItem" />
+			<menuitem label="Audit Info" onClick="controller.getSectionDetails(origin.getValue());" id="infoDetails" />
+		</menupopup>
+		<menupopup id="removeContextMenu">
+			<attribute name="onOpen">
+				if (!((OpenEvent) event).isOpen())
+					return;
+				removeComponent = event.getReference();
+			</attribute>
+			<menuitem label="Remove">
+				<attribute name="onClick">
+					com.nzion.view.component.SoapNoteListbox soapNoteListbox = (com.nzion.view.component.SoapNoteListbox) removeComponent;
+					soapNoteListbox.setPatientSoapNoteController(controller);
+					soapNoteListbox.removeSelectedChild();
+				</attribute>
+			</menuitem>
+		</menupopup>
+	</window>
+</zk>

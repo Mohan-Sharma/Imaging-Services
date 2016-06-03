@@ -1,0 +1,61 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+	import com.nzion.zkoss.composer.SoapSentenceComposer;
+	import com.nzion.domain.emr.soap.ChiefComplainSection;
+	import com.nzion.domain.emr.soap.ImmunizationSection;
+	SoapSentenceComposer sentenceComposer = (SoapSentenceComposer) arg.get("controller");
+	ImmunizationSection immunizationSection = (ImmunizationSection) sentenceComposer.getSoapNoteController()
+			.getSoapSection(ImmunizationSection.class, false);
+	sentenceComposer.setSelectedSection(immunizationSection);
+		Set immunizations = immunizationSection.getImmunizations();
+		List administeredImmunizations = new ArrayList();
+	for (com.nzion.domain.emr.soap.PatientImmunization patientImmunization : immunizations) {
+		if ("ADMINISTERED".equalsIgnoreCase(patientImmunization.getStatus()))
+			administeredImmunizations.add(patientImmunization);
+}
+</zscript>
+
+	<div style="margin-left:10px">
+		<n:h2>${immunizationSection.soapModule.moduleDescription}</n:h2>
+		<n:br />
+		<n:h4 unless="${not empty administeredImmunizations}">No vaccines were given in this visit.</n:h4>
+		<n:table width="100%" cellspacing="10px" cellpadding="10px"
+			if="${not empty administeredImmunizations}">
+			<n:thead>
+				<n:tr style="text-align:left">
+					<n:th>Vaccine Name</n:th>
+					<n:th>Route</n:th>
+					<n:th>Site</n:th>
+					<n:th>Consent Given On</n:th>
+					<n:th>Consent Received On</n:th>
+				</n:tr>
+			</n:thead>
+			<n:tr forEach="${administeredImmunizations}">
+				<n:td>
+					<label value="${each.immunization.fullVaccineName}" />
+				</n:td>
+				<n:td style="text-align:center">
+					<label value="${each.route}"/>
+					<label value="-" if="${each.route eq null}"/>
+				</n:td>
+				<n:td style="text-align:center">
+					<label value="${each.site}" />
+					<label value="-" if="${each.site eq null}"/>
+				</n:td>
+				<n:td style="text-align:center">
+					<label value="${display:fd(each.vis)}" />
+					<label value="-" if="${each.vis eq null}"/>
+				</n:td>
+				<n:td style="text-align:center">
+					<label value="${display:fd(each.visGiven)}" />
+					<label value="-" if="${each.visGiven eq null}"/>
+				</n:td>
+			</n:tr>
+		</n:table>
+		<n:br />
+	</div>
+</zk>

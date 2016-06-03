@@ -1,0 +1,231 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapNotePanel"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+	com.nzion.service.SoapNoteService soapNoteService = com.nzion.util.Infrastructure.getSpringBean("soapNoteService");
+	com.nzion.service.PersonService personService = com.nzion.util.Infrastructure.getSpringBean("personService");
+	com.nzion.domain.Patient patient = arg.get("entity");	
+	 List latestRecordedPatientAlleries = soapNoteService.getActiveAllergies(patient);	
+	 List latestRecordedPatientImmunizations = new ArrayList(soapNoteService.getAllPatientImmunization(patient));	 
+	 List latestPatientRx = soapNoteService.getAllPatientRx(patient);
+	 List latestLabResults = soapNoteService.getLatestLabResultsFor(patient, 5);	 
+	 List latestRecordedPatientProblemLists = soapNoteService.getIcdForPatient(patient,new String[]{"Active","Chronic","Intermittent","Recurrent"},null);
+	 List personVitalSigns = personService.getPersonVitalSign(com.nzion.util.Infrastructure.getUserLogin().getPerson());
+	 ListitemRenderer renderer = new com.nzion.zkoss.soap.VitalSignSetListItemRenderer(personVitalSigns);
+	 List patientVitalSigns = new ArrayList(soapNoteService.getAllPatientVitalSign(patient));
+</zscript>
+	<style>
+		.notePreview{
+		bottom: -10px; position: relative;
+		}
+		 
+		.summaryHeader{
+		background-color: #ECECEC; border: 1px solid #A2A2A2; 
+		border-radius: 3px 3px 3px 3px; 
+		margin-top:10px; 
+		padding: 8px;
+		 
+		}
+	</style>
+	<window id="soapNotePanel">
+		<div sclass="wrapper">
+			<div sclass="mid">
+				<div class="rCont">
+					<n:div class="summaryHeader" id="chiefCom">
+						<n:div id="CCTop" height="100%">
+							<n:h2 class="fl SNHeader">Summary Sheet</n:h2>
+							<!--<n:h3>(Last 5 Visit)</n:h3>
+							--><n:div class="clr patDetCont">
+								<image id="patientImage" sclass="patImg" width="46px" height="50px"
+									hover="@{patient,converter='com.nzion.view.component.GenderImageConverter'}"
+									onClick='Executions.getCurrent().sendRedirect("/patient/viewPatientWrapper.zul?patientId="+patient.getId(),"_blank");' />
+								<div sclass="patDet">
+									<n:strong>MRN : ${patient.accountNumber}</n:strong>
+									<n:br />
+								</div>
+								<div sclass="patDet">
+									<n:strong>
+										Name :
+										<span style="margin-top:2px">
+											<name object="${patient}" />
+										</span>
+									</n:strong>
+									<n:br />
+								</div>
+								<div sclass="patDet">
+									<n:strong>Gender :</n:strong>
+									<label value="${patient.gender}" />
+									<n:br />
+								</div>
+								<div sclass="patDet">
+									<n:strong>DOB :</n:strong>
+									<label value="${patient.dateOfBirth}" />
+									<n:br />
+								</div>
+								<div sclass="patDet">
+									<n:strong>Age :</n:strong>
+									<label value="${patient.age}" />
+									<n:br />
+									<span></span>
+								</div>
+							</n:div>
+							<style>.fd-btn { cursor: pointer; position: fixed; right: 0; top: 40%; }</style>
+							<div id="facesheetWindow" width="100%"
+								sclass="clr chiefComp soapNoteCont curSOAP ui-resizable">
+								<panel title="Problem List" collapsible="true" id="problemListPanel">
+									<panelchildren>
+										<!-- <div sclass="dataTables_scrollBody" style="overflow: auto; height: 125px;">
+											<listbox model="@{latestRecordedPatientProblemLists}">
+												<listhead>
+													<listheader label="Name" />
+													<listheader label="Occured On" />
+													<listheader label="Severity" />
+													<listheader label="Certainity" />
+													<listheader label="Status" />
+													<listheader label="Visit Date" />
+												</listhead>
+												<listitem self="@{each='patientPastIllness'}">
+													<listcell>
+														<label value="@{patientPastIllness.icdElementcode}" />
+														<label value="-" />
+														<label value="@{patientPastIllness.icdElementdescription}" />
+														<label value="@{patientPastIllness.description}"/>
+													</listcell>
+													<listcell label="@{patientPastIllness.onSetDate}" />
+													<listcell label="@{patientPastIllness.severity}" />
+													<listcell label="@{patientPastIllness.certainity}" />
+													<listcell label="@{patientPastIllness.status}" />
+													<listcell label="@{patientPastIllness.visitDate}" />
+												</listitem>
+											</listbox>
+										</div> -->
+									</panelchildren>
+								</panel>
+								<div sclass="panelFoot"/>
+								<panel title="Allergies" collapsible="true">
+									<panelchildren>
+										<!-- <div sclass="dataTables_scrollBody" style="overflow: auto; height: 125px;">
+											<listbox>
+												<listhead>
+													<listheader label="Name" />
+													<listheader label="Severity" />
+												</listhead>
+												<listitem forEach="${latestRecordedPatientAlleries}">
+													<listcell label="${each.allergyName}" />
+													<listcell label="${each.allergySeverityName}" />
+												</listitem>
+											</listbox>
+										</div> -->
+									</panelchildren>
+								</panel>
+								<div sclass="panelFoot"/>
+								<panel title="Medications" collapsible="true">
+									<panelchildren>
+										<!-- <div sclass="dataTables_scrollBody" style="overflow: auto; height: 125px;">
+											<listbox model="@{latestPatientRx}">
+												<listhead>
+													<listheader label="Drug" />
+													<listheader label="Strength" />
+													<listheader label="Dosage Form" />
+													<listheader label="Dosage Route" />
+													<listheader label="Prescribed By" />
+													<listheader label="Prescription Date" />
+													<listheader label="Visit Date" />
+												</listhead>
+												<listitem self="@{each='rx'}">
+													<listcell label="@{rx.drugName}" />
+													<listcell>
+														<label value="@{rx.strength}" />
+														<label value="@{rx.strengthUOM}" />
+													</listcell>
+													<listcell label="@{rx.dosageForm}" />
+													<listcell label="@{rx.route}" />
+													<listcell label="@{rx.physicianName}" />
+													<listcell label="@{rx.prescriptionDate}" />
+													<listcell label="@{rx.visitDate}" />
+												</listitem>
+											</listbox>
+										</div> -->
+									</panelchildren>
+								</panel>
+								<div sclass="panelFoot"/>
+								<panel id="vitalSignPanel" title="Vital Signs" collapsible="true">
+									<panelchildren>
+										<!-- <div sclass="dataTables_scrollBody" style="overflow: auto; height: 125px;">
+											<listbox model="@{patientVitalSigns,load-after='self.onReloadRequest'}"
+												id="vitalSignsListbox" itemRenderer="${renderer}">
+												<listhead>
+													<listheader forEach="${renderer.preferedVitalSigns}"
+														label="${each.name}" />
+												</listhead>
+											</listbox>
+										</div> -->
+									</panelchildren>
+								</panel>
+								<div sclass="panelFoot"/>
+								<panel title="Lab Results" collapsible="true" id="labOrderPanel">
+									<panelchildren>
+										<!-- <div sclass="dataTables_scrollBody" style="overflow: auto; height: 125px;">
+											<listbox model="@{latestLabResults}">
+												<listhead>
+													<listheader label="Test Name" />
+													<listheader label="Observation Value" />
+													<listheader label="Status" />
+													<listheader label="Visit Date" />
+												</listhead>
+												<listitem self="@{each='obx'}">
+													<listcell label="@{obx.obxName}" />
+													<listcell>
+														<label value="@{obx.observationValue}" />
+														<label value="@{obx.units}" />
+													</listcell>
+													<listcell label="@{obx.abnormalFlag}" />
+													<listcell>
+														<label
+															value="@{obx.soapNote.date,converter='com.nzion.view.component.DateConverter'}" />
+													</listcell>
+												</listitem>
+											</listbox>
+										</div> -->
+									</panelchildren>
+								</panel>
+								<div sclass="panelFoot"/>
+								<panel title="Immunizations" collapsible="true" visible="false" id="immunizationPanel">
+									<panelchildren>
+										<!-- <div sclass="dataTables_scrollBody" style="overflow: auto; height: 125px;">
+											<listbox model="@{latestRecordedPatientImmunizations}">
+												<listhead>
+													<listheader label="Immunization" />
+													<listheader label="CVX Code" />
+													<listheader label="Administered On" />
+													<listheader label="Administered Amount" />
+													<listheader label="Administered Units" />
+													<listheader label="Visit Date" />
+												</listhead>
+												<listitem self="@{each='patientImmunization'}">
+													<listcell label="@{patientImmunization.immunizationfullVaccineName}" />
+													<listcell label="@{patientImmunization.immunizationcvxCode}" />
+													<listcell label="@{patientImmunization.administeredOn}" />
+													<listcell label="@{patientImmunization.administeredAmount}" />
+													<listcell label="@{patientImmunization.administeredUnits}" />
+													<listcell label="@{patientImmunization.visitDate}" />
+												</listitem>
+											</listbox>
+										</div> -->
+									</panelchildren>
+								</panel>
+								<div sclass="panelFoot"/>
+							</div>
+						</n:div>
+					</n:div>
+					<div class="grayBox" id="empty" style="display: none;">
+						<n:h2></n:h2>
+					</div>
+				</div>
+				<n:p class="clr"></n:p>
+			</div>
+		</div>
+	</window>
+</zk>

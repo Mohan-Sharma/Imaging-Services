@@ -1,0 +1,12 @@
+<?page title="Ospedale" contentType="text/html;charset=UTF-8"?>
+<?component name="screen" macro-uri="/home-grid-macro.zul"?>
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/practiceTemplate.zul"?>
+<zk>
+	<window self="@{define(applicationContent)}" style="padding:0px">
+		<screen width="100%" listtitle="List of Practices"	addpage="practice" editpage="newPractice"
+					entityclass="com.nzion.domain.Practice" fields="id,practiceName,contactPersonName,contacts.email,
+					contacts.officePhone,contacts.postalAddress.stateProvinceGeo,contacts.postalAddress.city"
+					labels="Practice Id,Practice Name,Contact Name,EmailAddress,Office phone,State,City" 
+					hideactivation="true" hidedeletebtn="true" containername="contentArea"/>
+	</window>
+</zk>

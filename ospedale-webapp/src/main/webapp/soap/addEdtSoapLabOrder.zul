@@ -1,0 +1,84 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addEditLo"?>
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native">
+
+    <zscript><![CDATA[
+
+com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");	
+com.nzion.domain.emr.soap.LabOrderSection section = arg.get("labSection");
+com.nzion.zkoss.composer.PatientSoapNoteController controller = arg.get("controller");
+com.nzion.domain.emr.soap.PatientLabOrder patientLabOrder=arg.get("patientLabOrder"); 
+com.nzion.domain.emr.lab.LabOrderRequest labOrderRequest=arg.get("labOrderRequest"); 
+patientLabOrder.setPatient(controller.getPatient());                 
+]]>
+    </zscript>
+    <window title="Lab Order" closable="true" id="addEditLo" mode="modal">
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span12">
+                    <label value="Name" mold="required"/>
+                    <div zclass="form-search">
+                        <div zclass="input-append">
+                            <textbox sclass="span10 search-query" style="height:24px;" focus="false" id="testNameId"
+                                     value="@{patientLabOrder.testName,load-after='onChange'}" readonly="true"
+                                     cols="24"/>
+                            <a disabled="${controller.readonly}" zclass="lookupbtn">
+                                <attribute name="onClick">
+                                    Map m = com.nzion.util.UtilMisc.toMap("testName",
+                                    testNameId,"patientLabOrder",patientLabOrder);
+                                    Executions.createComponents("/soap/lab-test-lookup.zul", null, m);
+                                </attribute>
+                                Lookup
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span6">
+                    <label value="Start"/>
+                    <datebox value="@{patientLabOrder.startDate}" sclass="span12"/>
+                </div>
+                <div zclass="span6">
+                    <label value="End"/>
+                    <datebox value="@{patientLabOrder.endDate}" sclass="span12"/>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span12">
+                    <label value="Reason"/>
+                    <textbox rows="2"  value="@{patientLabOrder.reasonForTest}"  sclass="span12"/>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span12">
+                    <label value="Comments"/>
+                    <textbox rows="2" sclass="span12"
+                             value="@{patientLabOrder.testNotes}"/>
+                </div>
+            </div>
+        </div>
+        <div sclass="panelFoot">
+            <button disabled="${isOrdered}" zclass="btn btn-success" id="addEditBtn" label="Add" onClick="saveTestOrder();">
+            </button>
+        </div>
+
+        <zscript>
+            void saveTestOrder(){
+            if(com.nzion.util.UtilValidator.isEmpty(testNameId.getValue())){
+            com.nzion.util.UtilMessagesAndPopups.displayError("Please Provide Test Name");
+            return;
+            }
+            patientLabOrder.setStatus(com.nzion.domain.emr.soap.PatientLabOrder.STATUS.NEW);
+            section.addPatientLabOrder(patientLabOrder);
+            patientLabOrder.setLabOrderRequest(labOrderRequest);
+            //labOrderRequest.setOrderStatus(com.nzion.domain.emr.lab.LabOrderRequest.ORDERSTATUS.BILLING_REQUIRED);
+            labOrderRequest.addPatientLabOrder(patientLabOrder);
+            addEditLo.detach();
+            }
+        </zscript>
+    </window>
+</zk>

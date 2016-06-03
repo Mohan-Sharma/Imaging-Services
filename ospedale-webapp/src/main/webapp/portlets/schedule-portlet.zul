@@ -1,0 +1,77 @@
+<?component name="appointmentMenu" macro-uri="/appointment/appointment-menu.zul" inline="true"?>
+<zk xmlns:n="http://www.w3.org/1999/xhtml">
+<?xel-method prefix="d" name="format" class="com.nzion.util.ViewUtil" signature="java.lang.String getFormattedName(java.lang.Object)"?>
+<window>
+	<zscript deferred="false">
+	<![CDATA[
+		import com.nzion.domain.*;
+		import com.nzion.zkoss.composer.appointment.ScheduleController;
+		Person prov=p;
+		Provider p1;
+	
+		if(prov.getId() != null){
+			com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+			prov = commonCrudService.getById(Person.class, prov.getId());
+		}
+		Location loc = session.getAttribute("_location");
+		long _role = Sessions.getCurrent().getAttribute("_role");
+		boolean isProvider = Roles.PROVIDER == _role || Roles.MEDICAL_ASSISTANT == _role;
+						Roles.hasAnyRole(new long[]{Roles.PROVIDER, Roles.MEDICAL_ASSISTANT});
+		ScheduleController scheduleController = new ScheduleController("PORTLET");
+		boolean isProviderObject = prov instanceof Provider;
+		]]>	
+	</zscript>
+	<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./appointmentWindow"?>
+	<window id="appointmentWindow" apply="${scheduleController}">
+	<appointmentMenu/>
+	<div id="scheduleDiv">
+	 <panel collapsible="false" width="100%" title="${d:format(prov)}" id="schedulePanel" if="${not empty prov.id}" >
+		 <panelchildren id="panelChildren" >
+		 <vbox>
+				 <div sclass="provider">
+                  <div sclass="fl">
+                  	<hbox>
+                 	  <image id="providerImage" width="46px" height="50px" hover="@{prov,converter='com.nzion.view.component.GenderImageConverter'}"/>
+                 	  <div>
+	                  <label value="${prov.contacts.mobileNumber}"/>
+	                  <datebox value="${scheduleController.selectedDate}" onChange="scheduleController.setSelectedDate(self.getValue());" readonly="true"/>
+	                  </div>
+	                 </hbox>
+                  </div>
+                  <div class="fr">
+                  <div if="${isProviderObject}">
+                  	<n:span forEach="${prov.specialities}">${each.description}</n:span>
+                  </div>
+                  <div visible="${isProvider}">	
+                    <n:a>
+                    	<label value="Location : ${sessionScope._location.name}" id="locationLabel"  popup="locationsPopup"/>
+                    </n:a>
+                   </div>
+                  <div visible="${!isProvider}">	
+                    	<label value="Location : ${sessionScope._location.name}"/>
+                   </div>
+                  </div>
+                </div>
+				<div id="schedulesVbox" style="overflow:auto;"/>
+				<zscript>
+						scheduleController.changeToPortletMode(prov.getId() == null ? null : prov, loc, schedulesVbox);
+				</zscript>
+		</vbox>
+		</panelchildren>
+	</panel>
+	</div>
+		<popup id="locationsPopup" width="10%" style="background:transparent;">
+		<listbox  width="100%"
+		onSelect='loc = self.getSelectedItem().getValue();scheduleController.setLocation(loc);
+		locationLabel.setValue("Location : "+self.getSelectedItem().getLabel());
+		session.setAttribute("_location",loc);'>
+			<listhead>
+				<listheader label="Location Name"/>
+			</listhead>
+			<listitem label="All" />
+			<listitem forEach="${prov.locations}" value="${each}" label="${each.name}"/>
+		</listbox>
+	</popup>
+	</window>
+</window>	
+</zk>

@@ -1,0 +1,64 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk>
+	<window contentStyle="overflow:auto;">
+	<zscript>
+	<![CDATA[
+		import com.nzion.zkoss.composer.AgeBasedLMSZGrowthChartController;
+		com.nzion.zkoss.composer.ChartController chartController;
+		import com.nzion.domain.emr.soap.vitalsign.VitalSignReading;
+		import com.nzion.zkoss.composer.PatientSoapNoteController;
+		import com.nzion.domain.Patient;
+		import com.nzion.domain.Provider;
+		import com.nzion.domain.Location;
+		import com.nzion.domain.emr.soap.vitalsign.Height;
+		import com.nzion.domain.emr.soap.vitalsign.Weight;
+		
+		PatientSoapNoteController soapNoteController = (PatientSoapNoteController)session.getAttribute("patientSoapNoteController");
+		Patient patient = soapNoteController.getPatient();
+		Provider provider = soapNoteController.getProvider();
+		Location location = soapNoteController.getSchedule().getLocation();
+		String datafile = session.getAttribute("datafile");
+		String vitalsign = session.getAttribute("vitalsign");
+		String chartTitle = session.getAttribute("lbl");
+		String patientName = com.nzion.util.ViewUtil.getFormattedName(patient);
+		String genderValue = "M".equalsIgnoreCase(patient.getGender().getEnumCode()) ? "1" : "2";
+		AgeBasedLMSZGrowthChartController controller = new AgeBasedLMSZGrowthChartController(datafile,
+		"Age(months)",vitalsign, genderValue, chartTitle+" "+ patientName,patient);
+		chartController = controller.getChartController();
+
+		List recordings = (List)session.getAttribute("readings");
+		for(Iterator vitalSingIter=recordings.iterator();vitalSingIter.hasNext();){
+			VitalSignReading vsr = vitalSingIter.next();
+			String val =null;
+			if("height".equals(vitalsign)){
+				Height heightSign = vsr.getHeight();
+				if(heightSign!=null && com.nzion.util.UtilValidator.isNotEmpty(heightSign.getEnglishValue()))
+					val =  String.valueOf(heightSign.getEnglishValue());
+			}else if("weight".equals(vitalsign)){
+				Weight weightSign = vsr.getWeight();
+				if(weightSign!=null && com.nzion.util.UtilValidator.isNotEmpty(weightSign.getEnglishValue()))
+					val =  String.valueOf(weightSign.getEnglishValue());
+			}else if("bmi".equals(vitalsign)){
+				Double bmiValue = vsr.getBmi();
+				if(bmiValue != null)
+					val = String.valueOf(bmiValue);
+			}
+			if(val!=null)
+			controller.addPatientRecord(patientName, String.valueOf(com.nzion.util.UtilDateTime.getIntervalInMonths(patient.getDateOfBirth(), 
+										vsr.getDateOfMeasurement())),val);
+		}
+		]]>
+	</zscript>
+			<span sclass="linkBtn linkBtnOn" style="margin:10px;">
+				<a  label="Print" onClick="Clients.print()"/>
+			<span />
+			</span>
+			<div align="center">
+				<include src="/soap/soapPrintBanner.zul" soapnotedate="${soapNoteController.soapNote.date}"/>
+			</div>
+			<div  align="center">	
+				<include src="/chart.zul" chartcontroller="${chartController}" id="chartInclude" timeseries="false"/>
+			</div>
+				<include src="/soap/soapPrintFooter.zul"/>
+			</window>
+</zk>

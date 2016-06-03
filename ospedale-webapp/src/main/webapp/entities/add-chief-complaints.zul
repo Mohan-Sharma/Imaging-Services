@@ -1,0 +1,55 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addChiefComplaints"?>
+<?component name="enumeration" class="com.nzion.view.component.EnumerationDropdown"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript><![CDATA[
+	com.nzion.domain.emr.ChiefComplaint chiefComplaint = arg.get("entity");
+	if(chiefComplaint == null)
+		chiefComplaint = new com.nzion.domain.emr.ChiefComplaint();
+	com.nzion.domain.emr.SoapModule hpi = commonCrudRepository.findUniqueByEquality(com.nzion.domain.emr.SoapModule.class, new String[]{"moduleName"}, new Object[]{"HPI"});
+	List qaTemplates = soapNoteService.getQATemplatesFor(hpi);
+	]]></zscript>
+	<window id="addChiefComplaints"  width="40%" mode="modal" closable="true">
+	<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Chief Complaint</h:small>
+                <button type="button" zclass="close" onClick="addChiefComplaints.detach();">×</button>
+            </h:h1>
+        </div>
+        
+        <div zclass="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span4">
+                       <label value="Complaint Name" mold="required"/>
+						<textbox width="150px" value="@{chiefComplaint.complainName,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"/>
+                	</div>
+                	</div>
+               <!--  	 <div zclass="row-fluid">
+                	<div zclass="span4">
+                      <label value="HPI Template" />
+						<combobox  width="150px" model="@{qaTemplates}" selectedItem="@{chiefComplaint.qaTemplate,save-when='Save.onClick'}" sclass="span12">
+							<comboitem label="@{qat.name}" self="@{each='qat'}" value="@{qat}"/>
+						</combobox>
+                	</div>
+               </div>
+ -->               
+		</div>
+		<div sclass="panelFoot">
+			<button zclass="btn-success btn" label="Save" id="Save" >
+				<attribute name="onClick">
+				<![CDATA[
+						try{
+						commonCrudService.save(chiefComplaint);
+						com.nzion.util.UtilMessagesAndPopups.showSuccess();
+						addChiefComplaints.detach();
+						}catch(org.springframework.dao.DataIntegrityViolationException e){
+							throw new RuntimeException("Chief Complaint '"+chiefComplaint.getComplainName()+"' already exists.");
+						}
+				]]>
+				</attribute>
+			</button>
+			<button sclass="btn" label="Cancel" forward="onClick=onCancel"/>
+		</div>
+	</window>
+</zk>

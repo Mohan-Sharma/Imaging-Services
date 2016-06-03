@@ -1,0 +1,119 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./editAllergy"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+		<![CDATA[
+		import com.nzion.domain.emr.soap.PatientAllergy;
+		import com.nzion.zkoss.composer.SoapAllergyComposer;
+		com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+		com.nzion.domain.emr.soap.AllergySection allergySection =arg.get("allergySection");
+		Listbox allergyListbox = arg.get("allergyListbox");
+		SoapAllergyComposer allergyComposer=arg.get("allergyComposer"); 
+		PatientAllergy patientAllergy = arg.get("patientAllergy"); 
+		Checkbox noKnownAllergyCheckBox = arg.get("noKnownAllergyCheckBox"); 
+		]]>
+	</zscript>
+<window title="Allergy" closable="true" width="500px;"  id="editAllergy" mode="modal">
+	<div style="width:100%">
+		<div style="width:420px;margin:auto;" sclass="inputform">
+		<vlayout spacing="10px"  style="margin:10px;">
+			<hlayout spacing="10px">
+				<label sclass="formLabel" value="Allergy Type" zclass="labelSmall" mold="required"/>
+				<combobox id="allergyTypeCombobox" constraint="no empty" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+					model="@{allergyComposer.allergyTypes,load-after='editAllergy.onReload'}"
+					selectedItem="@{patientAllergy.allergyType,save-when='addBtn.onClick'}">
+					<comboitem self="@{each='allergyType'}" label="@{allergyType.description}" value="@{allergyType}">
+						<custom-attributes allergyCode="@{allergyType.code}" />
+					</comboitem>
+				</combobox>
+			</hlayout>
+			<hlayout spacing="10px">
+				<label sclass="formLabel" value="Name" zclass="labelSmall" mold="required"  />
+				<textbox constraint="no empty" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" width="160px" value="@{patientAllergy.allergy,load-after='editAllergy.onReload',save-when='addBtn.onClick'}"/>
+			</hlayout>
+				<hlayout spacing="10px">
+					<label value="Reaction" zclass="labelSmall"  sclass="formLabel" mold="required"/>
+					<textbox constraint="no empty" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+						value="@{patientAllergy.reactionName,load-after='editAllergy.onReload',save-when='addBtn.onClick'}" width="160px"/>
+				</hlayout>
+				<hlayout spacing="10px">
+					<label value="Source" zclass="labelSmall"  sclass="formLabel"/>
+					<textbox
+						value="@{patientAllergy.sourceInfo,load-after='editAllergy.onReload',save-when='addBtn.onClick'}" width="160px"/>
+				</hlayout>
+				<hlayout spacing="10px">
+					<label value="Status" zclass="labelSmall" mold="required"  sclass="formLabel"/>
+					<enumeration w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" id="allergyStatusEnumeration" enumType="ALLERGY_STATUS"
+						selectedItem="@{patientAllergy.allergyStatus,load-after='editAllergy.onReload',save-when='addBtn.onClick'}"
+						constraint="no empty:Status Required"
+						onSelect='inactiveReasonTextBox.setDisabled(!"Inactive".equalsIgnoreCase(self.getSelectedItem().getValue().toString()));' />
+				</hlayout>
+				<hlayout spacing="10px">
+					<label value="Onset Date" zclass="labelSmall"  sclass="formLabel"/>
+					<datebox constraint="no future"
+						value="@{patientAllergy.onSetDate,load-after='editAllergy.onReload',save-when='addBtn.onClick'}" />
+				</hlayout>
+				<hlayout spacing="10px">
+					<label value="Severity" zclass="labelSmall"  sclass="formLabel"/>
+					<enumeration enumType="ALLERGY_SEVERITY"
+						selectedItem="@{patientAllergy.severity,load-after='editAllergy.onReload',save-when='addBtn.onClick'}" />
+				</hlayout>
+				<hlayout spacing="10px">
+					<label value="Comments" zclass="labelSmall"  sclass="formLabel"/>
+					<textbox width="160px" value="@{patientAllergy.comments,load-after='editAllergy.onReload',save-when='addBtn.onClick'}"/>
+				</hlayout>
+				<hlayout spacing="10px">
+					<label value="Deactivation Reason"  zclass="labelSmall" sclass="formLabel" />
+					<textbox rows="3" id="inactiveReasonTextBox" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+						value="@{patientAllergy.deactivationReason,load-after='editAllergy.onReload',save-when='addBtn.onClick'}"
+						disabled="true" style="width:180px" />
+				</hlayout>
+			   <div sclass="panelFoot" >
+				<button disabled="${controller.readonly}" id="addBtn" label="Add" zclass="btn-success btn"
+					tooltiptext="This action will not save the data.Use Save to store the data.">
+					<attribute name="onClick">
+					<![CDATA[
+		if (allergyStatusEnumeration.getValue() == "")
+			throw new WrongValueException(allergyStatusEnumeration,"Status Required");
+		if (allergyTypeCombobox.getSelectedItem() == null) {
+			throw new WrongValueException(allergyTypeCombobox,"Allergy Type Required.");
+		}
+		if (allergyStatusEnumeration.getSelectedItem() != null) {
+			com.nzion.domain.Enumeration statusEnum = (com.nzion.domain.Enumeration) allergyStatusEnumeration.getSelectedItem().getValue();
+			if ("Inactive".equalsIgnoreCase(statusEnum.getDescription())) {
+				if (org.apache.commons.lang.StringUtils.isEmpty(inactiveReasonTextBox.getValue())) {
+					throw new WrongValueException(inactiveReasonTextBox,"Reason for Deactivation is Required.");
+				}
+			}
+			com.nzion.domain.Person _p = new com.nzion.domain.Person();
+			_p.setId(com.nzion.util.Infrastructure.getUserLogin().getPerson()
+					.getId());
+			patientAllergy.deActivate(patientAllergy.getDeactivationReason(), _p);
+		} else {
+			patientAllergy.deActivate(null, null);
+		}
+		patientAllergy.setCurrentSectionAllergy(true);
+	
+		if(patientAllergy.getId()==null){
+			allergyComposer.getAllergySection().addAllergy(patientAllergy);
+			allergyComposer.getMainCtl().saveSoapSection();
+		 }else{
+		 	commonCrudService.save(patientAllergy);	
+		 }
+
+		allergyComposer.applyActiveFilter();
+		Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null);
+		editAllergy.detach();
+		]]>
+					</attribute>
+				</button>
+			</div>
+		</vlayout>
+		</div>
+	</div>
+	<zscript>
+	
+	</zscript>
+		
+</window>
+</zk>

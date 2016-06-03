@@ -1,0 +1,219 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./providerView"?>
+<?component name="specialities" macro-uri="provider-specializations.zul"?>
+
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	import com.nzion.domain.Provider;
+	Provider provider=Executions.getCurrent().getArg().get("entity");
+	if(provider==null){
+		provider =(Provider)com.nzion.util.Infrastructure.getUserLogin().getPerson(); 
+	}
+	com.nzion.zkoss.composer.ProviderController viewController = new com.nzion.zkoss.composer.ProviderController(provider.getId());
+	desktop.setAttribute("provider", provider);
+</zscript>
+	<window  id="providerView" apply="${viewController}">
+		<tabbox>
+			<tabs>
+				<tab label="Personel Details" />
+				<tab label="Other Details" />
+				<tab label="Signature" />
+				<tab label="Preferences" id="providerPreferences" >
+					<attribute name="onClick">
+	Map args = new HashMap();
+	args.put("providerAccountNumber", provider.getAccountNumber());
+	args.put("displayArea", providerPreferencesArea);
+	args.put("editable", false);
+	providerPreferencesArea.getChildren().clear();
+	Component comp = Executions.getCurrent().createComponents("/provider/providerPreferences.zul", providerPreferencesArea, args);
+</attribute>
+				</tab>
+			</tabs>
+			<tabpanels>
+
+				<tabpanel>
+				<div sclass="panelTop">
+					<button label="Save" forward="save.onClick" />
+					<button label="Close" onClick="providerView.detach()"/>
+					<button label="Change Password" onClick='Executions.createComponents("/provider/changeTransactionPassword.zul",providerView, com.nzion.util.UtilMisc.toMap("ProviderController",viewController));'/>
+				</div>
+				<separator/>
+					<panel title="Personal Detail">
+						<panelchildren>
+						
+							<div sclass="panelCont">
+								<div>
+									<hbox>
+										<label value="First Name" />
+											<span zclass="labelReq">
+												<html><![CDATA[*]]></html>
+											</span>
+									</hbox>
+									<textbox value="@{viewController.provider.firstName,save-when='save.onClick'}" constraint="no empty" maxlength="20" onChange="com.nzion.util.UtilDisplay.validateOnlyAlphabets(self)"  />
+								</div>
+								<div>
+									<label value="Middle Name" />
+									<textbox value="@{viewController.provider.middleName,save-when='save.onClick'}" maxlength="1" onChange="com.nzion.util.UtilDisplay.validateOnlyAlphabets(self)"/>
+								</div>
+								<div>
+									<label value="Last Name" />
+									<textbox value="@{viewController.provider.lastName,save-when='save.onClick'}" maxlength="20"/>
+								</div>
+								<div>
+									<label value="DEA Number" />
+									<textbox value="@{viewController.provider.detail.deaNumber,save-when='save.onClick'}" maxlength="15" onChange="com.nzion.util.UtilDisplay.validateOnlyDigits(self)"/>
+								</div>
+								<div>
+									<label value="UPIN Number" />
+									<textbox value="@{viewController.provider.detail.upinNumber,save-when='save.onClick'}" maxlength="10" onChange="com.nzion.util.UtilDisplay.validateOnlyDigits(self)"/>
+								</div>
+								<div>
+									<label value="NPI Number" />
+									<textbox value="@{viewController.provider.detail.npiNumber,save-when='save.onClick'}" maxlength="15" onChange="com.nzion.util.UtilDisplay.validateOnlyDigits(self)"/>
+								</div>
+								<div>
+									<label value="DOB" />
+									<datebox value="@{viewController.provider.dateOfBirth,save-when='save.onClick'}" constraint="no future"/>
+								</div>
+								<div>
+									<label value="SSN"/>									
+									<textbox value="@{viewController.provider.ssnNumber,save-when='save.onClick'}" maxlength="9" onChange="com.nzion.util.UtilDisplay.validateNineDigits(self)" />
+								</div>
+								<div>	
+									<label value="Gender" />
+									<enumeration enumType="GENDER" id="gender" selectedItem="@{viewController.provider.gender,save-when='save.onClick'}" />
+								</div>
+							</div>
+						</panelchildren>
+					</panel>
+					<div sclass="panelFoot"/>
+					<separator/>
+			<panel title="Contact">
+				<panelchildren>
+				<div sclass="panelCont">
+					<div sclass="col2">
+						<hbox>
+						<label value="e-mail" />
+						<label value="*" zclass="labelReq"/>
+						</hbox>
+						<email value="@{viewController.provider.contacts.email,save-when='save.onClick'}" constraint="no empty"/>
+					</div>
+						<div>
+							<label value="Home phone" />
+							<phonebox value="@{viewController.provider.contacts.homePhone,save-when='save.onClick'}"/>
+						</div>
+						<div>
+							<label value="Mobile phone" />
+							<phonebox value="@{viewController.provider.contacts.mobileNumber,save-when='save.onClick'}"/>
+						</div>
+						<div>
+							<label value="Office phone" />
+							<phonebox value="@{viewController.provider.contacts.officePhone,save-when='save.onClick'}"/>
+						</div>
+						<div>
+							<label value="Office Ext" />
+							<textbox value="@{viewController.provider.contacts.officeExt,save-when='save.onClick'}" maxlength="5"/>
+						</div>
+						<div>
+							<label value="Fax"/>
+							<phonebox id="faxNumber" value="@{viewController.provider.contacts.faxNumber,save-when='save.onClick'}"/>
+						</div>
+				</div>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot"/>
+		<separator/>
+					<panel border="normal" title="Contact Details">
+						<panelchildren>
+							<div sclass="panelCont">
+								<div sclass="col2">
+									<label value="Address1" style="text-align:right" id="lbladdress1" />
+									<textbox value="@{viewController.provider.contacts.postalAddress.address1,save-when='save.onClick'}" id="address1" />
+								</div>
+								<div sclass="col2">
+									<label value="Address2" style="text-align:right;" id="lbladdress2" />
+									<textbox value="@{viewController.provider.contacts.postalAddress.address2,save-when='save.onClick'}" id="address2" />
+								</div>
+								<div>
+									<label value="State" style="text-align:right" id="lblstate" />
+									<textbox
+										value="@{viewController.provider.contacts.postalAddress.stateProvinceGeo,save-when='save.onClick'}" id="state" maxlength="2"/>
+								</div>
+								<div>
+									<label value="County" id="lblcountyGeo" />
+									<textbox
+										value="@{viewController.provider.contacts.postalAddress.countyGeo,save-when='save.onClick'}" id="countyGeo" />
+								</div>
+								<div>
+									<label value="City" style="text-align:right" id="lblcity" />
+									<textbox value="@{viewController.provider.contacts.postalAddress.city,save-when='save.onClick'}" id="city" onChange="com.nzion.util.UtilDisplay.validateNonDigits(self)" />
+								</div>
+								<div>
+									<label value="Postal code" style="text-align:right" id="lblpostalCode" />
+									<textbox
+										value="@{viewController.provider.contacts.postalAddress.postalCode,save-when='save.onClick'}" id="postalCode" maxlength="9" onChange="com.nzion.util.UtilDisplay.validateOnlyDigits(self)" />
+								</div>
+						</div>
+						</panelchildren>
+						</panel>
+						<div sclass="panelFoot"/>
+							<separator/>
+						<div sclass="panelFoot" visible="false">
+							<button label="Save" id="save" onClick='viewController.save();providerView.detach()'/>
+							<button label="Change Password" onClick='Executions.createComponents("/provider/changeTransactionPassword.zul",providerView, com.nzion.util.UtilMisc.toMap("ProviderController",viewController));'/>
+						</div>
+				</tabpanel>
+				<tabpanel id="otherDetails" height="400px">
+				<div sclass="panelTop">
+							<button label="Save Changes" onClick="" id="saveOtherDeatils" />
+							<button label="Close" onClick="providerView.detach()"/>
+					</div>
+					<separator/>
+					<include src="/provider/provider-qualifications.zul" controller="${viewController}" />
+					<separator/>
+					<include src="/provider/provider-locations.zul" controller="${viewController}" />
+					<separator/>
+					<specialities id="specialityMacro" />
+				</tabpanel>
+				<tabpanel id="Signature" height="400px">
+				
+				<div sclass="panelTop">
+					<button label="Upload Signature" upload="true">
+							<attribute name="onUpload">
+{
+	org.zkoss.util.media.Media media = event.getMedia();
+	if (media instanceof org.zkoss.image.Image) {
+		org.zkoss.zul.Image image = new org.zkoss.zul.Image();
+		image.setContent(media);
+		frontImage.setContent(media);
+		com.nzion.domain.DataResource fsrc = new com.nzion.domain.DataResource();
+		fsrc.setResource(org.hibernate.Hibernate.createBlob(media.getByteData()));
+		viewController.getProvider().setSignatureImage(fsrc);
+	} else {
+		Messagebox.show("Not an image: " + media, "Error", Messagebox.OK, Messagebox.ERROR);
+		break; //not to show too many errors
+	}
+}
+</attribute>
+						</button>
+							<button label="Save Signature" onClick="" id="saveSignauture" />
+							<button label="Close" onClick="providerView.detach()"/>
+					</div>
+					
+					<hbox>
+						<image id="frontImage" />
+						<zscript>
+						
+if (viewController.getProvider().getSignatureImage() != null) {
+	org.zkoss.image.AImage aImage = new org.zkoss.image.AImage("Front Image", viewController.getProvider().getSignatureImage().getResource().getBinaryStream());
+	frontImage.setContent(aImage);
+}
+</zscript>
+						<separator height="20px" />
+					</hbox>
+				</tabpanel>
+				<tabpanel id="providerPreferencesArea"></tabpanel>
+			</tabpanels>
+		</tabbox>
+	</window>
+</zk>

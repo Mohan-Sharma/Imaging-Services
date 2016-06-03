@@ -1,0 +1,57 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./genExam"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+		import com.nzion.zkoss.composer.SoapSentenceComposer;
+		import com.nzion.domain.emr.soap.ChiefComplainSection;
+		import com.nzion.domain.emr.soap.GeneralExaminationSection;
+		
+		SoapSentenceComposer sentenceComposer = (SoapSentenceComposer)arg.get("controller");
+		GeneralExaminationSection generalExaminationSection = (GeneralExaminationSection)sentenceComposer.getSoapNoteController().getSoapSection(GeneralExaminationSection.class,false);
+		sentenceComposer.setSelectedSection(generalExaminationSection);
+		Set readings = generalExaminationSection.getPatientGeneralExaminations();
+	</zscript>
+
+<div style="margin-left:10px" id="genExam">
+		<n:h2>${generalExaminationSection.soapModule.moduleDescription}</n:h2>
+		<n:br/>
+		<n:tbody>
+						<n:tr forEach="${readings}">
+							<n:td>
+							 <n:label>Height</n:label>
+							    <n:label if="${each.height.metricValue!= null}">${each.height.metricValue}</n:label>
+								<n:label if="${each.height.metricValue!= null}">${each.height.metricUnit}</n:label>
+							</n:td> 
+							 <n:td>
+							  <n:label >Weight</n:label>
+								<n:label if="${each.weight.metricValue!= null}">${each.weight.metricValue}</n:label>
+								<n:label if="${each.weight.metricValue!= null}">${each.weight.metricUnit}</n:label>
+							</n:td> 
+							 <n:td>
+							  <n:label >Head Circumference</n:label>
+								<n:label if="${each.headCircumference.metricValue!= null}">${each.headCircumference.metricValue}</n:label>
+								<n:label if="${each.headCircumference.metricValue!= null}">${each.headCircumference.metricUnit}</n:label>
+							</n:td>
+							 <n:td>
+							  <n:label >Chest Circumference</n:label>
+								<n:label if="${each.chestCircumference.metricValue!= null}">${each.chestCircumference.metricValue}</n:label>
+								<n:label if="${each.chestCircumference.metricValue!= null}">${each.chestCircumference.metricUnit}</n:label>
+							</n:td> 
+							<n:td>
+							  <n:label >Build Type</n:label>
+								<n:label if="${each.built!= null}">${each.built}</n:label>
+							</n:td> 
+							<n:td>
+							  <n:label >Nourishment Type</n:label>
+								<n:label if="${each.nourishment!= null}">${each.nourishment}</n:label>
+							</n:td> 
+							 <n:td>
+								<n:label if="${each.weight.metricValue!= null &amp;&amp; each.height.metricValue!= null}">${each.bmiValue} ${each.bmiCategory}</n:label>
+							</n:td> 
+						</n:tr> 
+					</n:tbody>
+</div>
+</zk>

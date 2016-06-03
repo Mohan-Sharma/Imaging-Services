@@ -1,0 +1,313 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./misTxnItemPrintWindow"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+	xmlns:h="http://www.w3.org/1999/xhtml">
+	<zscript><![CDATA[
+		import com.nzion.domain.billing.InvoiceType;
+        com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+        com.nzion.service.billing.BillingService billingService = com.nzion.util.Infrastructure.getSpringBean("billingService");
+        String invId = param.get("invoiceId")[0];
+        com.nzion.zkoss.composer.BillingController billingController  = new com.nzion.zkoss.composer.BillingController();
+        com.nzion.domain.inpatient.PatientAdmission patientAdmission;
+        com.nzion.domain.billing.Invoice invoice;
+        if(com.nzion.util.UtilValidator.isNotEmpty(invId)){
+       		 invoice= billingController.getInvoice();
+       	  patientAdmission    = invoice.getPatientAdmission();
+        }
+        else{
+        	patientAdmission= commonCrudService.getById(com.nzion.domain.inpatient.PatientAdmission.class, new Long(param.get("paId")[0]));
+        	Map invoiceAndItemsToUpd = billingService.viewInvoiceFor(patientAdmission);
+        	invoice = invoiceAndItemsToUpd.get("INVOICE");
+        	billingController.extractInvoiceToDisplay(invoice);
+        }
+        
+        Date date=new Date();
+        List invoicePayments ;
+        if(invoice.getInvoicePayments() != null)
+        	invoicePayments = new ArrayList(invoice.getInvoicePayments());
+        String paymentMode = "Payment Mode : ";
+     	if(com.nzion.util.UtilValidator.isNotEmpty(invoicePayments)){
+     		paymentMode += invoicePayments.size() > 1? "Multiple" : invoicePayments.get(0).getPaymentMethod().getDescription();
+     	}
+     	com.nzion.domain.emr.UnitOfMeasurement billingCurrency = billingService.getConfiguredCurrency();
+        boolean isWrittenOff =  billingController.getInvoice().getInvoiceStatus().equals(com.nzion.domain.billing.InvoiceStatusItem.WRITEOFF.toString());
+        billingController.getInvoiceItemMap();
+        com.nzion.domain.Practice practice = com.nzion.util.Infrastructure.getPractice();
+        com.nzion.repository.common.CommonCrudRepository commonCrudRepository = com.nzion.util.Infrastructure.getSpringBean("commonCrudRepository");
+        List userLogins = commonCrudRepository.findByEquality(com.nzion.domain.UserLogin.class,new String[]{"username"},new Object[]{invoice.getCollectedByUser()});
+        com.nzion.domain.UserLogin userlogin = (com.nzion.domain.UserLogin) userLogins.get(0);
+        com.nzion.domain.Person person  = commonCrudRepository.findUniqueByEquality(com.nzion.domain.Person.class, new String[]{"id"}, new Object[]{userlogin.getPerson().getId()});
+        String name = person.getFirstName() +  " " + person.getLastName();
+        Date createdTxTimestamp = invoice.getCreatedTxTimestamp();
+        String invoiceDate = com.nzion.util.UtilDateTime.formatDateToDatetimeFormat(createdTxTimestamp);
+    ]]>
+</zscript>
+	<style>
+		.notePreview{ bottom: -15px; position: relative; }
+        .summaryHeader{ background-color: #ECECEC; border: 1px solid #A2A2A2; border-radius: 3px 3px 3px 3px; margin-top:10px; padding: 8px; }
+        .footerClass{ font-family: arial,sans-serif; font-size: 11px; font-weigh t: normal; text-align: right; }
+        .mid, .pgTtl {padding: 0 98px; }
+        .rCont { top: -10px; width: 97%; z-index: 1; }
+        .total{ margin-right:19% }
+		.personDet{
+			border: 1px solid #333;
+			align:center;
+			margin : 2px 0px 0px 0px;
+		}
+		.invoiceTable{
+			border: 1px solid #333;
+			align:center;
+		}
+		.invoiceTable th{
+			text-align:left;
+            font-size: 13px;
+			font-weight:bold;
+			border: 1px solid #333;
+			border-collapse:collapsed;
+			padding-left:5px;
+			color:#333;
+			padding:5px;
+		}
+		.invoiceTable td{
+			text-align:left;
+            font-size: 12px;
+			font-weight:bold;
+			border-right: 1px solid #333;
+			border-left: 1px solid #333;
+			border-collapse:collapsed;
+			padding:0px 2px 4px 5px;
+		}
+		.personDet td{
+		  padding:2px;
+		}
+	</style>
+	<window id="misTxnItemPrintWindow" apply="${billingController}" self="@{define(content)}">
+		 <attribute name="onCreate">
+			     Clients.print();
+    	</attribute>
+    	<div style="margin-top:1.3in;">
+	    	<hbox>
+	    		<vbox style="margin-left:1.0in;">
+	    			<label value="${billingController.invoice.invoiceNumber}"/>
+	    			<name object="@{billingController.invoice.patient}"/>
+	    			<label value="${invoice.patient.gender.description}"/>
+	    		</vbox>
+	    		<vbox style="margin-left:470px;">
+	    			<label value="${invoiceDate}"/>
+	    			<label value="@{invoice.patient.age}"/>
+	    		</vbox>
+	    	</hbox>
+	    </div>
+	    <div style="margin-left:0.1in;margin-top:0.4in">
+	    	<hbox style="margin-top:20px;">
+		    	<label value="Consultant Name : "/>
+				<name object="@{invoice.consultant}"/>
+			</hbox>
+	    	<div style="margin-top:10px;height:1.8in;" if='${!(each.itemType == InvoiceType.DEDUCTIBLE.name() || each.itemType == InvoiceType.IPD_ADVANCE.name())}'>
+				 <hbox forEach="${invoice.invoiceItems}">
+				 <div style="width:500px;">
+				  <label value="${each.description}"/>
+				  </div>
+				  <div style="margin-left:200px;"> ${each.price.amount} ${billingCurrency.code} </div>
+				  </hbox>
+	    	</div>
+	    	<hbox style="margin-top:20px;">
+		    	<label value="Received By : " style="font-weight:bold;"/>
+				<label value="@{name}" style="font-weight:bold;"/>
+			</hbox>
+				 <hbox>
+				 	  <div style="width:450px;text-align:right;margin-left:250px;">
+					     <label value="Total Bill Amount " style="font-weight:bold;"/>
+					  </div>
+					  <div style="margin-left:10px;text-align:right;width:100px;"> 
+					    <label id="overAllAmt" value="@{invoice.totalAmount.price,load-after='self.onReload'}" style="font-weight:bold;"/>
+					  </div>
+				  </hbox>
+				 <hbox>
+				 	<div style="width:450px;text-align:right;margin-left:250px;">
+					  <label value="${c:l('collectedAmount')} " style="font-weight:bold;"/>
+					</div>
+					  <div style="margin-left:10px;text-align:right;width:100px;"> 
+						<label id="overAllCollectedAmt" value="@{invoice.collectedAmount.price,load-after='self.onReload'}" style="font-weight:bold;" />
+					  </div>
+				  </hbox>
+				 <hbox>
+				 	<div style="width:450px;text-align:right;margin-left:250px;">
+					  <label value="${c:l('balanceAmount')}" if='${invoice.invoiceStatus != "WRITEOFF"}' style="font-weight:bold;"/>
+					  <label value="Discounted Amount" if='${invoice.invoiceStatus == "WRITEOFF"}' style="font-weight:bold;"/>
+					</div>
+					  <div style="margin-left:10px;text-align:right;width:100px;"> 
+					    <label value="@{invoice.balanceAmount,load-after='self.onReload'}" style="font-weight:bold;"/>
+						<label value="@{billingCurrency.code}" style="font-weight:bold;"></label>
+					  </div>
+				  </hbox>
+    	</div>
+		<!-- <div sclass="wrapper">
+			<div>
+				<n:div id="CCTop" height="100%" style="width:610px;" >
+				  <n:div class="clr patDetCont" style="margin-top:2px;">
+						<div align="center">
+						 <n:table>
+							<n:tr>
+								<h:td align="center"><n:strong style="font-size:20px">${practice.practiceName}</n:strong></h:td>
+							</n:tr>
+							<n:tr>
+								<h:td align="center">
+									<n:strong style="font-size:15px;margin-right:2px;padding:10px">${invoice.location.contacts.postalAddress.address1}</n:strong>
+									<n:strong style="font-size:15px;margin-right:2px;padding:10px">${invoice.location.contacts.postalAddress.city}</n:strong>
+									<n:strong style="font-size:15px;margin-right:2px;padding:10px">${invoice.location.contacts.postalAddress.stateProvinceGeo}</n:strong>
+									<n:strong style="font-size:15px;margin-right:2px;padding:10px">${invoice.location.contacts.postalAddress.zipCode}</n:strong>
+								</h:td>
+							</n:tr>
+							<n:tr>
+							<h:td align="center">
+							<n:strong style="font-size:12px;margin-right:2px;padding:10px" >Tel :${invoice.location.contacts.officePhone}</n:strong>
+								<n:strong style="font-size:12px;margin-right:2px;padding:10px">Fax :${invoice.location.contacts.faxNumber}</n:strong>
+							</h:td>
+							</n:tr>
+							</n:table>
+				        </div>
+					 </n:div>
+					  <n:div class="clr patDetCont" style="width:100%;horizontal-align:center;margin-top:3px">
+						 <n:table class="personDet" style="align:center;width:99%">
+					       <n:tr>
+						   	 <n:td> <label value="Consultant Name : " style="font-weight:bold;"></label>
+							   	      	  <name object="@{invoice.consultant}"/>
+						   	      </n:td> 
+						   	       <n:td> <label value="Date : " style="font-weight:bold;"></label>
+							   	      	  <label value="@{invoice.invoiceDate,converter='com.nzion.view.component.DateConverter'}"/>
+						   	      </n:td> 
+						   	</n:tr>
+					</n:table>
+					</n:div>
+					 <n:div class="clr " style="width:100%;horizontal-align:center;margin-top:3px">
+						 <n:table  class="personDet" style="align:center;width:99%">
+					       <n:tr>
+						   	 <n:td>
+						   	 	<n:b>Patient Details : </n:b><n:br/>
+						   	 	   <hlayout spacing="8%" width="100%">
+						   	 	     <div><label value="MRN : " style="font-weight:bold;"></label> 
+							   	      <label value="@{invoice.patient.accountNumber}" style="font-weight:normal;" />
+							   	     </div>
+							   	      <div>
+							   	      <label value="Name : " style="font-weight:bold;"></label>
+							   	      <name object="@{invoice.patient}"  />
+							   	      </div>
+							   	       <div if="${patientAdmission != null}">
+									        <label value="IP Number : " style="font-weight:bold;"></label>
+											<label value="@{patientAdmission.accountNumber}" />
+									  </div>
+							   	      <div>
+							   	       <label value="Age : " style="font-weight:bold;"></label>
+							   	       <label value="@{invoice.patient.age}"  style="font-weight:normal;"/>
+							   	      </div>
+						   	      </hlayout>
+						   	      </n:td> 
+						   	</n:tr>
+						   <n:tr>
+						   	<n:td width="100%"> 
+						   	    <hlayout spacing="7%" width="100%">
+						   	         <div>
+							   	       <label value="Gender : " style="font-weight:bold;"></label>
+							   	       <label value="@{invoice.patient.gender.description}"  style="font-weight:normal;"/>
+							   	      </div>
+						   	        <div>
+						   	               <label value="Contact No : " style="font-weight:bold;"></label>
+								        <label value="@{invoice.patient.contacts.mobileNumber}" style="font-weight:normal;" />
+								   </div>
+								    <div style="white-space:nowrap"> 
+								  	    <label value="Address : " style="font-weight:bold;"></label>
+								    	${invoice.patient.contacts.postalAddress}
+									 </div>
+								</hlayout>
+								     	
+						 	  </n:td>
+						   </n:tr>
+					</n:table>
+					</n:div>
+					 <n:div class="clr patDetCont" style="width:100%;horizontal-align:center;margin-top:3px">
+					 	<n:table class="invoiceTable" cellspacing="2" cellpadding="2" style="align:center;width:99%">
+							<n:tr>
+								 <n:th  width="20%"> ${c:l('item')}</n:th>
+								 <n:th  width="14%">  ${c:l('actualPrice')} </n:th>
+								 <n:th  width="14%">  ${c:l('quantity')} </n:th>
+								 <n:th  width="14%"> ${c:l('amount')}</n:th>
+							 </n:tr>
+							 <n:tr >
+							  <n:td style="padding:3px 2px 0px 5px"> Billed Items:</n:td>
+							  <n:td></n:td>
+							  <n:td></n:td>
+							  <n:td > </n:td>
+							</n:tr>
+							<n:tr forEach="${invoice.invoiceItems}" if='${!(each.itemType == InvoiceType.DEDUCTIBLE.name() || each.itemType == InvoiceType.IPD_ADVANCE.name())}'>
+							  <n:td><label value="${each.description}" /></n:td>
+							  <n:td> <div style="text-align:left;width:49%;float:left;"> ${each.factor} </div> <div > ${billingCurrency.code} </div> </n:td>
+							  <n:td><label value="${each.quantity}"  /></n:td>
+							  <n:td> <div style="text-align:left;width:49%;float:left;"> ${each.price.amount} </div> <div > ${billingCurrency.code} </div></n:td>
+							</n:tr>	
+							<n:tr >
+							  <n:td></n:td>	<n:td></n:td>	<n:td>  Total Amount : </n:td>
+							  <n:td ><div style="text-align:left;width:49%;float:left;"> ${invoice.totalAmount.amount} </div> <div > ${billingCurrency.code} </div></n:td>
+							</n:tr>
+							<n:tr if="${advanceAvailable}">
+							  <n:td style="padding:3px 2px 0px 5px"> Less As Advance : </n:td>
+							  <n:td></n:td>
+							  <n:td></n:td>
+							  <n:td > </n:td>
+							</n:tr>
+							 <n:tr forEach="${adavanceItems}">
+							  <n:td><label value="${each.description}" /></n:td>
+							  <n:td>  <div style="text-align:left;width:49%;float:left;"> ${each.factor} </div> <div style="text-align:right;width:49%;float:left;"> ${billingCurrency.code} </div>  </n:td>
+							  <n:td><label value="${each.quantity}"  /></n:td>
+							  <n:td> <div style="text-align:left;width:49%;float:left;"> ${each.price.amount} </div> <div style="text-align:right;width:49%;float:left;"> ${billingCurrency.code} </div> </n:td>
+							</n:tr>	
+							<n:tr >
+							  <n:td if="${deductiblesAvailable}" style="padding:2px 2px 0px 5px"> Less On Item(s):</n:td>
+							  <n:td></n:td>
+							  <n:td></n:td>
+							  <n:td > </n:td>
+							</n:tr>
+							 <n:tr forEach="${decdutibleItems}">
+							  <n:td><label value="${each.description}" /></n:td>
+							  <n:td> <div style="text-align:left;width:49%;float:left;"> ${each.factor} </div> <div style="text-align:right;width:49%;float:left;"> ${billingCurrency.code} </div> </n:td>
+							  <n:td><label value="${each.quantity}"  /></n:td>
+							  <n:td> <div style="text-align:left;width:49%;float:left;"> ${each.price.amount} </div> <div style="text-align:right;width:49%;float:left;"> ${billingCurrency.code} </div> </n:td>
+							</n:tr>	
+							<n:tr if="${deductiblesAvailable || advanceAvailable}">
+							  <n:td></n:td>	<n:td></n:td>	<n:td> ${c:l('amountToBePaid')} : </n:td>
+							  <n:td > <div style="text-align:left;width:49%;float:left;"> ${billingController.remainingAmount} </div> <div style="text-align:right;width:49%;float:left;"> ${billingCurrency.code} </div></n:td>
+							</n:tr>
+						</n:table>
+					 </n:div>
+					  <hlayout spacing="10px" width="100%" style="margin:3px 0px 3px 0px;">
+							<div style="border:1px solid #333;padding:1px;"><label value="Total Bill Amount :" style="font-weight:bold;"/>
+								<label id="overAllAmt" 
+									value="@{invoice.totalAmount.price,load-after='self.onReload'}" style="font-weight:bold;" />
+									<label value="@{billingCurrency.code}" style="font-weight:bold;font-size:13px;"></label>
+							</div>
+							<div style="border:1px solid #333;padding:1px;"><label value="${c:l('amountToBePaid')}" style="font-weight:bold;"/>
+								<label id="overBalAmt" 
+									value="@{billingController.remainingAmount,load-after='self.onReload'}" style="font-weight:bold;" />
+									<label value="@{billingCurrency.code}" style="font-weight:bold;"></label>
+							</div>
+							<div style="border:1px solid #333;padding:1px;">
+							    <label value="${c:l('collectedAmount')}" style="font-weight:bold;font-size:13px;"/>
+								<label id="overAllCollectedAmt" 
+									value="@{invoice.collectedAmount.price,load-after='self.onReload'}" style="font-weight:bold;" />
+									<label value="@{billingCurrency.code}" style="font-weight:bold;"></label>
+							</div>
+							<div style="border:1px solid #333;padding:1px;">
+							   <label value="${c:l('balanceAmount')}" style="font-weight:bold;" if='${invoice.invoiceStatus != "WRITEOFF"}'/>
+							   <label value="Discounted Amount" style="font-weight:bold;" if='${invoice.invoiceStatus == "WRITEOFF"}'/>
+								<label value="@{invoice.balanceAmount,load-after='self.onReload'}" style="font-weight:bold;" />
+									<label value="@{billingCurrency.code}" style="font-weight:bold;"></label>
+							</div>
+					</hlayout>
+					<hlayout>
+						<div if='${invoice.invoiceStatus == "RECEIVED"}' style="border:1px solid #333;padding:1px;">${paymentMode}</div>
+					</hlayout>
+				</n:div>
+			</div>
+		</div> -->
+	</window>
+</zk>

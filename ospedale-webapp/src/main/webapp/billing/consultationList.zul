@@ -1,0 +1,81 @@
+<?page title="Patient" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./consultationListWindow"?>
+<zk>
+<zscript>
+	setPageTitle("Consultation", "");
+	com.nzion.service.common.CommonCrudService service = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	com.nzion.service.billing.BillingService billingService = com.nzion.util.Infrastructure.getSpringBean("billingService");
+	List specialities = service.getAll(com.nzion.domain.Speciality.class);
+	com.nzion.domain.screen.BillingDisplayConfig billingDisplayConfig = service.getByPractice(com.nzion.domain.screen.BillingDisplayConfig.class);
+	com.nzion.view.ConsultationValueObject voSpeciality = new com.nzion.view.ConsultationValueObject();
+	com.nzion.view.ConsultationValueObject voProvider = new com.nzion.view.ConsultationValueObject();
+	voSpeciality.setMeasurement(billingDisplayConfig.getCurrency());
+	voProvider.setMeasurement(billingDisplayConfig.getCurrency());
+	
+</zscript>
+	<window id="consultationListWindow" self="@{define(content)}" width="100%">
+		<hbox width="98%" widths="49%,49%">
+		<panel width="100%" title="Configure By Speciality">
+		<panelchildren>
+		<div width="20%" style="margin:10px">
+			<label value="Speciality"/>
+			<combobox model="@{specialities}" id="specialitiesComboBox" selectedItem="@{voSpeciality.speciality}" 
+			onChange='billingService.getAllConsultations(voSpeciality);'/>
+		</div>
+		<space orient="horizontal"/>
+		<div>
+			<listbox model="@{voSpeciality.consultations,load-after='specialitiesComboBox.onChange'}" rows="10">
+				<listhead>
+					<listheader label="Visit Type"/>
+					<listheader label="Charge Type"/>
+					<listheader label="Price"/>
+				</listhead>
+				<listitem self="@{each='consultationSpeciality'}" value="@{consultationSpeciality}">
+					<listcell label="@{consultationSpeciality.soapNoteType}"/>
+					<listcell label="@{consultationSpeciality.soapNoteType.chargeType}"/>
+					<listcell>
+						<decimalbox value="@{consultationSpeciality.price.amount}"/>
+						<label value="@{billingDisplayConfig.currency.code}"/>	
+					</listcell>
+				</listitem>
+			</listbox>
+		</div>
+		<space orient="horizontal"/>
+		<div align="center">
+			<button label="Save" onClick="if(com.nzion.util.UtilValidator.isEmpty(voSpeciality.getConsultations()))return;service.save(voSpeciality.getConsultations());com.nzion.util.UtilMessagesAndPopups.showSuccess();"/>
+		</div>
+		</panelchildren>
+		</panel>
+		<panel width="100%" title="Configure By Provider">
+		<panelchildren>
+		<div width="20%" style="margin:10px">
+			<label value="Doctor"/>
+			<providerlookup onChange='voProvider.setProvider(event.getOrigin().getData());billingService.getAllConsultations(voProvider);' id="providerLookUp"/>
+		</div>
+		<space orient="horizontal"/>
+		<div>
+			<listbox model="@{voProvider.consultations,load-after='providerLookUp.onChange'}" rows="10">
+				<listhead>
+					<listheader label="Visit Type"/>
+					<listheader label="Charge Type"/>
+					<listheader label="Price"/>
+				</listhead>
+				<listitem self="@{each='consultationProvider'}" value="@{consultationProvider}">
+					<listcell label="@{consultationProvider.soapNoteType}"/>
+					<listcell label="@{consultationProvider.soapNoteType.chargeType}"/>
+					<listcell>
+						<decimalbox value="@{consultationProvider.price.amount}"/>
+						<label value="@{billingDisplayConfig.currency.code}"/>	
+					</listcell>
+				</listitem>
+			</listbox>
+		</div>
+		<space orient="horizontal"/>
+		<div align="center">
+			<button label="Save" onClick="if(com.nzion.util.UtilValidator.isEmpty(voProvider.getConsultations()))return;service.save(voProvider.getConsultations());com.nzion.util.UtilMessagesAndPopups.showSuccess();"/>
+		</div>
+	</panelchildren>
+	</panel>
+		</hbox>		
+	</window>
+</zk>

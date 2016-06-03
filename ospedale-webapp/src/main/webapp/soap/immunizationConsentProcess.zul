@@ -1,0 +1,102 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./consentProcessWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+<![CDATA[
+	import com.nzion.domain.emr.Immunization;
+	import com.nzion.domain.emr.soap.*;
+	Immunization immunization = (Immunization) arg.get("immunization");
+	com.nzion.zkoss.composer.PatientSoapNoteController patientSoapNoteController = arg
+			.get("patientSoapNoteController");
+	PatientImmunization patientImmunization = new PatientImmunization(immunization);
+	Panel immunizationRegisterSectionPanel = arg.get("immunizationRegisterSectionPanel");
+	ImmunizationSection immunizationSoapSection = arg.get("immunizationSoapSection");
+]]>
+</zscript>
+	<window id="consentProcessWindow">
+		<label onCreate='self.setValue(immunization.getCode()+"-"+immunization.getDescription())' style="font-weight:bold" />
+		<h:table width="90%" style="border:0px;">
+			<h:tr>
+				<h:td style="text-align:right">
+					<label value="VIS Received:" />
+				</h:td>
+				<h:td>
+					<datebox value="@{patientImmunization.visGiven}" />
+				</h:td>
+				<h:td style="text-align:right">
+					<label value="VIS Given:" />
+				</h:td>
+				<h:td>
+					<datebox value="@{patientImmunization.vis}" />
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td/>
+				<h:td/>
+				<h:td />
+				<h:td />
+				<h:td>
+					<a label="Patient Education">
+						<attribute name="onClick">
+							String immUrl = immunization.getInformationUrl();
+							Executions.getCurrent().sendRedirect(immUrl, "_blank");
+						</attribute>
+					</a>
+				</h:td>
+			</h:tr>
+		</h:table>
+		<h:table style="margin:10px;border:0px;" width="90%">
+			<h:tr>
+				<h:td>
+					<checkbox checked="@{patientImmunization.hasAllergicReaction}"
+						label="Patient denies history of allergic reactions to this Vaccine" />
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td>
+					<checkbox checked="@{patientImmunization.hasIllNess}" label="Patient is not moderately or severly ill" />
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td>
+					<checkbox checked="@{patientImmunization.qasPerformed}"
+						label="Vaccine inforamtion given and questions answered" />
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td>
+					<checkbox checked="@{patientImmunization.authorizationOnFile}" label="Consent and authorization on file" />
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td>
+					<button label="Consent Done">
+						<attribute name="onClick">
+recordImmunizationPanel.setTitle("Record" + "  " + "(" + immunization.getCode() + "-" + immunization.getDescription()
+		+ ")");
+recordImmunizationPanel.setVisible(true);
+recordImmunizationPanelchild.getChildren().clear();
+patientImmunization.setConsentAccepted(true);
+Executions.createComponents("/soap/administerPatientImmunization.zul", recordImmunizationPanelchild,
+		com.nzion.util.UtilMisc.toMap("immunization", immunization, "immunizationSoapSection",
+				immunizationSoapSection, "patientSoapNoteController", patientSoapNoteController,
+				"immunizationRegisterSectionPanel", immunizationRegisterSectionPanel, "patientImmunization",
+				patientImmunization));
+</attribute>
+					</button>
+					<button label="Decline">
+						<attribute name="onClick">
+patientImmunization.setConsentAccepted(false);
+patientSoapNoteController.saveSoapSection();
+recordImmunizationPanel.setVisible(false);
+</attribute>
+					</button>
+				</h:td>
+			</h:tr>
+		</h:table>
+		<panel id="recordImmunizationPanel" visible="false" collapsible="false">
+			<panelchildren id="recordImmunizationPanelchild"></panelchildren>
+		</panel>
+	</window>
+</zk>

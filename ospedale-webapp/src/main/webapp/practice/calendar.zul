@@ -1,0 +1,9 @@
+<?page title="Calendar" contentType="text/html;charset=UTF-8"?>
+<zk>
+<window title="Calendar" border="normal">
+	<calendars id="scheduleCalendar" height="80%" firstDayOfWeek="Sunday">
+		<toolbar/>
+	</calendars>
+	
+</window>
+</zk>

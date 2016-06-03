@@ -1,0 +1,67 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	<![CDATA[
+	 import com.nzion.domain.emr.lab.LabOrderRequest; 
+	 com.nzion.inpatient.zkoss.InPatientConsultantsController inPatientConsultantsController=new com.nzion.inpatient.zkoss.InPatientConsultantsController();
+     com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	]]>
+	</zscript>
+
+<window id="labOrderList" apply="${inPatientConsultantsController}"  >
+<zscript>
+List labOrderReqList=commonCrudService.getAll(com.nzion.domain.emr.soap.PatientLabOrder.class);
+</zscript>
+<div align="center" >
+<toolbarbutton label="Add LabOrder Request" id="add" sclass="addBtn">
+<attribute name="onClick"><![CDATA[
+
+ Executions.createComponents("/portlets/frontDeskLabOrderRequest.zul", null,com.nzion.util.UtilMisc.toMap("inPatientConsultantsController",inPatientConsultantsController,"labOrderListBox",labOrderListBox,"labOrderReqList",labOrderReqList));
+ ]]>
+</attribute>
+			</toolbarbutton>
+			</div>
+			<separator></separator>
+<paging id="paging" pageSize="15"></paging>
+<div style="width:100%;vertical-align:top;float:left;background:#DDDDDD;"> 
+				<listbox id="labOrderListBox" model="@{labOrderReqList,load-after='self.onReloadRequest'}" mold="paging" paginal="${paging}" >
+					<listhead> 
+						<listheader label="${c:l('testName')}" />
+						<listheader label="${c:l('testCode')}" />
+						<listheader label="${c:l('codingSystem')}" />
+						<listheader label="${c:l('startDate')}" />
+						<listheader label="${c:l('endDate')}" />
+						<listheader label="${c:l('comments')}" />
+						<listheader label="${c:l('Action')}" />						
+					</listhead>
+					<listitem self="@{each='labOrder'}" value="@{labOrder}">
+						<listcell>
+						<label value="@{labOrder.patientLabOrders.testName}"/></listcell>
+						<listcell>
+						<label value="@{labOrder.patientLabOrders.testCode}"/></listcell>
+						<listcell>
+						<label value="@{labOrder.patientLabOrders.codingSystem}"/></listcell>
+						<listcell>
+						<label value="@{labOrder.patientLabOrders.startDate}"/></listcell>
+						<listcell>
+						<label value="@{labOrder.patientLabOrders.endDate}"/></listcell>
+						<listcell>
+						<label value="@{labOrder.patientLabOrders.testNotes}"/></listcell>
+						<listcell>
+							<a label="Result" >
+										<attribute name="onClick">
+										  com.nzion.domain.emr.soap.PatientLabOrder patientLabOrder =	(com.nzion.domain.emr.soap.PatientLabOrder)((Listitem)self.getParent().getParent()).getValue();
+										  com.nzion.domain.emr.lab.LabOrderRequest labReq	= patientLabOrder.getLabOrderRequest();													  								  
+						    			  Executions.getCurrent().sendRedirect(
+										"/lab/viewLabResult.zul?labOrderReqId=" + labReq.getId()+"&amp;pageName=Resultview", "_resultview");
+										</attribute>
+							</a>
+						</listcell>
+			       </listitem>
+				</listbox>
+		</div>
+		</window>
+</zk>

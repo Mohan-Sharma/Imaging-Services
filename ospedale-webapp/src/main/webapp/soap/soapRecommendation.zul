@@ -1,0 +1,29 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./recommendationSectionWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window width="100%" id="recommendationSectionWindow" >
+		<zscript>
+			import com.nzion.zkoss.composer.PatientSoapNoteController;
+			PatientSoapNoteController controller = desktop.getAttribute("controller");
+			com.nzion.zkoss.composer.SoapRecommendationController recommendationController = new com.nzion.zkoss.composer.SoapRecommendationController(desktop);
+			com.nzion.domain.emr.soap.RecommendationSection recommendationSection = recommendationController.getRecommendationSection();
+		</zscript>
+		<div id="remarksDiv" style="padding:10px;">
+			<hbox>
+				<vbox>
+					<label value="Counselling Notes/Follow Up Notes" style="font-weight:bold"/>
+					<textbox cols="60" rows="3" style="width:75%" value="@{recommendationSection.recommendedNotes}" />
+				<div sclass="buttonPanel">
+					<button disabled="${controller.readonly}" label="Save" zclass="btn btn-success" onClick="controller.saveSoapSection();" />
+				</div>
+				</vbox>
+			</hbox>
+		</div>
+		 <panel apply="${recommendationController}" open="false" collapsible="true">
+			<panelchildren>
+					<!-- <include src="/soap/plans/patientEducation.zul" rc="${recommendationController}"
+						rs="${recommendationSection}" id="patientEducationInclude" /> -->
+			</panelchildren>
+		</panel> 
+	</window>
+</zk>

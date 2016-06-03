@@ -1,0 +1,36 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addEditPatientCpt"?>
+<?component name="cptlookup" macro-uri="/utilities/cptlookup.zul" inline="false"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:w="http://www.zkoss.org/2005/zk/client" xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	com.nzion.zkoss.composer.SoapDiagnosisComposer diagnosisComposer = arg.get("diagComposer");
+	com.nzion.zkoss.composer.PatientSoapNoteController controller = diagnosisComposer.getMainCtl();
+	com.nzion.domain.emr.soap.DiagnosisSection section = diagnosisComposer.getSection(); 
+	com.nzion.domain.emr.soap.PatientCpt patientCpt = arg.get("patientCpt") == null ? new com.nzion.domain.emr.soap.PatientCpt() : arg.get("patientCpt");
+	]]>
+</zscript>
+	<window id="addEditPatientCpt" closable="true" title="Patient Procedures" mode="modal" width="50%">	
+				<div sclass="form">
+					<vlayout spacing="5px">
+					<hlayout spacing="5px">
+						<label value="Procedures" sclass="name" style="width:250px;" mold="required" />
+						<cptlookup style="margin-left:0px;" onChange="patientCpt.setCpt(event.getOrigin().getData())" value="${patientCpt.cpt.description}" 
+						id="cptlookupbox" multiple="false"/>
+					</hlayout>
+					<hlayout spacing="5px">
+						<label value="Unit" sclass="name" style="width:250px;" />
+						<intbox value="@{patientCpt.unit,save-when='addBtn.onClick'}" style="width:183px" constraint="no zero"/>
+					</hlayout>
+					</vlayout>
+					<separator></separator>
+					<div align="center">
+						<button disabled="${controller.readonly}" id="addBtn" label="Add">
+							<attribute name="onClick">
+								diagnosisComposer.addPatientCpt(patientCpt,cptlookupbox);
+							</attribute>
+						</button>
+					</div>
+			</div>
+</window>
+</zk>

@@ -1,0 +1,88 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addVitalSign"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window id="addVitalSign" mode="modal" width="60%" title="Vital Sign" closable="true" height="65%" position="center,top">
+<zscript><![CDATA[
+		import com.nzion.domain.emr.*;
+		import com.nzion.zkoss.ext.EntityDropdownRenderer;
+		VitalSign vitalSign = arg.get("entity");
+		vitalSign = vitalSign == null ? new VitalSign() : vitalSign;
+		List uoms = commonCrudService.getAll(UnitOfMeasurement.class);
+		EntityDropdownRenderer entityDropdownRenderer = new EntityDropdownRenderer("description");
+		EntityDropdownRenderer handoutRenderer = new EntityDropdownRenderer();
+		com.nzion.enums.HANDOUT[] handouts = com.nzion.enums.HANDOUT.values();
+		VitalSignCondition vitalSignCondition;
+	]]></zscript>
+		<panel>
+			<panelchildren>
+				<div sclass="panelCont">
+				<div>
+					<label value="Name" mold="required"/>
+					<textbox value="@{vitalSign.name,save-when='Save.onClick'}" constraint="no empty" />
+				</div>
+				<div>
+					<label value="Unit of Measurement" mold="required"/>
+					<combobox model="@{uoms}" itemRenderer="${entityDropdownRenderer}" constraint="no empty" selectedItem="@{vitalSign.unitOfMeasurement,save-when='Save.onClick'}"/>
+				</div>
+			</div>
+		</panelchildren>
+	</panel>
+	<button label="Add Condition" onClick='vitalSign.getConditions().add(new VitalSignCondition());' id="addCondition"/>
+	<listbox model="@{vitalSign.conditions,load-after='addCondition.onClick, self.onReloadRequest'}" 
+			onCreate='Events.postEvent("onReloadRequest", self, null);'>
+		<listhead>
+			<listheader label="Age From"/>		
+			<listheader label="Age To"/>		
+			<listheader label="Gender"/>		
+			<listheader label="Ethicity"/>		
+			<listheader label="Race"/>		
+			<listheader label="UpperBound"/>		
+			<listheader label="LowerBound"/>		
+		</listhead>
+		<listitem self="@{each='condition'}" value="@{condition}">
+			<listcell>
+					<intbox value="@{condition.ageFrom}"/>
+			</listcell>
+			<listcell>
+					<intbox value="@{condition.ageTo}"/>
+			</listcell>
+			<listcell>
+					<enumeration enumType="GENDER" selectedItem="@{condition.gender}" selectFirst="false"/>
+			</listcell>
+			<listcell>
+					<enumeration enumType="ETHNICITY" selectedItem="@{condition.ethinicity}" selectFirst="false"/>
+			</listcell>
+			<listcell>
+					<enumeration enumType="RACE" selectedItem="@{condition.race}" selectFirst="false" />
+			</listcell>
+			<listcell>
+					<decimalbox value="@{condition.upperBound}"/>
+			</listcell>
+			<listcell>
+					<decimalbox value="@{condition.lowerBound}"/>
+			</listcell>
+			</listitem>
+	</listbox>
+	<div sclass="panelFoot">					
+		<button label="Save" id="Save" onClick="commonCrudService.save(vitalSign);addVitalSign.detach();" >
+				<attribute name="onClick">
+				<![CDATA[
+						try{
+						commonCrudService.save(vitalSign);							
+						com.nzion.util.UtilMessagesAndPopups.showSuccess();
+						addVitalSign.detach();
+						}catch(org.springframework.dao.DataIntegrityViolationException e){
+							if(e.getCause()!=null && e.getCause() instanceof org.hibernate.exception.ConstraintViolationException){
+							int code = org.hibernate.exception.JDBCExceptionHelper.extractErrorCode(((org.hibernate.exception.ConstraintViolationException)(e.getCause())).getSQLException());
+								if(1062==code){
+									com.nzion.util.UtilMessagesAndPopups.showError("Vital Sign '"+vitalSign.getName()+"' already exists.");
+								}
+							}
+						}
+				]]>
+				</attribute>
+		</button>
+		<button  label="Cancel" forward="onClick=onCancel" />
+	</div>
+	</window>
+</zk>

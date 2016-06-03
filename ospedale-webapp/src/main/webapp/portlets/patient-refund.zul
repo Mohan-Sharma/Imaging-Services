@@ -1,0 +1,136 @@
+<?page title="Afya Lab" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientRefundWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+
+    <window id="patientRefundWin" apply="org.zkoss.bind.BindComposer" viewModel="@id('vmn') @init('com.nzion.zkoss.composer.PatientWithdrawViewModel')" >
+
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Patient" class="z-label-bold"/>
+                    <patientlookup style="height:24px" onChange="vmn.setPatient((com.nzion.domain.Patient)event.getOrigin().getData())"/>
+
+                </div>
+                <div zclass="span2">
+                    <label value="From Date" mold="required"  class="z-label-bold"/>
+                    <datebox id="fromDate" value="@bind(vmn.fromDate)" constraint="no empty" sclass="span12"/>
+                </div>
+                <div zclass="span2">
+                    <label value="To Date" mold="required" class="z-label-bold"/>
+                    <datebox id="thruDate" value="@bind(vmn.thruDate)" constraint="no empty" sclass="span12"/>
+                </div>
+            </div>
+        </div>
+
+        <div align="center" sclass="panelFoot buttonPanel">
+           <hlayout spacing="10px">
+            <button id="search" label="search" zclass="btn btn-primary">
+                <attribute name="onClick">
+                    <![CDATA[
+                        fromDate.getValue();
+                        thruDate.getValue();
+                        if(com.nzion.util.UtilDateTime.getIntervalInDays(fromDate.getValue(),thruDate.getValue()) > 30){
+                            com.nzion.util.UtilMessagesAndPopups.showError("Search Date range cannot be greater than 30 days");
+                            return;
+                        }
+                        Events.postEvent("onReloadRequest",patientWithdrawListBox,null);
+                    ]]>
+                </attribute>
+            </button>
+
+            <button id="newRefund" label="New Refund"  zclass="btn btn-primary">
+                <attribute name="onClick">
+                    <![CDATA[
+                         Executions.createComponents("/portlets/patient-withdraw.zul",null,com.nzion.util.UtilMisc.toMap("patientWithdrawListBox",patientWithdrawListBox));
+                    ]]>
+                </attribute>
+            </button>
+           </hlayout>
+
+        </div>
+
+        <div sclass="panelHeadTop pagination" >
+            <div sclass="fr" style="background-color:#24aadd">
+                <paging detailed="true" id="listboxPaging" pageSize="20" pageIncrement="1"/>
+            </div>
+        </div>
+
+        <panel>
+            <caption height="15px">
+                <div style="float:right; margin-right: 2%; background-color: white;width: 5%;text-align: center;text-decoration: none;">
+                    <a tooltiptext="Export" label="Export">
+                        <attribute name="onClick">
+                        if(com.nzion.util.UtilValidator.isNotEmpty(vmn.getPatientWithDraws()))
+                        new com.nzion.zkoss.ext.CsvDataExporter().exportWithHeader(new StringBuilder(""),vmn.getPatientWithDraws(),
+                        new String[]{"id","withdrawDate","patient.afyaId","patient.civilId","patient","createdPerson","withdrawAmount","status"}, new String[]{"Refund ID","Date","Afya ID","Civil ID","Patient Name","Created By","Refund Amount","Status"}, "patientRefund.xlsx","REFUND LIST",null);
+                        </attribute>
+                    </a>
+                </div>
+            </caption>
+        </panel>
+
+        <listbox model="@{vmn.patientWithDraws,load-after='self.onReloadRequest'}" id="patientWithdrawListBox"
+                 paginal="${listboxPaging}"  oddRowSclass="z-listbox-odd" mold="paging">
+            <attribute name="onReloadRequest">
+                vmn.searchPatientWithdraw();
+            </attribute>
+            <listhead>
+                <listheader label="Refund Id"/>
+                <listheader label="Date"/>
+                <listheader label="Afya Id"/>
+                <listheader label="Civil Id"/>
+                <listheader label="Patient Name"/>
+                <listheader label="Created By"/>
+                <listheader label="Refund Amount"/>
+                <listheader label="Status"/>
+                <listheader label="Action"/>
+            </listhead>
+            <listitem self="@{each='withdraw'}" value="@{withdraw}">
+                <listcell label="@{withdraw.id}"/>
+                <listcell label="@{withdraw.withdrawDate, converter='com.nzion.view.component.DateConverter'}"/>
+                <listcell label="@{withdraw.patient.afyaId}"/>
+                <listcell label="@{withdraw.patient.civilId}"/>
+                <listcell label="@{withdraw.patient}"/>
+                <listcell>
+                    <label value="@{withdraw.createdPerson.firstName}"/>
+                    <label value="@{withdraw.createdPerson.lastName}"/>
+                </listcell>
+                <listcell style="text-align:right">
+                    <label value="@{withdraw.withdrawAmount}"/>
+                     <label value="KD"/>
+                </listcell>
+                <listcell label="@{withdraw.status}"/>
+
+                <listcell>
+                  <image src="/images/BillingIcon/DeleteCancel.png" width="30px" height="30px" tooltiptext="Cancel" visible="@{withdraw.cancelled}">
+                    <attribute name="onClick">
+                        vmn.setPatientWithDraw(self.getParent().getParent().getValue());
+                        Executions.createComponents("/portlets/patient-refund-cancel.zul", null,com.nzion.util.UtilMisc.toMap("vm",vmn));
+                    </attribute>
+                  </image>
+
+                  <image src="/images/BillingIcon/view.png" width="30px" height="30px" tooltiptext="View">
+                      <attribute name="onClick">
+                          Window win = Executions.createComponents("/portlets/patient-withdrown-view.zul", null,com.nzion.util.UtilMisc.toMap("patientWithDraw",self.getParent().getParent().getValue()));
+                          win.setMode("modal");
+                          win.setWidth("60%");
+                          win.setClosable(true);
+                      </attribute>
+                  </image>
+
+                  <image src="/images/BillingIcon/Print.png"  width="30px" height="30px" tooltiptext="Print">
+                      <attribute name="onClick">
+                          Executions.getCurrent().sendRedirect("/portlets/patient-withdrown-print.zul?patientWithdrawId=" +self.getParent().getParent().getValue().getId(),"_new");
+                      </attribute>
+                  </image>
+
+                </listcell>
+            </listitem>
+        </listbox>
+
+    </window>
+
+</zk>

@@ -1,0 +1,40 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./reportWin"?>
+<?page title="Reports Home" contentType="text/html;charset=UTF-8"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	
+	<window id="reportWin">
+		<zscript><![CDATA[
+			String param = arg.get("param").toString();
+			String reportName = arg.get("reportName").toString();
+			String value;
+			String operator;
+			
+			String getReportURI(String path) {
+			return "~ceramid-reports/frameset?__report="+path;
+			}
+			
+			void showReport(Iframe iframe) {
+			String path = "report\\"+reportName+"&operator="+operator+"&"+param+"="+value;
+			iframe.setSrc(getReportURI(path));
+			iframe.setVisible(true);
+			}
+			
+			]]></zscript>
+		<div id="reportPramsDiv">
+			<combobox id="operatorsCombobox" width="150px" 
+					onSelect="operator = self.getSelectedItem().getValue().toString()">
+				<comboitem value="le" label="lest than equal to"/>
+				<comboitem value="eq" label="equal to"/>
+				<comboitem value="ge" label="greater than equal to"/>
+			</combobox>
+			<textbox id="valueTexbox" value="@{value}"/>
+		</div>
+		<button id="runReport" label="Run Report" onClick='showReport(iframe);'/>
+		<div id="reportDiv">
+			<iframe id="iframe" style="width:400%; height:800px;border:3px inset;" visible="false" />
+		</div>
+	</window>
+
+</zk>

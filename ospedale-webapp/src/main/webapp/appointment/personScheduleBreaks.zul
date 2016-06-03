@@ -1,0 +1,88 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./pscheduleBreakWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<window id="pscheduleBreakWindow" >
+	<zscript>
+		import com.nzion.zkoss.ext.*;
+		List persons = scheduleService.getSchedulablePersons();
+		EntityDropdownRenderer dropdownRenderer = new EntityDropdownRenderer(new EntityDropDownPersonNameAdapter());
+		List breaks;
+		setPageTitle("Schedule Breaks", "");
+	</zscript>
+	<panel title="Break Recurrence">
+		<panelchildren>
+		<div align="center">
+			<n:table style="margin:5px;" cellspacing="5" >
+				<n:tr>
+					<n:td>
+						<label value="Person" style="margin-right:5px;"/>
+						<label value="*" zclass="labelReq"/>
+					</n:td>
+					<n:td>				
+						<combobox model="@{persons}"  itemRenderer="${dropdownRenderer}" selectedItem="@{brek.person, save-when='newBtn.onClick'}" 
+								id="personsCombo"  onChange='Events.postEvent("onReloadRequest", breksListbox, null);' w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" readonly="true"/>
+					</n:td>
+					<n:td>
+						<button label="New Break" style="margin-left:10px;" id="newBtn">
+							<attribute name="onClick">
+								com.nzion.domain.ScheduleBreak brek = new com.nzion.domain.ScheduleBreak();
+								brek.setPerson((com.nzion.domain.Person)personsCombo.getSelectedItem().getValue());
+								Window w = Executions.createComponents("/appointment/scheduleBreak.zul", null, com.nzion.util.UtilMisc.toMap("brek", brek));
+								w.addForward("onDetach",breksListbox,"onReloadRequest");
+							</attribute>
+						</button>
+					</n:td>
+					<n:td>
+						<button label="Delete" style="margin-left:10px;" id="delBtn">
+							<attribute name="onClick">
+								List items = com.nzion.util.ViewUtil.getSelectedItems(breksListbox);
+								if(items == null || items.isEmpty()){
+									com.nzion.util.UtilMessagesAndPopups.showError("Please select breaks to delete.");
+									return;
+								}
+								commonCrudService.delete(items);
+								Events.postEvent("onReloadRequest", breksListbox, null);
+							</attribute>
+						</button>
+					</n:td>
+				</n:tr>
+			</n:table>
+			</div>
+			<listbox model="@{breaks, load-after='self.onReloadRequest'}" id="breksListbox" multiple="true" checkmark="true">
+				<attribute name="onReloadRequest">
+					breaks = scheduleService.getScheduleBreaks(personsCombo.getSelectedItem().getValue(), null, null);
+				</attribute>
+				<listhead>
+					<listheader label="Name"/>
+					<listheader label="Start Date"/>
+					<listheader label="End Date"/>
+					<listheader label="Start Time"/>
+					<listheader label="End Time"/>
+				</listhead>
+				<listitem self="@{each='brek'}" value="@{brek}" >
+					<attribute name="onDoubleClick">
+						Window w = Executions.createComponents("/appointment/scheduleBreak.zul", null, com.nzion.util.UtilMisc.toMap("brek", self.getValue()));
+						w.addForward("onDetach",breksListbox,"onReloadRequest");
+					</attribute>
+					<listcell>
+						<label value="@{brek.name}"/>					
+					</listcell>
+					<listcell>
+						<datebox value="@{brek.recurrence.startDate}" readonly="true" disabled="true" buttonVisible="false"/>					
+					</listcell>
+					<listcell>
+						<datebox value="@{brek.recurrence.endDate}" readonly="true" disabled="true" buttonVisible="false"/>					
+					</listcell>
+					<listcell>
+						<label value="@{brek.recurrence.startTime, converter='com.nzion.view.component.TimeConverter'}"/>					
+					</listcell>
+					<listcell>
+						<label value="@{brek.recurrence.endTime, converter='com.nzion.view.component.TimeConverter'}"/>					
+					</listcell>
+				</listitem>
+			</listbox>
+		</panelchildren>
+	</panel>
+</window>
+</zk>

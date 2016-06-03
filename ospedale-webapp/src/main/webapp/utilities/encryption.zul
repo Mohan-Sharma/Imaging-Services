@@ -1,0 +1,114 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./encryptionWin"?>
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:h="http://www.w3.org/1999/xhtml">
+	<zscript>
+		import com.nzion.service.util.EncryptionDecryptionUtil; 
+		String fileContent = null;
+		String encryptedValue = null;
+		String fileName = null;
+		org.zkoss.util.media.Media media = null;
+	</zscript>
+	<window border="normal" id="encryptionWin">
+		<panel title="Encyprtion/Decryption">
+			<panelchildren>
+				<div>
+					<label value="Select Algorithm" style="font-weight:bold" />
+					<radiogroup orient="horizontal" id="algorithm" onCheck="Clients.closeErrorBox(self)">
+						<vbox>
+							<radio label="Base-64" value="Base-64" selected="true"/>
+						</vbox>
+					</radiogroup>
+				</div>
+				<separator />
+				<div>
+					<label value="Test Data" style="font-weight:bold" />
+					<textbox id="databox" rows="15" cols="75" type="text" multiline="true" />
+				</div>
+				<separator height="10px" />
+				<div>
+					<label value="Browse File" style="font-weight:bold" />
+					<textbox id="fileNameTextBox" cols="60" readonly="true" />
+					<fileupload label="Browse" id="uploadBtn">
+						<attribute name="onUpload">
+							downloadLink.setVisible(false);
+							media = ((UploadEvent) event).getMedia();
+							fileName = media.getName();
+							fileNameTextBox.setValue(fileName);
+							if(media.isBinary()){
+							java.io.InputStream inputStream = media.getStreamData();
+							fileContent = org.apache.cxf.helpers.IOUtils.readStringFromStream(inputStream);
+							}
+							else{
+							java.io.Reader reader = media.getReaderData();
+							fileContent = org.apache.commons.io.IOUtils.toString(reader);
+							}
+						</attribute>
+					</fileupload>
+				</div>
+				<separator height="10px" />
+				<vlayout width="100%">
+				<hlayout>
+					<button label="Encrypt Data">
+						<attribute name="onClick">
+							<![CDATA[
+							    if(algorithm.getSelectedItem() == null)
+							    	throw new WrongValueException(algorithm,"Select algorithm");
+								String algo = algorithm.getSelectedItem().getValue();
+								if(com.nzion.util.UtilValidator.isEmpty(fileContent) && com.nzion.util.UtilValidator.isEmpty(databox.getValue())){
+									com.nzion.util.UtilMessagesAndPopups.showError("Either Provide Test data or upload File");
+									return;
+								}
+								encryptedValue = com.nzion.util.UtilValidator.isEmpty(fileContent)?EncryptionDecryptionUtil.encryptToBase64(databox.getValue()):EncryptionDecryptionUtil.encryptToBase64(fileContent);
+								if(com.nzion.util.UtilValidator.isNotEmpty(databox.getValue())){
+								outputLabel.setVisible(true);
+								outputLabel.setValue(encryptedValue);
+								}
+								if(com.nzion.util.UtilValidator.isNotEmpty(fileContent))
+									downloadLink.setVisible(true);
+							]]>				
+						</attribute>
+					</button>
+					<label value="OR"/>
+					<button label="Decrypt Data">
+						<attribute name="onClick">
+							<![CDATA[
+					         if(algorithm.getSelectedItem() == null)
+							    	throw new WrongValueException(algorithm,"Select algorithm");
+								String algo = algorithm.getSelectedItem().getValue();
+								if(com.nzion.util.UtilValidator.isEmpty(fileContent) && com.nzion.util.UtilValidator.isEmpty(databox.getValue())){
+									com.nzion.util.UtilMessagesAndPopups.showError("Either Provide Test data or upload File");
+									return;
+								}
+								encryptedValue = com.nzion.util.UtilValidator.isEmpty(fileContent)?EncryptionDecryptionUtil.decryptToBase64(databox.getValue()):EncryptionDecryptionUtil.decryptToBase64(fileContent);
+								if(com.nzion.util.UtilValidator.isNotEmpty(databox.getValue())){
+								outputLabel.setVisible(true);
+								outputLabel.setValue(encryptedValue);
+								}
+								if(com.nzion.util.UtilValidator.isNotEmpty(fileContent))
+									downloadLink.setVisible(true);
+							]]>
+						</attribute>
+					</button>
+				</hlayout>
+				<hlayout>
+					<label id="outputLabel" visible="false"/>
+				</hlayout>
+				<hlayout>
+					<a label="Click here to Download" id="downloadLink" visible="false">
+						<attribute name="onClick">
+							java.io.File file = new java.io.File(fileName);
+							java.io.FileOutputStream fileOutputStream = new java.io.FileOutputStream(file);
+							fileOutputStream.write(encryptedValue.getBytes());
+							org.apache.commons.io.IOUtils.closeQuietly(fileOutputStream);
+							fileOutputStream.flush();
+							java.io.FileInputStream fileInputStream = new java.io.FileInputStream(file);
+							com.nzion.util.IoAndFileUtil.downloadFile(fileInputStream,fileName,media.getContentType());
+						</attribute>
+					</a>
+				</hlayout>
+				</vlayout>
+			</panelchildren>
+		</panel>
+	</window>
+</zk>

@@ -1,0 +1,66 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientNotes"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import com.nzion.service.PatientService;
+	import com.nzion.domain.Patient;
+	import com.nzion.util.UtilMisc;
+	Long notesPatientId = (Long) Executions.getCurrent().getArg().get("patientId");
+	Tab notesTab = (Tab) Executions.getCurrent().getArg().get("notesTab");
+	PatientService patientService = (PatientService) org.zkoss.zkplus.spring.SpringUtil.getBean("patientService");
+	Patient patient = patientService.getPatientById(notesPatientId);
+	public void newPatient(Map args) {
+	String url = "/patient/newPatientNote.zul";
+	args.put("notesTab", notesTab);
+	Window window = (Window) Executions.getCurrent().createComponents(url, null, args);
+	try {
+		window.setWidth("60%");
+
+		window.doModal();
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+	}
+]]></zscript>
+	<window id="patientNotes">
+		<panel title="Patient Notes">
+			<panelchildren>
+				<div sclass="gridCont">
+				<div sclass="grid clr">
+					<n:table border="0" cellspacing="0" cellpadding="0">
+						<n:thead>
+							<n:tr>
+								<n:td>
+									<a href="#popup" class="addBtn" label="Add" id="addBtn"
+										onClick='newPatient(UtilMisc.toMap("patient", patient))' />
+								</n:td>
+							</n:tr>
+						</n:thead>
+					</n:table>
+				</div>
+				</div>
+					<grid oddRowSclass="#fff" paginal="${notesPaging}" mold="paging">
+						<rows>
+							<row forEach="${patient.notes}">
+								<vbox>
+									<custom-attributes note="${each}" />
+									<hbox width="100%" align="start">
+										<label value="Note Type: ${each.noteType.description}"></label>
+										<div width="100%" align="center">
+											<label value="Added On : ${each.noteEntry}" />
+										</div>
+										<div width="100%" align="right">
+											<label value="Created By: ${each.createdBy}" />
+										</div>
+									</hbox>
+									<hbox>
+										<label value="${each.noteContent}" maxlength="240"/>
+									</hbox>
+								</vbox>
+							</row>
+						</rows>
+					</grid>
+			</panelchildren>
+		</panel>
+	</window>
+</zk>

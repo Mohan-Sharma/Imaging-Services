@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="WebApp_ID" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+	<display-name>Afya-Lab</display-name>
+
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/classes/spring/applicationContext.xml</param-value>
+	</context-param>
+	<context-param>
+		<param-name>log4jConfigLocation</param-name>
+		<param-value>/WEB-INF/classes/log4j.xml</param-value>
+	</context-param>
+	<context-param>
+		<param-name>webAppRootKey</param-name>
+		<param-value>afya-lab</param-value>
+	</context-param>
+
+	<listener>
+		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+	</listener>
+
+	<listener>
+		<display-name>Spring Context Loader</display-name>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	<!-- START CHANGE -->
+	<filter>
+		<filter-name>Tenant Security Context Filter</filter-name>
+		<filter-class>com.nzion.web.multitenant.TenantIdFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>Tenant Security Context Filter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<!-- END CHANGE -->
+
+	<!-- ZK -->
+	<listener>
+		<description>ZK listener for cleanup when a session is destroyed</description>
+		<listener-class>org.zkoss.zk.ui.http.HttpSessionListener</listener-class>
+	</listener>
+
+	<filter>
+		<filter-name>springSecurityFilterChain</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+	</filter>
+
+	<filter>
+		<filter-name>ClickjackFilterDeny</filter-name>
+		<filter-class>org.owasp.filters.ClickjackFilter</filter-class>
+		<init-param>
+			<param-name>mode</param-name>
+			<param-value>DENY</param-value>
+		</init-param>
+	</filter>
+
+	<filter>
+		<filter-name>ClickjackFilterSameOrigin</filter-name>
+		<filter-class>org.owasp.filters.ClickjackFilter</filter-class>
+		<init-param>
+			<param-name>mode</param-name>
+			<param-value>SAMEORIGIN</param-value>
+		</init-param>
+	</filter>
+
+	<filter>
+		<filter-name>encoding-filter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</filter>
+
+	<filter>
+		<filter-name>tenancySupportFilter</filter-name>
+		<filter-class>com.nzion.web.HibernateTenantSupportFilter</filter-class>
+	</filter>
+
+	<filter>
+		<filter-name>passwordPolicyFilter</filter-name>
+		<filter-class>com.nzion.web.PasswordPolicyFilter</filter-class>
+	</filter>
+
+	<!--  use the Deny version to prevent anyone, including yourself, from framing the page -->
+	<filter-mapping>
+		<filter-name>ClickjackFilterDeny</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<filter-mapping>
+		<filter-name>springSecurityFilterChain</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<filter-mapping>
+		<filter-name>tenancySupportFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<filter-mapping>
+		<filter-name>encoding-filter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<filter-mapping>
+		<filter-name>passwordPolicyFilter</filter-name>
+		<url-pattern>*.zul</url-pattern>
+	</filter-mapping>
+    <servlet>
+        <servlet-name>default</servlet-name>
+        <init-param>
+            <param-name>useFileMappedBuffer</param-name>
+            <param-value>false</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet>
+        <description>Sample</description>
+        <servlet-name>PdfServlet</servlet-name>
+        <servlet-class>com.nzion.web.PdfServlet</servlet-class>
+    </servlet>
+	<servlet>
+		<description>ZK loader for ZUML pages</description>
+		<servlet-name>zkLoader</servlet-name>
+		<servlet-class>org.zkoss.zk.ui.http.DHtmlLayoutServlet</servlet-class>
+		<!--
+			Must. Specifies URI of the update engine (DHtmlUpdateServlet). It must be the same as <url-pattern> for the update
+			engine.
+		-->
+		<init-param>
+			<param-name>update-uri</param-name>
+			<param-value>/zkau</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<!--<servlet>
+		<description>HL7 Message Reader</description>
+		<servlet-name>hl7MessageReader</servlet-name>
+		<servlet-class>com.nzion.web.HL7ProcessorServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<description>CCD Upload Servlet</description>
+		<servlet-name>ccdUploadServlet</servlet-name>
+		<servlet-class>com.nzion.web.CCDUploadServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<description>CCDImport Servlet</description>
+		<servlet-name>ccdImportServlet</servlet-name>
+		<servlet-class>com.nzion.web.CCDImportServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<description>Emergency Access Servlet</description>
+		<servlet-name>emergency</servlet-name>
+		<servlet-class>com.nzion.web.EmergencyViewServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>emergency</servlet-name>
+		<url-pattern>/patient/emergency</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ccdUploadServlet</servlet-name>
+		<url-pattern>/ccd/upload</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ccdImportServlet</servlet-name>
+		<url-pattern>/ccd/import</url-pattern>
+	</servlet-mapping>-->
+    <servlet-mapping>
+        <servlet-name>PdfServlet</servlet-name>
+        <url-pattern>downloadPdf</url-pattern>
+    </servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>zkLoader</servlet-name>
+		<url-pattern>*.zul</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>zkLoader</servlet-name>
+		<url-pattern>*.zhtml</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>zkLoader</servlet-name>
+		<url-pattern>/zk/*</url-pattern>
+	</servlet-mapping>
+
+	<!--<servlet-mapping>
+		<servlet-name>hl7MessageReader</servlet-name>
+		<url-pattern>/hl7Upload</url-pattern>
+	</servlet-mapping>
+-->
+	<servlet>
+		<description>The asynchronous update engine for ZK</description>
+		<servlet-name>auEngine</servlet-name>
+		<servlet-class>org.zkoss.zk.au.http.DHtmlUpdateServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>auEngine</servlet-name>
+		<url-pattern>/zkau/*</url-pattern>
+	</servlet-mapping>
+	<session-config>
+		<session-timeout>-1</session-timeout>
+	</session-config>
+
+    <servlet>
+        <servlet-name>superBillServlet</servlet-name>
+        <servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
+        <load-on-startup>0</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>superBillPatientSearchServlet</servlet-name>
+        <servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
+        <load-on-startup>0</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>superBillPatientSearchServlet</servlet-name>
+        <url-pattern>/superbillsearchpatient</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>superBillServlet</servlet-name>
+        <url-pattern>/superbilldata</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>superBillPaymentServlet</servlet-name>
+        <servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
+        <load-on-startup>0</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>superBillPaymentServlet</servlet-name>
+        <url-pattern>/superbill</url-pattern>
+    </servlet-mapping>
+
+
+    <servlet>
+        <servlet-name>authorizationServlet</servlet-name>
+        <servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
+        <load-on-startup>0</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>authorizationServlet</servlet-name>
+        <url-pattern>/securityauthorization</url-pattern>
+    </servlet-mapping>
+
+	 <servlet>
+        <servlet-name>labOrderServlet</servlet-name>
+        <servlet-class>com.nzion.util.LabOrderServlet</servlet-class>
+        <load-on-startup>0</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>labOrderServlet</servlet-name>
+        <url-pattern>/labMaster/addLabOrderRequest</url-pattern>
+    </servlet-mapping>
+
+	<!--<servlet>
+		<servlet-name>bookLabAppointmentServlet</servlet-name>
+		<servlet-class>com.nzion.service.LabBookAppointmentServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>bookLabAppointmentServlet</servlet-name>
+		<url-pattern>/labMaster/getAvailableTimeslotsForGivenDateAndBookAppointment</url-pattern>
+	</servlet-mapping>-->
+
+	<servlet>
+		<servlet-name>phlebotomistListServlet</servlet-name>
+		<servlet-class>com.nzion.service.PhlebotomistListServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>phlebotomistListServlet</servlet-name>
+		<url-pattern>/labMaster/getPhlebotomistList</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>phlebotomistAvailabilityServlet</servlet-name>
+		<servlet-class>com.nzion.service.PhlebotomistAvailableSlotsServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>phlebotomistAvailabilityServlet</servlet-name>
+		<url-pattern>/labMaster/placeLabOrder</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>updatePracticeDetails</servlet-name>
+		<servlet-class>com.nzion.service.UpdatePracticeDetailsServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>updatePracticeDetails</servlet-name>
+		<url-pattern>/labMaster/updatePracticeDetails</url-pattern>
+	</servlet-mapping>
+
+	<welcome-file-list>
+		<welcome-file>home.zul</welcome-file>
+	</welcome-file-list>
+
+	<error-page>
+		<exception-type>java.lang.Throwable</exception-type>
+		<location>/error.zul</location>
+	</error-page>
+</web-app> 

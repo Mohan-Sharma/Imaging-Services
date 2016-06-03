@@ -1,0 +1,142 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./rescheduleLabOrder"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+    <zscript><![CDATA[
+    import java.util.*;
+    Set searchResult = new HashSet();
+    Set phlebotomistsearchResult = new HashSet();
+    List phlebotomistList = new ArrayList();
+    com.nzion.domain.base.Weekdays weekdays = com.nzion.domain.base.Weekdays.allSelectedWeekdays();
+
+        com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+        List employeeList = commonCrudService.getAll(com.nzion.domain.Employee.class);
+        java.util.Iterator iterator = employeeList.iterator();
+
+        while (iterator.hasNext()){
+            com.nzion.domain.Employee employee = (com.nzion.domain.Employee)iterator.next();
+            if (employee.getPhlebotomist().booleanValue()){
+                phlebotomistList.add(employee);
+            }
+        }
+    ]]>
+    </zscript>
+    <window mode="modal" closable="true" height="400px" title="Reschedule Lab Order" id="rescheduleLabOrder" sclass="modalStyle"
+            apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('vm') @init('com.nzion.zkoss.composer.emr.lab.RescheduleLabOrderViewModel')">
+        <!--<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Reschedule Lab Order</h:small>
+            </h:h1>
+        </div>-->
+        <div zclass="container-fluid">
+            <div zclass="row-fluid" id="labAppointmentDiv">
+                <div zclass="span5" style="margin-left: 10px;">
+                    <label value="Appointment Date" style="margin-left: 8px;" class="z-label-bold"/>
+                    <datebox id="appointmentDate" sclass="span11">
+                        <attribute name="onChange">
+                            <![CDATA[
+                                        Events.postEvent("onClick", freeSlot, null);
+                                    ]]>
+                        </attribute>
+                    </datebox>
+                </div>
+                <div zclass="span5" style="margin-left: 20px;">
+                    <label value="Time Slot" mold="required" class="z-label-bold"></label>
+                    <listbox mold="select" model="@{searchResult,load-after='freeSlot.onClick'}"
+                             id="slotListbox" zclass="span10">
+                        <listitem self="@{each='zk'}"
+                                  label="@{zk.slot,converter='com.nzion.zkoss.composer.appointment.SlotConverter'}"
+                                  value="@{zk.slot}"></listitem>
+                    </listbox>
+                    <a id="freeSlot" zclass="btn btn-primary" visible="false">
+                        <n:i class="whiteIcon-search"></n:i>
+                        <attribute name="onClick">
+                            searchResult = vm.searchSchedule(null, appointmentDate.getValue(), weekdays);
+                            //searchResult = scheduleController.searchSchedule(searchObject, weekdays);
+                        </attribute>
+                    </a>
+                </div>
+                <attribute name="onCreate">
+                    if(vm.getLabOrderRequest().isHomeService()){
+                    self.setVisible(false);
+                    }
+                </attribute>
+            </div>
+            <div zclass="row-fluid" id="phlebotomistDiv" visible="@{vm.labOrderRequest.homeService}">
+                <div zclass="span5" style="margin-left: 10px;">
+                    <label value="Phlebotomist Appointment Date" style="margin-left: 8px;" class="z-label-bold"/>
+                    <datebox id="phlebotomistAppointmentDate" sclass="span11">
+                        <attribute name="onChange">
+                            <![CDATA[
+                                        Events.postEvent("onClick", phlebotomistFreeSlot, null);
+                                    ]]>
+                        </attribute>
+                    </datebox>
+                </div>
+                <div zclass="span5" style="margin-left: 20px;">
+                    <label value="Phlebotomist" class="z-label-bold"></label>
+                    <listbox mold="select" model="@{phlebotomistList}" id="phlebotomistList" zclass="span10">
+                        <listitem self="@{each='zk'}"
+                                  label="@{zk.firstName}"
+                                  value="@{zk}">
+                        </listitem>
+                        <attribute name="onSelect">
+                            <![CDATA[
+                                        Events.postEvent("onClick", phlebotomistFreeSlot, null);
+                                    ]]>
+                        </attribute>
+                    </listbox>
+                </div>
+                <div zclass="span5" style="margin-left: 20px;" id="phlebotomistTimeSlot">
+                    <label value="Phlebotomist Time Slot" class="z-label-bold"></label>
+                    <listbox mold="select" model="@{phlebotomistsearchResult,load-after='phlebotomistFreeSlot.onClick'}"
+                             id="phlebotomistSlotListbox" zclass="span10">
+                        <listitem self="@{each='zk'}"
+                                  label="@{zk.slot,converter='com.nzion.zkoss.composer.appointment.SlotConverter'}"
+                                  value="@{zk.slot}"></listitem>
+                    </listbox>
+                    <a id="phlebotomistFreeSlot" zclass="btn btn-primary" visible="false">
+                        <n:i class="whiteIcon-search"></n:i>
+                        <attribute name="onClick"> <![CDATA[
+                            if((phlebotomistList.getSelectedItem() != null) && (phlebotomistAppointmentDate.getValue() != null)){
+                            phlebotomistsearchResult = vm.searchSchedule(phlebotomistList.getSelectedItem().getValue(), phlebotomistAppointmentDate.getValue(), weekdays);
+                            //searchResult = scheduleController.searchSchedule(searchObject, weekdays);
+                            }
+                        ]]></attribute>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div zclass="panelFoot">
+            <!--<button label="Generate Invoice" sclass="btn-primary" onClick="@command('GenerateInvoice')"
+                    visible="@bind(vm.generateInvoice)" disabled="@bind(vm.allLabOrderCancelled)"></button>
+            <button label="Mark Invoice Ready" sclass="btn-primary" onClick="@command('MarkInvoiceAsFinal')"
+                    visible="@bind(vm.invoiceReady &amp;&amp; !vm.enableReceipt)" ></button>
+            <button label="Cancel Order" sclass="btn-warning" visible="@bind(!vm.invoiceReady)" onClick="@command('CancelOrder')" disabled="@bind(vm.allLabOrderCancelled)"></button>
+            <button label="Cancel Invoice" sclass="btn-warning"   visible="@bind(vm.invoiceReady &amp;&amp; !vm.enableReceipt)" onClick="@command('cancelInvoice')" ></button>
+            <button label="Create Receipt" visible="@bind(vm.enableReceipt)" sclass="btn btn-success"  onClick="@command('CreateReceipt')"></button>-->
+            <button label="Reschedule">
+                <attribute name="onClick"><![CDATA[
+                    if(vm.getLabOrderRequest().isHomeService()){
+                    vm.getLabOrderRequest().setPhlebotomist(phlebotomistList.getSelectedItem().getValue());
+                    vm.getLabOrderRequest().setPhlebotomistStartDate(phlebotomistAppointmentDate.getValue());
+                    vm.getLabOrderRequest().setPhlebotomistStartTime(((com.nzion.domain.CalendarSlot)phlebotomistSlotListbox.getSelectedItem().getValue()).getStartTime());
+                    vm.getLabOrderRequest().setPhlebotomistEndTime(((com.nzion.domain.CalendarSlot)phlebotomistSlotListbox.getSelectedItem().getValue()).getEndTime());
+                    } else {
+                    vm.getLabOrderRequest().setStartDate(appointmentDate.getValue());
+                    vm.getLabOrderRequest().setStartTime(((com.nzion.domain.CalendarSlot)slotListbox.getSelectedItem().getValue()).getStartTime());
+                    vm.getLabOrderRequest().setEndTime(((com.nzion.domain.CalendarSlot)slotListbox.getSelectedItem().getValue()).getEndTime());
+                    }
+
+                    commonCrudService.merge(vm.getLabOrderRequest());
+                    com.nzion.util.UtilMessagesAndPopups.displaySuccess();
+                    rescheduleLabOrder.detach();
+                    //com.nzion.zkoss.ext.Navigation.navigate("/billing/labOrderPortlet",null,rescheduleLabOrder);
+                    ]]></attribute>
+            </button>
+            <button label="Cancel" onClick="rescheduleLabOrder.detach()"></button>
+        </div>
+    </window>
+</zk>

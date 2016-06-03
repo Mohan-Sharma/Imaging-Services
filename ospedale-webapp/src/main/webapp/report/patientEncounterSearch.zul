@@ -1,0 +1,381 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientEncounterWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+		<![CDATA[
+			import org.zkoss.zul.Listheader;
+			import org.zkoss.zk.ui.Component;
+			com.nzion.report.PatientReportSearchController controller = new com.nzion.report.PatientReportSearchController();
+			 com.nzion.zkoss.ext.DataExporter exporter = new com.nzion.zkoss.ext.CsvDataExporter();
+			java.util.List soapNotes = new java.util.ArrayList();
+			void setAscendingComparator(Component component, String fieldName) {
+				com.nzion.view.component.GenericAscendingComparator comparator = new com.nzion.view.component.GenericAscendingComparator(fieldName);
+					((Listheader) component).setSortAscending(comparator);
+			}
+			void setDescendingComparator(Component component, String fieldName) {
+				com.nzion.view.component.GenericDescendingCompartor comparator = new com.nzion.view.component.GenericDescendingCompartor(fieldName);
+					((Listheader) component).setSortDescending(comparator);
+			}
+			BindingListModelArray blm = null;
+			com.nzion.view.component.StringAscendingComparator ascendingComparator = new com.nzion.view.component.StringAscendingComparator();
+			com.nzion.view.component.StringDescendingComparator descendingComparator = new com.nzion.view.component.StringDescendingComparator();
+		]]>
+	</zscript>
+	<style>.z-grid table, .z-window-embedded-cnt-noborder table { border-collapse: separate; }</style>
+	<window id="patientEncounterWindow" apply="${controller}">
+		<zscript>
+			java.util.List labResultSearchVos = controller.getLabResultVos();
+		</zscript>
+		<div sclass="form" id="searchForm">
+			<vlayout spacing="15px">
+				<n:h3>Patient Demographics</n:h3>
+				<hlayout spacing="40px">
+				<hlayout spacing="20px">
+					<label value="Age:" />
+					<combobox
+						selectedItem="@{controller.patientEncounterSearchVo.lowEndAgeQuantifier}">
+						<comboitem label="Equal" value="Equal" />
+						<comboitem label="Greater Than" value="Greater" />
+						<comboitem label="Less Than" value="Less" />
+						<comboitem label="Between" value="Between" />
+						<attribute name="onSelect">
+							label.setVisible("Between".equalsIgnoreCase((String) self.getSelectedItem().getValue()));
+							ageIntbox.setVisible("Between".equalsIgnoreCase((String) self.getSelectedItem().getValue()));
+						</attribute>
+					</combobox>
+					<intbox value="@{controller.patientEncounterSearchVo.lowEndAge}" />
+					<label id="label" value="And" visible="false" />
+					<intbox id="ageIntbox" value="@{controller.patientEncounterSearchVo.highEndAge}" visible="false" />
+				</hlayout>
+				
+				<hlayout spacing="20px">
+					<label value="Gender:" />
+					<enumeration enumType="GENDER" selectedItem="@{controller.patientEncounterSearchVo.gender}" />
+				</hlayout>
+				
+				</hlayout>
+				</vlayout>
+				<separator></separator>
+				<vlayout spacing="15px">
+				<hlayout spacing="40px">
+				</hlayout>
+			</vlayout>
+			<separator bar="true"></separator>
+			<vlayout spacing="15px">
+				<n:h4>Search Including Doctor
+				 <image id="providerPlus" src="../images/round_plus.png" w:onClick="displaySection('provider','');this.setStyle('display:none');"></image>
+				 <image id="providerMinus" src="../images/1357926365_minus-sign.png" style="display:none" w:onClick="displaySection('provider','hidePanelCont');this.setStyle('display:none');"></image>
+				</n:h4>
+				<hlayout spacing="20px" id='provider'>
+					<label value="Doctor" sclass="name">
+						<attribute w:name="onBind">
+							var provider = $("$provider");
+							var providerCont = zk.Widget.$(provider);
+							providerCont.setSclass("hidePanelCont");
+						</attribute>
+					</label>
+					<providerlookup id="providerLookup"  onChange="controller.getPatientEncounterSearchVo().setProvider((Provider)event.getOrigin().getData());" />
+				</hlayout>
+			</vlayout>
+			<separator bar="true"></separator>
+			<vlayout spacing="15px">
+				<n:h4>Search Including Problem
+				 <image id="problemPlus" src="../images/round_plus.png" w:onClick="displaySection('problem','');this.setStyle('display:none');"></image>
+				 <image id="problemMinus" src="../images/1357926365_minus-sign.png" style="display:none" w:onClick="displaySection('problem','hidePanelCont');this.setStyle('display:none');"></image>
+				</n:h4>
+				<div id="problem">
+				<hlayout >
+				<hlayout spacing="20px" >
+					<label value="Problem:" sclass="name">
+					<attribute w:name="onBind">
+							var problem = $("$problem");
+							var problemCont = zk.Widget.$(problem);
+							problemCont.setSclass("hidePanelCont");
+					</attribute>
+					</label>
+					<div >
+						<suggest id="icdSuggestionBox" entity="com.nzion.domain.emr.IcdElement"
+							 onLookedUp="controller.getPatientEncounterSearchVo().setIcdElement(self.getResult())"
+							searchcolumns="description,code" displaycolumns="description" requiredcolumn="description" />
+					</div>	
+				</hlayout>
+				<hlayout spacing="20px" >
+					<label value="Status:" sclass="name" />
+					<enumeration enumType="PROBLEM_STATUS_CODE"
+						selectedItem="@{controller.patientEncounterSearchVo.problemStatus}" />
+				</hlayout>
+				</hlayout>
+				</div>
+			</vlayout>
+			<separator bar="true"></separator>
+			<script type="text/javascript">
+			 function displaySection(sectionName,cssClass){
+			 	var section = $("$"+sectionName);
+				var sectionCont = zk.Widget.$(section);
+				sectionCont.setSclass(cssClass);
+				if(cssClass==''){
+					var image = $("$"+sectionName+"Minus");
+					var imageCont = zk.Widget.$(image);
+					imageCont.setStyle("display:inline");
+				}
+				if(cssClass=='hidePanelCont'){
+					var image = $("$"+sectionName+"Plus");
+					var imageCont = zk.Widget.$(image);
+					imageCont.setStyle("display:inline");
+				}
+			 }
+			</script>
+			<vlayout spacing="15px" >
+				<n:h4 class="minimize">Search Including Vaccine
+				 <image id="vaccinePlus" src="../images/round_plus.png" w:onClick="displaySection('vaccine','');this.setStyle('display:none');"></image>
+				 <image id="vaccineMinus" src="../images/1357926365_minus-sign.png" style="display:none" w:onClick="displaySection('vaccine','hidePanelCont');this.setStyle('display:none');"></image>
+				 </n:h4>
+				 <div zclass="container-fluid" id="vaccine">
+		           <div zclass="row-fluid">
+                      <div zclass="span2">
+					<label value="Vaccine Name:" >
+						<attribute w:name="onBind">
+							var vaccine = $("$vaccine");
+							var vaccineCont = zk.Widget.$(vaccine);
+							vaccineCont.setSclass("hidePanelCont");
+						</attribute>
+					</label>
+						<suggest id="vaccineSuggestionBox" entity="com.nzion.domain.emr.Immunization" sclass="span12"
+							 onLookedUp="controller.getPatientEncounterSearchVo().setVaccine(self.getResult())"
+							searchcolumns="shortDescription,fullVaccineName" displaycolumns="shortDescription" requiredcolumn="fullVaccineName" />
+					</div>
+				</div>
+					 <div zclass="row-fluid">
+					 <div zclass="span2">
+						<label value="Status:" />
+						<combobox selectedItem="@{controller.patientEncounterSearchVo.vaccineStatus}" sclass="span12">
+							<comboitem label="Administered" value="ADMINISTERED"/>
+							<comboitem label="Not Administered" value="NOTADMINISTERED"/>
+						</combobox>
+					</div>
+				</div>
+				<div zclass="row-fluid">
+                      <div zclass="span4">
+					<label value="From Date:"  />
+					<datebox value="@{controller.patientEncounterSearchVo.administerStartDate}" sclass="span12"/>
+				</div>
+				 <div zclass="span4">
+					<label value="End Date:"   />
+					<datebox value="@{controller.patientEncounterSearchVo.administerEndDate}"  sclass="span12"/>
+				</div>
+				</div>
+				</div>
+				
+			</vlayout>
+			<separator bar="true"></separator>
+			<vlayout spacing="15px">
+				<n:h4>Search Including Medication
+				 <image id="drugPlus" src="../images/round_plus.png" w:onClick="displaySection('drug','');this.setStyle('display:none');"></image>
+				 <image id="drugMinus" src="../images/1357926365_minus-sign.png" style="display:none" w:onClick="displaySection('drug','hidePanelCont');this.setStyle('display:none');"></image>
+				</n:h4>
+				<div id="drug">
+				<hlayout spacing="20px" style="padding:10px">
+					<label value="Drug Name:" sclass="name" />
+					<div width="800px">
+					<suggest id="drugSuggestionBox"  entity="com.nzion.domain.drug.Drug" searchcolumns="tradeName"
+						displaycolumns="tradeName" requiredcolumn="tradeName" value="@{patientRx.drugName}" onLookedUp="controller.getPatientEncounterSearchVo().setDrug(self.getResult())"/>
+					</div>
+					<attribute w:name="onBind">
+							var drug = $("$drug");
+							var drugCont = zk.Widget.$(drug);
+							drugCont.setSclass("hidePanelCont");
+					</attribute>
+				</hlayout>
+				</div>
+			</vlayout>
+			<separator bar="true"/>
+			<vlayout spacing="15px">
+				<n:h4>Search Including Allergy
+				 <image id="allergyPlus" src="../images/round_plus.png" w:onClick="displaySection('allergy','');this.setStyle('display:none');"></image>
+				 <image id="allergyMinus" src="../images/1357926365_minus-sign.png" style="display:none" w:onClick="displaySection('allergy','hidePanelCont');this.setStyle('display:none');"></image>
+				</n:h4>
+				<div id="allergy">
+				<hlayout spacing="20px" style="padding:10px">
+				<hlayout spacing="20px" style="padding:10px">
+					<label value="Allergy Name:" sclass="name" />
+					<textbox value="@{controller.patientEncounterSearchVo.allergyName}">
+					<attribute w:name="onBind">
+							var allergy = $("$allergy");
+							var allergyCont = zk.Widget.$(allergy);
+							allergyCont.setSclass("hidePanelCont");
+					</attribute>
+					</textbox>
+				</hlayout>
+				<hlayout spacing="20px" style="padding:10px">
+					<label value="Severity:" sclass="name" />
+					<enumeration id="allergyStatusEnumeration" enumType="ALLERGY_STATUS"
+						selectedItem="@{controller.patientEncounterSearchVo.allergyStatus}"/>
+				</hlayout>
+				</hlayout>
+				</div>
+			</vlayout>
+			<separator bar="true"></separator>
+			<vlayout spacing="15px">
+				<n:h4>Search Including Lab Results
+				 <image id="labPlus" src="../images/round_plus.png" w:onClick="displaySection('lab','');this.setStyle('display:none');" onClick="labResultSearchListbox.setVisible(true);addBtn.setVisible(true)"></image>
+				 <image id="labMinus" src="../images/1357926365_minus-sign.png" style="display:none" w:onClick="displaySection('lab','hidePanelCont');this.setStyle('display:none');" onClick="labResultSearchListbox.setVisible(false);addBtn.setVisible(false)"/>
+				</n:h4>
+				<div id="lab">
+					<a sclass="btn" label="Add" id="addBtn"	onClick='controller.addLabResult();' visible="false">
+					 <n:i class="icon-plus"></n:i>
+					</a>
+					
+				<listbox id="labResultSearchListbox" visible="false"
+					model="@{controller.labResultVos,load-after='addBtn.onClick,self.onReloadRequest'}"
+					itemRenderer="${controller.listitemRenderer}">
+					<listhead>
+						<listheader label="Test Name" />
+						<listheader label="ObservationValue" />
+						<listheader label="Condition" />
+						<listheader label="Action" />
+					</listhead>
+					<listitem self="@{each='resultVo'}" value="@{resultVo}"></listitem>
+				</listbox>
+				</div>
+			</vlayout>
+				 <div align="center" sclass="panelFoot" >
+					<button label="Search Encounters" id="searchButton" zclass="btn-primary btn"
+						onClick='controller.addLabResult();Events.postEvent("onReloadRequest",labResultSearchListbox,null);'>
+						<attribute name="onClick">
+							searchResults.setVisible(true);
+							searchResultsSplitter.setVisible(true);
+							soapNotes = controller.search();
+							searchResultGrid.setVisible(true);
+							groupByResultGrid.setVisible(false);
+						</attribute>
+					</button>
+					</div>
+		</div>
+		<space height="5px" />
+		<hlayout width="100%" style="text-align:center;background-color:grey" id="searchResultsSplitter" visible="false">
+			<image src="/images/collapse-content.png" style="text-align:center">
+				<attribute w:name="onClick">
+					jq(this.$f('searchForm')).slideToggle(1000);
+				</attribute>
+				<attribute name="onClick">
+					if(self.getSrc().contains("expand")){
+						self.setSrc("/images/collapse-content.png");
+					}
+					else if(self.getSrc().contains("collapse")){
+						self.setSrc("/images/expand-content.png");
+					}
+				</attribute>
+			</image>
+		</hlayout>
+		<space height="5px" />
+		<panel visible="false" id="searchResults" title="Search Results">
+			<caption height="15px">
+				<div style="float:right">
+					<span sclass="linkBtn linkBtnOn" style="margin-top:-3px;">
+						<a sclass="reminderBtn" label="Send Reminder" onClick='controller.openReminderWindow()'></a>
+						<span />
+					</span>
+				</div>
+				<div style="float:right">
+					<span sclass="linkBtn linkBtnOn" style="margin:-3px 13px;">
+					<a  tooltiptext="Export" label="Export" sclass="reminderBtn">
+					<attribute name="onClick">					
+					    if(com.nzion.util.UtilValidator.isNotEmpty(soapNotes))							
+							exporter.export(soapNotes, new String[]{"patient.firstName","patient.lastName","provider.firstName","provider.lastName","date"}, new String[]{"Patient First Name","Patient Last Name","Doctor First Name","Doctor Last Name","Visit On"}, "encounters.csv");
+					</attribute>
+					</a>
+					</span>
+				</div>				
+			</caption>
+			<panelchildren>
+				<hlayout spacing="20px" style="padding:10px" width="50%">
+					<label value="Group By:" />
+					<listbox id="groupByComboBox" mold="select" sizedByContent="true" style="padding:2px">
+						<listitem />
+						<listitem label="Allergy Name" value="ALLERGY" />
+						<listitem label="Problem List" value="ICD" />
+						<listitem label="Lab Observation" value="LAB" />
+						<listitem label="Medication" value="DRUG" />
+						<listitem label="Vaccine Name" value="VACCINE" />
+						<attribute name="onSelect">
+							if (com.nzion.util.UtilValidator.isNotEmpty(controller.getSelectedSoapNotes()))
+								controller.getSelectedSoapNotes().clear();
+								groupByResultGrid.setVisible(self.getSelectedItem().getValue() != null);
+								searchResultGrid.setVisible(self.getSelectedItem().getValue() == null);
+							if (self.getSelectedItem().getValue() != null) {
+								searchResultDiv.setVisible(true);
+								controller.groupSoapNotes((String) self.getSelectedItem().getValue());
+								gridColumn.setLabel(self.getSelectedItem().getLabel());
+								Map m = controller.getPatientSoapNoteMap();
+								Object[] arr = m.keySet().toArray();
+								blm = new BindingListModelArray(arr, false);
+							}
+						</attribute>
+					</listbox>
+				</hlayout>
+				<div height="500px" style="overflow:auto" id="searchResultDiv">
+					<listbox id="searchResultGrid" model="@{soapNotes,load-after='searchButton.onClick'}"
+						checkmark="true" multiple="true"
+						selectedItem="@{controller.selectedSoapNotes,converter='com.nzion.view.component.MultipleListitemBindingConverter'}">
+						<listhead>
+							<listheader label="Patient Name"
+								onCreate='setAscendingComparator(self,"patient.firstName");setDescendingComparator(self,"patient.firstName")' />
+							<listheader label="Doctor Name"
+								onCreate='setAscendingComparator(self,"provider.firstName");setDescendingComparator(self,"provider.firstName")' />
+							<listheader label="Visit Date"
+								onCreate='setAscendingComparator(self,"date");setDescendingComparator(self,"date")' />
+						</listhead>
+						<listitem self="@{each='soapNote'}" value="@{soapNote}">
+							<listcell>
+								<name object="@{soapNote.patient}" />
+							</listcell>
+							<listcell>
+								<name object="@{soapNote.provider}" />
+							</listcell>
+							<listcell label="@{soapNote.date}" />
+						</listitem>
+					</listbox>
+					<grid id="groupByResultGrid" fixedLayout="true" model="@{blm,load-after='groupByComboBox.onSelect'}"
+						visible="false">
+						<columns>
+							<column width="40px"></column>
+							<column label="Problem" id="gridColumn" sortAscending="${ascendingComparator}"
+								sortDescending="${descendingComparator}">
+							</column>
+						</columns>
+						<rows>
+							<row self="@{each='key'}" value="@{key}">
+								<detail open="false">
+									<listbox checkmark="true" multiple="true"
+										selectedItem="@{controller.selectedSoapNotes,converter='com.nzion.view.component.MultipleListitemBindingConverter'}">
+										<listhead>
+											<listheader label="Patient Name" />
+											<listheader label="Doctor Name" />
+											<listheader label="Visit On" />
+										</listhead>
+										<listitem self="@{each='encounter'}" value="@{encounter}">
+											<listcell>
+												<name object="@{encounter.patient}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<name object="@{encounter.provider}" style="font-weight:normal" />
+											</listcell>
+											<listcell label="@{encounter.encounterDate}" />
+										</listitem>
+									</listbox>
+									<attribute name="onOpen">
+										List mapValue = controller.getPatientSoapNoteMap().get(((Row) self.getParent()).getValue());
+										((Listbox) self.getFirstChild()).setModel(new BindingListModelList(mapValue, false));
+									</attribute>
+								</detail>
+								<label value="@{key}" />
+							</row>
+						</rows>
+					</grid>
+				</div>
+			</panelchildren>
+		</panel>
+	</window>
+</zk>

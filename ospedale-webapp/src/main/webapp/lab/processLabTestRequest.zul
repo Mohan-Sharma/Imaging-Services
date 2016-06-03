@@ -1,0 +1,357 @@
+<?page title="Patient" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./proceeLabTestRequestWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+	<![CDATA[
+			import com.nzion.domain.emr.lab.*;
+			import com.nzion.domain.Patient;
+			import com.nzion.domain.Provider;
+	        import com.nzion.domain.emr.soap.PatientLabOrder;
+	        com.nzion.service.common.CommonCrudService commonCrudService =  com.nzion.util.Infrastructure.getSpringBean("commonCrudService"); 
+	        com.nzion.zkoss.composer.emr.lab.LabTestResultController labTestResultController = new com.nzion.zkoss.composer.emr.lab.LabTestResultController();
+	        PatientLabOrder pLabOrder = arg.get("pLabOrder");
+	        pLabOrder.setStatus(PatientLabOrder.STATUS.INPROCESS);
+	        commonCrudService.save(pLabOrder);
+	        LabOrderRequest labOrderReq = pLabOrder.getLabOrderRequest();
+	     	commonCrudService.refreshEntity(pLabOrder.getLabTestPanel());
+	        OBXSegment  resultItem;
+	]]>
+	</zscript>
+	<style>
+		.fl {
+    		float: none;
+		}
+	</style>
+	<window id="proceeLabTestRequestWindow" self="@{define(content)}" apply="${labTestResultController}">
+		<zscript>
+		<![CDATA[
+			Provider  provider =  labOrderReq.getProvider();
+			
+	        com.nzion.domain.Referral refferal =  labOrderReq.getReferral();
+	        
+	        Patient patient =  labOrderReq.getPatient();
+	    	List uoms = commonCrudService.getAll(com.nzion.domain.emr.UnitOfMeasurement.class);		
+		    boolean completed = false;
+		    completed = labOrderReq.getOrderStatus().equals(LabOrderRequest.ORDERSTATUS.COMPLETED);	
+		    com.nzion.service.PersonService personService = com.nzion.util.Infrastructure.getSpringBean("personService");
+			List personVitalSigns = personService.getPersonVitalSign(com.nzion.util.Infrastructure.getUserLogin().getPerson());
+
+			com.nzion.zkoss.soap.VitalSignSetListItemRenderer renderer = new com.nzion.zkoss.soap.VitalSignSetListItemRenderer(personVitalSigns);
+
+			Set vitalSignSet;
+			if(com.nzion.util.UtilValidator.isEmpty(labTestResultController.getPanelTestResult().getPatientVitalSignSets()))
+				vitalSignSet = new HashSet();
+			else
+				vitalSignSet = labTestResultController.getPanelTestResult().getPatientVitalSignSets();
+
+		]]>
+		</zscript>
+		<h:table width="100%">
+			<h:tr>
+				<h:td width="60%">
+					<n:h2 class="fl SNHeader">Patient Detail</n:h2>
+					<div class="clr patDetCont">
+						<image id="patientImage" sclass="patImg" width="46px" height="50px"
+							hover="@{patient,converter='com.nzion.view.component.GenderImageConverter'}" />
+							<div class="patDet">
+								<n:strong>MRN :</n:strong>
+								<span>
+									<label value="@{patient.accountNumber}" />
+								</span>
+								<n:br />
+								<n:strong>Name :</n:strong>
+								<span>
+									<name object="@{patient}" />
+								</span>
+								<n:br />
+								<n:br />
+								<n:strong class="fl">Lab Test Ordered Date:</n:strong>
+								<span>
+									<label value="${display:fd(labOrderReq.patientSoapNote.date)}" />
+								</span>
+								<n:br />
+								<n:strong class="fl">Lab Test Panel:</n:strong>
+								<span>
+									<label value="${pLabOrder.labTestPanel.panelName}" />
+								</span>
+								<n:br />
+							</div>
+					</div>
+				</h:td>
+				<h:td width="40%">
+					<div class="wrapper">
+						<div class="mid">
+							<div>
+								<div if="${provider ne null}">
+								<n:h2 class="fl SNHeader">Provider Detail</n:h2>
+								<div class="clr patDetCont">
+									<image id="providerImage" sclass="patImg" width="46px" height="50px"
+										hover="@{provider,converter='com.nzion.view.component.GenderImageConverter'}" />
+									<div class="patDet">
+										<n:strong>Provider Account :</n:strong>
+										<span>
+											<label value="@{provider.accountNumber}" />
+										</span>
+										<n:br />
+										<n:strong>Name :</n:strong>
+										<span>
+											<name object="@{provider}" />
+										</span>
+										<n:br />
+									</div>
+								</div>
+								</div>
+								<div if="${refferal ne null}">
+								<n:h2 class="fl SNHeader">Refferal Detail</n:h2>
+								<div class="clr patDetCont" >
+									<div class="patDet">
+										<n:strong>Reffered By:</n:strong>
+										<n:strong>Name :</n:strong>
+										<span>
+											<name object="@{refferal}" />
+										</span>
+										<n:br />
+									</div>
+								</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</h:td>
+			</h:tr>
+		</h:table>
+		<tabbox>
+			<tabs>
+				<tab label="Vital Sign" />
+				<tab label="Specimen Details" />
+				<tab label="Order Detail" />
+			</tabs>
+			<tabpanels>
+				<tabpanel>
+					<panel height="300px">
+						<panelchildren>
+						    <div style="width:52%;padding:5px">
+							<span sclass="linkBtn linkBtnOn">
+								<a label="Record" sclass="addBtn" visible="${!completed}">
+									<attribute name="onClick">
+									<![CDATA[
+										com.nzion.domain.emr.soap.PatientVitalSignSet patientVitalSignSet = new com.nzion.domain.emr.soap.PatientVitalSignSet(null,personVitalSigns, patient);
+										vitalSignSet.add(patientVitalSignSet);
+										Window window = (Window) Executions.createComponents("/soap/soapPatientVitalSign.zul", null,com.nzion.util.UtilMisc.toMap("entity", patientVitalSignSet));
+										window.addEventListener("onDetach",new org.zkoss.zk.ui.event.EventListener(){
+											public void onEvent(Event event) throws Exception {
+											if (patientVitalSignSet.hasRecordings()) {
+												labTestResultController.getPanelTestResult().addPatientVitalSignSet(patientVitalSignSet);
+												Events.postEvent("onReloadRequest", vitalSignsListbox, null);
+											}
+											}
+										});
+									]]>
+									</attribute>
+								</a>
+								<span />
+							</span>
+							</div>
+							<listbox
+								model="@{labTestResultController.panelTestResult.patientVitalSignSets,load-after='self.onReloadRequest'}"
+								id="vitalSignsListbox" itemRenderer="${renderer}" onCreate="renderer.setListbox(self);" style="margin-top:6px">
+								<listhead>
+									<listheader label="Recorded On"/>
+									<listheader forEach="${renderer.preferedVitalSigns}" label="${each.name}" />
+								</listhead>
+							</listbox>
+						</panelchildren>
+					</panel>
+				</tabpanel>
+				<tabpanel>
+					<panel height="300px">
+						<panelchildren>
+							<separator></separator>
+						<div style="width:65%;margin:auto;">
+							<div sclass="panelContInp">
+								<div>
+									<label value="Specimen Received On" />
+									<datebox value="@{labTestResultController.panelTestResult.specimenReceivedDate}"/>
+								</div>
+								<div>
+									<label value="Test Performed On" />
+									<datebox value="@{labTestResultController.panelTestResult.observationDateTime}"/>
+								</div>
+								<div>
+								<hlayout>
+								 <label value="Attach File" />
+								   <textbox cols="30" readonly="true" id="fileTextbox"/>
+									<fileupload label="Upload" visible="${!completed}">
+										<attribute name="onUpload">
+										
+										</attribute>
+									</fileupload>
+								</hlayout>
+							  </div>
+							<div >
+								<label value="Comments" />
+								<textbox value="@{labTestResultController.panelTestResult.technicianComment}" rows="3" cols="50"
+									style="border:1px solid #A8A8A8" />
+							</div>
+						    </div>
+						 </div>	
+						</panelchildren>
+					</panel>
+				</tabpanel>
+				<tabpanel>
+					<h:table width="100%">
+						<h:tr>
+							<h:td style="vertical-align:top;width:30%">
+								<panel height="300px">
+									<panelchildren>
+											<listbox model="@{pLabOrder.labTestPanel.labTests}">
+												<listhead>
+													<listheader>
+														Tests Panel
+													</listheader>
+												</listhead>
+												<listitem self="@{each='labTest'}" value="@{labTest}">
+												<listcell label="@{labTest.testName}">												
+													<attribute name="onClick">
+														<![CDATA[
+															LabTest labTest = (LabTest)self.getParent().getValue();															
+															OBXSegment resultItem  = getOBXSegment(labTest);
+
+															if(labTest.getUnit() != null)
+																resultItem.setUnits(labTest.getUnit());
+															
+															resultItem.setObxName(labTest.getTestName());
+															resultItem.setCodingSystem(labTest.getTestCode());
+															resultItem.setReferenceRange(labTest.getReferenceRange());
+															testResultPanel.setVisible(true);
+															Events.postEvent("onReloadRequest", testResultPanel, null);
+														]]>
+													</attribute>
+												</listcell>
+												</listitem>
+										</listbox>
+											
+									</panelchildren>
+								</panel>
+							</h:td>
+							<h:td style="vertical-align:top;width:70%">
+								<panel title="Observation">
+									<panelchildren>
+										<div id="testResultPanel" sclass="panelCont" height="235px" visible="false">
+											<div sclass="col2">
+												<div><label value="Test Name" /></div>
+												<textbox id="labTestName"
+													value="@{labTest.testName,load-after='testResultPanel.onReloadRequest'}" readonly="true" />
+											</div>
+											<div sclass="col2">
+												<label value="Reference Range" />
+												<textbox
+													value="@{resultItem.referenceRange,load-after='testResultPanel.onReloadRequest'}" />
+											</div>
+											<div sclass="col2">
+												<div>
+													<label value="Result"/>
+													<label value="*" style="color:red"/>
+												</div>
+													<doublebox id="resultTextbox" value="@{resultItem.observationValue,load-after='testResultPanel.onReloadRequest',save-when='addBtn.onClick'}"
+									style="border:1px solid #A8A8A8" constraint="no empty:Result Required"> </doublebox>
+											</div>											
+											<div sclass="col2">
+												<div>
+													<label value="Status" />
+													<label value="*" style="color:red"/>
+												</div>
+												<enumeration enumType="LAB_RESULT_STATUS" id="statusDropDown"
+													selectedItem="@{resultItem.resultStatus,load-after='testResultPanel.onReloadRequest',save-when='addBtn.onClick,saveBtn.onClick,sendBtn.onClick'}" readonly="true" constraint="no empty:Status Required"/>
+											</div>
+											<div sclass="col2">
+											<div>	<label value="Unit" /></div>
+												<textbox id="resultUnit" 
+															value="@{resultItem.units,load-after='testResultPanel.onReloadRequest',save-when='addBtn.onClick'}"
+														style="border:1px solid #A8A8A8" />
+											</div>
+											<div sclass="col2">
+												<label value="Test Performed Date" mold="required"/>
+												<datebox id="performedDate" 
+													value="@{resultItem.observationDateTime,save-when='addBtn.onClick,saveBtn.onClick,sendBtn.onClick'}" constraint="no empty,no future"/>
+											</div>
+											<div sclass="col2">
+												<label value="Test Note" style="vertical-align:top;"/>
+												<textbox
+													value="@{resultItem.testNotes,load-after='testResultPanel.onReloadRequest',save-when='addBtn.onClick,saveBtn.onClick,sendBtn.onClick'}" rows="3"
+													style="border:1px solid #A8A8A8"  cols="50"/>
+											</div>
+										</div>
+										<div sclass="panelFoot">
+										<div style="width:20%">
+											<button label="Add" id="addBtn" visible="${!completed}">
+												<attribute name="onClick">
+												  <![CDATA[													
+													resultItem.setPatient(labOrderReq.getPatient());
+													resultItem.setLabCategory(pLabOrder.getLabTestPanel().getLabCategory());
+													resultItem.setLabTestPanel(pLabOrder.getLabTestPanel());
+													resultItem.setActive(false);
+													if(labOrderReq.getPatientSoapNote() != null)
+														 resultItem.setSoapNote(labOrderReq.getPatientSoapNote());
+													if(labOrderReq.getInPatientAdmNumber() != null)
+														 resultItem.setPatientAdmission(labOrderReq.getPatientAdmission());
+													 resultItem.setObrSegment(labTestResultController.getPanelTestResult());
+												     labTestResultController.getPanelTestResult().addOBX(resultItem);
+													 saveBtn.setVisible(true);
+												  ]]>
+	
+												</attribute>
+											</button>
+											</div>
+										</div>
+									</panelchildren>
+								</panel>
+							</h:td>
+						</h:tr>
+					</h:table>
+				</tabpanel>
+			</tabpanels>
+		</tabbox>
+		<div sclass="panelFoot">
+			<button sclass="btn submit" label="Save" id="saveBtn" visible="${!completed}"
+				onClick="labTestResultController.getPanelTestResult().setSoapNote(labOrderReq.getPatientSoapNote());
+				 pLabOrder.setObrSegment(labTestResultController.getPanelTestResult());  
+				commonCrudService.save(labTestResultController.getPanelTestResult()); 
+				commonCrudService.save(pLabOrder);
+				" />
+			<button id="sendBtn" label="Complete">
+			<attribute name="onClick">
+			        Set obxItems = labTestResultController.getPanelTestResult().getObservations();
+			        if(com.nzion.util.UtilValidator.isNotEmpty(obxItems))
+					com.nzion.util.UtilMessagesAndPopups.confirm("Are You Sure? Want to set as Completed", "Information", Messagebox.YES | Messagebox.NO,
+					Messagebox.QUESTION, new org.zkoss.zk.ui.event.EventListener() {
+					public void onEvent(Event event) {
+								if ("onYes".equals(event.getName())){
+								     
+								     for(Object objItem : obxItems){
+								     	OBXSegment	obxItem = (OBXSegment)objItem;
+								     	obxItem.setActive(true);
+								     }
+								     commonCrudService.save(obxItems);								    				
+									pLabOrder.setStatus(PatientLabOrder.STATUS.COMPLETED);	
+									commonCrudService.save(pLabOrder);
+									com.nzion.util.UtilMessagesAndPopups.showSuccess("Lab Test Completed");
+								   }
+								}
+							});	 
+			</attribute>
+			</button>
+		</div>
+	</window>
+	<zscript>
+		public OBXSegment getOBXSegment(LabTest labTest){
+	    OBRSegment obrSegment =   labTestResultController.getPanelTestResult();
+	    for( OBXSegment obxSeg :  obrSegment.getObservations())
+	   		if(labTest.equals(obxSeg.getLabTest())) return obxSeg;
+	   	return new OBXSegment(labTest);
+	    }
+	</zscript>
+</zk>

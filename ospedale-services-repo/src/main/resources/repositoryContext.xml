@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:jee="http://www.springframework.org/schema/jee" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <bean id="accountNumberGenerator" class="com.nzion.repository.impl.HibernateAccountNumberGenerator" />
+    <!--<context:property-placeholder location="classpath*:database.properties"/>-->
+    <context:property-placeholder location="classpath:application-${profile.name:prod}.properties"/>
+    
+    
+     <bean id="defaultDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <!--<property name="url" value="jdbc:mysql://localhost:3306/afya_lab_db"/>
+        <property name="username" value="root"/>
+        <property name="password" value="welcome"/>-->
+         <property name="url" value="${jdbc.tenant.url}"/>
+         <property name="username" value="${jdbc.username}"/>
+         <property name="password" value="${jdbc.password}"/>
+    </bean>
+    
+     <bean id="tenantDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+         <property name="url" value="${jdbc.portal.url}"/>
+         <property name="username" value="${jdbc.portal.username}"/>
+         <property name="password" value="${jdbc.portal.password}"/>
+    </bean>
+    
+     <bean id="dataSource" class="com.nzion.hibernate.ext.multitenant.TenantRoutingDataSource">
+        <constructor-arg>
+            <bean class="com.nzion.hibernate.ext.multitenant.DataSourceFactory" id="tenantDataSourceFactory">
+                <property name="dataSource" ref="tenantDataSource"/>
+            </bean>
+        </constructor-arg>
+        <property name="defaultTargetDataSource" ref="defaultDataSource"/>
+    </bean>
+    
+    
+    
+    
+    
+<!-- 
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${database.driverClassName}"/>
+        <property name="url" value="${database.url}"/>
+        <property name="username" value="${database.username}"/>
+        <property name="password" value="${database.password}"/>
+    </bean>
+ -->
+    <bean class="com.nzion.domain.listeners.PracticePostInsertEventListener" id="PracticePostListener"></bean>
+
+    <util:set id="postInsertListeners">
+        <ref bean="PracticePostListener"/>
+    </util:set>
+
+
+    <util:set id="customSaveOrUpdateListeners">
+        <ref bean="customSaveOrUpdateListener"/>
+    </util:set>
+
+
+
+    <util:map id="hibernateEventListeners">
+        <entry key="save-update" value-ref="customSaveOrUpdateListeners" />
+        <entry key="post-insert" value-ref="postInsertListeners" />
+        <entry key="save" value-ref="customSaveOrUpdateListener" />
+    </util:map>
+
+    <bean class="com.nzion.hibernate.ext.SaveOrUpdateEventListener" id="customSaveOrUpdateListener">
+        <property name="generator" ref="accountNumberGenerator"></property>
+    </bean>
+
+   <!-- <bean id="flyway" class="com.googlecode.flyway.core.Flyway" init-method="migrate">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="initOnMigrate" value="true"/>
+    </bean>-->
+
+    <bean class="com.nzion.hibernate.ext.AutoColumnsPopulator" id="autoColumnsPopulator">
+    </bean>
+    <bean class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean" id="sessionFactory">
+        <property name="dataSource" ref="dataSource"></property>
+        <property name="eventListeners" ref="hibernateEventListeners"></property>
+        <property name="entityInterceptor" ref="autoColumnsPopulator"/>
+        <property name="packagesToScan">
+            <list>
+                <value>com.nzion.domain.base</value>
+                <value>com.nzion.domain</value>
+                <value>com.nzion.diagnostic</value>
+                <value>com.nzion.domain.emr</value>
+                <value>com.nzion.domain.emr.lab</value>
+                <value>com.nzion.domain.emr.soap</value>
+                <value>com.nzion.security</value>
+                <value>com.nzion.domain.product</value>
+                <value>com.nzion.domain.product.common</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <util:properties>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="configurationClass">org.hibernate.cfg.AnnotationConfiguration</prop>
+                <prop key="hibernate.dialect">com.nzion.hibernate.ext.MySQLUTF8InnoDBDialect</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.query.jpaql_strict_compliance">false</prop>
+                <prop key="hibernate.cache.use_second_level_cache">true</prop>
+                <prop key="hibernate.generate_statistics">false</prop>
+                <prop key="hibernate.cache.use_query_cache">true</prop>
+                <prop key="hibernate.cache.region.factory_class">net.sf.ehcache.hibernate.SingletonEhCacheRegionFactory</prop>
+                <prop key="hibernate.cache.region_prefix">tempdb</prop>
+                <prop key="hibernate.cache.use_structured_entries">true</prop>
+                <prop key="hibernate.default_batch_fetch_size">15</prop>
+                <prop key="hibernate.order_updates">true</prop>
+                <prop key="hibernate.use_sql_comments">true</prop>
+                <prop key="hibernate.jdbc.fetch_size">4</prop>
+                <prop key="hibernate.jdbc.batch_versioned_data">true</prop>
+                <prop key="hibernate.max_fetch_depth">1</prop>
+                <prop key="hibernate.bytecode.provider">cglib</prop>
+            </util:properties>
+        </property>
+        <property name="annotatedPackages" value="com.nzion.domain"/>
+<!--
+        <property name="configLocation" value="classpath:hibernate.cfg.xml"/>
+-->
+        <property name="namingStrategy"><ref bean="namingStrategy"/></property>
+    </bean>
+
+    <bean id="namingStrategy" class="com.nzion.hibernate.ext.CustomNamingStrategy"/>
+
+    <bean class="org.springframework.orm.hibernate3.HibernateTransactionManager" id="transactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    <tx:annotation-driven mode="aspectj" transaction-manager="transactionManager"/>
+    <tx:annotation-driven proxy-target-class="true" />
+
+
+    <bean id="hibernateDaoSupport" abstract="true" class="org.springframework.orm.hibernate3.support.HibernateDaoSupport">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+	<bean id="practiceRepo" class="com.nzion.repository.impl.HibernatePracticeRepository" parent="hibernateDaoSupport" />
+	<bean id="providerRepository" class="com.nzion.repository.impl.HibernateProviderRepository" parent="hibernateDaoSupport" />
+	<!-- <bean id="scheduleRepository" class="com.nzion.repository.impl.HibernateScheduleRepository" parent="hibernateDaoSupport" /> -->
+	<bean id="fixedAssetRepository" class="com.nzion.repository.impl.HibernateFixedAssetRepository" parent="hibernateDaoSupport" />
+	<bean id="slotRepository" class="com.nzion.repository.impl.HibernateSlotRepository" parent="hibernateDaoSupport" />
+	<bean id="patientRepo" class="com.nzion.repository.impl.PatientRepositoryImpl" parent="hibernateDaoSupport" />
+	<bean id="insuranceProviderRepository" class="com.nzion.repository.impl.HibernateInsuranceProviderRepository"
+		parent="hibernateDaoSupport"/>
+	<bean id="userLoginRepository" class="com.nzion.repository.impl.HibernateUserLoginRepository" parent="hibernateDaoSupport" />
+	<bean name="enumerationRepository" class="com.nzion.repository.impl.HibernateEnumerationRepository" parent="hibernateDaoSupport" />
+	<bean id="commonCrudRepository" class="com.nzion.repository.common.impl.HibernateCommonCrudRepository" parent="hibernateDaoSupport">
+	</bean>
+	<bean name="componentRepository" class="com.nzion.repository.impl.HibernateComponentRepository" parent="hibernateDaoSupport">
+		<property name="commonCrudRepository" ref="commonCrudRepository" />
+	</bean>
+	<bean id="passwordPolicyRepo" class="com.nzion.repository.impl.HibernatePasswordPolicyRepositoryImpl" parent="hibernateDaoSupport" />
+	<bean name="personRepository" class="com.nzion.repository.impl.HibernatePersonRepository" parent="hibernateDaoSupport" />
+	<bean id="labRepository" name="labRepository" class="com.nzion.repository.emr.lab.impl.HibernateLabRepository" parent="hibernateDaoSupport" />
+	<bean id="vaccineRepository" name="vaccineRepository" class="com.nzion.repository.impl.HibernateVaccineRepository" parent="hibernateDaoSupport" />
+	<bean name="billingRepository" class="com.nzion.repository.billing.impl.HibernateBillingRepository" parent="hibernateDaoSupport"/>
+    <bean id="scheduleRepository" class="com.nzion.repository.impl.HibernateScheduleRepository"
+          parent="hibernateDaoSupport"/>
+</beans>

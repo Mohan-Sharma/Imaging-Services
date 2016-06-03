@@ -1,0 +1,33 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./personFamilyIllnessWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?component name="toolbar" macro-uri="/toolbar.zul"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window  id="personFamilyIllnessWin">
+	<zscript>
+	com.nzion.zkoss.composer.PersonProfileController profileController = desktop.getAttribute("profileController");
+	List personFamilyIllness = profileController.getPersonFavourites(com.nzion.domain.person.PersonFamilyIllness.class);
+	</zscript>
+	<div sclass="panelTop">
+		<button label="Save" onClick="profileController.saveFavourites(personFamilyIllness);"/>
+	</div>
+	<panel title="Person Family Illness" id="familyIllnessPanel" 
+		onAddClick='profileController.favouriteAddClicked(personFamilyIllnessWin, personFamilyIllnessDisplayGrid, personFamilyIllness,"/person/add-person-family-illness.zul")'
+		onDeleteClick="profileController.deleteFavourites(personFamilyIllnessDisplayGrid, personFamilyIllness)">
+			<panelchildren>
+		<toolbar listenercomponent="${familyIllnessPanel}" hidecancel="true" hidesearch="true"/>
+				<listbox multiple="true" id="personFamilyIllnessDisplayGrid" checkmark="true" mold="paging" pageSize="10" pagingPosition="top"
+ 					model="@{personFamilyIllness,load-after='self.onReloadRequest'}">
+				<listhead>
+					<listheader label="Family Illness"/>
+				</listhead>
+					<listitem self="@{each='personFamilyIllness'}" value="@{personFamilyIllness}" >
+					<listcell>
+						<label value="@{personFamilyIllness.familyIllness.illnessDesc}" />
+					</listcell>
+					</listitem>
+				</listbox>
+			</panelchildren>
+		</panel>
+</window>
+</zk>

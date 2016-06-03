@@ -1,0 +1,64 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./icdLookUp"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import com.nzion.zkoss.composer.PatientSoapNoteController;
+	import com.nzion.util.Constants;
+	import com.nzion.domain.emr.IcdElement;
+	import com.nzion.domain.emr.soap.PatientIcd;
+	import com.nzion.zkoss.ext.EntityDropdownRenderer;
+	import com.nzion.domain.emr.soap.PatientIcd.Status;
+	EntityDropdownRenderer dropdownRenderer =  EntityDropdownRenderer.DEFAULT_INSTANCE;
+	com.nzion.domain.emr.soap.DiagnosisSection diagnosisSection=arg.get("section");
+	List masterData = new ArrayList();
+	]]></zscript>
+<window mode="modal" width="60%"  position="center,top" closable="true" title="Diagnosis Lookup" id="icdLookUp">
+<zscript><![CDATA[
+	void addIcds(){
+		for(Listitem li : icdDisplayGrid.getSelectedItems()){
+			PatientIcd icd = ((PatientIcd)li.getValue());
+			diagnosisSection.addIcd(icd);
+		}
+		icdLookUp.detach();
+	}
+	void getPatientIcds(){
+		if(icdtxt.getValue().isEmpty())
+			throw new WrongValueException(icdtxt,"enter atleast 3 characters");
+		masterData.clear();
+		List plainIcds=componentRepository.getMasterDataStartingWith(IcdElement.class,icdtxt.getValue(),"description");
+		for(int i=0;i  < plainIcds.size() ; ++i){
+			masterData.add(new PatientIcd((IcdElement)plainIcds.get(i)));
+		}
+	}
+	]]>
+</zscript>
+	<panel title="Search Diagnosis">
+		<panelchildren>
+			<hbox><label value="Diagnosis Description"/><textbox id="icdtxt" />
+			<button  label="Search" id="searchBtn" onClick="getPatientIcds();"/>
+			</hbox>	
+		<listbox model="@{masterData,load-after='self.onReloadRequest,searchBtn.onClick'}" id="icdDisplayGrid"  rows="10" checkmark="true" multiple="true"> 
+			<listhead>
+				<listheader label="Diagnosis Description"/>
+				<listheader label="Diagnosis Code"/>
+			</listhead>
+				<listitem self="@{each='icd'}" value="@{icd}">
+					<listcell>
+						<label value="@{icd.icdElement.description}"  />
+					</listcell>
+					<listcell>
+						<label value="@{icd.icdElement.code}"  />
+					</listcell>
+				</listitem>
+		</listbox>
+		</panelchildren>
+	</panel>
+	<div sclass="panelFoot"></div>
+	<div sclass="panelFoot">
+		<button  sclass="btn" label="Cancel" forward="onClick=onCancel"/>
+		<button  sclass="btn" label="Add" id="addBtn" onClick="addIcds();"/>
+	</div>
+	
+</window>
+</zk>

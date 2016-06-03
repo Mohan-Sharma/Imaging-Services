@@ -1,0 +1,10 @@
+<?component name="screen" macro-uri="/home-grid-macro.zul"?>
+<zk>
+	<zscript>setPageTitle("Templates", "")</zscript>
+	
+	<window id="templates">
+		<screen width="100%" pagetitle="Templates" listtitle="List of Templates" addpage="addTemplate"
+			editpage="addTemplate" entityclass="com.nzion.domain.emr.QATemplate" 
+			fields="name ,active" labels="Template Name,Active" addmodepopup="true" editmodepopup="true" hidedeletebtn="true"/>
+	</window>
+</zk>

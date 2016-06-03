@@ -1,0 +1,34 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addEditReferralWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import com.nzion.domain.emr.ReferalLetterTemplate;
+	com.nzion.domain.Provider provider = p;
+	List referralLetterList = commonCrudService.getAll(ReferalLetterTemplate.class);
+]]></zscript>
+	<window id="addEditReferralWin">
+	<panel title="Referral Letter Template" style="border:none;" height="100%">
+	<panelchildren>
+	<div height="280px" style="overflow:auto;margin:8px">
+			<radiogroup id="referralRadiogroup" orient="vertical">
+				<div height="100px">
+					<radio label="${each.templateName}" forEach="${referralLetterList}" id="${each.id}">
+						<attribute name="onCreate"><![CDATA[
+						long selfId = new Long(self.getId());
+						if(provider.getReferalLetterTemplate() != null && provider.getReferalLetterTemplate().getId().equals(selfId))
+							self.setChecked(true);
+						]]></attribute>
+						<attribute name="onCheck">
+						ReferalLetterTemplate referalLetterTmpl = commonCrudService.getById(ReferalLetterTemplate.class,new Long(self.getId()));
+						provider.setReferalLetterTemplate(referalLetterTmpl);
+						</attribute>
+					</radio>
+				</div>
+			</radiogroup>
+		</div>
+	</panelchildren>
+	</panel>
+	</window>
+</zk>

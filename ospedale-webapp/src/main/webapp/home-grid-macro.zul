@@ -1,0 +1,81 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native">
+    <zscript>
+        import com.nzion.view.component.HomeGridMacroController;
+        HomeGridMacroController homeGridMacroController = new HomeGridMacroController(arg);
+        arg.put("lazy",false);
+        boolean hideAddBtn = Boolean.parseBoolean((String) arg.get("hideaddbtn"));
+        boolean hideCustomAddBtn = Boolean.parseBoolean((String) arg.get("customaddbtn"));
+        boolean hideDeleteBtn = Boolean.parseBoolean((String) arg.get("hidedeletebtn"));
+        boolean hideActivation = Boolean.parseBoolean((String) arg.get("hideactivation"));
+        boolean hideSearch = Boolean.parseBoolean((String) arg.get("hideSearch"));
+        List listModel = (List)arg.get("listModel");
+    </zscript>
+
+    <div apply="${homeGridMacroController}" zclass="container-fluid" id="gridRoot">
+            <div zclass="page-header">
+                <h:h3>
+                    <h:small>${arg.listtitle}</h:small>
+                </h:h3>
+            </div>
+            <div style="padding-left:10px;">
+                <div zclass="btn-toolbar">
+                    <div zclass="btn-group">
+                        <a href="#popup" zclass="btn" label="Add" id="addBtn" onClick='homeGridMacroController.addClicked()' visible="${!hideAddBtn}">
+                            <n:i class="icon-plus-sign"></n:i>
+                        </a>
+                        <a href="#popup" zclass="btn" label="Add" id="customAddBtn" onClick='homeGridMacroController.addClicked(listModel)' visible="${hideCustomAddBtn}">
+                            <n:i class="icon-plus-sign"></n:i>
+                        </a>
+                        <a href="#" zclass="btn"  label="Delete" onClick='homeGridMacroController.deleteClicked()' visible="${!hideDeleteBtn}">
+                            <n:i class="icon-off"></n:i>
+                        </a>
+                        <a href="#" zclass="btn" onClick='homeGridMacroController.activateClicked()' visible="${!hideActivation}" label="Activate">
+                            <n:i class="icon-ok-sign"></n:i>
+                        </a>
+                        <a href="#" zclass="btn" visible="${!hideActivation}" label="Deactivate">
+                            <attribute name="onClick">
+                                if(com.nzion.util.UtilValidator.isEmpty(com.nzion.util.ViewUtil.getSelectedItems(listbox))){
+                                com.nzion.util.UtilMessagesAndPopups.displayError("Please select items to deactivate");
+                                return;
+                                }
+                                Executions.createComponents("/home-grid-deactivation-confirmation.zul", gridRoot,
+                                com.nzion.util.UtilMisc.toMap("gridController", homeGridMacroController));
+                            </attribute>
+                            <n:i class="icon-ban-circle"></n:i>
+                        </a>
+                    </div>
+                    <div zclass="form-search" style="float:right">
+                        <include src="${arg.extrabuttons}" gridcontroller="${homeGridMacroController}"/>
+                        <a href="javascript:void(0)" class="export"	onClick='homeGridMacroController.export()' tooltiptext="Export"/>
+                        <a href="javascript:void(0)" class="print" onClick="homeGridMacroController.printClicked()" tooltiptext="Print"/>
+                        <div zclass="input-append" visible="${!hideSearch}">
+                            <textbox name="search" id="txtSearch" sclass="span2 search-query" style="height:24px;"
+                                     onFocus="self.setValue(null);" onOK='Events.postEvent("onClick", searchBtn, null);' />
+                            <button type="submit" zclass="btn" id="searchBtn" onClick="homeGridMacroController.searchClicked(txtSearch.getValue());">Search</button>
+                        </div>
+                        <space/>
+                        <button onClick="txtSearch.setValue(null);homeGridMacroController.loadEntities();" label="Clear" visible="${!hideSearch}" zclass="btn"/>
+                    </div>
+                </div>
+                <separator/>
+                <listbox multiple="true" checkmark="true" id="listbox" paginal="${listboxPaging}" mold="paging" oddRowSclass="z-listbox-odd" width="100%">
+                    <listhead sizable="true">
+                        <listheader forEach="${homeGridMacroController.labels}" label="${each}" sort="auto">
+                            <attribute name="onCreate">
+                                int index = self.getParent().getChildren().indexOf(self);
+                                self.setSortAscending(homeGridMacroController.getAscComparator(index));
+                                self.setSortDescending(homeGridMacroController.getDescComparator(index));
+                            </attribute>
+                        </listheader>
+                    </listhead>
+                    <listfoot id="listFoot">
+                        <listfooter id="listFooter" />
+                    </listfoot>
+                </listbox>
+
+                <separator/>
+            </div>
+    </div>
+</zk>

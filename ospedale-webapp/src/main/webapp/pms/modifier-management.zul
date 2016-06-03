@@ -1,0 +1,14 @@
+<?component name="screen" macro-uri="/home-grid-macro.zul"?>
+<?component name="enumeration" class="com.nzion.view.component.EnumerationDropdown"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window>
+	<zscript><![CDATA[
+		setPageTitle("Modifiers", "");	                  
+	]]></zscript>
+		<screen width="100%" pagetitle="Modifier Management" listtitle="List of Modifiers" addpage="addModifier"
+			editpage="addModifier" entityclass="com.nzion.domain.pms.Modifier" hidedeletebtn="true"
+			fields="code,description,active" labels="Modifier Code,Name,Active" searchstrength="2" 
+			addmodepopup="true" editmodepopup="true" />
+	</window>
+</zk>

@@ -1,0 +1,29 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./vitalSignDiv"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+	<![CDATA[
+	import com.nzion.zkoss.composer.SoapSentenceComposer;
+	import com.nzion.domain.emr.soap.VitalSignSection;
+	import com.nzion.domain.emr.soap.vitalsign.VitalSignReading;
+	SoapSentenceComposer sentenceComposer = (SoapSentenceComposer) arg.get("controller");
+	VitalSignSection vitalSignSection = (VitalSignSection) sentenceComposer.getSoapNoteController().getSoapSection(VitalSignSection.class, false);
+	sentenceComposer.setSelectedSection(vitalSignSection);
+	List vitalSignReadings = vitalSignSection.getReadings(); 
+	boolean noVitalSignReadings = false;
+	VitalSignReading reading = null;
+	if(vitalSignReadings.size()>0){
+		noVitalSignReadings=true;
+		reading=(VitalSignReading)vitalSignReadings.get(vitalSignReadings.size()-1);
+	}
+	]]>
+	</zscript>
+		<div style="margin-left:10px" id="vitalSignDiv" visible="${noVitalSignReadings}">
+			<n:h2>${vitalSignSection.soapModule.moduleDescription}</n:h2>
+			Temperature: ${reading.temperature}, Blood Pressure: ${reading.bloodPressure}, Pulse: ${reading.pulse}, Respiration: ${reading.respiration}
+		</div>
+</zk>

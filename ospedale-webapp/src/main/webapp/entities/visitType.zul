@@ -1,0 +1,12 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<style>.soapBox{ display:block; height:16px; margin:0 0 0 10px; text-align:center; width:69px; }</style>
+	<window>
+	<zscript><![CDATA[
+setPageTitle("Visit Type", "");
+
+]]></zscript>
+		<screen width="100%" pagetitle="Visit Type" listtitle="List of Visit Type" addpage="addSoapNoteSetup" hidedeletebtn="true"
+			entityclass="com.nzion.domain.SoapNoteType" fields="name,description,chargeType" addmodepopup="true" hideactivation="true"/>
+	</window>
+</zk>

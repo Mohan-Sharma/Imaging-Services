@@ -1,0 +1,46 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./personFavouriteOrganSystemsWindow"?>
+<zk>
+	<zscript>
+	<![CDATA[
+	com.nzion.domain.Person person = com.nzion.util.Infrastructure.getUserLogin().getPerson();         
+	List favouriteOrganSystems = personService.getPersonOrganSystem(person, true);
+	void move(Component dragged) {
+	self.parent.insertBefore(dragged, self);
+	Object dragedItem = dragged.getValue();
+	Object droppedItem = self.getValue();
+	favouriteOrganSystems.remove(dragedItem);
+	favouriteOrganSystems.add(favouriteOrganSystems.indexOf(droppedItem), dragedItem);
+	]]>
+	}
+</zscript>
+	<window id="personFavouriteOrganSystemsWindow">
+		<div sclass="panelTop">
+		<button label="Save"
+			onClick="personService.savePersonFavouriteOrganSystemWithSortOrder(favouriteOrganSystems);com.nzion.util.UtilMessagesAndPopups.showSuccess()" />
+		</div>
+		<panel title="Organ System">
+		<panelchildren>
+		<div sclass="dataTables_scrollBody" style="overflow: auto; height: 350px;">
+		<listbox model="@{favouriteOrganSystems}">
+			<listhead>
+				<listheader label="Name" />
+				<listheader label="Mandatory" />
+			</listhead>
+			<listitem self="@{each='fos', load-after='self.onReloadRequest'}" value="@{fos}" draggable="true"
+				droppable="true" onDrop="move(event.dragged);">
+				<listcell>
+					<checkbox checked="@{fos.selected}" />
+					<label value="@{fos.organSystem.desc}" />
+				</listcell>
+				<listcell label="Mandatory">
+					<checkbox checked="@{fos.mandatory}"
+						onCheck='self.getParent().getParent().getValue().setSelected(true);Events.postEvent("onReloadRequest",self.getParent().getParent(),null)' />
+				</listcell>
+			</listitem>
+		</listbox>
+		</div>
+		</panelchildren> 
+		</panel>		
+	</window>
+</zk>

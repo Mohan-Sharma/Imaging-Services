@@ -1,0 +1,55 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./pastImageSectionDisplayGrid"?>
+<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:w="http://www.zkoss.org/2005/zk/client" xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	com.nzion.service.SoapNoteService soapNoteService = com.nzion.util.Infrastructure.getSpringBean("soapNoteService");
+	com.nzion.zkoss.composer.ImageSectionComposer imageSectionComposer = arg.get("imageSectionComposer");
+	Set imageSectionFiles = new HashSet(imageSectionComposer.getImageSectionHistory());
+	new HashSet(imageSectionComposer.getImageSectionHistory());
+	</zscript>
+ 	<window id="pastImageSectionDisplayGrid" width="60%" closable="true" title="Image Section History">	
+			<div style="padding:5px">
+				<n:table id="PastFamilyHistoryDisplayGrid" cellpadding="0" cellspacing="0" border="0" class="display">
+					<n:thead>
+						<n:tr>
+							<n:th >File Name</n:th>
+							<n:th >Description</n:th>
+							<n:th >Created By</n:th>
+							<n:th >Visit Date</n:th>
+							<n:th >Action</n:th>
+						</n:tr>
+					</n:thead>
+					<n:tbody>
+						<n:tr forEach="${imageSectionFiles}">
+							<n:td>${each.file.fileName}</n:td>
+							<n:td>${each.file.description}</n:td>
+							<n:td>${each.file.createdBy}</n:td>
+							<n:td>${display:fd(each.visitDate)}</n:td>
+							<n:td>
+							<div>
+							<custom-attributes value="${each}"/>
+								<a class="group" label="View Image" disabled="${imageSectionComposer.soapNoteController.readonly}"
+								onClick='Executions.createComponents("/soap/viewImage.zul",null,
+								com.nzion.util.UtilMisc.toMap("imageFile",((com.nzion.view.ImageSectionFileValueObject)self.getParent().getAttribute("value")).getFile()));' />
+							</div>
+							</n:td>
+						</n:tr>
+					</n:tbody>
+				</n:table>
+		<div sclass="buttonPanel">
+			<button label="Cancel" onClick="pastImageSectionDisplayGrid.detach();"/>
+	   </div>
+				</div>
+		<script type="text/javascript">
+			zk.afterMount(function() { 
+				jq("#PastFamilyHistoryDisplayGrid").dataTable({
+				"bJQueryUI": true,
+				"sPaginationType": "full_numbers", 
+				"aoColumns":
+							[ null, null,null,null,{ "bSortable": false,"sType": "html"} ] 
+						}); 
+			});
+		</script>
+	</window>
+</zk>

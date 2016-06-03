@@ -1,0 +1,140 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientFamilyMemberWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript><![CDATA[
+	        import com.nzion.domain.PatientFamilyMember;   
+	        import com.nzion.domain.emr.FamilyMember;
+	        import com.nzion.zkoss.ext.EntityDropdownRenderer;
+	        import com.nzion.domain.Patient;
+	    	EntityDropdownRenderer nameRenderer = new EntityDropdownRenderer("relationshipName");
+	    	Patient patient=args.get("patient");
+	    	List patientFamilyMembers=args.get("patientFamilyMembers");
+	    	PatientFamilyMember patientFamilyMember = args.get("entity");
+	    	String label="Edit ";
+	    	if(patientFamilyMember == null){
+	    		patientFamilyMember = new PatientFamilyMember();
+	    		patientFamilyMember.setPatient(patient);
+	    		label="New ";
+	    	}
+	    	List familyMembers= commonCrudService.getAll(FamilyMember.class); 
+]]></zscript>
+
+	<window id="patientFamilyMemberWin"  mode="modal" width="60%" position="center" closable="true">
+	<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>${label} Family Member</h:small>
+                  <button type="button" zclass="close" onClick="patientFamilyMemberWin.detach();">×</button>
+            </h:h1>
+         </div>
+			<div class="container-fluid">
+		       <div zclass="row-fluid">
+                 <div zclass="span4">
+					<label value="Relationship Type" mold="required" />
+					<combobox  model="@{familyMembers,save-when='Save.onClick'}" itemRenderer="${nameRenderer}" selectedItem="@{patientFamilyMember.familyMember}"
+							constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" readonly="true"/>
+				</div>
+				 
+				 <div zclass="span2">
+					<label value="Name" mold="required" />
+						<textbox value="@{patientFamilyMember.name,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" id="familyMemberName"/>
+						<span id="lookUpBtn" sclass="linkBtn linkBtnOn" visible="false">
+							<a sclass="lookupBtn">
+								<attribute name="onClick">
+										Map m = new HashMap();
+										m.put("familyMemberName",familyMemberName);
+										m.put("PatientFamilyMember",patientFamilyMember);
+										m.put("internalPanel",internalPanel);
+										Executions.createComponents("/patient/employee_lookup.zul",null,m);
+									</attribute>
+								Lookup
+							</a>
+							<span/>
+						</span>
+				</div>
+				
+				<div zclass="span2" style="margin-top:20px">
+					<label value="Is Employee" />
+					<checkbox checked="@{patientFamilyMember.clinicEmployee,save-when='Save.onClick'}">
+						<attribute name="onCheck">
+							if(self.isChecked()){
+								lookUpBtn.setVisible(true);						
+								familyMemberName.setReadonly(true);
+							}else{
+								lookUpBtn.setVisible(false);						
+								familyMemberName.setReadonly(false);
+							}
+						</attribute>
+					</checkbox>
+				</div>
+				 <div zclass="span2" style="margin-top:20px">
+					<label value="Hide Clinical Data" />
+					<checkbox checked="@{patientFamilyMember.restrictAccess,save-when='Save.onClick'}"/>
+				</div>
+			</div>
+			  <div zclass="row-fluid">
+				<div zclass="span6">
+					<label value="Email" />
+					<email value="@{patientFamilyMember.contacts.email,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" />
+				</div>
+				<div zclass="span3">
+					<label value="Home phone" />
+					<phonebox value="@{patientFamilyMember.contacts.homePhone,save-when='Save.onClick'}" sclass="span12"   />
+				</div>
+				<div zclass="span3">
+					<label value="Office phone" />
+					<phonebox value="@{patientFamilyMember.contacts.officePhone,save-when='Save.onClick'}" sclass="span12"   />
+				</div>
+				</div>
+				<div zclass="row-fluid">
+				<div zclass="span6">
+					<label value="Mobile phone" />
+					<phonebox value="@{patientFamilyMember.contacts.mobileNumber,save-when='Save.onClick'}" sclass="span12" />
+				</div>
+				<div zclass="span6">
+					<label value="Fax number" />
+					<phonebox value="@{patientFamilyMember.contacts.faxNumber,save-when='Save.onClick'}" sclass="span12"  />
+				</div>
+		</div>
+		<div zclass="row-fluid">
+				<div zclass="span6">
+					<label value="Address1"  id="lbladdress1" mold="required" />
+					<textbox rows="2" cols="50" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" value="@{patientFamilyMember.contacts.postalAddress.address1,save-when='Save.onClick'}" id="address1" maxlength="50" constraint="no empty"/>
+				</div>
+				<div zclass="span6">
+					<label value="Address2" id="lbladdress2" />
+					<textbox rows="2" cols="50" sclass="span12"  value="@{patientFamilyMember.contacts.postalAddress.address2,save-when='Save.onClick'}" id="address2" maxlength="50"/>
+				</div>
+				</div>
+				<div zclass="row-fluid">
+				<div zclass="span4">
+					<label value="State" mold="required"  id="lblstate" />
+					<textbox value="@{patientFamilyMember.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick'}"
+					constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"	id="state" maxlength="2" onChange="if(com.nzion.util.UtilValidator.isNotEmpty(self.getValue())){com.nzion.util.UtilDisplay.validateNonDigits(self);self.setValue(self.getValue().toUpperCase());}"/>
+				</div>
+				<div zclass="span4">
+					<label value="City" mold="required"  id="lblcity" />
+					<textbox value="@{patientFamilyMember.contacts.postalAddress.city,save-when='Save.onClick'}" id="city"
+					constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"	onChange="if(com.nzion.util.UtilValidator.isNotEmpty(self.getValue())){com.nzion.util.UtilDisplay.validateNonDigits(self);}" />
+				</div>
+				<div zclass="span4">
+					<label value="Zipcode" mold="required"  id="lblpostalCode" />
+					<zipcodebox value="@{patientFamilyMember.contacts.postalAddress.postalCode,save-when='Save.onClick'}"
+						id="postalCode" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"/>
+				</div>
+		        </div>
+		        
+			</div>
+			<div sclass="panelFoot">
+			<button label="Save" id="Save" zclass="btn-success btn">
+				<attribute name="onClick">
+					if(patientFamilyMember.getId() == null)
+						patientFamilyMembers.add(patientFamilyMember);
+					commonCrudService.save(patientFamilyMember);
+					patientFamilyMemberWin.detach();
+				</attribute>
+			</button>
+			<button label="Cancel" forward="onClick=onCancel"/>
+		</div>
+</window>
+</zk>

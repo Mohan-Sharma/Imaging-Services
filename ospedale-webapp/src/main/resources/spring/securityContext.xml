@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                           http://www.springframework.org/schema/security
+                           http://www.springframework.org/schema/security/spring-security-3.0.xsd">
+	<security:global-method-security secured-annotations="enabled" />
+
+	<security:http auto-config="true">
+		<!-- Restrict URLs based on role -->
+		<security:remember-me  services-ref="rememberMeServices" key="ajaynema"/>
+		<security:intercept-url pattern="/labMaster/*" filters="none" />
+		<security:intercept-url pattern="/login.zhtml" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+		<security:intercept-url pattern="/hl7Upload/*" filters="none" />
+		<security:intercept-url pattern="/sessionTimeOut.zul" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<security:intercept-url pattern="/ccd/*" access="IS_AUTHENTICATED_REMEMBERED" />
+		<security:intercept-url pattern="/forgot-password.zul" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<security:intercept-url pattern="/userAgreementDetails.zul" filters="none" />
+		<security:intercept-url pattern="/zkau/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<security:intercept-url pattern="/css/*.css" filters="none" />
+		<security:intercept-url pattern="/images/*.css" filters="none" />
+		<security:intercept-url pattern="/images/*.jpg" filters="none" />
+		<security:intercept-url pattern="/images/*.gif" filters="none" />
+		<security:intercept-url pattern="/images/*.png" filters="none" />
+		<security:intercept-url pattern="/*.js" filters="none" />
+		<security:intercept-url pattern="/**" access="IS_AUTHENTICATED_REMEMBERED" />
+		<security:intercept-url pattern="/zk/*" access="IS_AUTHENTICATED_REMEMBERED" />
+        <!--<security:intercept-url pattern="/anon/*" filters="none" />-->
+		<security:intercept-url pattern="/anon/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+		<security:intercept-url pattern="/info-for-new-tenant.zhtml" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+		<security:intercept-url pattern="/info-for-new-tenant.zhtml" filters="none"/>
+		<!-- Override default login and logout pages -->
+		<security:form-login login-page="/login.zhtml" default-target-url="/home.zul"
+			authentication-success-handler-ref="authenticationSuccessHandler" authentication-failure-handler-ref="authenticationFailureHandler"
+			authentication-failure-url="/login.zhtml?login_error=1" />
+		<security:logout logout-url="/logout" invalidate-session="true" success-handler-ref="authenticationSuccessHandler" />
+	</security:http>
+
+	<bean id="rememberMeServices" class="com.nzion.security.CustomTokenBasedRememberMeService">
+		<property name="key" value="ajaynema" />
+		<property name="tokenValiditySeconds" value="1209600" />
+		<property name="userDetailsService" ref="userLoginService" />
+		<property name="alwaysRemember" value="false" />
+	</bean>
+
+	<bean id="authenticationSuccessHandler" class="com.nzion.security.AuthenticationSuccessHandler">
+		<property name="userLoginService" ref="userLoginService" />
+		<property name="commonCrudService" ref="commonCrudService" />
+		<property name="passwordCheckStrategies">
+			<list>
+				<bean class="com.nzion.security.passwordcheck.ExpiredPasswordStrategy" />
+				<bean class="com.nzion.security.passwordcheck.ExpirationWarningPasswordStrategy" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="authenticationFailureHandler" class="com.nzion.security.AuthenticationFailureHandler">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+		<property name="passwordPolicyService" ref="passwordPolicyService"></property>
+		<property name="practiceService" ref="practiceService"></property>
+		<property name="defaultFailureUrl" value="/login.zhtml?login_error=1"></property>
+	</bean>
+
+	<security:authentication-manager>
+		<security:authentication-provider user-service-ref="userLoginService" />
+	</security:authentication-manager>
+</beans>

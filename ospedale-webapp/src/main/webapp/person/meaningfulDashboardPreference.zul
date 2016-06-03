@@ -1,0 +1,175 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./dashBoardPreferenceWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		<![CDATA[
+			import com.nzion.domain.report.meaningful.ProviderMeaningfulPreference;
+			import com.nzion.domain.Provider;
+			import com.nzion.util.Infrastructure;
+			com.nzion.service.meaningful.MeaningfulService meaningfulService = com.nzion.util.Infrastructure.getSpringBean("meaningfulService");
+			com.nzion.service.common.CommonCrudService commonCrudService = Infrastructure.getSpringBean("commonCrudService");
+			ProviderMeaningfulPreference providerMeaningfulPreference = meaningfulService.getProviderMeaningfulPreferenceFor((Provider) Infrastructure.getLoggedInPerson());
+			List meaningfulSubTypes = commonCrudService.getAll(com.nzion.domain.report.meaningful.MeaningfulUse.class);
+			void displayLabel(Checkbox checkbox){
+			if (checkbox.isChecked())
+				checkbox.setLabel("Yes");
+			else
+				checkbox.setLabel("No");
+			}
+		]]>
+	</zscript>
+	<window id="dashBoardPreferenceWindow">
+		<div sclass="panelTop">
+			<button label="Save" id="saveButton"
+				onClick="meaningfulService.saveProviderMeaningfulDashboardPreference(providerMeaningfulPreference);com.nzion.util.UtilMessagesAndPopups.showSuccess()" />
+		</div>
+		<panel title="Dashboard Preference">
+			<panelchildren>
+				<n:table width="90%" cellspacing="10" cellpadding="10" style="margin:15px">
+					<n:tr>
+						<n:td style="text-align:right">
+							<label value="Reporting Period:" style="font-weight:bold" />
+						</n:td>
+						<n:td>
+							<listbox id="timePeriodListbox" mold="select" style="margin:1px;padding:1%"
+								selectedItem="@{providerMeaningfulPreference.reportingTimePeriod}">
+								<listitem />
+								<listitem label="Last 30 Days" value="30 Days" />
+								<listitem label="Last 60 Days" value="60 Days" />
+								<listitem label="Last 90 Days" value="90 Days" />
+								<listitem label="Last 6 Months" value="6 Months" />
+								<listitem label="Last 1 Year" value="1 Year" />
+							</listbox>
+						</n:td>
+					</n:tr>
+					<n:tr>
+						<n:td style="text-align:right">
+							<label value="Include Exempt Patient:" style="font-weight:bold" />
+						</n:td>
+						<n:td>
+							<checkbox id="checkbox" label="Yes"  style="margin:1px;padding:2%"
+								checked="@{providerMeaningfulPreference.includeExemptedPatient}">
+								<attribute name="onCreate">
+									if (providerMeaningfulPreference.getIncludeExemptedPatient())
+										self.setLabel("Yes");
+									else
+										self.setLabel("No");
+								</attribute>
+								<attribute name="onCheck">
+									displayLabel(self);
+								</attribute>
+							</checkbox>
+						</n:td>
+					</n:tr>
+					<n:tr>
+					<n:td style="text-align:right">
+							<label value="Immunization Administartion:" style="font-weight:bold" />
+						</n:td>
+						<n:td>
+							<checkbox id="vaccineCheckBox"
+								checked="@{providerMeaningfulPreference.requireImmunizationMeasure}" style="margin:1px;padding:2%">
+								<attribute name="onCreate">
+								<![CDATA[
+									if (providerMeaningfulPreference.getRequireImmunizationMeasure()!=null && providerMeaningfulPreference.getRequireImmunizationMeasure())
+										self.setLabel("Yes");
+									else
+										self.setLabel("No");
+									]]>	
+								</attribute>
+								<attribute name="onCheck">
+									displayLabel(self);
+								</attribute>
+							</checkbox>
+						</n:td>
+					</n:tr>
+					<n:tr>
+					<n:td style="text-align:right">
+							<label value="Referral Require For Medical Reconcilation:" style="font-weight:bold" />
+						</n:td>
+						<n:td>
+							<checkbox id="reconilationCheckBox" style="margin:1px;padding:2%"
+								checked="@{providerMeaningfulPreference.referralRequireForReconilation}">
+								<attribute name="onCreate">
+								<![CDATA[
+									if (providerMeaningfulPreference.getReferralRequireForReconilation()!=null && providerMeaningfulPreference.getReferralRequireForReconilation())
+										self.setLabel("Yes");
+									else
+										self.setLabel("No");
+								]]>	
+								</attribute>
+								<attribute name="onCheck">
+									displayLabel(self);
+								</attribute>
+							</checkbox>
+						</n:td>
+					</n:tr>
+					<n:tr>
+					<n:td style="text-align:right">
+							<label value="Vital Sign Measure Applicable:" style="font-weight:bold" />
+						</n:td>
+						<n:td>
+							<checkbox id="vitalSignCheckBox" style="margin:1px;padding:2%"
+								checked="@{providerMeaningfulPreference.requireVitalSignMeasure}">
+								<attribute name="onCreate">
+								<![CDATA[
+									if (providerMeaningfulPreference.getRequireVitalSignMeasure()!=null && providerMeaningfulPreference.getRequireVitalSignMeasure())
+										self.setLabel("Yes");
+									else
+										self.setLabel("No");
+								]]>	
+								</attribute>
+								<attribute name="onCheck">
+									displayLabel(self);
+									if (self.isChecked()) {
+										vitalSignChoiceCombobox.setDisabled(false);
+										vitalSignChoiceCombobox.setConstraint("no empty:Measure Choice Required");
+									} else {
+										vitalSignChoiceCombobox.setDisabled(true);
+										providerMeaningfulPreference.setVitalSignMeasureChoice(null);
+										vitalSignChoiceCombobox.clearErrorMessage();
+									}
+								</attribute>
+							</checkbox>
+						</n:td>
+					</n:tr>
+					<n:tr>
+					<n:td style="text-align:right">
+					<label value="Vital Sign Measure Choice:" style="font-weight:bold" />
+					</n:td>
+						<n:td>
+							<div width="30%">
+							<combobox id="vitalSignChoiceCombobox" style="margin:1px;padding:7%"
+								selectedItem="@{providerMeaningfulPreference.vitalSignMeasureChoice,save-when='saveButton.onClick'}" disabled="true">
+								<comboitem label="All" value="ALL" />
+								<comboitem label="Height" value="HEIGHT" />
+								<comboitem label="Weight" value="WEIGHT" />
+								<comboitem label="Blood Pressure" value="BP" />
+								<attribute name="onCreate">
+									if (vitalSignCheckBox.isChecked())
+										self.setDisabled(false);
+									else
+										self.setDisabled(true);
+								</attribute>
+							</combobox>
+							</div>
+						</n:td>
+					</n:tr>
+				</n:table>
+				<div height="450px" style="overflow:auto">
+					<listbox checkmark="true" multiple="true" model="@{meaningfulSubTypes}"
+						selectedItem="@{providerMeaningfulPreference.meaningfulUses,converter=com.nzion.view.component.MultipleListitemBindingConverter }">
+						<listhead>
+							<listheader label="Measure Name" />
+							<listheader label="Meaningful Type" />
+						</listhead>
+						<listitem self="@{each='meaningfulSubType'}" value="@{meaningfulSubType}">
+							<listcell label="@{meaningfulSubType.meaningfulSubTypeDescription}" />
+							<listcell label="@{meaningfulSubType.meaningfulType}" />
+						</listitem>
+					</listbox>
+				</div>
+			</panelchildren>
+		</panel>
+	</window>
+</zk>

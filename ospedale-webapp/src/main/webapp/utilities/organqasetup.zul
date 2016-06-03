@@ -1,0 +1,165 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8" id="qa"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./organqaWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+
+	<zscript>
+	<![CDATA[
+	import com.nzion.domain.emr.SoapModule;
+	import com.nzion.service.common.CommonCrudService;
+	import com.nzion.domain.emr.Question;
+	import com.nzion.zkoss.composer.QASetupComposer;
+	CommonCrudService commonCrudService = com.nzion.util.Infrastructure
+			.getSpringBean("commonCrudService");
+	SoapModule selectedSoapModule = (SoapModule) arg.get("selectedSoapModule");
+	boolean displayOrganSystems = ((Boolean) arg.get("displayOrganSystems"))
+			.booleanValue();
+	com.nzion.domain.emr.OrganSystem selectedOrganSystem = null;
+	java.util.List allTemplates = selectedSoapModule.getQaTemplates();
+	QASetupComposer qaSetupComposer = new QASetupComposer();
+	qaSetupComposer.setSelectedSoapModule(selectedSoapModule);
+	]]>
+	</zscript>
+	<window title="" border="none" id="organqaWin" apply="${qaSetupComposer}">
+		<h:table width="100%" cellpadding="0px" cellspacing="0px" style="border:0px">
+			<h:tr>
+				<h:td class="soapNoteContL" onClick="expandRHS(this.id)" style="width:20%;vertical-align:top">
+					<panel title="Templates">
+						<panelchildren>
+							<div align="right">
+								<a sclass="btn btn-mini" label="New Template" onClick="qaSetupComposer.setSelectedQATemplate(null);showNewTemplate();" id="newTemplateBtn"/>
+								<span />
+							</div>
+							<listbox id="allTemplatesBox" model="@{allTemplates,load-after='organqaWin.onReload,newTemplateBtn.onClick'}"
+								height="300px" selectedItem="@{qaSetupComposer.selectedQATemplate}">
+								<!-- <attribute name="onReload">
+									questionPanel.setVisible(true);
+									Listitem li = allTemplatesBox.getSelectedItem();
+									questionSetup.invalidate();
+									Events.postEvent("onSelect",self,null);
+									allTemplatesBox.setSelectedItem(li);
+								</attribute> -->
+								<listitem self="@{each='zk'}" value="@{zk}">
+									<listcell label="@{zk.name}"></listcell>
+									<listcell>
+										<button label="Edit" onClick="((Listitem)self.getParent().getParent()).setSelected(true);qaSetupComposer.setSelectedQATemplate((com.nzion.domain.emr.QATemplate)((Listitem)self.getParent().getParent()).getValue());showNewTemplate();"></button>
+									</listcell>
+								</listitem>
+							</listbox>
+						</panelchildren>
+					</panel>
+				</h:td>
+				<h:td class="soapNoteContL" onClick="expandRHS(this.id)" style="width:20%;vertical-align:top"
+					if="${displayOrganSystems}">
+					<panel title="Organ Systems">
+						<panelchildren>
+							<div sclass="grid clr">
+								<span sclass="linkBtn linkBtnOn">
+									<a sclass="addBtn" label="Add" onClick="seachOrganSystem();" />
+									<span />
+								</span>
+								<span sclass="linkBtn linkBtnOn">
+									<a sclass="delBtn" label="Delete" onClick="deleteOrganSystemFromTemplate();" />
+									<span />
+								</span>
+							</div>
+							<listbox
+								model="@{qaSetupComposer.selectedQATemplate.organSystems,load-after='allTemplatesBox.onSelect,self.onReload,newTemplateBtn.onClick'}" height="300px"
+								id="organSystemsListbox" selectedItem="@{qaSetupComposer.selectedOrganSystem}" onSelect="qaSetupComposer.setSelectedQuestion(null);">
+								<listitem self="@{each='organSystem'}" label="@{organSystem.desc}" value="@{organSystem}"></listitem>
+							</listbox>
+						</panelchildren>
+					</panel>
+				</h:td>
+				<!-- <h:td class="soapNoteContL" onClick="expandRHS(this.id)" style="width:20%;vertical-align:top">
+					<panel title="List of Question" id="questionPanel" visible="false">
+						<panelchildren>
+							<div align="right">
+								<a id="addBtn1" sclass="btn btn-mini" label="New Question"
+									onClick="Question q= new Question();qaSetupComposer.setSelectedQuestion(q);refreshInclude();" />
+								<span />
+							</div>
+							<listbox if="${displayOrganSystems}"
+								model="@{qaSetupComposer.organQuestions,load-after='self.onReload,organSystemsListbox.onSelect,addBtn1.onClick,allTemplatesBox.onSelect'}"
+								id="questionsListbox" checkmark="true" selectedItem="@{qaSetupComposer.selectedQuestion}" onSelect="refreshInclude()">
+								<listitem self="@{each='question'}" value="@{question}" label="@{question.name}"></listitem>
+							</listbox>
+							<listbox unless="${displayOrganSystems}"
+								model="@{qaSetupComposer.questions,load-after='self.onReload,allTemplatesBox.onSelect,addBtn1.onClick'}"
+								id="templateQuestionsListbox" checkmark="true" selectedItem="@{qaSetupComposer.selectedQuestion}" onSelect="refreshInclude();">
+								<listitem self="@{each='ques'}" value="@{ques}" label="@{ques.name}"></listitem>
+							</listbox>
+
+						</panelchildren>
+					</panel>
+				</h:td>
+				<h:td class="soapNoteContR" style="width:40%;vertical-align:top">
+					<zscript>
+						org.zkoss.zul.Listbox listboxForCallback = null;
+						if (displayOrganSystems)
+							listboxForCallback = questionsListbox;
+						else
+							listboxForCallback = templateQuestionsListbox;
+					</zscript>
+					<include id="questionSetup" src="/utilities/answersetup.zul" progressing="true" referencedQASetupComposer="${qaSetupComposer}" questionsListbox="${listboxForCallback}" displayOrganSystems="${false}">
+					</include>
+				</h:td> -->
+			</h:tr>
+		</h:table>
+		<zscript>
+		<![CDATA[
+	void seachOrganSystem() {
+		if (qaSetupComposer.getSelectedQATemplate() != null) {
+			java.util.Map m = new java.util.HashMap();
+			m.put("qaSetupComposer", qaSetupComposer);
+			m.put("organSystemsListbox", organSystemsListbox);
+			org.zkoss.zul.Window window = (Window)Executions.createComponents(
+					"/utilities/searchOrganSystems.zul", organqaWin, m);
+			window.doModal();
+		}
+	}
+
+	void deleteOrganSystemFromTemplate() {
+		java.util.Set selectedItems = organSystemsListbox.getSelectedItems();
+		for (org.zkoss.zul.Listitem each : selectedItems) {
+			if(qaSetupComposer.isQuestionAnswerConfigured()){
+				com.nzion.util.UtilMessagesAndPopups.showError("Cannot be deleted : '"+((com.nzion.domain.emr.OrganSystem)each.getValue()).getDesc()+"' is used in SOAP Note");
+				return;
+			}
+			qaSetupComposer.getSelectedQATemplate().getOrganSystems().remove(each.getValue());
+			commonCrudService.delete(((com.nzion.domain.emr.OrganSystem)each.getValue()).getQuestions());
+			each.detach();
+		}
+		commonCrudService.save(qaSetupComposer.getSelectedQATemplate());
+		//questionsListbox.setModel(new BindingListModelList(Collections.emptyList(),false));
+		qaSetupComposer.setSelectedQuestion(null);
+		//refreshInclude();
+	}
+	
+	/* void refreshInclude() {
+		if (displayOrganSystems) {
+			questionSetup.setDynamicProperty("questionsListbox",
+					questionsListbox);
+			questionSetup.setDynamicProperty("displayOrganSystems", true);
+		} else {
+			questionSetup.setDynamicProperty("questionsListbox",
+					templateQuestionsListbox);
+			questionSetup.setDynamicProperty("displayOrganSystems", false);
+		}
+		questionSetup.setDynamicProperty("referencedQASetupComposer",qaSetupComposer);
+		questionSetup.invalidate();
+	} */
+	void showNewTemplate() {
+		java.util.Map m = new java.util.HashMap();
+		m.put("allTemplates", allTemplates);
+		m.put("qaSetupComposer", qaSetupComposer);
+		m.put("selectedSoapModule",selectedSoapModule);
+		org.zkoss.zul.Window window = (Window)Executions.createComponents(
+				"/utilities/newTemplate.zul", organqaWin, m);
+		window.doModal();
+	}
+]]>
+	</zscript>
+	</window>
+</zk>

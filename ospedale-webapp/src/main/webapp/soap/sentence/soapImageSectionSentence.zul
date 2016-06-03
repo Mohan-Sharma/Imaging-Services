@@ -1,0 +1,19 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./imageSectionSentenceWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	import com.nzion.domain.emr.soap.*;
+	import com.nzion.zkoss.composer.SoapSentenceComposer;
+	SoapSentenceComposer sentenceComposer = (SoapSentenceComposer) arg.get("controller");
+	com.nzion.zkoss.composer.PatientSoapNoteController soapNoteController = sentenceComposer == null? patientSoapNoteController:sentenceComposer.getSoapNoteController();
+	ImageSection imageSection = (ImageSection) soapNoteController.getSoapSection(ImageSection.class,false);
+	com.nzion.zkoss.composer.ImageSectionComposer imageSectionComposer = new com.nzion.zkoss.composer.ImageSectionComposer();
+	</zscript>
+	<div id="imageSectionSentenceWin" style="margin-left:10px">
+		<n:h4>${imageSection.soapModule.moduleDescription}</n:h4>
+		<n:br/>
+				<listbox model="@{imageSection.files}" style="border:0px" oddRowSclass="none" itemRenderer="${imageSectionComposer}"/>
+	</div>
+</zk>

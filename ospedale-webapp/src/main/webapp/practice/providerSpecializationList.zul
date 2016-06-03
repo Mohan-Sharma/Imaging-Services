@@ -1,0 +1,39 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./profileSpecializations"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+com.nzion.domain.Provider provider = commonCrudService.getById(com.nzion.domain.Provider.class, com.nzion.util.Infrastructure.getLoggedInPerson().getId());
+Set specialities =  provider.getSpecialities();
+</zscript>
+<window id="profileSpecializations">
+<panel title="Specialities">
+<panelchildren>
+<separator/>
+<a href="#patSearchRes" id="patSearch" label="Add/Edit" sclass="addBtn z-a">
+	<attribute name="onClick">
+		Executions.createComponents("/practice/providerSpecializations.zul",null,com.nzion.util.UtilMisc.toMap("provider",provider,"btnSearch",btnSearch));
+	</attribute>
+</a>
+<separator/>
+<button label="Search" visible="false" id="btnSearch">
+<attribute name="onClick">
+specialities =  provider.getSpecialities();
+</attribute>
+</button>
+	<div height="100px" style="overflow: auto;">
+	<listbox model="@{specialities,load-after='btnSearch.onClick'}" id="searchResultGrid" >
+		<listhead>
+			<listheader label="Code" />
+			<listheader label="Name" />
+		</listhead>
+		<listitem self="@{each='specialitie'}" value="@{specialitie}">
+			<listcell label="@{specialitie.code}"/>
+			<listcell label="@{specialitie.description}"/>
+		</listitem>
+	</listbox>
+	</div>
+	</panelchildren>
+</panel>
+</window>
+</zk>

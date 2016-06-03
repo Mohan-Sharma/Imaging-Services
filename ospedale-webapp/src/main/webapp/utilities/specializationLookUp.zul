@@ -1,0 +1,22 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<hbox width="100%">
+	<textbox id="specializationTxtBox" forward="onChange=onChange" readonly="true" value="${arg.value}"/>
+		<n:div style="width:70px;">
+		<span sclass="linkBtn linkBtnOn">
+		<a sclass="lookupBtn" label="Look up">
+		<attribute name="onClick">
+			Executions.createComponents("/utilities/speciality-look-up.zul",null,com.nzion.util.UtilMisc.toMap("specializationTxtBox",specializationTxtBox));
+		</attribute>
+		</a>
+		<span />
+	</span>
+	</n:div>
+	</hbox>
+	<zscript>
+	com.nzion.domain.Speciality speciality = arg.get("speciality");
+	if(speciality!=null)
+		specializationTxtBox.setValue(speciality.getDescription());
+	</zscript>
+</zk>

@@ -1,0 +1,224 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./searchResultsDiv"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?xel-method prefix="d" name="format"  class="com.nzion.util.UtilDateTime"  signature="java.lang.String format(java.util.Date)"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.w3.org/1999/xhtml">
+	<style>
+	#patSearchRes {
+	overflow:hidden;
+	width:100%;
+	}
+	.panelCont label, .panelCont input, .panelCont select {
+	display:inline;
+	}
+	.z-combobox-rounded-inp, .z-bandbox-rounded-inp, .z-datebox-rounded-inp, .z-timebox-rounded-inp, .z-spinner-rounded-inp, .z-doublespinner-rounded-inp, .z-combobox-inp, .z-bandbox-inp, .z-datebox-inp, .z-timebox-inp, .z-spinner-inp, .z-doublespinner-inp{
+	width:135px;
+	}
+	</style>
+	<zscript>
+	com.nzion.service.common.EnumerationService enumerationService=com.nzion.util.Infrastructure.getSpringBean("enumerationService");
+	List enumerationGender=enumerationService.getRelevantEnumerationsByType("GENDER");
+	</zscript>
+	<div zclass="boxStyle" style="overflow:auto;height:100%" id="searchResultsDiv">
+		   <div zclass="customLeftBox">
+		   	<vbox align="center"> 		 
+		   	   <div style="text-align:left;padding-top:3px;padding-left:21px">	     	    
+   			    <div style="width:200px;text-align:center;"><label zclass="whiteHeading" value="Search criteria"/></div>   			  
+					<div>
+						  <div > 
+							  <label value="MRN" zclass="whiteSubHeading"/>
+						  </div>
+								<textbox id="paccountNumber" value="@{patient.accountNumber}" style="text-align:left;background-color:#fff;width:150px;" />
+					</div>
+					<div>
+					    <div >
+							<label value="First Name" zclass="whiteSubHeading"/>
+							</div>
+							 <textbox id="pfirstName" value="@{patient.firstName}" style="text-align:left;background-color:#fff;width:150px;"/>
+					    
+				    </div>
+					<div >
+					    <div >
+							<label value="Last Name" zclass="whiteSubHeading"/>	
+							</div>			
+							<textbox id="plastName" value="@{patient.lastName}" style="text-align:left;background-color:#fff;width:150px;"/>
+					   
+				    </div>
+					<div >
+					     <div >
+							<label value="Gender" zclass="whiteSubHeading"/>	
+							</div>
+						<div>				
+							<!-- <enumeration id="gender"  enumType="GENDER" style="text-align:left;background:#fff;width:150px;" selectedItem="@{patient.gender}"/>  -->
+							<combobox id="gender" model="@{enumerationGender}" selectedItem="@{patient.gender}"> </combobox>
+					    </div>
+				    </div>
+					<div>
+				        <div >
+						   <label value="Mobile Phone" zclass="whiteSubHeading"/>
+						 </div>		
+						   <phonebox id="mobilePhone"  value="@{patient.contacts.mobileNumber}" style="text-align:left;background-color:#fff;width:150px;"/>
+				   		
+				    </div>
+					<div>
+				    	<div >
+							 <label value="Home phone" zclass="whiteSubHeading"/>	
+							 </div>			
+							<phonebox id="homePhone"  value="@{patient.contacts.homePhone}" style="text-align:left;background-color:#fff;width:150px;"/>
+				    	
+				    </div>
+					<div>
+					   	 <div >
+							 <label value="Email" zclass="whiteSubHeading"/>	
+							 </div>		
+							<textbox id="emailId"  value="@{patient.contacts.email}" style="text-align:left;background-color:#fff;width:150px;"/>
+				     </div>
+				    <div id="patSearchRes" align="center" >
+				    	<separator></separator>
+						<hlayout >						  
+						  
+						      <button  label="Search" id="search" zclass="btn-primary btn">
+						      	<attribute name="onClick"><![CDATA[
+						      	    com.nzion.service.common.impl.ApplicationEvents.postEvent(com.nzion.enums.EventType.PATIENT_SEARCH,com.nzion.util.ApplicationEventsHelper.buildEventLogForPatientSearch(new String[]{"accountNumber","firstName","lastName","gender","contacts.email","contacts.mobileNumber","contacts.homePhone"}, patient));                              
+	                                com.nzion.domain.Enumeration selectedGender = gender.getSelectedItem() == null ? null : gender.getSelectedItem().getValue();
+						      		if(UtilValidator.isEmpty(paccountNumber.getValue()) && UtilValidator.isEmpty(pfirstName.getValue()) && UtilValidator.isEmpty(plastName.getValue()) && selectedGender == null && UtilValidator.isEmpty(emailId.getValue()) && UtilValidator.isEmpty(mobilePhone.getValue()) && UtilValidator.isEmpty(homePhone.getValue()))
+						      	 		Messagebox.show("Please Provide Any Search Criteria","Warning",1,null);
+							      	 else{
+						      		 patientList = commonCrudRepository.simulateExampleSearch(new String[]{"accountNumber","firstName","lastName","gender","contacts.email","contacts.mobileNumber","contacts.homePhone"}, patient);
+	      				      			lblNoRecFound.setVisible(patientList == null || patientList.size() == 0);
+							      	}
+						      		]]></attribute>
+						      </button>
+							      <button zclass="btn-primary btn" label="New Patient" onClick='Executions.getCurrent().sendRedirect("/patient/patientWrapper.zul","_blank")' />
+						      </hlayout>
+						     <separator></separator>
+					 </div>
+				</div>
+			</vbox>		
+		</div>
+		<!--Left Search  Panel ends-->
+		<div style="width:81%;vertical-align:top;float:left;">  
+		<div style="width:100%;vertical-align:top;">		
+			<panel title="Patient Search Result" id="searchPanel" style="width:100%;vertical-align:top;">
+				<panelchildren>		
+					<div   style="overflow:auto;vertical-align:top;" width="100%">
+					<zscript>
+					import com.nzion.util.UtilValidator;
+					 List patientLiset = (List) desktop.getAttribute("patients");
+					 com.nzion.domain.Patient patient = desktop.getAttribute("patient");
+					//Enumeration enumeration = patient.getGender();
+					// claimTypes.add(0, null);
+					 if(patient == null)
+					     patient = new com.nzion.domain.Patient();
+					</zscript>
+						<grid id="patientSearchDisplayGrid" model="@{patientList, load-after='search.onClick'}" style="border:none;" width="100%">
+							<rows>
+							<row self="@{each='patient'}" value="@{patient}" context="contextMenu" forward="onDoubleClick=onPatientSelect">
+							<!--  <attribute name="onClick">
+								Map m = new HashMap();
+								m.put("entity",self.getValue());
+								Executions.createComponents("/patient/viewpatient.zul",(Component)desktopScope.get("contentArea"),m);
+								searchPanel.detach();
+							</attribute>  -->
+								<h:table width="100%">
+								<h:tr>
+								<h:td width="50px">
+								<image width="50px" height="50px" hover="@{patient,converter='com.nzion.view.component.GenderImageConverter'}" style="display:block">
+									<attribute name="onClick">
+										Executions.getCurrent().sendRedirect("/patient/viewPatientWrapper.zul?patientId="+self.getParent().getParent().getParent().getParent().getValue().getId(),"_blank");
+									</attribute>
+								</image>
+								</h:td>
+								<h:td width="300px"  rowspan="2" align="left">
+									<div width="200px" style="margin-left:10px;">
+									<label value="@{patient.salutation}" />
+									<space/>
+									<name object="@{patient}">
+									<!-- <attribute name="onClick">
+								         Executions.getCurrent().sendRedirect("/patient/viewPatientWrapper.zul?patientId="+self.getParent().getParent().getParent().getParent().getParent().getValue().getId(),"_blank");
+									</attribute> -->
+									
+									</name>
+									</div>
+									<h:br/>
+									<div width="200px" style="margin-left:10px;">
+									<label value="@{patient.contacts.postalAddress}" />
+									</div>
+								</h:td>
+								<h:td width="150px"  rowspan="2" align="left">
+								<div width="150px" align="left">
+								<!-- <attribute name="onClick">
+								Executions.getCurrent().sendRedirect("/patient/viewPatientWrapper.zul?patientId="+self.getParent().getParent().getParent().getParent().getValue().getId(),"_blank");
+									</attribute> -->
+								<label value="@{patient.dateOfBirth,converter='com.nzion.view.component.DateConverter'}" />
+								</div>
+								</h:td>
+								<h:td width="100px"  rowspan="2" align="left">
+								<div width="100px" align="left">
+								<!-- <attribute name="onClick">
+								Executions.getCurrent().sendRedirect("/patient/viewPatientWrapper.zul?patientId="+self.getParent().getParent().getParent().getParent().getValue().getId(),"_blank");
+									</attribute> -->
+								<label value="@{patient.age}" />
+								</div>
+								</h:td>
+								<h:td width="100px"  rowspan="2" align="left">
+								
+								<div width="100px" align="left">
+								<!-- <attribute name="onClick">
+								Executions.getCurrent().sendRedirect("/patient/viewPatientWrapper.zul?patientId="+self.getParent().getParent().getParent().getParent().getValue().getId(),"_blank");
+									</attribute> -->
+								 <label value="@{patient.gender}" />
+								</div>
+								</h:td>
+								<h:td width="380px"  rowspan="2" align="left">
+									<label value="MRN" style="width:100px;"/>
+								 	<label value="@{patient.accountNumber}" />
+								 	<h:br/>
+								</h:td>
+								<h:td align="left" width="200px">
+									 <vbox width="200px">
+									 	<hbox width="200px">
+										 <image src="../images/email.png" width="10px" height="10px" style="cursor:pointer !important;cursor:hand  cursor:default;"/>
+										 <label value="@{patient.contacts.email}"/>
+										 </hbox>
+									 	<hbox width="200px">
+										 <image src="../images/mobile.png" width="10px" height="10px" style="cursor:pointer !important;cursor:hand  cursor:default;"/>
+										 <label value="@{patient.contacts.mobileNumber}"/>
+										 </hbox>
+									 	<hbox width="200px">
+									 	 <image src="../images/contact.png"  width="10px" height="10px" style="cursor:pointer !important;cursor:hand  cursor:default;"/>
+										 <label value="@{patient.contacts.homePhone}"/>
+										 </hbox>
+										<hbox width="200px"> 
+										<a  style="margin:20px;" label="Print ID Card">
+										<attribute name="onClick">
+											Executions.getCurrent().sendRedirect("/patient/printPatientIdCard.zul?patientId="+self.getParent().getParent().getParent().getParent().getParent().getParent().getValue().getId(),"_clinicalRecords");</attribute>
+										</a>
+										</hbox>
+									 </vbox>
+								</h:td>
+								</h:tr>
+							</h:table>
+							</row>
+							</rows>
+						</grid>
+						<div visible="false" id="lblNoRecFound" onCreate='self.setVisible(desktop.getAttribute("patients") != null &amp;&amp; ((List) desktop.getAttribute("patients")).size() == 0)'>
+							<label value="No records available"/>
+						    <a  label="(Click here to create a new patient)">
+							    <attribute name="onClick">
+							    	String url = "/patient/patientWrapper.zul?fname="+(patient.getFirstName()==null?"":patient.getFirstName())+"&amp;lname="+(patient.getLastName()==null?"":patient.getLastName())+"&amp;genderid="+(patient.getGender()==null?"":patient.getGender().getEnumId()+"&amp;emailId="+(patient.getContacts().getEmail()==null?"":patient.getContacts().getEmail())+"&amp;mobilePh="+(patient.getContacts().getMobileNumber()==null?"":patient.getContacts().getMobileNumber())+"&amp;homePh="+(patient.getContacts().getHomePhone()==null?"":patient.getContacts().getHomePhone()));
+							    	Executions.getCurrent().sendRedirect(url,"_blank");
+							    </attribute>
+						    </a>
+					    </div>
+						<menupopup onOpen='if(event.isOpen())self.setAttribute("patient", event.getReference().getValue())' id="contextMenu">
+							<menuitem label="Copy Patient" onClick='sessionScope.put("COPY_PATIENT", self.parent.getAttribute("patient"));'/>
+						</menupopup>
+					</div>	
+				</panelchildren>
+			</panel>
+		</div>
+		</div>  
+  </div>
+</zk>

@@ -1,0 +1,77 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./observationWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	        import com.nzion.domain.emr.Observation;          
+			Observation observation = (Observation)Executions.getCurrent().getArg().get("entity");
+			observation = observation == null ? new Observation() : commonCrudService.getById(Observation.class,observation.getId());
+			List uoms = commonCrudService.getAll(com.nzion.domain.emr.UnitOfMeasurement.class);
+			com.nzion.zkoss.ext.EntityDropdownRenderer dropdownRenderer = com.nzion.zkoss.ext.EntityDropdownRenderer.DEFAULT_INSTANCE;
+]]></zscript>
+
+	<window id="observationWin" mode="modal" width="40%" position="center,top" closable="true" title="Observation">
+		<div width="97%" style="padding:5px">
+			<panel title="Add/Edit Observation">
+					<panelchildren>
+						<div sclass="panelCont">
+							<div>
+								<label value="Name" />
+								<label value=" *" zclass="labelReq"/>
+								<textbox value="@{observation.name,save-when='Save.onClick'}" constraint="no empty" />
+							</div>
+							<div width="30%">
+								<label value="Unit Of Measurement" />
+								<combobox model="@{uoms}" itemRenderer="${dropdownRenderer}" readonly="true" selectedItem="@{observation.uom,save-when='Save.onClick'}"/>
+							</div>
+						</div>
+					</panelchildren>
+			</panel>
+			<div sclass="panelFoot" />
+			<separator/>					
+			<panel title="Collection Names">
+			<panelchildren>
+				<label value="Collection Name"/>
+				<label value=" *" zclass="labelReq"/>
+				<textbox id="collectionNameTxtBox" style="margin:5px"/>
+					<a href="#" class="addBtn" label="Add a collection name" id="addcollectionNamesBtn">
+							<attribute name="onClick">
+								if(collectionNameTxtBox.getValue().isEmpty())
+											throw new WrongValueException(collectionNameTxtBox, "Cannot Be Empty");	
+								observation.getCollectionNames().add(collectionNameTxtBox.getValue());				
+								collectionNameTxtBox.setValue(null);
+							</attribute>
+					</a>
+					<listbox model="@{observation.collectionNames,load-after='self.onReloadRequest,addcollectionNamesBtn.onClick'}" id="collectionNameListBox">
+						<listhead>
+							<listheader label="Collection Names"/>		
+						</listhead>
+						<listitem self="@{each='collectionName'}" value="@{collectionName}">
+							<listcell>
+								<label value="@{collectionName}"/>
+								<image src="/images/cross.png" align="right" onClick='observation.getCollectionNames().remove(self.getParent().getParent().getValue());Events.postEvent("onReloadRequest",collectionNameListBox,null)'/>
+							</listcell>
+					   </listitem>
+					</listbox>
+				</panelchildren>
+		</panel>
+			<div sclass="panelFoot" />
+			<separator/>
+			<div sclass="panelFoot">
+			<button label="Save" id="Save" >
+				<attribute name="onClick">
+				if(com.nzion.util.UtilValidator.isEmpty(observation.getCollectionNames())){
+					throw new WrongValueException(collectionNameTxtBox,"Add atleast one collection name");
+					return;
+					}
+					commonCrudService.save(observation);
+					com.nzion.util.UtilMessagesAndPopups.showSuccess();
+					observationWin.detach();
+				</attribute>
+			</button>
+			<button label="Cancel" forward="onClick=onCancel"/>
+		</div>
+		</div>
+	</window>
+
+</zk>

@@ -1,0 +1,38 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./newPatientNotes"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?component name="enumeration" class="com.nzion.view.component.EnumerationDropdown"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import com.nzion.zkoss.composer.PatientNotesController;
+	PatientNotesController newPatientNotesController = new PatientNotesController();
+]]></zscript>
+	<window id="newPatientNotes"  apply="${newPatientNotesController}" closable="true" title="Note" >
+		<zscript><![CDATA[
+	Tab notesTab = (Tab) Executions.getCurrent().getArg().get("notesTab");
+]]></zscript>
+	<vbox>
+		<label id="lblNoteType" value="Note Type" />
+		<enumeration enumType="NOTE_TYPE" selectedItem="@{vo.noteType,save-when='Save.onClick'}"
+			id="noteType" autodrop="false" style="width:200px;"/>
+		<hbox>
+			<label id="lblNoteContent" value="Note Content" />
+			<span zclass="labelReq">
+				<html><![CDATA[*]]></html>
+			</span>
+		</hbox>
+		<textbox multiline="true" value="@{vo.noteContent,save-when='Save.onClick'}" focus="true"
+			constraint="no empty" rows="5" cols="100">
+		</textbox>
+	</vbox>
+	<div sclass="panelFoot">
+		<button id="Save" label="Save">
+			<attribute name="onClick"><![CDATA[
+org.zkoss.zk.ui.event.Events.postEvent(org.zkoss.zk.ui.event.Events.ON_CLICK, notesTab, null);
+newPatientNotes.detach();
+]]>
+			</attribute>
+			</button>
+		</div>
+</window>
+</zk>

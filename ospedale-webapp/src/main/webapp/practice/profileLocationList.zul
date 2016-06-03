@@ -1,0 +1,48 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./profileLocation"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+com.nzion.domain.Person person = commonCrudService.getById(com.nzion.domain.Person.class, com.nzion.util.Infrastructure.getLoggedInPerson().getId());
+Set locationList = person.getLocations();
+</zscript>
+<window id="profileLocation">
+<panel title="Locations">
+<panelchildren>
+
+<separator/>
+<a href="#patSearchRes" id="patSearch" label="Add/Edit" sclass="addBtn z-a">
+	<attribute name="onClick">
+		Executions.createComponents("/practice/profileLocation.zul",null,com.nzion.util.UtilMisc.toMap("person",person,"btnSearch",btnSearch));
+	</attribute>
+</a>
+<separator/>
+<button label="Search" visible="false" id="btnSearch">
+<attribute name="onClick">
+locationList = person.getLocations();
+</attribute>
+</button>
+<div height="100px" style="overflow: auto;">
+	<listbox model="@{locationList,load-after='btnSearch.onClick'}" id="searchResultGrid">
+		<listhead>
+			<listheader label="Code" />
+			<listheader label="Location Name" />
+			<listheader label="City"/>
+			<listheader label="State"/>
+			<listheader label="Office Phone"/>
+			<listheader label="Email"/>
+		</listhead>
+		<listitem self="@{each='location'}" value="@{location}">
+			<listcell label="@{location.code}"/>
+			<listcell label="@{location.description}"/>
+			<listcell label="@{location.contacts.postalAddress.city}"/>
+			<listcell label="@{location.contacts.postalAddress.stateProvinceGeo}"/>
+			<listcell label="@{location.contacts.officePhone}"/>
+			<listcell label="@{location.contacts.email}"/>
+		</listitem>
+	</listbox>
+	</div>
+	</panelchildren>
+</panel>
+</window>
+</zk>

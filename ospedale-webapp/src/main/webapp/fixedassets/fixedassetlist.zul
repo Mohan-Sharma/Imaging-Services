@@ -1,0 +1,11 @@
+<?page title="Fixed Assets" contentType="text/html;charset=UTF-8"?>
+<zk>
+<zscript>
+setPageTitle("Fixed Assets", "");
+</zscript>
+	<window>
+		<screen width="100%" pagetitle="Fixed Assets" listtitle="List of Consultation Room" addpage="fixedAssetAdd" hidedeletebtn="true"
+				entityclass="com.nzion.domain.FixedAsset" fields="fixedAssetName,description,active"
+				labels="Name,Description,Active" addmodepopup="true" />
+	</window>
+</zk>

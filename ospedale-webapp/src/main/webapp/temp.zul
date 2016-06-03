@@ -1,0 +1,218 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./createProduct"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import  com.nzion.oms.zkoss.ProductManagementController;; 
+	import com.nzion.service.common.CommonCrudService;
+	CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	ProductManagementController productController = null;
+	com.nzion.domain.product.Product productArg = arg.get("entity");
+	if(productArg != null){
+		productController = new ProductManagementController(productArg);
+	}
+	else
+	   productController = new ProductManagementController();
+	com.nzion.domain.product.ProductDetails.ProductType[] productTypesList = com.nzion.domain.product.ProductDetails.ProductType.values();
+	List productCategories = commonCrudService.getAll(com.nzion.domain.product.ProductCategory.class);
+]]></zscript>
+	<div id="createProduct" apply="${productController}">
+	<panel title="${c:l('productDetails')}">
+		<panelchildren>
+			<div class="panelCont divCol2">
+				<div>
+					 <label value="${c:l('productType')}" zclass="labelReqNopad"/>
+					 <n:strong class="labelReq">*</n:strong>
+					 <combobox constraint="no empty" model="@{productTypesList}" id="category" readonly="true" selectedItem="@{productController.product.productDetails.productType}">
+					 	<comboitem self="@{each}" label="@{each}" value="@{each}"/>
+					 </combobox>
+				</div>
+				<div>
+					 <label value="Product Category" zclass="labelReqNopad"/>
+					 <n:strong class="labelReq">*</n:strong>
+					 <combobox constraint="no empty" model="@{productCategories}" id="productCategoriesCombobox" readonly="true" selectedItem="@{productController.product.productCategory}">
+					 	<comboitem self="@{each='pc'}" label="@{pc.categoryName}" value="@{pc}"/>
+					 </combobox>
+				</div>
+				<div>
+					<label value="${c:l('productCode')}" zclass="labelReqNopad"/>
+					<n:strong class="labelReq">*</n:strong>	
+					<textbox value="@{productController.product.productDetails.productCode}" constraint="no empty"/>
+				</div>
+				<div>
+					<label value="${c:l('productName')}" zclass="labelReqNopad"/>
+					<n:strong class="labelReq">*</n:strong>	
+					<textbox value="@{productController.product.productDetails.productName}" constraint="no empty"/>
+				</div>
+				<div>
+					<label value="${c:l('productDisplay')}"/>
+					<textbox value="@{productController.product.productDetails.productDisplayName}"/>
+				</div>
+				<div>
+					<label value="Internal Name"/>
+					<textbox value="@{productController.product.productDetails.internalName}"/>
+				</div>
+			</div>
+			<div class="panelCont divCol2">
+				<div>
+					<label value="Brand Name"/>
+					<textbox value="@{productController.product.productDetails.brandName}"/>
+				</div>							
+				<div>
+					<label value="Perishable" zclass="labelReqNopad"/>
+					<n:strong class="labelReq">*</n:strong>	
+					<combobox constraint="no empty">
+						<comboitem label="Yes" onClick="productController.getproduct().getProductDetails().setPerishable(true);"/>
+						<comboitem label="No"  onClick="productController.getproduct().getProductDetails().setPerishable(false);"/>
+					</combobox>
+				</div>	
+			 	<div>
+					 <label value="${c:l('returnable')}"/>
+					 <combobox id="returnable">
+						<comboitem label="Yes" onClick="productController.getproduct().getProductDetails().setReturnable(true)"/>
+						<comboitem label="No"  onClick="productController.getproduct().getProductDetails().setReturnable(false)"/>
+					</combobox>
+				</div>
+				<div>
+					<label value="${c:l('includeInPromotions')}" />
+					<combobox id="includeInPromotions">
+						<comboitem label="Yes" onClick="productController.getproduct().getProductDetails().setIncludeInPromotions(true)"/>
+						<comboitem label="No"  onClick="productController.getproduct().getProductDetails().setIncludeInPromotions(false)"/>
+					</combobox>
+				</div>
+				<div>
+					<label value="${c:l('taxable')}"/>
+					<combobox id="taxable">
+						<comboitem label="Yes" onClick="productController.getproduct().getProductDetails().setTaxable(true)"/>
+						<comboitem label="No"  onClick="productController.getproduct().getProductDetails().setTaxable(false)"/>
+					</combobox>
+				</div>
+			</div>
+		</panelchildren>
+	</panel>
+	<div sclass="panelFoot"/>
+	<panel title="${c:l('unitOfMeasurement')}">
+		<panelchildren>
+		 <div class="panelCont divCol2">
+				<div>
+					<label value="Base Purchase UOM" zclass="labelReqNopad"/>
+					<n:strong class="labelReq">*</n:strong>	
+					<combobox constraint="no empty" model="@{productController.uomList}" selectedItem="@{productController.product.productDetails.basePurchaseUom}">
+						<comboitem self="@{each='basePurchase'}" label="@{basePurchase}" value="@{basePurchase}"/> 
+					</combobox>
+				</div>
+				<div>
+				    <n:table>
+						  <n:tr><n:td>						
+							<label value="Select Purchase UOM" />				
+							 </n:td>
+							<n:td>
+								<div style="overflow:auto; -moz-box-shadow: 0 2px 6px 0 rgba(147, 147, 202, 0.4) inset;border:1px solid #86A4BE" height="150px"  width="200px" >
+								<listbox  model="@{productController.uomList}" multiple="true" checkmark="true" 
+									selectedItem="@{productController.product.productDetails.purchaseUom, converter=com.nzion.view.component.MultipleListitemBindingConverter}"> 
+								<listhead>
+								<listheader label="Uom"/>
+								</listhead>
+								<listitem self="@{each='purchaseUom'}" label="@{purchaseUom}" value="@{purchaseUom}">
+								</listitem>
+								</listbox>
+								</div>
+							</n:td>
+							</n:tr>
+					</n:table>			
+				</div>
+			</div>
+			<div class="panelCont divCol2">
+				<div>
+					<label value="Base Sale UOM" zclass="labelReqNopad"/>
+					<n:strong class="labelReq">*</n:strong>	
+					<combobox constraint="no empty" model="@{productController.uomList}" selectedItem="@{productController.product.productDetails.baseSaleUom}">
+						<comboitem self="@{each='baseSaleUom'}" label="@{baseSaleUom}" value="@{baseSaleUom}"/> 
+					</combobox>
+				</div>
+				<div>
+				    <n:table>
+						  <n:tr><n:td>						
+							<label value="Select Sale UOM" />				
+							 </n:td>
+							<n:td>
+								<div style="overflow:auto; -moz-box-shadow: 0 2px 6px 0 rgba(147, 147, 202, 0.4) inset;border:1px solid #86A4BE" height="150px"  width="200px" >
+								<listbox  model="@{productController.uomList}" multiple="true" checkmark="true" 
+									selectedItem="@{productController.product.productDetails.saleUom, converter=com.nzion.view.component.MultipleListitemBindingConverter}"> 
+								<listhead>
+								<listheader label="Uom"/>
+								</listhead>
+								<listitem self="@{each='saleUom'}" label="@{saleUom}" value="@{saleUom}">
+								</listitem>
+								</listbox>
+								</div>
+							</n:td>
+							</n:tr>
+					</n:table>			
+				</div>
+			</div>
+		</panelchildren>
+	</panel>
+	<div sclass="panelFoot"/>
+	<panel title="${c:l('pricing')}">
+	<panelchildren>
+		<div class="panelCont panelPadding">
+		<separator/>
+		<a href="#patSearchRes" id="btnAdd" label="Add" sclass="addBtn z-a">
+		<attribute name="onClick">
+			productController.getProduct().addPricingAndInvalidatePresentEffectivePricing(new com.nzion.domain.product.pricing.Pricing());
+		</attribute>
+		</a>
+		</div>
+		<separator/>
+		<div height="100px" style="overflow: auto;" width="100%">
+			<listbox model="@{productController.product.salePricings,load-after='btnAdd.onClick,self.onReloadReq'}" id="searchResultGrid" width="100%">
+				<listhead>
+					<listheader label="Sale Price" />
+					<listheader label="MRP" />
+					<listheader label="Effective From"/>
+					<listheader label="Effective To"/>
+					<listheader label="Action"/>
+				</listhead>
+				<listitem self="@{each='pricing'}" value="@{pricing}">
+					<listcell>
+					<textbox value="@{pricing.price}" constraint="no empty"/>
+					</listcell>
+					<listcell>
+					<textbox value="@{pricing.mrp}" constraint="no empty"/>
+					</listcell>
+					<listcell>
+					<datebox value="@{pricing.effectivePeriod.fromDate}"/>
+					</listcell>
+					<listcell>
+						<datebox value="@{pricing.effectivePeriod.thruDate}"/>
+					</listcell>
+					<listcell>
+					<a href="#" class="delBtn" >
+						<attribute name="onClick">	
+							productController.getProduct().getSalePricings().remove(self.getParent().getParent().getValue());
+							Events.postEvent("onReloadReq",searchResultGrid,null);
+						</attribute>
+	   				</a>
+					</listcell>
+				</listitem>
+			</listbox>
+		</div>		
+	</panelchildren>
+	</panel>
+	<div sclass="panelFoot"/>
+	<separator/>
+	<div sclass="panelFoot" align="center">
+		<button label="Save" id="Save" sclass="saveBtn">
+			<attribute name="onClick">			 
+			 productController.getProduct().getProductDetails().setProductType((com.nzion.domain.product.ProductDetails.ProductType)category.getSelectedItem().getValue());			 
+			 productController.save();
+			 appendContent("productList");
+			</attribute>
+		</button>
+		<button label="Cancel" onClick='appendContent("productList")' sclass="cancelBtn"/>
+	</div>
+	<separator/>
+	</div>
+</zk>

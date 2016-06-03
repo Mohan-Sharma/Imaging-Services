@@ -1,0 +1,91 @@
+<?page title="New Telephone" contentType="text/html;charset=UTF-8"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./editTelephone"?>
+
+<zk xmlns:h="http://www.zkoss.org/2005/zk/native" xmlns:a="http://www.zkoss.org/2005/zk/annotation">
+
+	<zscript><![CDATA[
+	Long patientId = (Long) Executions.getCurrent().getArg().get("patientId");
+	com.nzion.zkoss.composer.ContactMechController contactMechController = new com.nzion.zkoss.composer.ContactMechController();
+	com.nzion.domain.Patient p = new com.nzion.domain.Patient();
+p.setId(patientId);
+	com.nzion.domain.TelephoneNumber telephoneNumber = null;
+telephoneNumber = (com.nzion.domain.TelephoneNumber) Executions.getCurrent().getArg().get("telephoneNumber");
+
+if (telephoneNumber == null) telephoneNumber = new com.nzion.domain.TelephoneNumber();
+telephoneNumber.setPatient(p);
+contactMechController.setContactMech(telephoneNumber);
+	BindingListModel purposeModel = contactMechController
+			.getContactMechPurposes(com.nzion.enums.ContactMechTypeEnum.TELEPHONE);
+]]></zscript>
+
+	<window style="border: 7px solid #2d2d2d; background-color:#EEEEEE;" width="600px" closable="true"
+		apply="${contactMechController}" id="editTelephone">
+
+		<panel>
+			<panelchildren>
+				<hbox visible="${contactMechController.contactMech.id!=null}" id="purposeBox" width="60%">
+					<listbox id="oldPurposesList" width="600px"
+						model="@{contactMechController.contactMech.contactMechPurposes,load-after='toolbarAdd.onClick,toolBarDel.onClick'}"
+						selectedItem="@{selected}">
+						<listhead>
+							<listheader label="Purpose"></listheader>
+							<listheader label="Action"></listheader>
+						</listhead>
+						<listitem self="@{each='pur'}" value="@{pur}">
+							<listcell>
+								<label value="@{pur.description}"></label>
+							</listcell>
+							<listcell>
+								<toolbarbutton label="Delete" id="toolBarDel" sclass="delBtn">
+									<attribute name="onClick">
+contactMechController.getContactMech().getContactMechPurposes().remove(
+		oldPurposesList.getSelectedItem() != null ? oldPurposesList.getSelectedItem().getValue() : null);
+</attribute>
+								</toolbarbutton>
+							</listcell>
+						</listitem>
+					</listbox>
+				</hbox>
+				<separator height="10px"></separator>
+				<div sclass="panelCont">
+					<div sclass="col2" visible="${contactMechController.contactMech.id!=null}" id="newPurpose">
+						<label value="New Purpose" style="font-weight:bold"></label>
+						<hbox width="100%">
+							<listbox mold="select" model="${purposeModel}"
+								itemRenderer="${contactMechController.listitemRenderer}" selectedIndex="0" id="purposes">
+							</listbox>
+							<toolbarbutton sclass="addBtn" label="Add" id="toolbarAdd">
+								<attribute name="onClick">
+contactMechController.getContactMech().getContactMechPurposes().add(
+		(com.nzion.domain.ContactMechPurposeType) purposes.getSelectedItem().getValue());
+</attribute>
+							</toolbarbutton>
+						</hbox>
+					</div>
+					<div sclass="col2">
+						<label value="Contact Number" />
+						<phonebox
+							value="@{contactMechController.contactMech.contactNumber,save-when='contactMech.onClick'}" />
+					</div>
+				</div>
+
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot">
+			<button label="Save" id="contactMech">
+				<attribute name="onClick">
+Events.postEvent(Events.ON_CLICK, Path.getComponent("/patientView/contactMech"), null);
+purposeBox.setVisible(true);
+newPurpose.setVisible(true);
+</attribute>
+			</button>
+			<button label="Close" id="close">
+				<attribute name="onClick">
+Events.postEvent(Events.ON_CLICK, Path.getComponent("/patientView/contactMech"), null);
+editTelephone.detach();
+</attribute>
+			</button>
+		</div>
+	</window>
+</zk>

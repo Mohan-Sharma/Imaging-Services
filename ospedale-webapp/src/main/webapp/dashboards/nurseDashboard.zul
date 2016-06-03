@@ -1,0 +1,20 @@
+<?component name="dashboard" macroURI="/dashboards/dashboard-macro.zul"?>
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/practiceTemplate.zul"?>
+<zk>
+<zscript>
+	setPageTitle("Dashboard", "");
+	List portletDatas = new ArrayList();
+	portletDatas.add(new com.nzion.view.PortletData("Sign In", "/portlets/schedules-for-self.zul", "../images/appointment.png", true));
+	portletDatas.add(new com.nzion.view.PortletData("My InPatient", "/nurseStation/nurseStationInpatients.zul", "../images/patient2.png"));
+	portletDatas.add(new com.nzion.view.PortletData("Ward Transfer", "/inPatient/wardTransfer.zul", "../images/stretcher.jpg"));
+	portletDatas.add(new com.nzion.view.PortletData("Clinical Message", "/inPatient/clinicalMessageInbox.zul","../images/clinicalinbox.png"));
+	portletDatas.add(new com.nzion.view.PortletData("Service Request", "/inPatient/serviceRequest.zul","../images/Head-physician-icon.png"));
+	
+	portletDatas.add(new com.nzion.view.PortletData("Message", "/portlets/message-portlet-view.zul", "../images/mail-message-new-64.png", true));
+	portletDatas.add(new com.nzion.view.PortletData("Patient Search", "/portlets/patient-search-portlet.zul", "../images/patient-search.png"));
+</zscript>
+<window self="@{define(applicationContent)}">
+	<dashboard portlets="${portletDatas}" width="100%"/>
+</window>
+</zk>
+

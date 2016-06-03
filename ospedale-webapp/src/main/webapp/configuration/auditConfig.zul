@@ -1,0 +1,55 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./auditConfig"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	
+	<?xel-method prefix="view" name="format"
+    class="com.nzion.util.UtilDisplay"    
+    signature="String camelcaseToUiString(java.lang.String)"?>
+	
+	<zscript><![CDATA[
+	import com.nzion.zkoss.composer.AuditConfigurationComposer;
+	AuditConfigurationComposer auditConfigurationComposer = new AuditConfigurationComposer();
+]]></zscript>
+	<window apply="${auditConfigurationComposer}" id="auditConfig">
+		
+		<style>
+			.z-paging{
+				width:200px;
+				float:right;
+			}	
+		</style>
+	
+		<div sclass="panelFoot">
+			<button id="Save" label="Save" />
+		</div>
+		<panel title="Audit Configurations">
+			<panelchildren>
+				<div zclass="grid">
+				<vbox>
+					<hbox>
+						<toolbarbutton
+							forEach="${auditConfigurationComposer.entityNames}"
+							label="${each}" forEachBegin="0" forEachEnd="26"
+							onClick='auditConfigurationComposer.showEntities(self);'>
+							<custom-attributes classInitial="${each}" />
+						</toolbarbutton>
+					</hbox>
+					<paging id="configPanel"></paging>
+					<listbox id="auditConfigList" fixedLayout="true" multiple="true" checkmark="true"  mold="paging" paginal="${configPanel}">
+						<listhead>
+							<listheader label="Entity Name" />
+						</listhead>
+						<listitem forEach="${auditConfigurationComposer.entityClasses}">
+							<custom-attributes entity="${each}" />
+							<listcell>
+								<label value="${view:format(each.simpleName)}"></label>
+							</listcell>
+						</listitem>
+					</listbox>
+				</vbox>
+				</div>
+			</panelchildren>
+		</panel>
+	</window>
+</zk>

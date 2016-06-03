@@ -1,0 +1,49 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./warningMessageWindow"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native">
+    <zscript>
+        import com.nzion.domain.emr.soap.PatientSoapNote;
+        com.nzion.zkoss.composer.PatientSoapNoteController controller = arg.get("controller");
+        com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+        Set specialities = arg.get("specialities");
+        List cdssAlerts = arg.get("cdssAlerts");
+        boolean multispeciality = specialities.size()>1;
+        if(specialities.size() == 1)
+        controller.getSoapNote().setSpeciality((com.nzion.domain.Speciality)new ArrayList(specialities).get(0));
+        boolean buttonVisible = specialities.size() > 1;
+    </zscript>
+    <window mode="modal" title="Warning" closable="true" width="55%" id="warningMessageWindow">
+        <style>.list { margin-left: 35px; }</style>
+        <tabbox>
+            <tabs>
+                <tab label="Alerts" selected="true"></tab>
+            </tabs>
+            <tabpanels>
+                <tabpanel height="200px">
+                    <div style="margin:10px">
+                        <n:h4>Billing Information</n:h4>
+                        <checkbox label="Do you want this Encounter Open and Billing to be performed." style="font-weight:bold" id="billingOnly"/>
+                    </div>
+                    <div width="30%" style="margin-left:10px" if="${multispeciality}">
+                        <label value="Choose Speciality For Billing" />
+                        <label value="*" style="color:red"/>
+                        <combobox id="specialityCombobox" model="@{specialities}" buttonVisible="${buttonVisible}"
+                                  selectedItem="@{controller.soapNote.speciality,save-when='signOutBtn.onClick'}" constraint="no empty" readonly="true">
+                            <comboitem self="@{each='speciality'}" value="@{speciality}" label="@{speciality.description}"/>
+                        </combobox>
+                    </div>
+                </tabpanel>
+            </tabpanels>
+        </tabbox>
+        <separator bar="true" orient="horizontal" width="100%" />
+        <separator height="10px" />
+        <div sclass="panelFoot">
+            <button label=" SIGN OUT" sclass="btn submit" id="signOutBtn">
+                <attribute name="onClick">
+                    controller.setSoapNoteBillingOnly(billingOnly.isChecked());
+                    controller.signOutSoapNoteDirectly();
+                    warningMessageWindow.detach();
+                </attribute>
+            </button>
+        </div>
+    </window>
+</zk>

@@ -1,0 +1,22 @@
+<?page title="Reports Home" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/headerFooterTemplate.zul"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+
+	<window id="indexWin" closable="true" maximizable="true">
+		<zscript>
+			import com.nzion.zkoss.ext.Navigation;
+			import com.nzion.util.UtilMisc;
+			void navigate(String viewName, String param, String reportName) {
+				Map map = UtilMisc.toMap("param", param, "reportName", reportName);
+				Navigation.navigate(viewName, map);
+			}
+		</zscript>
+		<div>
+			<a onClick='navigate("report", "age", "PatientDemographics.rptdesign")'>Patient Demography</a><separator/>
+			<a onClick=''>Patient Eligibility</a><separator/>
+			<a onClick=''>Age Bands</a><separator/>
+		</div>
+	</window>
+</zk>

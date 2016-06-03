@@ -1,0 +1,69 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./labOrderLookUpWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<window id="labOrderLookUpWin" title="Search Lab Panels" closable="true" mode="modal" width="50%">
+	<zscript>
+	<![CDATA[
+	 com.nzion.domain.docmgmt.PatientEducation education = arg.get("patientEducation");
+	 Listbox listbox = arg.get("listBox");
+	 com.nzion.enums.MATERIALCATEGORY materialcategory = arg.get("category");
+	 com.nzion.zkoss.composer.PatientEducationController educationController = arg.get("patientEducationController");
+	 List labTestPanels = commonCrudService.getAll(com.nzion.domain.emr.lab.LabTestPanel.class);
+	 int labTestPanelsSize = labTestPanels.size();
+	]]>
+	</zscript>
+		<separator height="10px" />
+	<div align="center">	
+		<div sclass="panelTop" align="left">
+	           <image src="/images/funnel.png" />
+	           <textbox id="panelNameTxtBox" w:onClick="this.select()" onChanging='getLabPanelsByPanelName(event);' width="100px"/>
+	    </div>
+	<listbox model="@{labTestPanels}" multiple="true" checkmark="true" id="labTestPanelsListBox" rows="5">
+		<listhead>
+			<listheader label="Name"/>
+		</listhead>
+		<listitem self="@{each='labTestPanel'}" value="@{labTestPanel}">
+			<listcell label="@{labTestPanel.panelName}"/>
+		</listitem>
+		<listfoot>
+			<listfooter id="footer_msg" /><!--
+			<listfooter id="footer_category" label="A total of ${labTestPanelsSize} Lab Panel(s) " if="${labTestPanelsSize > 0}"/>
+		--></listfoot>
+	</listbox>
+	</div>
+	<zscript>
+	 void getLabPanelsByPanelName(Event event){
+     ((Textbox) event.getTarget()).setValue(((org.zkoss.zk.ui.event.InputEvent) event).getValue());
+     labTestPanelsListBox.setModel(new SimpleListModel(educationController.getFilteredLabTestPanels(panelNameTxtBox.getValue(),labTestPanels)));
+     if (labTestPanelsListBox.getModel().getSize() > 0) {
+         footer_msg.setLabel("");
+ //        footer_category.setLabel("A Total of " + labTestPanelsListBox.getRows() + " Lab Panel(s)");
+     } else {
+         footer_msg.setLabel("Nothing found ...");
+//         footer_category.setLabel("");
+     }
+	 }
+	</zscript>
+    
+		<div sclass="panelFoot" id="panelFootDiv">
+			<button label="Add" zclass="btn btn-success">
+				<attribute name="onClick">
+				List selectedLabPanels = com.nzion.util.ViewUtil.getSelectedItems(labTestPanelsListBox);
+				if(com.nzion.util.UtilValidator.isEmpty(selectedLabPanels)){
+				com.nzion.util.UtilMessagesAndPopups.showError("Choose atleast one lab test panel to add");
+					return;
+					}
+					for(com.nzion.domain.emr.lab.LabTestPanel labTestPanel  : selectedLabPanels)
+						education.addAttachedItem(new com.nzion.domain.docmgmt.AttachedItem(labTestPanel.getCode(),labTestPanel.getPanelName(),labTestPanel.getId()+"",materialcategory));
+					Events.postEvent("onReloadRequest",listbox,null);	
+					labOrderLookUpWin.detach();
+				</attribute>
+			</button>
+			<button label="Cancel" forward="onClick=onCancel" />
+		</div>
+	</window>
+</zk>
+
+
+

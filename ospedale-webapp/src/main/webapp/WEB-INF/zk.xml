@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	<!--
+		zk.xml Purpose: Description: History: Sun Mar 26 16:29:07 2006, Created by tomyeh Copyright (CREDIT) 2006 Potix
+		Corporation. All Rights Reserved.
+	-->
+<zk>
+
+	<library-property>
+		<name>org.zkoss.util.label.web.location</name>
+		<value>/WEB-INF/ospedaleLabels.properties</value>
+	</library-property>
+
+	<listener>
+		<description>ZK performance monitor</description>
+		<listener-class>com.nzion.zkoss.monitor.ZKPerformanceMeter</listener-class>
+	</listener>
+
+	<zscript language="Java">
+		import com.nzion.zkoss.composer.*;
+		import com.nzion.zkoss.ext.*;
+		import com.nzion.util.*;
+		import com.nzion.domain.*;
+	</zscript>
+
+	<!--
+		<log> <description>[Optional] Monitor i3-log.conf and register a handler for the specified log-base</description>
+		<log-base>org.zkoss</log-base> </log>
+	-->
+
+	<language-config>
+		<addon-uri>/WEB-INF/ospedale-addon.xml</addon-uri>
+	</language-config>
+
+
+	<!--
+		Turn on if you prefer to use the native (Servlet) thread to process the events, instead of forking the event
+		processing thread
+	-->
+	<!--
+		Turn on the following if you want to keep session after Web server restarts <system-config>
+		<ui-factory-class>org.zkoss.zk.ui.http.SerializableUiFactory </ui-factory-class> </system-config>
+	-->
+	<system-config>
+	<max-upload-size>999999999</max-upload-size>
+		<disable-event-thread /><!--
+		<id-generator-class>com.nzion.zkoss.ext.NthdimenzionIdGeneratorrator
+		</id-generator-class>
+		--><!--
+			Turn on the following if you want to cache all desktops in a global cache, rather than one for each session
+		-->
+	</system-config>
+	<!--
+		Turn on to test FailoverManager with an useless failover manager <system-config>
+		<failover-manager-class>org.zkoss.zkdemo.test.DumbFailoverManager</failover-manager-class> </system-config>
+	-->
+
+
+	<!-- Optional -->
+	<device-config>
+		<device-type>ajax</device-type>
+		<timeout-uri>/timeout.zul</timeout-uri>
+	</device-config>
+
+	<error-page>
+		 <exception-type>java.lang.Throwable</exception-type>
+		 <location>/error.zul</location>
+	</error-page>
+
+
+	<!--
+		Configure the error page 
+		<error-page> <exception-type>java.lang.Throwable</exception-type>
+		<location>/error.zul</location> </error-page>
+	-->
+	<!--
+		Configure ZUL to use larger fonts for Chinese characters, and smaller fonts for the rest Locales <desktop-config>
+		<disable-default-theme>xul/html</disable-default-theme> <theme-uri>~./zul/css/norm**.css.dsp</theme-uri>
+		</desktop-config>
+	-->
+	<!--
+		Configure additional theme URIs <desktop-config> <theme-uri>/a.css</theme-uri> <theme-uri>/b**.css</theme-uri>
+		</desktop-config>
+	-->
+
+	<!--
+		Any number of preferences. <preference> <name></name> <value></value>
+		</preference>
+	-->
+	<session-config>
+		<timer-keep-alive>true</timer-keep-alive>
+		<max-desktops-per-session>3600000</max-desktops-per-session>
+		<max-requests-per-session>5</max-requests-per-session>
+		<timer-keep-alive>true</timer-keep-alive>
+		<device-type>ajax</device-type>
+		<timeout-uri>/sessionTimeOut.zul</timeout-uri>
+	</session-config>
+
+	<library-property>
+		<name>org.zkoss.zul.include.mode</name>
+		<value>auto</value>
+	</library-property>
+
+    <library-property>
+        <name>org.zkoss.zul.theme.fontFamilyC</name>
+        <value>'Segoe UI',Tahoma,Helvetica,Sans-Serif</value>
+    </library-property>
+	<!--
+		Turn on if you want to use language addons. <language-config> <addon-uri>/WEB-INF/lang-addon.xml</addon-uri>
+		</language-config>
+	-->
+	<!--
+		Turn on if the processing time is longer than 9000 miliseconds.
+		http://docs.zkoss.org/wiki/Developer_reference_Appendix_B._WEB-INF/zk.xml_Overview_The_client-config_Element#The_resend-delay_Element
+	-->
+	<client-config>
+		<keep-across-visits>false</keep-across-visits>
+	    <processing-prompt-delay>500</processing-prompt-delay>
+    	<tooltip-delay>10</tooltip-delay>    
+		<resend-delay>9000</resend-delay>
+		<click-filter-delay>200</click-filter-delay>
+		<disable-behind-modal>false</disable-behind-modal>
+	</client-config>
+	<!--
+		Turn on if you want to ignore the consecutive click events, if it happens too close to the previous one, or the
+		server is still serving the previous click. <client-config> <click-filter-delay>390</click-filter-delay>
+		</client-config>
+	-->
+
+	<library-property>
+		<name>org.zkoss.zul.grid.rod</name>
+		<value>true</value>
+	</library-property>
+
+    <library-property>
+        <name>org.zkoss.zk.ui.composer.autowire.zscript</name>
+        <value>true</value>
+    </library-property>
+
+    <library-property>
+        <name>org.zkoss.zk.ui.composer.autowire.xel</name>
+        <value>true</value>
+    </library-property>
+
+    <!--
+         [ZK EE] Turn on if you want to enable the render-on-demand feature for listbox. It improves the performance for
+         huge listbox. Default: false
+
+
+	<library-property>
+		<name>org.zkoss.zul.listbox.rod</name>
+		<value>true</value>
+	</library-property>
+	-->
+
+	<library-property>
+	    <name>org.zkoss.zul.progressbox.position</name>
+	    <value>center</value>
+	</library-property>
+</zk>

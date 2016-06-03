@@ -1,0 +1,18 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addEditWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript><![CDATA[
+Object object = p; 
+ List specialities = commonCrudService.getAll(com.nzion.domain.Speciality.class);
+ ]]></zscript>
+<window id="addEditWin" >
+<div style="overflow:auto;" height="100px">
+<listbox model="@{specialities}" width="100%" multiple="true" checkmark="true" id="specialityListbox" 
+				selectedItem="@{object.specialities, converter=com.nzion.view.component.MultipleListitemBindingConverter}">
+ 		<listitem self="@{each}" value="@{each}" label="@{each.description}">
+		</listitem>
+</listbox>
+</div>
+</window>
+</zk>

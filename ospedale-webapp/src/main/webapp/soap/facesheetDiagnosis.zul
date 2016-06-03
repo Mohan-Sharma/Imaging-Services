@@ -1,0 +1,59 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./facesheetWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	com.nzion.zkoss.composer.PatientSoapNoteController patientSoapNoteController = arg.get("patientSoapNoteController");
+	com.nzion.domain.Patient patient = patientSoapNoteController.getPatient();
+	Set patientIcds = soapNoteService.getLatestPatientIcds(patient, 5);
+	Set patientCpts = soapNoteService.getLatestPAtientCpts(patient, 5);
+</zscript>
+<div id="facesheetWindow" sclass="soapNoteContL col2">
+<panel title="Diagnosis" collapsible="true" height="300px">
+			<panelchildren>
+				<h:table width="100%">
+					<h:tr>
+						<h:td width="50%">
+							<panel title="Diagnosis(International Classification of Diseases)">
+								<panelchildren>
+									<div sclass="dataTables_scrollBody" style="overflow: auto; height: 125px;">
+										<listbox model="@{patientIcds}">
+											<listhead>
+												<listheader label="Diagnosis Description" />
+												<listheader label="Status" />
+												<listheader label="Reviewed On" />
+											</listhead>
+											<listitem self="@{each='patientIcd'}">
+												<listcell label="@{patientIcd.icdElement.description}" />
+												<listcell label="@{patientIcd.status}" />
+												<listcell label="@{patientIcd.createdTxTimestamp}" />
+											</listitem>
+										</listbox>
+									</div>
+								</panelchildren>
+							</panel>
+						</h:td>
+						<h:td width="50%">
+							<panel title="Procedures(Current Procedural Terminology)">
+								<panelchildren>
+									<div sclass="dataTables_scrollBody" style="overflow: auto; height: 125px;">
+										<listbox model="@{patientCpts}">
+											<listhead>
+												<listheader label="Procedures Description" />
+												<listheader label="Performed On" />
+											</listhead>
+											<listitem self="@{each='patientCpt'}">
+												<listcell label="@{patientCpt.cpt.description}" />
+												<listcell label="@{patientCpt.createdTxTimestamp}" />
+											</listitem>
+										</listbox>
+									</div>
+								</panelchildren>
+							</panel>
+						</h:td>
+					</h:tr>
+				</h:table>
+			</panelchildren>
+		</panel>
+</div>
+</zk>

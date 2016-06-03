@@ -1,0 +1,60 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./sinatureWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+		com.nzion.domain.Provider provider = commonCrudService.getById(com.nzion.domain.Provider.class, com.nzion.util.Infrastructure.getLoggedInPerson().getId());
+	</zscript>
+	<window id="sinatureWin">
+	<panel title="Signature">
+		<panelchildren>
+		<hbox>
+			<div id="imageDiv" height="200px"/>
+			<zscript>
+			if (provider.getSignatureImage() != null) {
+			    Image image = new Image(); 
+			    image.setHeight("200px");
+				org.zkoss.image.AImage aImage = new org.zkoss.image.AImage("Front Image", provider.getSignatureImage().getResource().getBinaryStream());
+				image.setContent(aImage);
+				image.setParent(imageDiv);
+			}
+			</zscript>
+			<separator/>
+		</hbox>
+		<separator/>
+		<div sclass="panelTop">
+					<button label="Upload Signature" upload="true">
+							<attribute name="onUpload">
+							{
+									org.zkoss.util.media.Media media = event.getMedia();
+									if (media instanceof org.zkoss.image.Image) {
+										org.zkoss.zul.Image newImage = new org.zkoss.zul.Image();
+										imageDiv.getChildren().clear();
+										newImage.setHeight("200px");
+										newImage.setContent((org.zkoss.image.Image)media);
+										newImage.setParent(imageDiv);
+										com.nzion.domain.DataResource fsrc = new com.nzion.domain.DataResource();
+										fsrc.setResource(org.hibernate.Hibernate.createBlob(media.getByteData()));
+										provider.setSignatureImage(fsrc);
+										commonCrudService.save(provider);
+										com.nzion.util.UtilMessagesAndPopups.displaySuccess();
+									} else {
+										Messagebox.show("Not an image: " + media, "Error", Messagebox.OK, Messagebox.ERROR);
+										break; //not to show too many errors
+									}
+							}
+							</attribute>
+					</button>
+					<button label="Delete">
+					<attribute name="onClick">
+					provider.setSignatureImage(null);
+					commonCrudService.save(provider);
+					imageDiv.getChildren().clear();
+					com.nzion.util.UtilMessagesAndPopups.displaySuccess();
+					</attribute>
+					</button>
+					</div>
+		</panelchildren>
+	</panel>
+	</window>
+</zk>

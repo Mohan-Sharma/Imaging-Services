@@ -1,0 +1,71 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addOrganSystemWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript><![CDATA[
+	import com.nzion.zkoss.ext.EnumDropdownRenderer;
+	import com.nzion.enums.SoapComponents;
+	import com.nzion.enums.SoapModuleType;
+	import com.nzion.service.common.CommonCrudService;
+	import com.nzion.util.Infrastructure;
+	import com.nzion.util.UtilValidator;
+	import com.nzion.domain.emr.OrganSystem;
+	import com.nzion.domain.emr.SoapModule;
+	OrganSystem organSystem = null;
+	if (UtilValidator.isEmpty(arg)){
+		organSystem = new OrganSystem();
+	}
+	else{
+		organSystem = (OrganSystem) arg.get("entity");
+	}
+	]]></zscript>
+	<window width="50%" id="addOrganSystemWin"  mode="modal" closable="true"
+	  position="center">
+		<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Organ System</h:small>
+                  <button type="button" zclass="close" onClick="addOrganSystemWin.detach();">×</button>
+            </h:h1>
+        </div>
+	<div class="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span4">
+						<label value="Organ System Name" sclass="name"  mold="required"/>
+						<textbox sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" value="@{organSystem.desc,save-when='AddOrganSystem.onClick'}" constraint="no empty" />
+						</div>
+						</div>
+						<div zclass="row-fluid">
+					   <div zclass="span4">
+						<label value="Gender" sclass="name" />
+						<enumeration id="gender" enumType="QUESTION_GENDER" sclass="span12" selectedItem="@{organSystem.gender}" />
+						</div>
+						</div>
+						<div zclass="row-fluid">
+					   <div zclass="span6">
+						<label value="Sentence for Normal Status" mold="required" sclass="name" ></label>
+						<textbox rows="2" cols="50"  sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" value="@{organSystem.normalSentence}" constraint="no empty"></textbox>
+					  </div>
+					  </div>
+					  </div>
+		
+				<div sclass="panelFoot" />
+		
+			<div sclass="panelFoot">					
+			<button label="Save" onClick="" id="AddOrganSystem" zclass="btn-success btn">
+				<attribute name="onClick">
+				<![CDATA[
+				try{
+				commonCrudService.save(organSystem);
+				com.nzion.util.UtilMessagesAndPopups.showSuccess();
+				addOrganSystemWin.detach();
+				}catch(org.springframework.dao.DataIntegrityViolationException e){
+					com.nzion.util.ViewUtil.disPlayUniqueErrorMessage(e,"Organ System '"+ organSystem.getDesc() +"' already exists.");
+				}
+				
+				]]>
+				</attribute>
+			</button>
+			<button label="Cancel" forward="onClick=onCancel"></button>
+		</div>
+	</window>
+</zk>

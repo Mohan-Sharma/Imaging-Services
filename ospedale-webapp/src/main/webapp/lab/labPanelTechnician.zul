@@ -1,0 +1,40 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./labPanelTechnicianWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	com.nzion.domain.emr.soap.PatientLabOrder patientLabOrder = arg.get("patientLabOrder");
+	com.nzion.domain.emr.lab.LabTestPanel labTestPanel = patientLabOrder.getLabTestPanel();
+	Set panelTechnicianTest = labTestPanel.getPanelTechnicians();
+</zscript>
+	<window id="labPanelTechnicianWindow" mode="modal" width="60%" closable="true"  title="Panel Technicians">
+		<panel collapsible="true">
+			<panelchildren>
+				<grid id="associatedTechnicianGrid" model="@{panelTechnicianTest}">
+					<rows>
+						<row self="@{each='panelTechnician'}" value="@{panelTechnician}">
+							<label value="@{panelTechnician.location.name}" />
+							<detail open="true">
+								<listbox model="@{panelTechnician.technicians}">
+									<listhead>
+										<listheader label="Technician" />
+										<listheader label="Email" />
+									</listhead>
+									<listitem self="@{each='technician'}">
+										<listcell>
+											<name object="@{technician}" />
+										</listcell>
+										<listcell label="@{technician.contacts.email}" />
+									</listitem>
+								</listbox>
+							</detail>
+						</row>
+					</rows>
+				</grid>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot">
+			<button label="Cancel" forward="onClick=onCancel" />
+		</div>
+	</window>
+</zk>

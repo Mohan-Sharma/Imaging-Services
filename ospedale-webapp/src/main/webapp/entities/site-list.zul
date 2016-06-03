@@ -1,0 +1,10 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	setPageTitle("Site", "");
+</zscript>
+	<window>
+		<screen width="100%" pagetitle="Site" listtitle="List of Site" addpage="addSite" entityclass="com.nzion.domain.drug.Site" hidedeletebtn="true"
+			fields="code,description" labels="Site Code,Site Name" addmodepopup="true" />
+	</window>
+</zk>

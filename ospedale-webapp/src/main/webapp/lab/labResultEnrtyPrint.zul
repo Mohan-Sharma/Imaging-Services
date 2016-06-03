@@ -1,0 +1,301 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./labResultPrintWin"?>
+<?page  contentType="text/html;charset=UTF-8"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native">
+
+<zscript>
+    <![CDATA[
+			import java.util.Collections;
+			import com.nzion.service.common.CommonCrudService;
+			import com.nzion.domain.emr.lab.OBXSegment;
+			import com.nzion.domain.emr.lab.SpecimenModel;
+			com.nzion.repository.common.CommonCrudRepository commonCrudRepository = com.nzion.util.Infrastructure.getSpringBean("commonCrudRepository");
+			CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+			Long obrId = new Long(param.get("obrId")[0]);
+			com.nzion.domain.emr.lab.LabRequisition labRequisition = commonCrudRepository.findUniqueByEquality(com.nzion.domain.emr.lab.LabRequisition.class, new String[]{"id"}, new Object[]{obrId});
+			
+			String patientType="";
+				patientType="OPD";
+			com.nzion.domain.Provider provider = commonCrudRepository.findUniqueByEquality(com.nzion.domain.Provider.class, new String[]{"id"}, new Object[]{labRequisition.getProviderId()});
+			com.nzion.domain.Referral referral=commonCrudRepository.findUniqueByEquality(com.nzion.domain.Referral.class, new String[]{"id"}, new Object[]{labRequisition.getReferralId()});
+			String doctor="";
+			if(referral!=null && com.nzion.util.UtilValidator.isNotEmpty(referral))
+					doctor=referral.toString();
+			else if(provider!=null && com.nzion.util.UtilValidator.isNotEmpty(provider))
+				doctor=provider.toString();
+					
+			List obrSegmentList = commonCrudRepository.findByEquality(com.nzion.domain.emr.lab.OBRSegment.class,new String[] { "requisitionNumber" }, new Object[]
+					{String.valueOf(obrId) });
+			com.nzion.domain.emr.lab.LabTestPanel labTestPanel = null;
+			Date observationDate = null;
+			for (com.nzion.domain.emr.lab.OBRSegment obrSegment : obrSegmentList) {
+				if(obrSegment!=null){
+					observationDate = obrSegment.getObservationDateTime();
+					//labTestPanel = obrSegment.getLabTestPanel();
+				}
+			}
+			com.nzion.domain.Practice practice = com.nzion.util.Infrastructure.getPractice();
+			com.nzion.domain.Location location = com.nzion.util.Infrastructure.getSelectedLocation();
+			com.nzion.zkoss.composer.emr.lab.LabResultPrintComposer labResultPrintComposer = new com.nzion.zkoss.composer.emr.lab.LabResultPrintComposer();
+			 
+			String gender="";
+			if(labRequisition.patient!=null && labRequisition.patient.gender!=null)
+				gender=labRequisition.patient.gender.toString();
+			if ("Male".equals(gender)) 	gender="M";
+			else if("Female".equals(gender))	gender="F";
+			else if("Ambiguous".equals(gender))	gender="A";
+			else if("Not applicable".equals(gender))	gender="NA";
+			else if("Other".equals(gender))		gender="O";
+			else		gender="U";
+			 
+			List specimenLabelList=labRequisition.getSpecimenModelList();
+			SpecimenModel specimenModel=null;
+			if(specimenLabelList!=null)
+					 specimenModel=(SpecimenModel)specimenLabelList.get(0);
+			String specimenLabel="";
+			if(specimenModel!=null)
+					specimenLabel=specimenModel.getSpecimenLabel();
+			
+			
+		]]>
+</zscript>
+<style>
+	.personDet{
+            border: 1px solid #333;
+            align:center;
+            margin : 2px 0px 0px 0px;
+        }
+        
+     .personDet td{
+            padding:0px;
+        }
+    .break {
+        page-break-after: always;
+    }
+
+    @media print {
+        #footerDiv {
+            position: fixed;
+            bottom: 0;
+        }
+
+        #body {
+            margin: x x y x;
+        ( y should reflect the height of the footer );
+        }
+    }
+</style>
+<window id="labResultPrintWin" apply="${labResultPrintComposer}">
+    <attribute name="onCreate">
+        Clients.print();
+    </attribute>
+    <zscript>
+        int size = labResultPrintComposer.getLabResults().size();
+        int count = 0;
+    </zscript>
+    <div forEach="${labResultPrintComposer.labResults}">
+        <zscript>
+             count = count+1;
+        </zscript>
+        <custom-attributes subMap="${each}"/>
+        <n:div style="width:95%;text-align:center;">
+           <n:div class="clr" style="width:95%;horizontal-align:center;margin:20px 0px 0px 30px">
+            <n:table class="personDet" style="align:center;width:100%">
+                <n:tr>
+                    <n:td>
+                        <div class="z-hlayout" style="width:100%;">
+                        <div style="width:20%" class="z-hlayout-inner">
+                        <div>
+                                <label value="MRN : "
+                                       style="font-weight:bold;font-size:14px">
+                                </label>
+                                <label value="@{labRequisition.patient.accountNumber}"
+                                       style="font-weight:normal;font-size:14px"/>
+                            </div>
+                           </div>
+                           
+                          <div style="width:40%" class="z-hlayout-inner">  
+                            <div>
+                                <label value="PATIENT : "
+                                       style="font-weight:bold;font-size:14px">
+                                </label>
+                                <label value="@{labRequisition.patient.salutation}"
+                                       style="font-weight:normal;font-size:14px"/>
+                                <name value="@{labRequisition.patient.firstName}"
+                                      style="font-weight:normal;font-size:14px"/>
+                            </div>
+                          </div>
+                          
+                             
+ 						 <div style="width:40%" class="z-hlayout-inner">
+   							 <div>
+                                <label value="AGE : "
+                                       style="font-weight:bold;font-size:14px">
+                                </label>
+                                <label value="@{labRequisition.patient.age}"
+                                       style="font-weight:normal;font-size:14px"/>
+                                <label value="/"
+                                       style="font-weight:normal;font-size:14px"/>
+                                <label value="@{gender}"
+                                       style="font-weight:normal;font-size:14px"/>
+                            </div>
+                            </div>
+                            </div>
+                    
+                    </n:td>
+                </n:tr>
+                <n:tr>
+                    <n:td>
+                        <div class="z-hlayout" style="width:100%;">
+                         <div style="width:20%" class="z-hlayout-inner">
+                            <div>
+                                <label value="DATE : "
+                                       style="font-size:14px;font-weight:bold">
+                                </label>
+                                <label value="@{observationDate,converter='com.nzion.view.component.DateConverter'}"
+                                       style="font-weight:normal;font-size:14px"/>
+                            </div>
+                            </div>
+                         
+                          <div style="width:35%" class="z-hlayout-inner">
+                            <div>
+                                <label value="DOCTOR : "
+                                       style="font-weight:bold;font-size:14px">
+                                </label>
+                                <label value="@{doctor}"
+                                       style="font-weight:normal;font-size:14px"/>
+                            </div>
+                           </div>
+                         
+                            
+                         <div style="width:25%" class="z-hlayout-inner">
+                            <div>
+                                <label value="Lab No : "
+                                       style="font-size:14px;font-weight:bold">
+                                </label>
+                                <label value="@{specimenLabel}"
+                                       style="font-weight:normal;font-size:14px"/>
+                                <label value="/"
+                                       style="font-weight:normal;font-size:14px"/>
+                                <label value="@{patientType}"
+                                       style="font-weight:normal;font-size:14px"/>
+                            </div>
+						</div>
+                            
+                            <div style="width:20%" class="z-hlayout-inner">
+                         <!--    <div if="${labRequisition.patientAdmission != null}">
+                                <label value="IP No : "
+                                       style="font-weight:bold;font-size:14px">
+                                </label>
+                                <label value="@{labRequisition.patientAdmission.accountNumber}"
+                                       style="font-weight:normal;font-size:14px"/>
+                            </div> -->
+                     </div> 
+                 </div>
+                    </n:td>
+                </n:tr>
+            </n:table>
+            </n:div>
+            <n:td>
+                <html><![CDATA[&nbsp;&nbsp;]]></html>
+            </n:td>
+            <div align="center">
+                <label
+                        style="font-size:20px;font-weight:bold;text-decoration:underline"
+                        value="LABORATORY INVESTIGATION REPORT">
+                </label>
+            </div>
+            <n:td>
+                <html><![CDATA[&nbsp;&nbsp;]]></html>
+            </n:td>
+            <n:div>
+                <n:table style="width:100%;margin-bottom:10px;">
+                  <n:tr>
+                        <separator></separator>
+                        <separator></separator>
+                        <n:th style="font-size:20px;width:30%;text-decoration:underline">
+                            LAB TEST
+                        </n:th>
+                        <n:th style="font-size:20px;width:33%;text-align:right;text-decoration:underline">
+                            VALUES
+                        </n:th>
+                        <n:th style="font-size:20px;padding-right:30px;text-decoration:underline">
+                            NORMAL RANGE
+                        </n:th>
+                    </n:tr>
+                </n:table>
+            </n:div>
+            <zscript>
+                com.nzion.zkoss.composer.emr.lab.LabResultPrintVO labResultPrintVO =
+                ((com.nzion.zkoss.composer.emr.lab.LabResultPrintVO)subMap);
+            </zscript>
+            <div>
+                <n:div style="text-align:center;width:100%;">
+                    <n:table style="width:80%;" align="center">
+                        <n:tr forEach="${labResultPrintVO.labResults}">
+                            <n:th style="font-size:17px;text-align:left;width:56%;">
+                                ${each.panelName} :
+                            </n:th>
+                            <n:tr forEach='${each.obxSegments}' style="text-align:left;">
+                                <n:td style="width:45%;font-size: 17px;">
+                                    ${each.investigation.investigationName}
+                                </n:td>
+                                <n:td>
+                                    <n:table style="width:100%;">
+                                        <n:tr>
+                                            <n:td style="font-size: 17px;">
+                                                ${each.observationValue}
+
+                                                ${each.units}
+                                            </n:td>
+                                            <n:td style="width:55%;font-size: 17px;">
+                                                ${each.referenceRange}
+
+                                                ${each.units}
+                                            </n:td>
+                                        </n:tr>
+                                        <n:tr>
+                                            <n:td colspan="2" style="font-size: 17px;">
+                                                ${each.freeText}
+                                            </n:td>
+                                        </n:tr>
+                                    </n:table>
+                                </n:td>
+                            </n:tr>
+                            <n:tr>
+                                <n:td style="font-size: 17px;">
+                                    <html>
+                                    ${each.remarks}
+                                    </html>
+                                </n:td>
+                            </n:tr>
+                        </n:tr>
+                    </n:table>
+                </n:div>
+            </div>
+        </n:div>
+        <div align="center" style="margin: 17px" visible="${size==count}">
+            <html>
+                ${labRequisition.remarks}
+            </html>
+        </div>
+        <n:div id="footerDiv" style="width:100%;text-align:center;">
+            <n:table style="width:80%;margin-top:5px;" align="center">
+                <n:tr>
+                    <n:th style="text-align:left;font-size:15px;width:45%">
+                        LAB TECHNICIAN
+                    </n:th>
+                    <n:th style="text-align:left;font-size:15px;width:31%">
+                    </n:th>
+                    <n:th style="text-align:left;font-size:15px;width:30%">
+                        PATHOLOGIST
+                    </n:th>
+                </n:tr>
+            </n:table>
+        </n:div>
+        <div sclass="break"></div>
+    </div>
+</window>
+</zk>

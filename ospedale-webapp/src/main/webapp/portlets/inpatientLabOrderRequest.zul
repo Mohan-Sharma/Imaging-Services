@@ -1,0 +1,118 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./inpatientLabOrderReq"?>
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zk/native ">
+    
+    <zscript>
+	<![CDATA[
+	import com.nzion.domain.Provider;
+	import com.nzion.util.UtilValidator;
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	final Long INHOUSE_DOCTOR_ID=9000L;
+	]]>
+	</zscript>
+    
+<window id="inpatientLabOrderReq" self="@define(applicationContent)" apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('vm') @init('com.nzion.zkoss.composer.emr.lab.LabOrderRequestViewModel')">
+            <zscript>
+            import com.nzion.domain.inpatient.PatientAdmission;
+            import com.nzion.domain.emr.soap.PatientLabOrder;
+            PatientAdmission  patientAdmission = arg.get("patientAdmission");
+            </zscript>
+<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Inpatient Lab Test Request</h:small>
+            </h:h1>
+        </div>
+			<div zclass="row-fluid">
+            
+            <div zclass="span4">
+                    <label value="Doctor"/>
+                    <providerlookup
+                            onChange="vm.getLabOrderRequest().setProvider((com.nzion.domain.Provider)event.getOrigin().getData())" sclass="span12"/>
+                </div>
+             <div zclass="span4">
+                    <label value="Test Name" mold="required"/>
+                    <suggest id="labTestPanelTxt" entity="com.nzion.domain.emr.lab.LabTestPanel" sclass="span12"
+                             searchcolumns="panelName" displaycolumns="panelName" requiredcolumn="panelName"/>
+                </div>
+            </div>
+      <div sclass="panelFoot">
+                <button label="Add" id="addBtn" sclass="saveBtn">
+                    <attribute name="onClick">
+                        <![CDATA[
+                        if(com.nzion.util.UtilValidator.isEmpty( labTestPanelTxt.getValue()))
+                        throw new WrongValueException(labTestPanelTxt , "Test Name Required");
+					PatientLabOrder patientLabOrder = new PatientLabOrder();
+					patientLabOrder.setLabTestPanel(labTestPanelTxt.getResult());
+					patientLabOrder.setTestName(labTestPanelTxt.getValue());
+					patientLabOrder.setPatient(patientAdmission.getPatient());
+					vm.getLabOrderRequest().addPatientLabOrder(patientLabOrder);
+					patientLabOrder.setLabOrderRequest(vm.getLabOrderRequest());
+					patientLabOrder.setStatus(com.nzion.domain.emr.soap.PatientLabOrder.STATUS.NEW);
+					patientLabOrder.getLabOrderRequest().addPatientLabOrder(patientLabOrder);
+					Events.postEvent("onReloadRequest",inPLabOrderListBox,null);
+                                                   
+                        ]]>
+                    </attribute>
+                </button>
+                <button label="Cancel" sclass="cancelBtn"> 
+                <attribute name="onClick">
+                  Events.postEvent("onClick",session.getAttribute("portletImg"),null);
+             		  inpatientLabOrderReq.detach();
+             		  </attribute>
+                </button>
+            </div>
+            <div sclass="boxStyle" style="width:100%;float:left;">
+                <panel>
+                    <panelchildren>
+                        <listbox id="inPLabOrderListBox" mold="paging" pageSize="7" width="20%"
+                                 model="@{vm.labOrderRequest.patientLabOrders,load-after='self.onReloadRequest'}">
+                            <listhead>
+                                <listheader label="${c:l('testName')}" style="font-weight:bold"/>
+                                <listheader label="Rate" style="font-weight:bold"/>
+                            </listhead>
+                            <listitem self="@{each='labOrder'}" value="@{labOrder}">
+                                <listcell>
+                                    <label value="@{labOrder.labTestPanel.panelName}"/>
+                                </listcell>
+                                <listcell>
+                                    <label value="@{labOrder.labTestPanel.price}"/>
+                                </listcell>
+                            </listitem>
+                        </listbox>
+                        <div align="center" sclass="panelFoot">
+                            <button label="Save" id="Save" sclass="saveBtn">
+                                <attribute name="onClick"><![CDATA[
+	 						 if(com.nzion.util.UtilValidator.isEmpty(vm.getLabOrderRequest().getPatientLabOrders())){
+		     					com.nzion.util.UtilMessagesAndPopups.showError("Please Add atleast One test name");
+		     					return;
+      							}
+	 						vm.getLabOrderRequest().setOrderStatus(com.nzion.domain.emr.lab.LabOrderRequest.ORDERSTATUS.INPATIENT_BILLING);
+	 						vm.getLabOrderRequest().setPatient(patientAdmission.getPatient());
+	 						vm.getLabOrderRequest().setPatientAdmission(patientAdmission);
+	 						if(UtilValidator.isEmpty(vm.getLabOrderRequest().getProvider()))
+	 							vm.getLabOrderRequest().setProvider(commonCrudService.getById(Provider.class,INHOUSE_DOCTOR_ID));
+	 						else
+	 							vm.getLabOrderRequest().setProvider(vm.getLabOrderRequest().getProvider());
+	 						for(PatientLabOrder pLabOrder : vm.getLabOrderRequest().getPatientLabOrders()){
+	 							pLabOrder.setStatus(PatientLabOrder.STATUS.SENT);
+	 						}
+	 						com.nzion.inpatient.zkoss.InPatientConsultantsController ipConsutantsController=new com.nzion.inpatient.zkoss.InPatientConsultantsController();
+	 						ipConsutantsController.setLabOrderRequest(vm.getLabOrderRequest());
+	 						ipConsutantsController.setPatientAdmission(patientAdmission);
+	 						ipConsutantsController.saveLabOrder();
+	 						 Events.postEvent("onClick",session.getAttribute("portletImg"),null);
+	 	             		  inpatientLabOrderReq.detach();
+					]]></attribute>
+                            </button>
+                        </div>
+                    </panelchildren>
+                </panel>
+            </div>
+            
+
+</window>
+</zk>

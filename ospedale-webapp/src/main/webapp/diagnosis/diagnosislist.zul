@@ -1,0 +1,13 @@
+<?page title="Location" contentType="text/html;charset=UTF-8"?>
+<?component name="screen" macro-uri="/home-grid-macro.zul"?>
+<zk>
+	<zscript>
+		setPageTitle("Diagnosis ", "");
+	</zscript>
+	<window >
+		<screen width="100%" listtitle="Pms - Diagnosis Management"	addpage="diagnosisManagement"
+					addmodepopup="true" entityclass="com.nzion.domain.pms.DiagnosisCode" 
+					labels="Diagnosis Code,Description,Statement Description,Alternate Code #1,Alternate Code #2,Age Specific,Gender"
+					fields="icd.code,description,statementDescription,alternateCode1,alternateCode2,ageMark,gender"/>
+	</window>
+</zk>

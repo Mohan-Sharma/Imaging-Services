@@ -1,0 +1,46 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./drugInteractionWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	Set rxSectionAlerts = arg.get("rxSectionAlerts");
+</zscript>
+	<window id="drugInteractionWindow" title="Drug Interaction" width="50%" closable="true" mode="modal" contentStyle="overflow:auto">
+		<style>
+			.rxAlertCont{
+				padding:7px;
+			}
+			.rxAlert{
+			}
+			.lowInteraction{
+			background-color:yellow;
+			}
+			.mediumInteraction{
+			background-color:orange;
+			}
+			.highInteraction{
+			background-color:red;
+			}
+		</style>
+		<box forEach="${rxSectionAlerts}" sclass="" width="100%">
+		<label value="${each.relatedDrugName}" style="font-weight:bold"/>
+			<custom-attributes patientRxAlert="${each}" />
+			<span>
+			<html>
+				<![CDATA[ <ul> <li >${each.alertMessage}</li> </ul> ]]>
+				</html>
+			<separator orient="horizontal" bar="true" width="100%" />
+			<attribute name="onCreate">
+				if (patientRxAlert.getRating() == 2) self.getParent().setSclass("lowInteraction");
+				if (patientRxAlert.getRating() == 3) self.getParent().setSclass("mediumInteraction");
+				if (patientRxAlert.getRating() == 4) self.getParent().setSclass("highInteraction");
+				if (patientRxAlert.getRating()== null ||patientRxAlert.getRating() == 0) self.getParent().setSclass("");
+							</attribute>
+			</span>
+		</box>
+		<separator height="20px" />
+		<div sclass="panelFoot">
+			<button sclass="btn submit" label="Cancel" forward="onClick=onCancel" />
+		</div>
+	</window>
+</zk>

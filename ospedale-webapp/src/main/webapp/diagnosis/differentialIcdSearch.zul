@@ -1,0 +1,217 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./icdSearchWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+		import  com.nzion.zkoss.composer.emr.IcdSearchController;
+		import com.nzion.domain.emr.soap.DiagnosisSection;
+		String paneltitle = "Search From" + " ";
+		List icdGroups = commonCrudService.getAll(com.nzion.domain.emr.IcdGroup.class);
+		List icds;
+		IcdSearchController icdSearchController = new IcdSearchController();
+		Textbox icdLookupTextBox = arg.get("icdLookupTextBox");
+		boolean multiple = false;
+		com.nzion.domain.emr.soap.PatientFamilyIllness patientFamilyIllness = arg.get("patientFamilyIllness");
+		com.nzion.domain.inpatient.InPatientDoctorVisit  inPatientDoctorVisit  = arg.get("inPatientDoctorVisit");
+		
+	]]>
+	</zscript>
+	<window id="icdSearchWindow" title="Diagnosis Lookup" closable="true" width="60%" mode="modal" apply="${icdSearchController}" height="75%">
+		<attribute name="onCreate">
+			if(icdSearchController.isMultipleSelectionRequire())
+			multiple = true;
+		</attribute>
+		<style>
+			.z-toolbarbutton-over{ border-bottom:none; border-top:none; padding:none; text-decoration: underline; border:0
+			none; } .z-toolbarbutton-over .z-toolbarbutton-body{ border-left:none; border-right:none; padding:none; }
+			.z-toolbarbutton{ margin:0 0; } tr.z-vbox-sep { height:0; } .selected{
+			background:url("/ecosmos/images/leftmenu_active.gif") no-repeat scroll left center #FFFFFF; color:#006699;
+			border-right:1px solid #FFFFFF; border-bottom:1px solid #E0E0E0; display:block; padding:6px 10px; } .unSelected{
+			background:url(none); color:#249; border-bottom:1px solid #E0E0E0; display:block; padding:7px 10px; } .divStyle{
+			background:url("../images/grey_bdr_1x1.gif") repeat-y scroll right top #F6F7F8; vertical-align:top;
+			border-spacing:none; padding:0; height:100%; }
+		</style>
+		<h:table width="100%" height="100%">
+			<h:tr>
+				<h:td style="text-align:left;vertical-align:top;width:20%" class="divStyle">
+					<vbox height="100px">
+						<toolbarbutton label="Group" id="groupLink" sclass="unSelected" width="100px">
+							<attribute name="onClick">
+								setToolbarbuttonColor(self);
+								searchCriteriaPanel.setTitle(paneltitle + self.getLabel());
+								otherDiv.setVisible(false);
+								groupDiv.setVisible(true);
+								searchResultPanel.setVisible(false);
+								icdSearchController.setFromGroup(true);
+								icdSearchController.setSearchCriteria("group");
+								searchSection.setVisible(true);
+								searchCriteriaPanel.setVisible(true);
+							</attribute>
+						</toolbarbutton>
+						<toolbarbutton label="Favourites" id="favouriteLink" sclass="unSelected" width="100px">
+							<attribute name="onClick">
+								setToolbarbuttonColor(self);
+								loadResultSection(paneltitle + self.getLabel());
+								icdSearchController.setSearchCriteria("Favourite");
+								searchSection.setVisible(false);
+								searchCriteriaPanel.setVisible(false);
+								addBtn.setVisible(multiple);
+								addBtn1.setVisible(multiple);
+								searchResultGrid.setMultiple(multiple);
+								searchResultGrid.setCheckmark(multiple);
+								icds = icdSearchController.lookUpIcd();
+								searchResultPanel.setVisible(true);
+								noresultLabel.setVisible(com.nzion.util.UtilValidator.isEmpty(icds));
+								Events.postEvent("onReloadRequest",searchResultGrid,null);
+							</attribute>
+						</toolbarbutton>
+						<toolbarbutton label="Previous Diagnosis" id="previousLink" sclass="unSelected" width="100px">
+							<attribute name="onClick">
+								setToolbarbuttonColor(self);
+								loadResultSection(paneltitle + self.getLabel());
+								icdSearchController.setSearchCriteria("PatientICD");
+								icds = icdSearchController.lookUpIcd();
+								noresultLabel.setVisible(com.nzion.util.UtilValidator.isEmpty(icds));
+								searchResultPanel.setVisible(true);
+								Events.postEvent("onReloadRequest",searchResultGrid,null);
+								searchSection.setVisible(false);
+								addBtn.setVisible(multiple);
+								addBtn1.setVisible(multiple);
+								searchCriteriaPanel.setVisible(false);
+								searchResultGrid.setMultiple(multiple);
+								searchResultGrid.setCheckmark(multiple);
+							</attribute>
+						</toolbarbutton>
+						<toolbarbutton label="Global" id="globalLink" sclass="unSelected" width="100px">
+							<attribute name="onClick">
+								setToolbarbuttonColor(self);
+								loadResultSection(paneltitle + self.getLabel());
+								searchCriteriaPanel.setVisible(true);
+								icdSearchController.setFromGroup(false);
+								icdSearchController.setSearchCriteria("global");
+								searchSection.setVisible(true);
+							</attribute>
+						</toolbarbutton>
+					</vbox>
+				</h:td>
+				<h:td style="vertical-align:top; border-spacing:none; padding:0; height:100%;">
+					<panel id="searchCriteriaPanel" collapsible="true">
+						<panelchildren>
+							<div sclass="panelCont" height="40px" id="otherDiv">
+								<div sclass="col2">
+									<label value="Diagnosis Code" />
+									<textbox id="codeTextBox" value="@{icdSearchController.icdCode}" />
+								</div>
+								<div sclass="col2">
+									<label value="Diagnosis Description" />
+									<textbox id="descriptionTextBox" value="@{icdSearchController.icdDescription}" />
+								</div>
+							</div>
+							<div sclass="panelCont" height="40px" id="groupDiv">
+								<div sclass="col2">
+									<label value="Group Name" />
+									<combobox id="groupComboBox" model="@{icdGroups}"
+										selectedItem="@{icdSearchController.icdGroup}">
+										<comboitem self="@{each='icdGroup'}" label="@{icdGroup.groupName}"
+											value="@{icdGroup}" description="@{icdGroup.groupDescription}" />
+									</combobox>
+								</div>
+							</div>
+							<div sclass="panelFoot" id="searchSection">
+								<button label="Search" id="searchBtn">
+									<attribute name="onClick">
+									<![CDATA[
+										if (codeTextBox.getValue().isEmpty() && descriptionTextBox.getValue().isEmpty() && otherDiv.isVisible()) {
+											com.nzion.util.UtilMessagesAndPopups.showError(org.zkoss.util.resource.Labels.getLabel("nosearchcondition"));
+											return;
+										}
+										if(groupComboBox.getSelectedItem() == null && groupDiv.isVisible()){
+											com.nzion.util.UtilMessagesAndPopups.showError("Provide Group Name For Search");
+											return;	
+										}
+										addBtn.setVisible(multiple);
+										addBtn1.setVisible(multiple);
+										searchResultGrid.setMultiple(multiple);
+										searchResultGrid.setCheckmark(multiple);
+										icds = icdSearchController.lookUpIcd();
+										searchResultPanel.setVisible(true);
+										noresultLabel.setVisible(com.nzion.util.UtilValidator.isEmpty(icds));
+										Events.postEvent("onReloadRequest",searchResultGrid,null);
+									]]>
+									</attribute>
+								</button>
+							</div>
+						</panelchildren>
+					</panel>
+					<separator height="10px"/>
+					<panel title="Search Result" collapsible="true" visible="false" id="searchResultPanel">
+						<panelchildren>
+							<label value="No Record Found" id="noresultLabel" visible="false" style="font-weight:bold" />
+							<div sclass="panelHeadTop pagination">
+							<div sclass="fl">
+					<toolbarbutton id="addBtn1" label="Add" visible="multiple" onClick="addIcd()" sclass="addBtn"/>
+				</div>
+				<div sclass="fr">
+					<paging id="searchPaging" pageSize="10" detailed="true" pageIncrement="1"/>
+				</div>
+			</div>
+							
+							<listbox model="@{icds,load-after='self.onReloadRequest'}" id="searchResultGrid" mold="paging" paginal="${searchPaging}" oddRowSclass="z-listbox-odd" selectedItem="@{icdSearchController.icdElements,converter=com.nzion.view.component.MultipleListitemBindingConverter}">
+								<listhead>
+									<listheader label="Diagnosis Code" />
+									<listheader label="Diagnosis Description" />
+								</listhead>
+								<listitem self="@{each='icd'}" value="@{icd}">
+									<listcell label="@{icd.code}"/>
+									<listcell label="@{icd.description}"/>
+									<attribute name="onDoubleClick">
+										if(!multiple){
+										com.nzion.domain.emr.IcdElement icd = (com.nzion.domain.emr.IcdElement)self.getValue();
+										icdLookupTextBox.setValue(icd.getDescription());
+										if(patientFamilyIllness!=null)
+										patientFamilyIllness.setIcd(icd);
+										Events.postEvent("onChange",icdLookupTextBox,icd);
+										icdSearchWindow.detach();
+										}
+									</attribute>
+								</listitem>
+							</listbox>
+						</panelchildren>
+					</panel>
+				</h:td>
+			</h:tr>
+		</h:table>
+		<div sclass="panelFoot">
+						<button id="addBtn" label="Add" visible="multiple" onClick="addIcd()"/>
+						<button label="Cancel" forward="onClick=onCancel"/>
+					</div>
+		<div onCreate='Events.postEvent("onClick",groupLink,null)' />
+		<zscript>
+		<![CDATA[
+			Component lastSelectedComponent;
+			void setToolbarbuttonColor(Component cmp) {
+				((Toolbarbutton) cmp).setSclass("selected");
+				if(lastSelectedComponent != null && !lastSelectedComponent.equals(cmp))
+					((Toolbarbutton) lastSelectedComponent).setSclass("unSelected");
+				lastSelectedComponent = cmp;
+			}   
+	         void loadResultSection(String title){
+	        	searchCriteriaPanel.setTitle(title);
+				otherDiv.setVisible(true);
+				groupDiv.setVisible(false);
+				searchResultPanel.setVisible(false);
+				icdSearchController.setFromGroup(false);
+	         }
+	         
+	         void addIcd(){
+	            if(inPatientDoctorVisit == null){
+		            icdSearchController.addIcdToDifferentialDiagnosisSection();
+	            }
+				icdSearchWindow.detach();
+				
+	         }
+	]]>
+		</zscript>
+	</window>
+</zk>

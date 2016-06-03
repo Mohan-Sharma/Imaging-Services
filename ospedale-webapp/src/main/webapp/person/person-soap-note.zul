@@ -1,0 +1,114 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./personSoapNoteAndModulesWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<window id="personSoapNoteAndModulesWin">
+	<zscript><![CDATA[
+	   import com.nzion.domain.SoapNoteType;
+	   import com.nzion.view.RolesValueObject;
+	   import com.nzion.util.UtilMessagesAndPopups;
+	   import com.nzion.domain.Authorization;
+	                  
+      	com.nzion.zkoss.composer.PersonProfileController profileController = desktop.getAttribute("profileController");
+    	com.nzion.domain.person.PersonSoapTypeAndModule personSoapTypeAndModule=null;
+    	List soapNoteTypes=commonCrudService.getAll(SoapNoteType.class);
+    	com.nzion.zkoss.ext.EntityDropdownRenderer soapNoteRenderer = new com.nzion.zkoss.ext.EntityDropdownRenderer("name");
+	            	
+	   void setPersonSoapTypeAndModule(){
+		   personSoapTypeAndModule=personService.getPersonSoapTypeAndModule(soapNotes.getSelectedItem().getValue(),profileController.getPerson());
+		   soapNoteReportHeader.setDisabled(false);
+		   apptLength.setDisabled(false);
+		   defaultFormat.setDisabled(false);
+		   colorBox.setDisabled(false);
+		   defaultNoteChkBox.setDisabled(false);
+		   FollowUpNoteChkBox.setDisabled(false);
+	   }	
+//      com.nzion.view.RolesValueObject vo;
+]]></zscript>
+	<div sclass="panelFoot">
+		<button label="Save" id="Save" onClick="personService.savePersonSoapNoteAndModule(personSoapTypeAndModule);UtilMessagesAndPopups.showSuccess();"/>
+	</div>
+	<panel title="Person SOAP Note">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div>
+						<label value="SOAP Note"></label> 
+						<combobox id="soapNotes" model="@{soapNoteTypes}" itemRenderer="${soapNoteRenderer}"  onChange="setPersonSoapTypeAndModule();"/>
+						</div>
+					<div>
+						<label value="Report Header"></label> 
+						<textbox id = "soapNoteReportHeader" value="@{personSoapTypeAndModule.slotTypeFeatures.reportHeader,load-after='soapNotes.onChange'}" disabled="true" />
+					</div>
+					<div>
+						<label value="Appt Length *"></label> 
+						<intbox id = "apptLength" value="@{personSoapTypeAndModule.slotTypeFeatures.apptLength,load-after='soapNotes.onChange'}" disabled="true"/>
+					</div>
+					<div>
+						<label value="Default Format"></label>
+						<enumeration enumType="DEFAULT_SOAP_NOTE_FORMAT" selectedItem="@{personSoapTypeAndModule.slotTypeFeatures.defaultFormat,load-after='soapNotes.onChange'}" id="defaultFormat" disabled="true"/> 
+					</div>
+					<div>
+						<label value="Color"></label>
+						<colorbox width="100%" color="@{personSoapTypeAndModule.slotTypeFeatures.colorCode,load-after='soapNotes.onChange'}" id="colorBox" onChange="personSoapTypeAndModule.getSlotTypeFeatures().setColorCode(colorBox.color);" disabled="true"/>
+					</div>
+					<div sclass="chkBox">
+						<checkbox checked="@{personSoapTypeAndModule.slotTypeFeatures.DefaultNote,load-after='soapNotes.onChange'}"  label="Default Note" id="defaultNoteChkBox" disabled="true"/>
+					</div>
+					<div sclass="chkBox">
+						<checkbox checked="@{personSoapTypeAndModule.slotTypeFeatures.FollowUpNote,load-after='soapNotes.onChange'}" label="Follow Up Note" id="FollowUpNoteChkBox" disabled="true"/>
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+		<panel title="Selected Modules(Drag and drop to change the order)" id="modulesPanel" 
+		onDeleteClick="profileController.deleteFavourites(personSoapNoteModuleDisplayGrid, personSoapTypeAndModule.getPersonCustomisedModules())">
+			<attribute name="onAddClick">
+			if(soapNotes.getSelectedItem() == null){
+					UtilMessagesAndPopups.showError("Please select SOAP Note");
+					return;
+			}
+			profileController.soapNoteAddClicked(personSoapNoteAndModulesWin, personSoapNoteModuleDisplayGrid, personSoapTypeAndModule,"/person/add-person-soap-modules.zul");
+			</attribute>
+			<panelchildren>
+			<toolbar listenercomponent="${modulesPanel}" hidesearch="true" hidecancel="true"/>
+			<listbox multiple="true" id="personSoapNoteModuleDisplayGrid" checkmark="true" mold="paging" pageSize="10"  pagingPosition="top"
+					model="@{personSoapTypeAndModule.personCustomisedModules,load-after='soapNotes.onChange,self.onReloadRequest,modulesPanel.onDeleteClick'}">
+				<listhead>
+					<listheader label="Module Name" width="20%"/>
+					<listheader label="Customised Module Name" width="20%"/>
+					<listheader label="Import Previous Visits Data" width="20%"/>
+				</listhead>
+					<listitem self="@{each='personModule'}" value="@{personModule}" draggable="true" droppable="true" 
+					onDrop="profileController.moveCustomizedSoapModule(event, event.dragged, personSoapTypeAndModule);">
+					<listcell>
+						<label value="@{personModule.soapModule.moduleName}"  />
+					</listcell>
+					<listcell>
+						<textbox value="@{personModule.moduleName}"/>
+					</listcell>
+					<listcell>
+						<checkbox checked="@{personModule.previousVisitData}" />			
+					</listcell>
+					<!--<listcell label="Change roles" popup="msg"/>
+					--></listitem>
+		    </listbox>
+			</panelchildren> 
+		</panel><!--
+		<popup id="msg" width="300px">
+			<hbox width="100%">
+				<checkbox label="Doctor" checked="@{vo.provider,load-after='msg.onOpen'}" />
+				<checkbox label="Medical Assistant" checked="@{vo.medicalAssistant,load-after='msg.onOpen'}"/>
+				<checkbox label="Nurse" checked="@{nurse,load-after='msg.onOpen'}"/>
+				<checkbox label="Technician" checked="@{technician,load-after='msg.onOpen'}"/>
+				<checkbox label="Patient" checked="@{patient,load-after='msg.onOpen'}"/>
+			</hbox>
+		</popup>
+			put the below piece in listitem t make dat work as per d roles.
+			<attribute name="onClick">
+				Authorization a = new Authorization(self.getValue().effectiveAuthorization());
+				self.getValue().setAuthorization(a);
+				vo = new RolesValueObject(a);
+			</attribute>
+	--></window>
+</zk>

@@ -1,0 +1,17 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import com.nzion.domain.UserLogin;
+	import com.nzion.service.UserLoginService;
+	setPageTitle("Emergency Access", "");
+	UserLoginService ulServ = com.nzion.util.Infrastructure.getSpringBean("userLoginService");
+]]>
+	</zscript>
+
+	<window id="winUserLogin" width="100%">
+		<screen width="100%" listtitle="List of Emergency Logins" addpage="security/emergencyAccess" entityclass="com.nzion.domain.UserLogin"
+			fields="username,person.firstName,person.lastName,patient.firstName,patient.lastName,passwordValidThruDate" searchservice="${ulServ}" 
+			labels="User Login,First Name,Last Name,Patient First Name,Patient Last Name,Valid Till" addmodepopup="true" 
+			searchfields="username,person.firstName,person.lastName,patient.firstName,patient.lastName"/>
+	</window>
+</zk>

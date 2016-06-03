@@ -1,0 +1,25 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/practiceTemplate.zul"?>
+<zk xmlns:x="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:h="http://www.zkoss.org/2005/zk/native">
+<div self="@{define(content)}">
+	<tabbox>
+		<tabs>
+			<!--<tab label="Enumerations" id="enumerations"	onClick='renderUtilityCenter("/entities/enumerations.zul")' />-->
+			<tab label="Financial Class" id="financialClass" onClick='renderUtilityCenter("/entities/financialclass.zul")' />
+			<!--<tab label="Audit Trail" />-->
+		</tabs>
+	</tabbox>
+	<div id="utilitycenterMain"/>
+	<zscript>
+	void renderUtilityCenter(String url) {
+	if(utilitycenterMain.getFirstChild() != null){
+	   utilitycenterMain.getFirstChild().detach();
+	}
+		Component component = Executions.createComponents(url, null, null);
+		component.setParent(utilitycenterMain);
+	}
+	//Events.postEvent("onClick", enumerations, null);
+	</zscript>
+</div>
+</zk>

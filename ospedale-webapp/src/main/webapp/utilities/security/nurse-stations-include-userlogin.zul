@@ -1,0 +1,19 @@
+<zk  xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	 xmlns:n="http://www.zkoss.org/2005/zk/native">
+<div forEach="${nurseStations}">
+ <listbox visible="false">
+   <listitem value="${each}" selected="true"></listitem>
+  </listbox>
+  <n:table>
+  	<n:tr>
+  		<n:td>
+		   <checkbox  value="${each}"
+		   onCheck='userLoginController.addOrRemoveNurseStation(((Listbox)self.getParent().getPreviousSibling()).getSelectedItem().getValue(), event.isChecked())'
+		   onCreate="self.setChecked(userLoginController.getNurseStations().contains(((Listbox)self.getParent().getPreviousSibling()).getSelectedItem().getValue()))"/>	
+		   <label value="${each.name}"/>
+		   [<label value="${each.location.name}"/>]		
+  	 	</n:td>
+  	</n:tr>
+  </n:table>			  
+</div>
+</zk>

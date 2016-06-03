@@ -1,0 +1,21 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientUserLogin"?>
+<?component name="lookup" class="com.nzion.view.component.LookupBox"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import com.nzion.domain.UserLogin;
+	import com.nzion.domain.Party.PartyType;
+	setPageTitle("Patient Login", "");
+	com.nzion.service.UserLoginService ulServ = com.nzion.util.Infrastructure.getSpringBean("userLoginService");
+	List userLogins = ulServ.getUserLoginsFor(com.nzion.util.UtilMisc.toList(com.nzion.domain.Party.PartyType.PATIENT));
+	BindingListModelList listModel = new BindingListModelList(userLogins,false);
+]]>
+	</zscript>
+
+	<window apply="${securityGroupController}" id="patientUserLogin" width="100%">
+		<screen width="100%" listtitle="List of Patient Logins" hideaddbtn="true"
+			extrabuttons="/utilities/security/resetUserLoginPassword.zul" entityclass="com.nzion.domain.UserLogin"
+			fields="username,person.firstName,active,requirePasswordChange"
+			labels="User Name,Patient Name,Active,Password Change Required" listModel="${userLogins}" hidedeletebtn="true"/>
+	</window>
+</zk>

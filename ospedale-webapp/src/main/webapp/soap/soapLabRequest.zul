@@ -1,0 +1,194 @@
+	<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+							<h:table width="100%" cellpadding="0px" cellspacing="0px" style="border:0px">
+									<h:tr>
+										<h:td class="soapNoteContL" onClick="expandRHS(this.id)">		
+											<panel title="Current Lab Request" collapsible="false" height="330px" border="none"
+												accessrecord="${section.soapAccessRecord}" use="com.nzion.view.component.SoapSecurityPanel">
+												<panelchildren>
+													<div id="buttonBlock" visible="${!isOrdered}">
+														<span sclass="linkBtn linkBtnOn">
+															<a disabled="${controller.readonly}" id="addBtn" sclass="addBtn" label="New" onCreate='Events.postEvent("onClick",self,null)'>
+																<attribute name="onClick">
+																	patientLabOrder = new PatientLabOrder();
+																	patientLabOrder.setPatient(controller.getPatient());
+																</attribute>
+															</a>
+															<span />
+														</span>
+													</div>
+													<separator/>
+													<div sclass="dataTables_scrollBody" style="overflow: auto; height: 330px;">
+													<listbox model="@{section.labOrder,load-after='self.onReloadRequest,saveBtn.onClick'}"
+															id="labOrderDisplayGrid">
+															<listhead>
+																<listheader label="Test Name" />
+																<listheader label="Test code" />
+																<listheader label="Coding System" />
+																<listheader label="Action" />
+															</listhead>
+															<listitem self="@{each='labOrder'}" value="@{labOrder}">
+																<attribute w:name="onMouseOver" if="${!isCompleted}">
+																	jQuery('#'+this.uuid).find('img[class=\"delImg\"]').css('display','inline');
+																</attribute>
+																<attribute w:name="onMouseOut" if="${!isCompleted}">
+																	jQuery('#'+this.uuid).find('img[class=\"delImg\"]').css('display','none');
+																</attribute>
+																<attribute w:name="onClick" if="${!isCompleted}">
+																	var rightSide = jQuery('#'+this.uuid).find('td.soapNoteContR');
+																	rightSide.toggleClass('CCRCollapse');
+																	rightSide.find('div.slideHandle').toggleClass('SHCollapse');
+																	rightSide.find('div.panelCont').toggleClass('hidePanelCont');
+																</attribute>
+																<listcell>
+																	<span sclass="dragHandle" />
+																	<label value="@{labOrder.testName}" />
+																</listcell>
+																<listcell>
+																	<label value="@{labOrder.testCode}" />
+																</listcell>
+																<listcell>
+																	<div>
+																		<label value="@{labOrder.codingSystem}" />
+																	</div>
+																</listcell>
+																<listcell>
+																 <span style="float:right">
+																		<image sclass="delImg" src="/images/delButton.png" width="8px"
+																			height="8px" visible="false" onClick="removePatientLabOrder()" />
+																 </span>
+																</listcell>
+															</listitem>
+															<attribute name="onSelect">
+																patientLabOrder = (PatientLabOrder) self.getSelectedItem().getValue();											
+															</attribute>
+														</listbox>
+													</div>
+												</panelchildren>
+											</panel>
+											<div sclass="panelFoot" >
+												<button disabled="${isOrdered}" label="Save And Send">
+												<attribute name="onClick">							
+												//labOrderRequest.setOrderStatus(LabOrderRequest.ORDERSTATUS.BILLING_REQUIRED);
+												labOrderRequest.setPatientSoapNote(controller.getSoapNote());
+												labOrderRequest.setPatient(controller.getSoapNote().getPatient());
+												labOrderRequest.setProvider(controller.getProvider());
+											    commonCrudService.save(labOrderRequest);
+											    controller.saveSoapSection();
+											    buttonBlock.setVisible(false);
+											    requestDisSec.setVisible(true);
+											    self.setDisabled(true);
+											    Events.postEvent("onReloadRequest",requestStatusDis,null);
+												</attribute>
+												</button> 
+											</div>
+										</h:td>
+										<h:td class="soapNoteContR">
+											<div sclass="posRel">
+												<div sclass="slideHandle">
+													<attribute w:name="onClick">
+														var slideHandle = jQuery('#'+this.uuid);
+														slideHandle.parent().closest('.soapNoteContR').toggleClass('CCRCollapse');
+														slideHandle.toggleClass('SHCollapse');
+														slideHandle.parent().find('div.panelCont').toggleClass('hidePanelCont');
+														slideHandle.parent().find('div.panelFoot').toggleClass('hidePanelCont');
+														slideHandle.parent().find('button').toggleClass('hidePanelCont'); var obj =
+														slideHandle.parent().parent().parent().parent().find('.z-listbox-header');
+														obj.css('width','auto');
+													</attribute>
+												</div>
+												<div style="display: block;" height="330px">
+													<div sclass="panelCont" style="border-width:0px">
+														<div width="100%">
+															<label value="Name" />
+															<label value="*" style="color:red" />
+															<hbox style="border:0px">
+																<textbox id="testName"
+																	value="@{patientLabOrder.testName,load-after='addBtn.onClick,labOrderDisplayGrid.onSelect'}" readonly="true"
+																	constraint="no empty:Test Name Required" />
+																<span id="lookUpBtn" sclass="linkBtn linkBtnOn">
+																	<a disabled="${controller.readonly}" sclass="lookupBtn">
+																		<attribute name="onClick">
+																			Map m = com.nzion.util.UtilMisc.toMap("testName", testName, "testCode", testCode, "codingSystem", codingSystem,"patientLabOrder",patientLabOrder);
+																			Executions.createComponents("/soap/lab-test-lookup.zul", null, m);
+																		</attribute>
+																		Lookup
+																	</a>
+																	<span />
+																</span>
+															</hbox>
+														</div>
+														<div >
+															<label value="Coding System" />
+															<textbox id="codingSystem" readonly="true" 
+																value="@{patientLabOrder.codingSystem,load-after='addBtn.onClick,labOrderDisplayGrid.onSelect'}" />
+														</div>
+														<div >
+															<label value="Code" />
+															<textbox id="testCode" readonly="true"
+																value="@{patientLabOrder.testCode,load-after='addBtn.onClick,labOrderDisplayGrid.onSelect'}" />
+														</div>
+														<div >
+															<label value="Start" />
+															<datebox
+																value="@{patientLabOrder.startDate,load-after='addBtn.onClick,labOrderDisplayGrid.onSelect'}" />
+														</div>
+														<div >
+															<label value="End" />
+															<datebox
+																value="@{patientLabOrder.endDate,load-after='addBtn.onClick,labOrderDisplayGrid.onSelect'}" />
+														</div>
+														<div width="90%" style="overflow:auto">
+																<label value="Reason"/>
+																<textbox rows="5" value="@{patientLabOrder.reasonForTest,load-after='addBtn.onClick,labOrderDisplayGrid.onSelect'}" />
+														</div>
+														<div width="90%">
+															<label value="Comments" />
+															<textbox rows="5"
+																value="@{patientLabOrder.testNotes,load-after='addBtn.onClick,labOrderDisplayGrid.onSelect'}" />
+														</div>
+													</div>
+												</div>
+												<div sclass="panelFoot">
+													<button disabled="${isOrdered}" id="saveBtn" label="Add">
+														<attribute name="onClick">	
+															section.addPatientLabOrder(patientLabOrder);
+															patientLabOrder.setLabOrderRequest(labOrderRequest);										
+														    labOrderRequest.addPatientLabOrder(patientLabOrder);
+															labOrderDisplayGrid.setVisible(true);
+															Events.postEvent("onClick",addBtn,null);
+														</attribute>
+													</button>
+												</div>
+											</div>
+										</h:td>
+									</h:tr>
+						</h:table>
+									<zscript>
+									void removePatientLabOrder() {
+									if (!(labOrderRequest.getOrderStatus().equals(LabOrderRequest.ORDERSTATUS.BILLING_REQUIRED))) {
+										alert("Its already ordered.Cannot be deleted.");
+										return;
+									}
+									Messagebox.show("Are you sure you wish to delete this record?", "Delete Confirm?", Messagebox.YES | Messagebox.NO,
+											Messagebox.QUESTION, new org.zkoss.zk.ui.event.EventListener() {
+												public void onEvent(Event evt) throws Exception {
+												if ("onYes".equals(evt.getName())) {
+													try {
+														section.getLabOrder().remove(patientLabOrder);
+														labOrderRequest.getPatientLabOrders().remove(patientLabOrder);
+														commonCrudService.save(labOrderRequest);
+												    	controller.saveSoapSection();
+														controller.setEventMessage("Lab Order Record deleted");
+														Events.postEvent("onReloadRequest", labOrderDisplayGrid, null);
+													} catch (Exception e) {
+														e.printStackTrace();
+													}
+												} else {
+													return;
+												}
+												}
+											});
+									}
+								</zscript>
+							</zk>

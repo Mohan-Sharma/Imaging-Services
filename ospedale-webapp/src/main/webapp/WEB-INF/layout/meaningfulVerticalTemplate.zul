@@ -1,0 +1,100 @@
+<?component name="enumeration" class="com.nzion.view.component.EnumerationDropdown"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<style>
+		.z-toolbarbutton-over{ 
+			border-bottom:none; 
+			border-top:none;
+			padding:none; 
+			text-decoration: underline; 
+			border:0 none; 
+		}
+		.z-toolbarbutton-over .z-toolbarbutton-body{ 
+			border-left:none;
+			border-right:none; 
+			padding:none; 
+		} 
+		.z-toolbarbutton{ 
+			margin:0 0;
+		}
+		tr.z-vbox-sep { 
+			height:0; 
+		}
+		.selected{ background:url("/ecosmos/images/leftmenu_active.gif")
+			no-repeat scroll left center #FFFFFF; color:#006699;
+			border-right:1px solid #FFFFFF; border-bottom:1px solid #E0E0E0;
+			display:block; padding:6px 10px; } 
+		
+		.unSelected{
+			background:url(none); color:#249; border-bottom:1px solid
+			#E0E0E0; display:block; padding:7px 10px; }
+			
+		.divStyle{
+			background:url("../images/grey_bdr_1x1.gif") repeat-y scroll
+			right top #F6F7F8;
+			vertical-align:top; 
+			border-spacing:none; padding:0; 
+			height:100%;
+			width:14% !important;
+		}
+	</style>
+<window self="@{define(utilityContent)}" id="win" height="100%">
+	<h:table
+		style="border:none; vertical-align:top; border-spacing:none; padding:0;background:#FFFFFF; height:100%;">
+		<h:tr height="100%">
+			<h:td class="divStyle" height="100%">
+			<div style="min-height:630px;" id="vboxDiv">
+				<vbox id="vbox"/>
+			</div>
+			</h:td>
+			<h:td  style="vertical-align:top; border-spacing:none; padding:0; height:100%;">
+				<div id="utilitycenter" width="99%"	style="margin-left:6px"/>
+			</h:td>
+		</h:tr>
+	</h:table>
+</window>
+<zscript><![CDATA[
+   	import com.nzion.util.UtilMisc;
+ 	import com.nzion.util.UtilValidator;
+ 	
+ 	import com.nzion.domain.*;
+
+	Component lastSelectedComponent;
+	
+	int i = 0;
+	
+	void setToolbarbuttonColor(Component cmp) {
+		((Toolbarbutton) cmp).setSclass("selected");
+		if(lastSelectedComponent != null && !lastSelectedComponent.equals(cmp))
+			((Toolbarbutton) lastSelectedComponent).setSclass("unSelected");
+		lastSelectedComponent = cmp;
+	}
+	void renderTabs(List meaningfulSubTypes){
+		TreeMap map = new TreeMap();
+		for(int i=0; i <meaningfulSubTypes.size(); i++){
+			com.nzion.domain.report.meaningful.MeaningfulUse meaningfulUse = meaningfulSubTypes.get(i);
+			Toolbarbutton btn = new Toolbarbutton();
+			btn.setParent(win.getFellow("vbox"));
+			btn.setLabel(meaningfulUse.getMeaningfulSubTypeDescription());
+			btn.setAttribute("meaningfulObject",meaningfulUse);
+			btn.setAttribute("view",meaningfulUse.getMeaningfulSubTypeId());
+			btn.setSclass("unSelected");
+			btn.setWidth("10px");
+			btn.addEventListener("onClick", new org.zkoss.zk.ui.event.EventListener() {
+				public void onEvent(Event event) throws Exception {
+					Toolbarbutton toolbarbutton = (Toolbarbutton)event.getTarget();
+					com.nzion.domain.util.MeaningfulExecutionContext meaningfulExecutionContext = new com.nzion.domain.util.MeaningfulExecutionContext();
+					meaningfulExecutionContext.setMeaningfulUse((com.nzion.domain.report.meaningful.MeaningfulUse)toolbarbutton.getAttribute("meaningfulObject"));
+					setToolbarbuttonColor(toolbarbutton);
+					Div utilityCenter = (Div)event.getTarget().getFellow("utilitycenter");
+					com.nzion.zkoss.ext.Navigation.navigate((String)btn.getAttribute("view"), UtilMisc.toMap("meaningfulExecutionContext",meaningfulExecutionContext), utilityCenter);
+					utilityCenter.setFocus(true);
+				}
+			});
+			} 
+		Events.postEvent("onClick", win.getFellow("vbox").getFirstChild(), null);
+	}
+	]]>
+</zscript>
+</zk>

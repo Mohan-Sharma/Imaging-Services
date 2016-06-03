@@ -1,0 +1,13 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		setPageTitle("Diagnosis Group", "");
+	</zscript>
+	
+<window id="icdGroupList">
+<screen width="100%" listtitle="List of DiagnosisGroups" addpage="addIcdGroup" editpage="addIcdGroup" addmodepopup="true"
+	entityclass="com.nzion.domain.emr.IcdGroup" fields="groupName,groupDescription" 
+	labels="Group Name,Group Description" hidedeletebtn="true"/>
+</window>
+</zk>

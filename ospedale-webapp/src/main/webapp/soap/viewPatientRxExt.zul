@@ -1,0 +1,25 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./viewPatientRxWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	com.nzion.domain.emr.soap.PatientRx PatientRx = (com.nzion.domain.emr.soap.PatientRx) arg
+			.get("patientRxNewCorpObj");
+			java.lang.reflect.Field[] classFields =PatientRx.getClass().getDeclaredFields();
+</zscript>
+	<window id="viewPatientRxWindow" mode="modal" width="50%" height="95%" closable="true" title="Rx Detail" contentStyle="overflow:auto">
+		
+	<n:table width="100%">
+		<n:tr forEach="${classFields}" style="border:1px solid black">
+				<n:td style="border:1px solid black">
+					 <label value="${each.name}"/></n:td>
+				<zscript>
+					each.setAccessible(true);
+					Object fieldValue = each.get(PatientRx);
+				</zscript>
+				<n:td style="border:1px solid black">
+					<label value="${fieldValue}"/>
+				</n:td>
+		</n:tr>
+	</n:table>	
+	</window>
+</zk>

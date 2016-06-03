@@ -1,0 +1,32 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addVitalSignsforPerson"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	com.nzion.zkoss.composer.PersonProfileController profileController = desktop.getAttribute("profileController");
+ 	List list=arg.get("list");
+	List vitalSigns = personService.getUnAddedVitalSigns(profileController.getPerson());
+	]]></zscript>
+	<window  id="addVitalSignsforPerson" mode="modal" position="center,top" width="60%" height="70%" title="Add Vital Signs" closable="true">
+	<div width="97%" style="padding:5px">
+	 <panel title="Add Vital Sign" id="vitalSignPanel" forward='onCancelClick=onCancel' 
+	 		onAddClick="profileController.addPersonFavourites(vitalSignDisplayGrid,addVitalSignsforPerson,list,com.nzion.domain.person.PersonVitalSign.class,com.nzion.domain.emr.VitalSign.class);"
+		onCancelClick="addVitalSignsforPerson.detach();">
+		<panelchildren>
+			<toolbar listenercomponent="${vitalSignPanel}" hidedelete="true" hidesearch="true"/>		
+		</panelchildren>
+	</panel>
+	<listbox multiple="true" checkmark="true" width="100%" id="vitalSignDisplayGrid" model="@{vitalSigns}"  
+		mold="paging" pageSize="10" pagingPosition="top" preloadSize="20">
+	<listhead>
+		<listheader label="Vital Sign"/>
+	</listhead>
+		<listitem self="@{each='selectedVitalSign'}" value="@{selectedVitalSign}">
+			<listcell>
+				<label value="@{selectedVitalSign.name}" />
+			</listcell>
+		</listitem>
+	</listbox>
+	</div>
+	</window>
+</zk>

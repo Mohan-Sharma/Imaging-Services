@@ -1,0 +1,159 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./chiefComplaintSectionDiv"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+
+	<window id="chiefComplaintSectionDiv" width="100%">
+		<zscript>
+<![CDATA[
+	import com.nzion.util.UtilMisc;
+	com.nzion.zkoss.composer.PatientSoapNoteController controller = arg.get("controller");
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	java.util.Date ut=new java.util.Date();
+	com.nzion.domain.emr.soap.ChiefComplainSection section = controller.getSoapSection(com.nzion.domain.emr.soap.ChiefComplainSection.class);
+	List soapNotes;
+	List pastSoapNotes = soapNoteService.getLatestPatientSoapNotes(controller.getPatient(), 5, controller.getSoapNote().getDate());
+	boolean provider = com.nzion.domain.Roles.hasRole(com.nzion.domain.Roles.PROVIDER);
+	List similarChiefComplaints;
+	Component lastSelectedComponent;
+	void setStyle(Component cmp) {
+	((A) cmp).setSclass("cur");
+	if (lastSelectedComponent != null && !lastSelectedComponent.equals(cmp)) ((A) lastSelectedComponent).setSclass("");
+	lastSelectedComponent = cmp;
+	}
+]]>			
+</zscript>
+		<style>
+			.cclayout input{ width:350px; } 
+			.ccActions a { padding:10px } 
+			.z-row, z-grid-odd{ 
+				border: 1px solid #86A4BE;
+				-moz-border-radius: 15px;
+				border-radius: 15px;
+				box-sizing: border-box;
+			}
+			.z-combobox-rounded-pp, .z-combobox-pp, .z-bandbox-rounded-pp, .z-bandbox-pp{
+				max-width:600px;
+			}
+		</style>
+		<panel collapsible="false" closable="false">
+			<panelchildren>
+				<div sclass="form" width="700px">
+					<vlayout spacing="20px">
+						<hlayout spacing="7px" width="100%">
+							<label class="name" value="Brief Description of Visit" />
+							<textbox value="@{section.patientComplaint}" rows="3" width="450px"/>
+						</hlayout>
+						<hlayout  spacing="7px">
+							<label class="name" value="Add Chief Complaint" />
+							<hlayout style="margin:5px;border-width:0px" sclass="cclayout">
+								<suggest id="chiefComplaintTxt" entity="com.nzion.domain.emr.ChiefComplaint"
+									searchcolumns="complainName" displaycolumns="complainName" requiredcolumn="complainName" />
+								
+									<a id="addBtn" zclass="btn" disabled="${controller.readonly}" label="Add" >
+										<attribute name="onClick">
+											<![CDATA[
+											if(com.nzion.util.UtilValidator.isNotEmpty(chiefComplaintTxt.getValue()))
+												similarChiefComplaints = controller.addChiefComplaint(chiefComplaintTxt.getValue(),chiefComplaintTxt.getResult()!=null?chiefComplaintTxt.getResult().getQaTemplate() != null ? chiefComplaintTxt.getResult().getQaTemplate() : null:null);chiefComplaintTxt.setValue("");
+											]]>
+										</attribute>
+									 <n:i class="icon-plus-sign"></n:i>
+									</a>
+									
+									<a zclass="lookupbtn" disabled="${controller.readonly}">
+										<attribute name="onClick">
+										//	Map m = com.nzion.util.UtilMisc.toMap("chiefComplaintTxt", chiefComplaintTxt, "provider", controller.getProvider());
+											//Executions.createComponents("/soap/chief-complaint-look-up.zul", null, m);
+							Window w =com.nzion.zkoss.ext.Navigation.openModalWindowWithParent("/soap/chief-complaint-look-up",com.nzion.util.UtilMisc.toMap("chiefComplaintTxt",chiefComplaintTxt,"provider",controller.getProvider()),self);
+										</attribute>
+										Quick Look Up
+									</a>
+							</hlayout>
+						</hlayout>
+					</vlayout>
+				</div>
+				<separator bar="true"></separator>
+				<space height="10px"></space>
+				<label value="Current Chief Complaints"></label>
+				<grid height="200px" width="95%" style="margin:10px" id="grid"
+					model="@{controller.selectedSection.patientChiefComplaints, load-after='addBtn.onClick,chiefComplaintTxt.onLookedUp,self.onReload'}">
+					<columns>
+						<column width="70%"></column>
+						<column width="30%"></column>
+					</columns>
+					<rows>
+						<row self="@{each='cc'}" value="@{cc}">
+							<span sclass="ccActions">
+								<a>
+									<label value="@{cc.chiefComplaint}" zclass="" width="200px" />
+								</a>
+							</span>
+							<span sclass="ccActions">
+								<a id="historyBtn" onClick='soapNotes=soapNoteService.getSoapNotesForSimilarChiefComplaints(controller.getPatient(),
+									 self.getParent().getParent().getValue().getChiefComplaint(), controller.getSoapNote().getDate());
+									 Executions.createComponents("previousCC.zul",null,UtilMisc.toMap("soapNotes",soapNotes))'>History</a>
+								|
+								<!--  <a id="sixMonthsBtn" onClick='soapNotes=soapNoteService.getSixMonthsChiefComplaints(controller.getPatient(),
+									 self.getParent().getParent().getValue().getChiefComplaint(),UtilDateTime.addMonthsToDate(controller.getSoapNote().getDate(),6) ,section);
+									 Executions.createComponents("previousCC.zul",null,UtilMisc.toMap("soapNotes",soapNotes))' >Visit in last six months</a> -->
+								
+								<a label="Remove" disabled="${controller.readonly}">
+								<attribute name="onClick">
+							   Set selectedSection = section.getPatientChiefComplaints();
+							   selectedSection.remove(self.getParent().getParent().getValue());
+							   Events.postEvent("onReload",grid,null);
+								</attribute>
+								</a>
+							</span>
+						</row>
+					</rows>
+					<foot>
+					</foot>
+				</grid>
+			</panelchildren>
+		</panel>
+		<div width="100%" sclass="buttonPanel">
+			<button label="Save" id="Save" zclass="btn btn-success" disabled="${controller.readonly}">
+				<attribute name="onClick">
+				if(controller.isNotSaved()){
+				com.nzion.util.UtilMessagesAndPopups.confirm("Is this a Medical Legal Case ?", "MLC Confirmation", Messagebox.YES
+		| Messagebox.NO, Messagebox.QUESTION, new org.zkoss.zk.ui.event.EventListener() {
+	public void onEvent(Event event) {
+	if ("onYes".equals(event.getName())) {
+		if (section.getPatientChiefComplaints().isEmpty())
+			com.nzion.util.UtilMessagesAndPopups.showError("Add a Chief Complaint");
+		else {
+			controller.setEventMessage("Chief Complaint Section\t updated");
+			controller.saveSoapSection();
+			com.nzion.domain.emr.soap.PatientSoapNote soapNote = controller.getSelectedSection().getSoapNote();
+			soapNote.setIsMlc(Boolean.TRUE);
+			commonCrudService.save(soapNote);
+		}
+					
+	}
+	else{
+		if (section.getPatientChiefComplaints().isEmpty())
+			com.nzion.util.UtilMessagesAndPopups.showError("Add a Chief Complaint");
+		else {
+			controller.setEventMessage("Chief Complaint Section\t updated");
+			controller.saveSoapSection();
+			com.nzion.domain.emr.soap.PatientSoapNote soapNote = controller.getSelectedSection().getSoapNote();
+			soapNote.setIsMlc(Boolean.FALSE);
+			commonCrudService.save(soapNote);
+		}
+	}
+	}
+});
+}else{
+	if (section.getPatientChiefComplaints().isEmpty())
+			com.nzion.util.UtilMessagesAndPopups.showError("Add a Chief Complaint");
+		else {
+			controller.setEventMessage("Chief Complaint Section\t updated");
+			controller.saveSoapSection();
+			com.nzion.domain.emr.soap.PatientSoapNote soapNote = controller.getSelectedSection().getSoapNote();
+			}
+}
+					</attribute>
+			</button>
+		</div>
+	</window>
+</zk>

@@ -1,0 +1,11 @@
+<?component name="screen" macro-uri="/home-grid-macro.zul"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	setPageTitle("Drug Type", "");
+</zscript>
+	<window>
+		<screen width="100%" pagetitle="Drug Type" listtitle="List of Drug Type" addpage="addDrugType" editpage="addDrugType" entityclass="com.nzion.domain.emr.drug.DrugType"
+			fields="code, description" hidedeletebtn="true"	labels="Code,Description" addmodepopup="true"/>
+	</window>
+</zk>

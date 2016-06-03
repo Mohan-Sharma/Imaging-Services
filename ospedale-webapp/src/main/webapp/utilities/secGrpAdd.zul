@@ -1,0 +1,46 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./winSecurityGroupNew"?>
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<zk>
+
+	<zscript>
+	com.nzion.zkoss.composer.SecurityGroupController securityGroupController = new com.nzion.zkoss.composer.SecurityGroupController();
+</zscript>
+	<window style="border: 7px solid #2d2d2d; background-color:#EEEEEE;" closable="true" apply="${securityGroupController}"
+		id="winSecurityGroupNew" mode="modal" title="Security Group">
+
+		<panel>
+		
+			<panelchildren>
+
+				<div sclass="panelCont">
+					<div sclass="col2">
+						<label value="Security Group Name"></label>
+						<textbox value="@{securityGroupController.securityGroup.id}"></textbox>
+					</div>
+					<div  sclass="col2">
+						<label value="Description"></label>
+						<textbox rows="3" cols="45" value="@{securityGroupController.securityGroup.description}"></textbox>
+					</div>
+				</div>
+				
+				<div>
+				<label value="Available Permissions"/>
+				<listbox id="existingSecurityPermissionList" model="@{securityGroupController.uniquePermissions}"
+					mold="paging" visible="true" pageSize="10" paginal="${listboxPaging}"
+					itemRenderer="${securityGroupController.permissionRenderer}">
+					<listhead>
+						<listheader label="Description" />
+						<listheader label="View" />
+						<listheader label="Update" />
+						<listheader label="Create" />
+						<listheader label="Delete" />
+					</listhead>
+				</listbox>
+				</div>
+				<box width="100%" align="center">
+					<button id="SavePermissions" label="Save" forward="winSecurityGroup.onClick" />
+				</box>
+			</panelchildren>
+		</panel>
+	</window>
+</zk>

@@ -1,0 +1,53 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xmlns:w="http://www.zkoss.org/2005/zk/client">
+<window width="98%">
+<separator/>
+	<n:div width="98%">
+	<n:table>
+	<n:tr>
+		<h:td align="center"><n:strong style="font-size:20px">${provider.practice.practiceName}</n:strong></h:td>
+	</n:tr>
+	<n:tr>
+		<h:td>
+		<n:strong style="font-size:12px;margin-right:2px">${location.contacts.postalAddress.address1}</n:strong>
+		<n:strong style="font-size:12px;margin-right:2px">${location.contacts.postalAddress.city}</n:strong>
+		<n:strong style="font-size:12px;margin-right:2px">${location.contacts.postalAddress.stateProvinceGeo} - </n:strong>
+		<n:strong style="font-size:12px;margin-right:2px">Tel :${location.contacts.officePhone}</n:strong>
+		<n:strong style="font-size:12px">Fax :${location.contacts.faxNumber}</n:strong>
+		</h:td>
+	</n:tr>
+	</n:table>
+	</n:div>
+	<separator/>
+    <n:div width="98%">
+	<n:table>
+	<n:tr>
+		<n:td align="center"><n:strong>Name : <span style="margin-top:2px"> <name object="${provider}" style="font-weight:bold;"/> </span></n:strong></n:td>
+	</n:tr>
+	<n:tr>
+		<h:td>
+		<n:strong style="font-size:12px;margin-right:2px">NPI : ${provider.detail.npiNumber}</n:strong>
+		<n:strong style="font-size:12px;margin-right:2px">UPIN : ${provider.detail.upinNumber}</n:strong>
+		<n:strong >DEA : ${provider.detail.deaNumber} </n:strong>
+		</h:td>
+	</n:tr>
+	</n:table>
+	</n:div>
+	<separator/>
+	<n:table width="98%">
+	<n:caption style="font-size:14px;text-align:left;font-weight:bold">Patient Detail</n:caption>
+	<n:tr>
+		<h:td><n:strong>Account : ${patient.accountNumber}</n:strong></h:td>
+		<n:td><n:strong>Name : <span style="margin-top:2px"> <name object="${patient}" style="font-weight:bold;"/> </span></n:strong></n:td>
+		<n:td><n:strong>Gender :${patient.gender}</n:strong></n:td>
+	</n:tr>
+	<n:tr>
+		<h:td><n:strong>DOB : ${patient.dateOfBirth}</n:strong></h:td>
+		<n:td><n:strong>Ethnicity : ${patient.ethnicity}</n:strong></n:td>
+		<n:td><n:strong>Race : ${patient.race} </n:strong></n:td>
+	</n:tr>
+	</n:table>
+<separator/>
+</window>
+</zk>

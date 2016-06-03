@@ -1,0 +1,71 @@
+<div class="modal-header colorHeader">
+    <h4 class="modal-title">New Patient</h4>
+</div>
+<form novalidate name="patient">
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Title</label>
+                    <select class="form-control">
+                        <option>Mr</option>
+                        <option>Ms</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" class="form-control" ng-model="user.firstName" placeholder="First Name" required>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" class="form-control" ng-model="user.lastName" placeholder="Last Name">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="text" class="form-control" ng-pattern="/[0-9]{1,}([.][0-9]{1,2})*/" ng-model="user.age" placeholder="Age" required>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="form-group has-feedback" ng-class="{'has-success':(patient.mn.$dirty && patient.mn.$valid),'has-error':(patient.mn.$dirty && patient.mn.$invalid)}">
+                    <label>Gender</label>
+                    <select class="form-control" name="gender" ng-model="user.gender" required>
+                        <option>Male</option>
+                        <option>Female</option>
+                    </select>
+                    <span class="glyphicon glyphicon-ok form-control-feedback" ng-show="patient.gender.$dirty && patient.gender.$valid "></span>
+                    <span class="glyphicon glyphicon-remove form-control-feedback" ng-show="patient.gender.$dirty && patient.gender.$invalid "></span>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="form-group  has-feedback" ng-class="{'has-success':(patient.mn.$dirty && patient.mn.$valid),'has-error':(patient.mn.$dirty && patient.mn.$invalid)}">
+                    <label>Mobile Number</label>
+                    <input type="text" class="form-control" name="mn" ng-pattern="/[0-9]{10}/" ng-model="user.number" placeholder="Mobile Number" maxlength="10">
+                    <span class="glyphicon glyphicon-ok form-control-feedback" ng-show="patient.mn.$dirty && patient.mn.$valid "></span>
+                    <span class="glyphicon glyphicon-remove form-control-feedback" ng-show="patient.mn.$dirty && patient.mn.$invalid "></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer well" style="padding: 10px;margin: 0px">
+        <button class="btn btn-primary"  ng-disabled="patient.$invalid">OK</button>
+        <button class="btn btn-warning" ng-click="$dismiss('')">Cancel</button>
+    </div>
+</form>
+        <style>
+            .colorHeader{
+                color: #cdbfe3;
+                text-shadow: 0 1px 0 rgba(0,0,0,.1);
+                background-color: #6f5499;
+                background-image: -webkit-linear-gradient(top,#563d7c 0,#6f5499 100%);
+                background-image: linear-gradient(to bottom,#563d7c 0,#6f5499 100%);
+                background-repeat: repeat-x;
+            }
+        </style>

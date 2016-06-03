@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE jasperReport PUBLIC "//JasperReports//DTD Report Design//EN" "http://jasperreports.sourceforge.net/dtds/jasperreport.dtd">
+<jasperReport name="patientDemographyReport" printOrder="Vertical" pageHeight="842" pageWidth="695"
+	bottomMargin="30" columnCount="1" columnWidth="555" topMargin="30" whenNoDataType="BlankPage" isTitleNewPage="false"
+	isIgnorePagination="false">
+	<field name="accountNumber" class="java.lang.String" />
+	<field name="firstName" class="java.lang.String" />
+	<field name="lastName" class="java.lang.String" />
+	<field name="dateOfBirth" class="java.util.Date" />
+	<field name="age" class="java.lang.String" />
+	<field name="gender.description" class="java.lang.String" />
+	<title>
+		<band height="50" isSplitAllowed="true">
+			<rectangle radius="0">
+				<reportElement mode="Opaque" x="0" y="0" width="596" height="35" backcolor="#333333" forecolor="#FFFFFF"
+					positionType="FixRelativeToTop" isPrintRepeatedValues="true" isRemoveLineWhenBlank="false" isPrintInFirstWholeBand="false"
+					isPrintWhenDetailOverflows="false" />
+				<graphicElement />
+			</rectangle>
+			<staticText>
+				<reportElement mode="Transparent" x="90" y="5" width="596" height="40" forecolor="#FFFFFF" backcolor="#333333"
+					positionType="FixRelativeToTop" isPrintRepeatedValues="true" isRemoveLineWhenBlank="false" isPrintInFirstWholeBand="false"
+					isPrintWhenDetailOverflows="false" />
+				<textElement textAlignment="Center" verticalAlignment="Top" lineSpacing="Single" isStyledText="true">
+					<font size="20" isBold="true" isItalic="true" isUnderline="false" isPdfEmbedded="false" pdfEncoding="Cp1250"
+						isStrikeThrough="false" />
+				</textElement>
+				<text><![CDATA[Patient List]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="20" isSplitAllowed="true">
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="40" isSplitAllowed="true">
+			<rectangle radius="0">
+				<reportElement mode="Opaque" x="0" y="0" width="596" height="25" backcolor="#333333" forecolor="#FFFFFF"
+					positionType="FixRelativeToTop" isPrintRepeatedValues="true" isRemoveLineWhenBlank="false" isPrintInFirstWholeBand="false"
+					isPrintWhenDetailOverflows="false" />
+				<graphicElement />
+			</rectangle>
+			<staticText>
+				<reportElement mode="Transparent" x="90" y="0" width="100" height="30" positionType="FixRelativeToTop"
+					isPrintRepeatedValues="true" isRemoveLineWhenBlank="false" isPrintInFirstWholeBand="false" isPrintWhenDetailOverflows="false"
+					backcolor="#FFFFFF" forecolor="#ffffff" />
+				<textElement textAlignment="Center" verticalAlignment="Top" lineSpacing="Single">
+					<font size="14" isBold="true" isItalic="false" isUnderline="false" isPdfEmbedded="false" pdfEncoding="Cp1250"
+						isStrikeThrough="false" />
+				</textElement>
+				<text><![CDATA[Account Number ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="0" y="0" width="100" height="30" forecolor="#ffffff" backcolor="#FFFFFF"
+					positionType="FixRelativeToTop" isPrintRepeatedValues="true" isRemoveLineWhenBlank="false" isPrintInFirstWholeBand="false"
+					isPrintWhenDetailOverflows="false" />
+				<textElement textAlignment="Center" verticalAlignment="Top" lineSpacing="Single">
+					<font size="14" isBold="true" isItalic="false" isUnderline="false" isPdfEmbedded="false" pdfEncoding="Cp1250"
+						isStrikeThrough="false" />
+				</textElement>
+				<text><![CDATA[First Name ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="190" y="0" width="100" height="30" forecolor="#ffffff" backcolor="#FFFFFF"
+					positionType="FixRelativeToTop" isPrintRepeatedValues="true" isRemoveLineWhenBlank="false" isPrintInFirstWholeBand="false"
+					isPrintWhenDetailOverflows="false" />
+				<textElement textAlignment="Center" verticalAlignment="Top" lineSpacing="Single">
+					<font size="14" isBold="true" isItalic="false" isUnderline="false" isPdfEmbedded="false" pdfEncoding="Cp1250"
+						isStrikeThrough="false" />
+				</textElement>
+				<text><![CDATA[Last Name ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="290" y="0" width="100" height="30" forecolor="#ffffff" backcolor="#FFFFFF"
+					positionType="FixRelativeToTop" isPrintRepeatedValues="true" isRemoveLineWhenBlank="false" isPrintInFirstWholeBand="false"
+					isPrintWhenDetailOverflows="false" />
+				<textElement textAlignment="Center" verticalAlignment="Top" lineSpacing="Single">
+					<font size="14" isBold="true" isItalic="false" isUnderline="false" isPdfEmbedded="false" pdfEncoding="Cp1250"
+						isStrikeThrough="false" />
+				</textElement>
+				<text><![CDATA[Date of Birth ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="390" y="0" width="100" height="30" forecolor="#ffffff" backcolor="#FFFFFF"
+					positionType="FixRelativeToTop" isPrintRepeatedValues="true" isRemoveLineWhenBlank="false" isPrintInFirstWholeBand="false"
+					isPrintWhenDetailOverflows="false" />
+				<textElement textAlignment="Center" verticalAlignment="Top" lineSpacing="Single">
+					<font size="14" isBold="true" isItalic="false" isUnderline="false" isPdfEmbedded="false" pdfEncoding="Cp1250"
+						isStrikeThrough="false" />
+				</textElement>
+				<text><![CDATA[Age ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="490" y="0" width="100" height="30" forecolor="#ffffff" backcolor="#FFFFFF"
+					positionType="FixRelativeToTop" isPrintRepeatedValues="true" isRemoveLineWhenBlank="false" isPrintInFirstWholeBand="false"
+					isPrintWhenDetailOverflows="false" />
+				<textElement textAlignment="Center" verticalAlignment="Top" lineSpacing="Single">
+					<font size="14" isBold="true" isItalic="false" isUnderline="false" isPdfEmbedded="false" pdfEncoding="Cp1250"
+						isStrikeThrough="false" />
+				</textElement>
+				<text><![CDATA[Gender ]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="30">
+			<line>
+				<reportElement positionType="Float" x="0" y="12" width="590" height="1" forecolor="#808080" />
+				<graphicElement pen="Thin" />
+			</line>
+			<textField>
+				<reportElement x="120" y="0" width="180" height="15" />
+				<textElement />
+				<textFieldExpression class="java.lang.String">
+              <![CDATA[$F{accountNumber}]]>
+				</textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="20" y="0" width="100" height="15" />
+				<textElement />
+				<textFieldExpression class="java.lang.String">
+              <![CDATA[$F{firstName}]]>
+				</textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="210" y="0" width="100" height="15" />
+				<textElement />
+				<textFieldExpression class="java.lang.String">
+              <![CDATA[$F{lastName}]]>
+				</textFieldExpression>
+			</textField>
+			<textField pattern="dd-MMM-yyyy">
+				<reportElement x="312" y="0" width="100" height="15" />
+				<textElement />
+				<textFieldExpression class="java.util.Date">
+              <![CDATA[$F{dateOfBirth}]]>
+				</textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="412" y="0" width="100" height="15" />
+				<textElement />
+				<textFieldExpression class="java.lang.String">
+              <![CDATA[$F{age}]]>
+				</textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="512" y="0" width="100" height="15" />
+				<textElement />
+				<textFieldExpression class="java.lang.String">
+			              <![CDATA[$F{gender.description}]]>
+				</textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band></band>
+	</columnFooter>
+	<pageFooter>
+		<band height="15">
+			<staticText>
+				<reportElement x="0" y="0" width="40" height="15" />
+				<textElement />
+				<text>
+              <![CDATA[Page:]]>
+				</text>
+			</staticText>
+			<textField>
+				<reportElement x="40" y="0" width="100" height="15" />
+				<textElement />
+				<textFieldExpression class="java.lang.Integer">
+              <![CDATA[$V{PAGE_NUMBER}]]>
+				</textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band></band>
+	</summary>
+</jasperReport>

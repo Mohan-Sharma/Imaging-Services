@@ -1,0 +1,138 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./medicationSectionDiv"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+	com.nzion.zkoss.composer.MedicationHxComposer composer = new com.nzion.zkoss.composer.MedicationHxComposer();
+	com.nzion.zkoss.composer.PatientSoapNoteController soapNoteController = arg.get("controller");
+	com.nzion.domain.emr.soap.MedicationHistorySection historySection = soapNoteController.getSoapSection(com.nzion.domain.emr.soap.MedicationHistorySection.class);
+	com.nzion.domain.emr.soap.RxSection rxSection = soapNoteController.getSoapSection(com.nzion.domain.emr.soap.RxSection.class,false);
+	List allMedications = soapNoteService.getAllMedicationsExcludingCurrentSection(historySection,rxSection,soapNoteController.getPatient());	
+	composer.setSection(historySection);
+	Set medications = new HashSet();
+	medications.addAll(composer.getSection().getPatientRxs());
+	medications.addAll(allMedications);	
+	</zscript>
+	<window id="medicationSectionDiv" width="100%" apply="${composer}">
+	<zscript>
+	import com.nzion.util.*;
+	import com.nzion.domain.emr.soap.PatientRx;
+	com.nzion.service.SoapNoteService soapNoteService = Infrastructure.getSpringBean("soapNoteService");
+	PatientRx patientRx;
+	patientRx = new PatientRx();
+	
+	</zscript>
+		<div  id="SectionDiv" sclass="chiefComp soapNoteCont curSOAP ui-resizable" style="position:relative;">
+		<panel title="Medication History List" collapsible="false" border="none">
+			<panelchildren>
+			<h:table width="100%" cellpadding="0px" cellspacing="0px" style="border:0px">
+				<h:tr>
+					<h:td class="soapNoteContL">
+						<div style="width:99%;padding:10px;">
+							<div>
+								<span sclass="linkBtn linkBtnOn">
+									<a disabled="${soapNoteController.readonly}" label="New" sclass="addBtn"  id="newBtn">
+										<attribute name="onClick">
+											addEdit(null);
+										</attribute>
+										<n:i class="icon-plus-sign"></n:i>
+									</a>
+									<span />
+								</span>	
+							</div>
+						</div>
+					</h:td>
+				</h:tr>
+				<h:tr>
+					<h:td class="soapNoteContL">
+							<div sclass="dataTables_scrollBody"  style="width:95%;margin:auto;">
+								<n:table id="rxSectionDisplayGrid" cellpadding="0" cellspacing="0" border="0" class="display" >
+									<n:thead>
+										<n:tr>
+											<n:th>Generic Name</n:th>
+											<n:th>Drug Name</n:th>
+											<!-- <n:th>Quantity</n:th>
+											<n:th>Drug Form</n:th>
+											<n:th>Frequency</n:th> -->
+											<n:th>Total Supply</n:th>
+											<n:th>SIG</n:th>
+											<n:th>Start Date</n:th>
+											<n:th>End Date</n:th>
+											<n:th>Status</n:th>
+											<n:th>Action</n:th>
+										</n:tr>
+									</n:thead>
+									<n:tbody>
+										<n:tr forEach="${medications}">
+											<n:td>${each.drug.genericName}</n:td>
+											<n:td>
+											${each.drug.tradeName}
+											<!-- <n:label if="${each.drug ne null &amp;&amp; each.drug.tradeName eq each.drugName}">${each.drug.tradeName}</n:label> 
+											<n:label unless="${each.drug ne null &amp;&amp; each.drug.tradeName eq each.drugName}">${each.drugName}</n:label>
+											 -->
+											 </n:td>
+											<!-- <n:td>${each.quantity}</n:td>
+											<n:td>${each.drugDosageForm}</n:td>
+											<n:td>${each.drugDirection}</n:td> -->
+											<n:td>${each.totalSupply}</n:td>
+											<n:td>${each.internalComment}</n:td>
+											<n:td>${display:fd(each.startDate)}</n:td>
+											<n:td>${display:fd(each.endDate)}</n:td>
+											<n:td>${each.status}</n:td>
+											<n:td>
+											<div>
+												<custom-attributes value="${each}"/>	
+													<a class="group" onClick="addEdit(self.getId())" disabled="${soapNoteController.readonly}" id="${each.id}">Edit</a> |
+													<a label="Remove" disabled="${soapNoteController.readonly}"
+													onClick='soapNoteController.removeSoapRecord(self.getParent().getAttribute("value"),"medicationHistorySection","patientRxs");'/>
+											</div>
+											</n:td>
+										</n:tr>
+									</n:tbody>
+								</n:table>
+								</div>
+					</h:td>
+				</h:tr>
+			</h:table>
+			</panelchildren>
+		</panel>
+		</div>
+			<div sclass="panelFoot">
+			<button label="Save" zclass="btn btn-success">
+				<attribute name="onClick">
+				soapNoteController.saveSoapSection();
+				</attribute>
+			</button>
+	   </div>
+	   <script type="text/javascript">
+			zk.afterMount(function() { 
+				jq("#rxSectionDisplayGrid").dataTable({
+				"bJQueryUI": true,
+				"sPaginationType": "full_numbers", 
+				"aoColumns":
+							[ null,null,null,null, null, null,null,{ "bSortable": false,"sType": "html"} ] 
+						}); 
+			});
+		</script>
+		<zscript>
+			void addEdit(String  id){
+				patientRx = null;
+				if(id!=null){
+					com.nzion.service.common.CommonCrudService commonCrudService = Infrastructure.getSpringBean("commonCrudService");
+					patientRx = commonCrudService.getById(PatientRx.class, new Long(id));
+				}else{
+					patientRx = new PatientRx();
+				}
+				Window w =com.nzion.zkoss.ext.Navigation.navigateToModalWindow("/soap/soapAddMedicationHistory",com.nzion.util.UtilMisc.toMap("patientRx",patientRx,"historySection",historySection,"rxSection",rxSection,"composer",composer,"soapNoteController",soapNoteController));
+				w.addForward("onDetach", (Component)desktop.getAttribute("wkModule"), "onClick");
+			}
+			
+			void showHistory(){
+				Window window = Executions.createComponents("/soap/addedMedicationHistory.zul",medicationSectionDiv,
+					com.nzion.util.UtilMisc.toMap("composer",composer,"historySection",historySection,"rxSection",rxSection,"soapNoteController",soapNoteController));
+				window.doModal();
+			}
+		</zscript>
+	</window>
+</zk>

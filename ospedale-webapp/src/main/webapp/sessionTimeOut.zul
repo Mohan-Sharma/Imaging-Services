@@ -1,0 +1,35 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<style>
+		.warningFont{ font-weight:bold; font-size:12px; color:red; padding:3%; }
+
+		.sessionTimeout{ background-color: Lavender; margin: 6% 0 0 21%; width: 54%; }
+	</style>
+	<script>
+	function winClose()
+	{
+	window.top.opener=null;
+	window.close();
+	}
+	
+	</script>
+	<zscript>
+	com.nzion.service.common.impl.ApplicationEvents.postEvent(com.nzion.enums.EventType.SESSION_TIMEOUT, null,com.nzion.util.Infrastructure.getUserLogin(), "session got timed out");
+	</zscript>
+	<n:div class="sessionTimeout">
+		<n:p class="warningFont">
+			For Security reason , your session has been terminated due to inactivity over specified
+			time limit set by the Administration.
+		</n:p>
+		<n:br />
+		<n:br />
+		<n:p style="padding:3%;">
+			For security reasons, we recommend you close this window.
+		</n:p>
+		<n:br />
+		<n:p style="padding:3%;">
+			To Login again, please click
+			<n:a href="login.zhtml">here</n:a>
+		</n:p>
+	</n:div>
+</zk>

@@ -1,0 +1,164 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addTestResult"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+		<zscript><![CDATA[
+	import com.nzion.domain.emr.lab.OBRSegment;	 
+	import com.nzion.domain.emr.lab.OBXSegment;
+    com.nzion.domain.inpatient.PatientAdmission patientAdmission =  arg.get("patientAdmission");
+    Boolean isDischargedLab;
+    if(com.nzion.util.UtilValidator.isNotEmpty(patientAdmission.getDischargeSummary())){
+    	if(patientAdmission.getDischargeSummary().getStatus()!=null){
+    		isDischargedLab=com.nzion.domain.inpatient.DischargeSummary.STATUS.COMPLETED.equals(patientAdmission.getDischargeSummary().getStatus());
+    }
+    }
+    OBXSegment resultItem =  arg.get("obxItem");
+    resultItem = (resultItem ==  null) ? new OBXSegment(): resultItem;
+    OBRSegment obrSegment =  resultItem.getObrSegment() == null ? new OBRSegment() : resultItem.getObrSegment();
+    com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+    List labTestPanels = commonCrudService.getAll(com.nzion.domain.emr.lab.LabTestPanel.class);
+    List labCategories = commonCrudService.getAll(com.nzion.domain.emr.lab.LabCategory.class);
+]]></zscript>
+
+	<window id="addTestResult" mode="modal" closable="true"  width="70%"  height="80%">
+	<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Lab Test Result</h:small>
+                <button type="button" zclass="close" onClick="addTestResult.detach();">×</button>
+            </h:h1>
+        </div>
+	<div sclass="panelContInp" style="width:100%;float:left;" id="labResult" >
+		<panel>
+					<panelchildren>
+						<div id="testResultPanel" style="padding-top:5px;">
+							<div>
+								<label value="Test Name" mold="required"/>
+								<textbox id="labTestName" 
+									value="@{resultItem.obxName,save-when='addBtn.onClick',load-after='testResultPanel.onReloadRequest'}" constraint="no empty:Please provide Test Name" />
+							</div>
+							<div>
+								<label value="Test Performed Date" mold="required"/>
+								<datebox id="performedDate" 
+									value="@{resultItem.observationDateTime,save-when='addBtn.onClick'}" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty,no future"/>
+							</div>
+							<div>
+								 	<label value="Result" mold="required"/>
+								    <doublebox id="resultTextbox" value="@{resultItem.observationValue,load-after='testResultPanel.onReloadRequest',save-when='addBtn.onClick'}"
+									style="border:1px solid #A8A8A81px solid #A8A8A8" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty:Result Required"> </doublebox>
+							</div>	
+							<div>
+								<label value="Unit" mold="required"/>
+								<textbox id="resultUnit" 
+									value="@{resultItem.units,load-after='testResultPanel.onReloadRequest',save-when='addBtn.onClick'}"
+									style="border:1px solid #A8A8A81px solid #A8A8A8" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty:Units Required"/>
+							</div>
+							<div>
+								<label value="Reference Range" />
+								<textbox
+									value="@{resultItem.referenceRange,load-after='testResultPanel.onReloadRequest',save-when='addBtn.onClick',load-after='testResultPanel.onReloadRequest'}" />
+							</div>
+							<div>  
+								<label value="Category" > </label> 
+    							<combobox id="labCategory" model="@{labCategories}" selectedItem="@{resultItem.labCategory,save-when='addBtn.onClick',load-after='testResultPanel.onReloadRequest'}">
+    							<attribute name="onSelect">
+    							    com.nzion.domain.emr.lab.LabCategory lc  = (com.nzion.domain.emr.lab.LabCategory)self.getSelectedItem().getValue();    							   
+    								labTestPanels = commonCrudService.findByEquality(com.nzion.domain.emr.lab.LabTestPanel.class,new String[]{"labCategory"},new Object[]{lc});
+    								Events.postEvent("onReloadRequest",testPanel,null);
+    							</attribute> 
+    								<comboitem self="@{each='labCat'}" value="@{labCat}" label="@{labCat.name}">				     								
+    								</comboitem>
+    							</combobox>    
+    						</div>
+    						<div>  
+								<label value="Test Panel" > </label> 
+    								<combobox id="testPanel" model="@{labTestPanels,load-after='onReloadRequest,testResultPanel.onReloadRequest'}" selectedItem="@{resultItem.labTestPanel,save-when='addBtn.onClick'}"> 
+    								   <comboitem self="@{each='panel'}" value="@{panel}" label="@{panel.panelName}">
+    								   </comboitem>
+    							</combobox>    
+    						</div>
+							<div >
+								<label value="Test Note" />
+								<textbox
+									value="@{resultItem.testNotes,load-after='testResultPanel.onReloadRequest',save-when='addBtn.onClick'}" rows="3"
+									style="border:1px solid #A8A8A8"  width="60%"/>
+							</div>
+						</div>
+						<div sclass="panelFoot">
+						<div style="width:100%" align="center">
+							<button label="Add" id="addBtn" disabled="${isDischargedLab}">
+								<attribute name="onClick">
+									resultItem.setObservationDateTime(performedDate.getValue());
+									resultItem.setExternalTest(true);									
+									resultItem.setPatient(patientAdmission.getPatient());
+									resultItem.setInPatientAdmNumber(patientAdmission.getAccountNumber());
+								  //  resultItem.setPatientAdmission(patientAdmission);
+								    commonCrudService.save(resultItem);
+								    obrSegment.addOBX(resultItem);
+								    obrSegment.setPatient(patientAdmission.getPatient());
+								    resultItem.setObrSegment(obrSegment);	
+								    resultItem =  new OBXSegment();
+								    Events.postEvent("onReloadRequest",testResultPanel,null);	
+								</attribute>
+							</button>
+							</div>
+						</div>
+					</panelchildren>
+			</panel>
+	</div>
+	<div  style="width:100%;float:left;" >
+	<panel >
+			<panelchildren>
+		    <listbox id="extLabResultListBox" mold="paging" pageSize="7" width="90%"
+			 model="@{obrSegment.observations,load-after='addBtn.onClick,self.onReloadRequest'}" >
+				<listhead>
+					<listheader label="Test Performed Date" style="font-weight:bold"/>
+					<listheader label="Test Name" style="font-weight:bold"/>
+					<listheader label="Observation Value" style="font-weight:bold" />
+					<listheader label="Unit" style="font-weight:bold" />
+					<listheader label="Reference Range" style="font-weight:bold" />
+					<listheader label="Action" style="font-weight:bold" />
+				</listhead>
+					<listitem self="@{each='tmpObx'}" value="@{tmpObx}" >
+					<listcell>
+						<label value="@{tmpObx.observationDateTime}" />				
+					</listcell>
+					<listcell>
+						<label value="@{tmpObx.obxName}"/>				
+					</listcell>
+					<listcell>
+						<label value="@{tmpObx.observationValue}" />
+					</listcell>		
+					<listcell>
+						<label value="@{tmpObx.units}" />				
+					</listcell>		
+					<listcell>
+						<label value="@{tmpObx.referenceRange}"/>				
+					</listcell>		
+					<listcell>
+						<label value="@{tmpObx.resultStatus}" />				
+					</listcell>					
+				</listitem>
+				</listbox>
+			<div align="center" sclass="panelFoot"> 
+				<button label="Save" id="Save" sclass="saveBtn" disabled="${dischargedPatientLab}">
+					<attribute name="onClick"><![CDATA[
+                        if(com.nzion.util.UtilValidator.isNotEmpty(obrSegment.getObservations())){					                                   
+                        commonCrudService.save(obrSegment);					    				 
+						addTestResult.detach();
+                        }else{
+                        	com.nzion.util.UtilMessagesAndPopups.showError("Please add atleast one test result");
+                        	return;
+                        }
+					]]></attribute>
+			</button>
+					<button label="Cancel" id="cancelBtn">
+								<attribute name="onClick">  
+								  addTestResult.detach();
+								</attribute>
+							</button>
+		 </div>
+		</panelchildren>
+		</panel>
+	</div>
+</window>
+</zk>

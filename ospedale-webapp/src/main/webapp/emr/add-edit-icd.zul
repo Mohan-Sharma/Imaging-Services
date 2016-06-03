@@ -1,0 +1,69 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addediticd"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<zscript>
+import com.nzion.domain.emr.IcdElement;
+IcdElement icdElement = arg.get("entity");
+icdElement = icdElement == null ? new IcdElement() : icdElement;
+String label = icdElement.getId()!=null?"Edit Diagnosis":"New Diagnosis";
+boolean isReadOnly = icdElement.getId()!=null? true : false;
+</zscript>
+<window id="addediticd" mode="modal" closable="true" position="center,top" width="50%">
+					<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Diagnosis</h:small>
+                  <button type="button" zclass="close" onClick="addediticd.detach();">×</button>
+            </h:h1>
+        </div>
+	<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span2">
+                <label value="Diagnosis Code"   mold="required" />
+			    <textbox value="@{icdElement.code}" style="width:140px;" id="code" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" disabled="${isReadOnly}"/>
+                </div>
+                </div>
+                
+                <div zclass="row-fluid">
+                <div zclass="span6">
+               <label value="Diagnosis Description"  mold="required"  />
+				<textbox cols="50" rows="2" value="@{icdElement.description}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" id="desc" constraint="no empty" />
+                </div>
+                </div>
+                
+                <div zclass="row-fluid">
+                <div zclass="span5">
+             <label value="Diagnosis Version"  />
+						<textbox  value="ICD-9-CM" id="icdVersion" sclass="span12" disabled="true"/>	
+                </div>
+                </div>
+                </div>
+			
+			<div sclass="panelFoot">
+			<button label="Save" id="Save" zclass="btn-success btn">
+				<attribute name="onClick">
+			<![CDATA[
+					icdElement.setIcdVersion(icdVersion.getValue());
+					if(com.nzion.util.UtilValidator.isEmpty(code.getValue()))
+						throw new WrongValueException(code, "Can not be empty");
+					if(com.nzion.util.UtilValidator.isEmpty(desc.getValue()))
+						throw new WrongValueException(desc, "Can not be empty");
+				try{
+				commonCrudService.save(icdElement);
+				com.nzion.util.UtilMessagesAndPopups.showSuccess();
+				addediticd.detach();
+				}catch(org.springframework.dao.DataIntegrityViolationException e){
+					if(e.getCause()!=null && e.getCause() instanceof org.hibernate.exception.ConstraintViolationException){
+					int code = org.hibernate.exception.JDBCExceptionHelper.extractErrorCode(((org.hibernate.exception.ConstraintViolationException)(e.getCause())).getSQLException());
+						if(1062==code){
+							com.nzion.util.UtilMessagesAndPopups.showError("Diagnosis '"+icdElement.getCode()+"' already exists.");
+						}
+					}
+				}
+				]]>
+				</attribute>
+			</button>
+			<button label="Cancel" onClick='addediticd.detach()' sclass="btn"/>
+		</div>
+</window>
+</zk>

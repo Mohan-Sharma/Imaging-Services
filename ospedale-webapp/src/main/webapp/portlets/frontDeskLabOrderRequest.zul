@@ -1,0 +1,289 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientLabOrderReq"?>
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zk/native ">
+    <zscript><![CDATA[
+    import java.util.*;
+    import com.nzion.service.common.CommonCrudService;
+    import com.nzion.util.Infrastructure;
+    Set searchResult = new HashSet();
+    Set phlebotomistsearchResult = new HashSet();
+    List phlebotomistList = new ArrayList();
+    com.nzion.domain.base.Weekdays weekdays = com.nzion.domain.base.Weekdays.allSelectedWeekdays();
+
+        com.nzion.service.common.CommonCrudService commonCrudService =  Infrastructure.getSpringBean("commonCrudService");
+        List employeeList = commonCrudService.getAll(com.nzion.domain.Employee.class);
+        java.util.Iterator iterator = employeeList.iterator();
+
+        while (iterator.hasNext()){
+            com.nzion.domain.Employee employee = (com.nzion.domain.Employee)iterator.next();
+            if (employee.getPhlebotomist().booleanValue()){
+                phlebotomistList.add(employee);
+            }
+        }
+    ]]>
+    </zscript>
+    <window id="patientLabOrderReq" self="@define(applicationContent)" apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('vm') @init('com.nzion.zkoss.composer.emr.lab.LabOrderRequestViewModel')">
+        <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Lab Test Request</h:small>
+            </h:h1>
+        </div>
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span4">
+                    <label value="Patient" mold="required"/>
+                    <patientlookup id="labPatientlookupbox"
+                                   onChange="vm.getLabOrderRequest().setPatient((com.nzion.domain.Patient)event.getOrigin().getData());"/>
+                </div>
+                
+                 <div zclass="span4">
+                    <label value="Referral Doctor"/>
+                    <referrallookup
+                            onChange="vm.getLabOrderRequest().setReferral((com.nzion.domain.Referral)event.getOrigin().getData())"/>
+                </div>
+                
+                 <div zclass="span4">
+                    <label value="Referral Clinic"/>
+                    <referrallookup
+                            onChange="vm.getLabOrderRequest().setReferral((com.nzion.domain.Referral)event.getOrigin().getData())"/>
+                </div>
+                
+             </div>
+            <div zclass="row-fluid">
+
+                <div zclass="span5" style="margin-left: 10px;">
+                    <label value="Appointment Date" style="margin-left: 8px;" class="z-label-bold"/>
+                    <datebox id="appointmentDate" sclass="span11">
+                        <attribute name="onChange">
+                            <![CDATA[
+                                        Events.postEvent("onClick", freeSlot, null);
+                                    ]]>
+                        </attribute>
+                    </datebox>
+                </div>
+                <div zclass="span5" style="margin-left: 20px;">
+                    <label value="Time Slot" mold="required" class="z-label-bold"></label>
+                    <listbox mold="select" model="@{searchResult,load-after='freeSlot.onClick'}"
+                             id="slotListbox" zclass="span10">
+                        <listitem self="@{each='zk'}"
+                                  label="@{zk.slot,converter='com.nzion.zkoss.composer.appointment.SlotConverter'}"
+                                  value="@{zk.slot}"></listitem>
+                    </listbox>
+                    <a id="freeSlot" zclass="btn btn-primary" visible="false">
+                        <n:i class="whiteIcon-search"></n:i>
+                        <attribute name="onClick">
+                            searchResult = vm.searchSchedule(null, appointmentDate.getValue(), weekdays);
+                            //searchResult = scheduleController.searchSchedule(searchObject, weekdays);
+                        </attribute>
+                    </a>
+                </div>
+
+            </div>
+            <div zclass="row-fluid">
+                       
+                
+                <radiogroup orient="horizontal">
+					
+					<radio label="Lab Test"  id="testRadio" style="padding:30px" 
+					onCheck = "labTestDiv.setVisible(true);labTestPanelDiv.setVisible(false);labTestProfileDiv.setVisible(false);homeSerDiv.setVisible(true)"/>
+					
+					<radio label="Lab Profile"  id="profileRadio" style="padding:30px" 
+					onCheck = "labTestProfileDiv.setVisible(true);labTestDiv.setVisible(false);labTestPanelDiv.setVisible(false);homeSerDiv.setVisible(true)"/>
+					
+					<radio label="Lab Panel"  id="panelRadio" style="padding:30px" 
+					onCheck = "labTestPanelDiv.setVisible(true);labTestProfileDiv.setVisible(false);labTestDiv.setVisible(false);homeSerDiv.setVisible(true)"/>
+				
+				 </radiogroup>
+                
+            </div>
+
+            <div zclass="row-fluid">
+                 
+                 <div zclass="span4" id="labTestDiv" visible ="false">
+                    <label value="Lab Test Name" mold="required"/>
+                    <suggest id="labTestTxt" entity="com.nzion.domain.emr.lab.LabTest" sclass="span12"
+                             searchcolumns="testDescription" displaycolumns="testDescription" requiredcolumn="testDescription"/>
+                </div>
+                
+                 <div zclass="span4" id="labTestPanelDiv" visible="false">
+                    <label value="Lab Test Panel Name" mold="required"/>
+                    <suggest id="labTestPanelTxt" entity="com.nzion.domain.emr.lab.LabTestPanel" sclass="span12"
+                             searchcolumns="panelDescription" displaycolumns="panelDescription" requiredcolumn="panelDescription"/>
+                </div>
+                
+                 <div zclass="span4" id="labTestProfileDiv" visible="false">
+                    <label value="Lab Test Profile Name" mold="required"/>
+                    <suggest id="labTestProfileTxt" entity="com.nzion.domain.emr.lab.LabTestProfile" sclass="span12"
+                             searchcolumns="profileName" displaycolumns="profileName" requiredcolumn="profileName"/>
+                </div> 
+                <div zclass="span3" style="margin-top: 15px;" id ="homeSerDiv" visible ="false">
+                    <checkbox id="hSCheckBox">
+                        <attribute name="onCheck">
+                            phlebotomistDiv.setVisible(true);
+                            //phlebotomistList = vm.getAllPhlebotomistList();
+                        </attribute>
+                            </checkbox>
+                    <label value = "Home Service"/>
+                </div>
+            </div>
+            <div zclass="row-fluid" visible="false" id="phlebotomistDiv">
+                <div zclass="span5" style="margin-left: 10px;">
+                    <label value="Phlebotomist Appointment Date" style="margin-left: 8px;" class="z-label-bold"/>
+                    <datebox id="phlebotomistAppointmentDate" sclass="span11">
+                        <attribute name="onChange">
+                            <![CDATA[
+                                        Events.postEvent("onClick", phlebotomistFreeSlot, null);
+                                    ]]>
+                        </attribute>
+                    </datebox>
+                </div>
+                <div zclass="span5" style="margin-left: 20px;">
+                    <label value="Phlebotomist" class="z-label-bold"></label>
+                    <listbox mold="select" model="@{phlebotomistList,load-after='hSCheckBox.onClick'}" id="phlebotomistList" zclass="span10">
+                        <listitem self="@{each='zk'}"
+                                  label="@{zk.firstName}"
+                                  value="@{zk}">
+                        </listitem>
+                    </listbox>
+                </div>
+                <div zclass="span5" style="margin-left: 20px;" id="phlebotomistTimeSlot">
+                    <label value="Phlebotomist Time Slot" class="z-label-bold"></label>
+                    <listbox mold="select" model="@{phlebotomistsearchResult,load-after='phlebotomistFreeSlot.onClick'}"
+                             id="phlebotomistSlotListbox" zclass="span10">
+                        <listitem self="@{each='zk'}"
+                                  label="@{zk.slot,converter='com.nzion.zkoss.composer.appointment.SlotConverter'}"
+                                  value="@{zk.slot}"></listitem>
+                    </listbox>
+                    <a id="phlebotomistFreeSlot" zclass="btn btn-primary" visible="false">
+                        <n:i class="whiteIcon-search"></n:i>
+                        <attribute name="onClick">
+                            phlebotomistsearchResult = vm.searchSchedule(phlebotomistList.getSelectedItem().getValue(), phlebotomistAppointmentDate.getValue(), weekdays);
+                            //searchResult = scheduleController.searchSchedule(searchObject, weekdays);
+                        </attribute>
+                    </a>
+                </div>
+            </div>
+            <div sclass="panelFoot">
+                <button label="Add" id="addBtn" sclass="saveBtn">
+                    <attribute name="onClick">
+                        <![CDATA[
+                        import com.nzion.domain.emr.soap.PatientLabOrder;
+                        import com.nzion.domain.emr.lab.*;
+                        if(com.nzion.util.UtilValidator.isEmpty(vm.getLabOrderRequest().getPatient()))
+                        throw new WrongValueException(labPatientlookupbox , "Patient Required");
+                        
+                       PatientLabOrder patientLabOrder = new PatientLabOrder();
+                        
+                        if(profileRadio.isChecked()){
+                        	if(com.nzion.util.UtilValidator.isEmpty( labTestProfileTxt.getValue()))
+                                throw new WrongValueException(labTestProfileTxt , "Test Profile Name Required");
+
+                        	LabTestProfile profile = (LabTestProfile)labTestProfileTxt.getResult();
+                        	patientLabOrder.setLabTestProfile(profile);
+                        	for(LabTest test: profile.getTests())
+                        		vm.getLabOrderRequest().addLaboratories(test.getLaboratory());
+                        	labTestProfileTxt.setValue(null);
+                        }else if(panelRadio.isChecked()){
+                        	if(com.nzion.util.UtilValidator.isEmpty( labTestPanelTxt.getValue()))
+                                throw new WrongValueException(labTestPanelTxt , "Test Panel Name Required");
+
+                        	LabTestPanel panel = (LabTestPanel) labTestPanelTxt.getResult();
+                        	patientLabOrder.setLabTestPanel(panel);
+                        	for(LabTest test: panel.getTests())
+                        		vm.getLabOrderRequest().addLaboratories(test.getLaboratory());
+                        	labTestPanelTxt.setValue(null);
+                        }else{
+                        	if(com.nzion.util.UtilValidator.isEmpty( labTestTxt.getValue()))
+                                throw new WrongValueException(labTestTxt , "Test Name Required");
+
+                        	LabTest test = (LabTest) labTestTxt.getResult();
+                        	patientLabOrder.setLabTest(test);
+                        	vm.getLabOrderRequest().addLaboratories(test.getLaboratory());
+                        	labTestTxt.setValue(null);
+                        }
+
+                       			patientLabOrder.setHomeService(hSCheckBox.isChecked());
+                       			//hSCheckBox.setChecked(false);
+                        		vm.getLabOrderRequest().addPatientLabOrder(patientLabOrder);
+                                patientLabOrder.setLabOrderRequest(vm.getLabOrderRequest());
+                          Events.postEvent("onReloadRequest",inPLabOrderListBox,null);
+                        ]]>
+                    </attribute>
+                </button>
+                <button label="Cancel" sclass="cancelBtn"> 
+                <attribute name="onClick">
+                  Events.postEvent("onClick",session.getAttribute("portletImg"),null);
+             		  patientLabOrderReq.detach();
+             		  </attribute>
+                </button>
+            </div>
+            <div sclass="boxStyle" style="width:100%;float:left;">
+                <panel>
+                    <panelchildren>
+                        <listbox id="inPLabOrderListBox" mold="paging" pageSize="7" width="20%"
+                                 model="@{vm.labOrderRequest.patientLabOrders,load-after='self.onReloadRequest'}">
+                            <listhead>
+                                <listheader label="${c:l('testName')}" style="font-weight:bold"/>
+                                <listheader label="Rate" style="font-weight:bold"/>
+                            </listhead>
+                            <listitem self="@{each='labOrder'}" value="@{labOrder}">
+                                <listcell>
+                                    <!-- <label value="@{labOrder.labTestPanel.panelName}"/> -->
+                                    <label value="@{labOrder.labTest.testDescription}" if="${empty labOrder.labTest.testDescription}"/>
+                                    <label value="@{labOrder.labTestProfile.profileName}" if="${empty labOrder.labTestProfile.profileName}"/>
+                                    <label value="@{labOrder.labTestPanel.panelDescription}" if="${empty labOrder.labTestPanel.panelDescription}"/>
+                                </listcell>
+                                
+                               <!--  <listcell>
+                                    <label value="@{labOrder.labTestPanel.price}"/>
+                                </listcell> -->
+                            </listitem>
+                        </listbox>
+                        <div align="center" sclass="panelFoot">
+                            <button label="Save" id="Save" sclass="saveBtn">
+                                <attribute name="onClick"><![CDATA[
+					  private final Long INHOUSE_REFERRAL_ID=9000L;
+					
+					  if(com.nzion.util.UtilValidator.isEmpty(vm.getLabOrderRequest().getPatient()))
+					  throw new WrongValueException(labPatientlookupbox , "Patient Required"); 
+					  
+					  if(com.nzion.util.UtilValidator.isEmpty(vm.getLabOrderRequest().getPatientLabOrders())){
+						     com.nzion.util.UtilMessagesAndPopups.showError("Please Add atleast One test name");
+						     return;
+				        }
+					  vm.getLabOrderRequest().setOrderStatus(com.nzion.domain.emr.lab.LabOrderRequest.ORDERSTATUS.BILLING_REQUIRED);
+					
+					  if(vm.getLabOrderRequest().getProvider()==null && vm.getLabOrderRequest().getReferral()==null){
+						  com.nzion.domain.Referral referral = commonCrudService.getById(com.nzion.domain.Referral.class, INHOUSE_REFERRAL_ID);
+						  vm.getLabOrderRequest().setReferral(referral);
+					  }
+
+					  vm.getLabOrderRequest().setStartDate(appointmentDate.getValue());
+					  vm.getLabOrderRequest().setStartTime(((com.nzion.domain.CalendarSlot)slotListbox.getSelectedItem().getValue()).getStartTime());
+					  vm.getLabOrderRequest().setEndTime(((com.nzion.domain.CalendarSlot)slotListbox.getSelectedItem().getValue()).getEndTime());
+					  vm.getLabOrderRequest().setLocation(com.nzion.util.Infrastructure.getSelectedLocation());
+
+                      if(hSCheckBox.isChecked()){
+					  vm.getLabOrderRequest().setPhlebotomist(phlebotomistList.getSelectedItem().getValue());
+					  vm.getLabOrderRequest().setPhlebotomistStartDate(phlebotomistAppointmentDate.getValue());
+					  vm.getLabOrderRequest().setPhlebotomistStartTime(((com.nzion.domain.CalendarSlot)phlebotomistSlotListbox.getSelectedItem().getValue()).getStartTime());
+					  vm.getLabOrderRequest().setPhlebotomistEndTime(((com.nzion.domain.CalendarSlot)phlebotomistSlotListbox.getSelectedItem().getValue()).getEndTime());
+					  }
+
+					  commonCrudService.save(vm.getLabOrderRequest());
+					  com.nzion.util.UtilMessagesAndPopups.displaySuccess(); 
+             		  Events.postEvent("onClick",session.getAttribute("portletImg"),null);
+             		  patientLabOrderReq.detach();
+					]]></attribute>
+                            </button>
+                        </div>
+                    </panelchildren>
+                </panel>
+            </div>
+        </div>
+    </window>
+</zk>

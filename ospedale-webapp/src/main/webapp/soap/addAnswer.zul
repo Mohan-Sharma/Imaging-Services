@@ -1,0 +1,204 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addAnswerWin"?>
+<zk>
+	<zscript><![CDATA[
+	import com.nzion.domain.emr.Answer;
+	import com.nzion.util.UtilValidator;
+	import com.nzion.zkoss.ext.EnumDropdownRenderer;
+	import com.nzion.enums.AnswerType;
+	import com.nzion.domain.emr.Question;
+	import com.nzion.zkoss.composer.emr.SoapModuleAnswersController;
+	import com.nzion.domain.emr.NumericResponse;
+	import com.nzion.domain.emr.AlphaNumericResponse;
+	import com.nzion.domain.emr.AlphaNumericOption;
+	EnumDropdownRenderer enumDropdownRenderer = new EnumDropdownRenderer();
+	AnswerType[] answerTypes = AnswerType.values();
+	Answer answer = (Answer) arg.get("selectedAnswer");
+	Listbox answerListBox = (Listbox)arg.get("answerListBox");
+	AlphaNumericResponse selectedAlphaNumericResponse = null;
+	if (UtilValidator.isNotEmpty(arg)) {
+		selectedAlphaNumericResponse = (AlphaNumericResponse) arg.get("selectedAlphaNumericResponse");
+	}
+
+if (answer == null) {
+	answer = new Answer();
+}
+	Question question = (Question) arg.get("selectedQuestion");
+	SoapModuleAnswersController soapModuleAnswersController = (SoapModuleAnswersController) arg.get("baseController");
+	NumericResponse numericResponse = null;
+	AlphaNumericResponse alphaNumericResponse = null;
+	void saveAnswer() {
+	if (numericResponse != null) {
+		numericResponse.setName(answer.getName());
+		if (selectedAlphaNumericResponse != null) {
+			numericResponse.setParentAnswer(selectedAlphaNumericResponse);
+		} else {
+			numericResponse.setQuestion(question);
+		}
+		commonCrudService.save(numericResponse);
+		soapModuleAnswersController.refreshListbox();
+	} else
+		if (alphaNumericResponse != null) {
+			alphaNumericResponse.setAnswerType(AnswerType.ALPHANUMERIC);
+			alphaNumericResponse.setName(answer.getName());
+			if (selectedAlphaNumericResponse != null) {
+				alphaNumericResponse.setParentAnswer(selectedAlphaNumericResponse);
+			} else {
+				alphaNumericResponse.setQuestion(question);
+			}
+			commonCrudService.save(alphaNumericResponse);
+			soapModuleAnswersController.refreshListbox();
+		} else {
+			if (selectedAlphaNumericResponse != null) {
+				answer.setParentAnswer(selectedAlphaNumericResponse);
+			} else {
+				answer.setQuestion(question);
+			}
+			commonCrudService.save(answer);
+			soapModuleAnswersController.refreshListbox();
+		}
+	//soapModuleAnswersController.refreshAnswerTree();
+	soapModuleAnswersController.refreshListbox();
+	com.nzion.util.UtilMessagesAndPopups.showMessage("Answer saved successfully");
+	}
+]]></zscript>
+
+	<window id="addAnswerWin" mode="modal"  title="Add/Edit Answer" closable="true" >
+		<panel>
+			<panelchildren>
+				<div sclass="panelCont">
+					<div sclass="col2">
+						<label value="Name" />
+						<label value="*" style="color:red"/>
+						<textbox id="answerName" value="@{answer.name}" constraint="no empty:Name Required"/>
+					</div>
+					<div sclass="col2">
+						<label value="Type" />
+						<label value="*" style="color:red"/>
+						<combobox id="answerType" model="@{answerTypes}" itemRenderer="${enumDropdownRenderer}" width="100px;"
+							selectedItem="@{answer.answerType}" onSelect="answerTypeOnSelect(self)" readonly="true"/>
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+		<panel title="Add/Edit Numeric Response" visible="false" id="numericPanel">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div>
+						<label value="Prefix" />
+						<textbox id="prefix" value="@{numericResponse.numericOption.prefix}" />
+					</div>
+					<div>
+						<label value="Suffix" />
+						<textbox id="suffix" value="@{numericResponse.numericOption.suffix}" />
+					</div>
+					<div>
+						<label value="Start" />
+						<textbox id="start" value="@{numericResponse.numericOption.start}" />
+					</div>
+					<div>
+						<label value="Increment" />
+						<textbox id="increment" value="@{numericResponse.numericOption.increment}" />
+					</div>
+					<div>
+						<label value="End" />
+						<textbox id="end" value="@{numericResponse.numericOption.end}" />
+					</div>
+					<div>
+						<label value="Suffix Plural Form" />
+						<textbox id="pluralText" value="@{numericResponse.numericOption.pluralSuffix}" />
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+
+		<panel title="Add/Edit Alpha Numeric Option" visible="false" id="alphaOptionPanel">
+			<panelchildren>
+				<toolbarbutton label="Add Option" onClick="addOption()" id="addOptionButton"></toolbarbutton>
+				<div sclass="panelCont">
+					<listbox
+						model="@{alphaNumericResponse.options,load-after='addOptionButton.onClick,deleteOptionButton.onClick'}"
+						id="alphOptionBox" width="100%">
+						<listhead>
+							<listheader label="Prefix"></listheader>
+							<listheader label="Name"></listheader>
+							<listheader label="Suffix"></listheader>
+							<listheader></listheader>
+						</listhead>
+						<listitem self="@{each='option'}" value="@{option}">
+							<listcell>
+								<textbox value="@{option.prefix}" />
+							</listcell>
+							<listcell>
+								<textbox id="name" value="@{option.name}" />
+							</listcell>
+							<listcell>
+								<textbox value="@{option.suffix}" />
+							</listcell>
+							<listcell>
+								<toolbarbutton label="Delete" id="deleteOptionButton"
+									onClick="removeOption((Listitem)self.getParent().getParent());">
+								</toolbarbutton>
+							</listcell>
+						</listitem>
+					</listbox>
+				</div>
+			</panelchildren>
+		</panel>
+
+<zscript>
+<![CDATA[
+        void validate(){
+        answerName.getValue();
+        if(answerType.getSelectedItem() == null)
+        	throw new WrongValueException(answerType,"Answertype Required");
+        }
+	]]>
+</zscript>
+		<div sclass="panelFoot">
+			<button label="Save" id="Save" onClick='validate();saveAnswer();Events.postEvent("onReloadRequest",answerListBox,null);addAnswerWin.detach();' />
+			<button label="Cancel" onClick="addAnswerWin.detach();" />
+		</div>
+
+		<zscript>
+		<![CDATA[
+if (answer instanceof NumericResponse) {
+	numericPanel.setVisible(true);
+} else
+	if (answer instanceof AlphaNumericResponse) {
+		alphaOptionPanel.setVisible(true);
+	}
+	void answerTypeOnSelect(org.zkoss.zul.Combobox box) {
+	AnswerType answerType = (AnswerType) box.getSelectedItem().getValue();
+	if (answerType.equals(AnswerType.NUMERIC)) {
+		numericPanel.setVisible(true);
+		alphaOptionPanel.setVisible(false);
+		numericResponse = new NumericResponse();
+	} else
+		if (answerType.equals(AnswerType.ALPHANUMERIC)) {
+			alphaOptionPanel.setVisible(true);
+			numericPanel.setVisible(false);
+			alphaNumericResponse = new AlphaNumericResponse();
+		} else
+			if (answerType.equals(AnswerType.NONE) || answerType.equals(AnswerType.DATE)) {
+				numericPanel.setVisible(false);
+				alphaOptionPanel.setVisible(false);
+			}
+	}
+	void removeOption(Listitem li) {
+	if (li != null) {
+		AlphaNumericOption option = (AlphaNumericOption) li.getValue();
+		alphaNumericResponse.getOptions().remove(option);
+	}
+	}
+	void addOption() {
+	if (alphaNumericResponse.getOptions() == null) {
+		alphaNumericResponse.setOptions(new java.util.ArrayList());
+	}
+	alphaNumericResponse.getOptions().add(new AlphaNumericOption());
+	}
+]]>
+		</zscript>
+
+	</window>
+</zk>

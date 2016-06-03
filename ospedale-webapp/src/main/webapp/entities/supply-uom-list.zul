@@ -1,0 +1,13 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	setPageTitle("Supply Uom", "");
+	com.nzion.domain.drug.DrugSig dSig = new com.nzion.domain.drug.DrugSig("SUPPLY_UOM");
+	List entities = commonCrudService.searchByExample(dSig);
+</zscript>
+	<window>
+		<screen width="100%" pagetitle="Quantity" listtitle="List of Quantity Qualifier" addpage="addSupplyUom"
+			entityclass="com.nzion.domain.drug.DrugSig" listModel="${entities}" hideSearch="true"
+			fields="code, description" hidedeletebtn="true"	labels="Code,Description" addmodepopup="true" />
+	</window>
+</zk>

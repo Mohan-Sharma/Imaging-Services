@@ -1,0 +1,96 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./rxSectionWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+		<zscript>
+		<![CDATA[
+		import com.nzion.zkoss.composer.SoapRxComposer;
+		import com.nzion.domain.emr.soap.PatientRx;
+		SoapRxComposer rxComposer = new SoapRxComposer();
+		 com.nzion.domain.emr.soap.RxSection rxSection;
+		com.nzion.zkoss.composer.PatientSoapNoteController controller = desktop.getAttribute("controller");
+	]]>	
+</zscript>
+	<window id="rxSectionWin" width="100%" apply="${rxComposer}">
+	<zscript>
+	rxSection = rxComposer.getSection();
+	</zscript>
+	
+		<div sclass="chiefComp soapNoteCont curSOAP ui-resizable" style="position:relative;">
+			<h:table width="100%" cellpadding="0px" cellspacing="0px" style="border:0px">
+				<h:tr>
+					<h:td class="soapNoteContL" onClick="expandRHS(this.id)">
+						<panel collapsible="false" border="none">
+						<caption label="Prescriptions"/>
+							<panelchildren>
+							<separator/>
+		<span sclass="linkBtn linkBtnOn">
+			<a disabled="${controller.readonly}" label="New" id="newBtn" sclass="addBtn" onClick="rxComposer.openRxSectionExt()"/>
+			<span />
+		</span>
+		</panelchildren>
+		</panel>
+			<panel title="Prescription">
+				<panelchildren>
+					<listbox sclass="dataTable_scroll" height="250px"
+						 model="@{rxSection.extPatientRxs,load-after='self.onReloadRequest'}"
+						id="rxSectionDisplayGrid" rows="4">
+							<attribute name="onReloadRequest">
+								rxSection = (com.nzion.domain.emr.soap.RxSection)rxComposer.getMainCtl().getSoapSection(com.nzion.domain.emr.soap.RxSection.class);
+							</attribute>
+							<listhead>
+								<listheader label="Drug Name" />
+								<listheader label="Drug Strength" />
+								<listheader label="Uom" />
+								<listheader label="Dosage Form" />
+								<listheader label="Route" />
+								<listheader label="Physician Name" />
+								<listheader label="Prescription Notes" />
+								<listheader label="Refills" />
+								<listheader label="Archived"/>
+								<listheader label="Prescription Date" />
+							</listhead>
+							<listitem self="@{each='extPatientRx'}" value="@{extPatientRx}">
+								<listcell>
+									<label value="@{extPatientRx.drugName}" />
+								</listcell>
+								<listcell>
+									<label value="@{extPatientRx.strength}" />
+								</listcell>
+								<listcell>
+									<label value="@{extPatientRx.strengthUOM}" />
+								</listcell>
+								<listcell>
+									<label value="@{extPatientRx.dosageForm}" />
+								</listcell>
+								<listcell>
+									<label value="@{extPatientRx.route}" />
+								</listcell>
+								<listcell>
+									<label value="@{extPatientRx.physicianName}" />
+								</listcell>
+								<listcell>
+									<label value="@{extPatientRx.prescriptionNotes}" />
+								</listcell>
+								<listcell>
+									<label value="@{extPatientRx.refills}" />
+								</listcell>
+								<listcell>
+									<label value="@{extPatientRx.archive}" />
+								</listcell>
+								<listcell>
+									<label value="@{extPatientRx.prescriptionDate,converter='com.nzion.view.component.DateConverter'}" />
+								</listcell>
+								<attribute name="onDoubleClick">
+									Executions.createComponents("/soap/viewPatientRxExt.zul",null,com.nzion.util.UtilMisc.toMap("patientRxNewCorpObj",(com.nzion.domain.emr.soap.PatientRx)self.getValue()));
+								</attribute>
+							</listitem>
+					</listbox>
+				</panelchildren>
+			</panel>
+					</h:td>
+				</h:tr>
+			</h:table>
+				</div>
+	</window>
+</zk>

@@ -1,0 +1,55 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./unbilledWindow"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+    <zscript>
+        import com.nzion.repository.billing.BillingRepository;
+        BillingRepository billingRepository = com.nzion.util.Infrastructure.getSpringBean("billingRepository");
+        List patientAdmissions = billingRepository.getAllOpenPatientAdmission();
+
+    </zscript>
+    <window id="unbilledWindow">
+        <grid>
+            <columns>
+                <column width="40px" style="text-align:left"></column>
+                <column label="Patient"></column>
+                <column label="MRN"></column>
+                <column label="Admission No"></column>
+                <column label="Ward"></column>
+                <column label="Bed"></column>
+                <column label="Admitted On"></column>
+            </columns>
+            <rows>
+                <row forEach="${patientAdmissions}">
+                    <custom-attributes patientAdmission="${each}"/>
+                    <name object="${patientAdmission.patient}" style="font-weight:bold"/>
+                    <label value="${patientAdmission.patient.accountNumber}"></label>
+                    <label value="${patientAdmission.accountNumber}"></label>
+                    <label value="${patientAdmission.latestAllocatedBed.ward}"></label>
+                    <label value="${patientAdmission.latestAllocatedBed.bed}"></label>
+                    <label value="${patientAdmission.admittedDate}"></label>
+                    <detail open="true">
+                        <zscript>
+                            List items = billingRepository.getUnpaidInvoiceSummary(self.getParent().getAttribute("patientAdmission"));
+                        </zscript>
+                        <listbox oddRowSclass="false">
+                            <listhead>
+                                <listheader label="Charge Type"/>
+                                <listheader label="Amount"/>
+                            </listhead>
+                            <listitem forEach="${items}">
+                                <listcell>
+                                    <label value="${each[0]}"/>
+                                </listcell>
+                                <listcell style="text-align:right;width:100px">
+                                    <label value="${each[1]}"/>
+                                </listcell>
+                            </listitem>
+                        </listbox>
+                    </detail>
+                </row>
+            </rows>
+        </grid>
+    </window>
+</zk>

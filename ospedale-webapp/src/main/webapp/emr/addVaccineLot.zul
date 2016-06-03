@@ -1,0 +1,107 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addVaccineLotWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+		<zscript>
+	<![CDATA[
+	import com.nzion.domain.emr.VaccineLot;
+	import com.nzion.domain.emr.Immunization;
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	VaccineLot vaccineLot = arg.get("entity");
+	String label = "Edit ";
+	if (vaccineLot == null) {
+		vaccineLot = new VaccineLot();
+		label = "New ";
+	}
+	List immunizations = commonCrudService.getAll(com.nzion.domain.emr.Immunization.class);
+	Collections.sort(immunizations,new Comparator(){
+	public int compare(Immunization o1, Immunization o2) {
+	return o1.getShortDescription().compareToIgnoreCase(o2.getShortDescription());
+	}
+	});
+	
+	immunizations.add(0,null);
+	List mvxCodes = new ArrayList();
+	String cvxCode="";
+	if(vaccineLot!=null)
+		cvxCode = vaccineLot.getImmunization()!=null?vaccineLot.getImmunization().getCvxCode():"";
+	String manufacturerName ="";
+	
+	List uomList = commonCrudService.findByEquality(com.nzion.domain.emr.UnitOfMeasurement.class,new String[]{"uomType"},new Object[]{"OTHER"});
+]]>
+	</zscript>
+	<window id="addVaccineLotWindow"  mode="modal" width="50%"  closable="true">
+	<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Vaccine Lot</h:small>
+                  <button type="button" zclass="close" onClick="addVaccineLotWindow.detach();">×</button>
+            </h:h1>
+        </div>
+	<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span2">
+				<label  value="Lot Number#"  mold="required"/>
+				<textbox id="lotNumberTextBox" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"  value="@{vaccineLot.lotNumber,save-when='saveButton.onClick'}" constraint="no empty:Lot Number Required"/>
+		</div>
+		  <div zclass="span4">
+					<label   value="Vaccine Name" mold="required" />
+				<listbox id="vaccineCombobox" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"   model="@{immunizations}" selectedItem="@{vaccineLot.immunization,save-when='saveButton.onClick'}" mold="select">
+					<listitem self="@{each='immunization'}" value="@{immunization}" label="@{immunization.shortDescription}" description="@{immunization.fullVaccineName}"/>
+				</listbox>
+			</div>
+			<div zclass="span4">
+				<label value="Product Name"   />
+				<textbox id="productCombobox" sclass="span12"  value="@{vaccineLot.productName,save-when='saveButton.onClick'}" />
+					</div>
+			</div>
+			<div zclass="row-fluid">
+		     <div zclass="span4">
+			<label value="Expiry Date"   mold="required"/>
+				<datebox  id="expiryDateBox" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" value="@{vaccineLot.expiryDate,save-when='saveButton.onClick'}" constraint="no empty,no past">
+				<attribute name="onCreate">
+					<![CDATA[
+					if(vaccineLot!=null && vaccineLot.getId()!=null)
+						self.setDisabled(false);
+					]]>
+					</attribute>
+				</datebox>
+			</div>
+                <div zclass="span3">
+				<label value="Dosage Amount"  mold="required" />
+				<doublebox id="dosageIntbox"  value="@{vaccineLot.dosesRemaining,save-when='saveButton.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"  constraint="no empty,no zero">
+				<attribute name="onCreate">
+					<![CDATA[
+					if(vaccineLot!=null && vaccineLot.getId()!=null)
+						self.setDisabled(false);
+					]]>
+					</attribute>
+				</doublebox>
+				</div>
+				<div zclass="span4">
+				<label value="Unit" />
+				<combobox model="@{uomList}" value="@{vaccineLot.unit,save-when='saveButton.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty">
+					<comboitem self="@{each='unit'}" value="@{unit}" label="@{unit}"/>
+				</combobox>
+			</div>
+			</div>
+		</div>
+		<div sclass="panelFoot">
+			<button label="Save" id="saveButton" zclass="btn-success btn">
+			<attribute name="onClick">
+				//vaccineLot.setCvxCode(cvxCodeTextBox.getValue());
+				if(vaccineCombobox.getSelectedItem() == null)
+				throw new WrongValueException(vaccineCombobox,"Vaccine Required");
+				if(com.nzion.util.UtilValidator.isEmpty(vaccineCombobox.getSelectedItem().getLabel()))
+				throw new WrongValueException(vaccineCombobox,"Vaccine Required");
+				try{
+				commonCrudService.save(vaccineLot);
+				com.nzion.util.UtilMessagesAndPopups.showSuccess();addVaccineLotWindow.detach();
+				}catch(Exception e){
+				com.nzion.util.ViewUtil.disPlayUniqueErrorMessage(e,"Lot Number'"+vaccineLot.getLotNumber()+"' already exists.");
+				}
+			</attribute>
+			</button>
+			<button label="Cancel" forward="onClick=onCancel"/>
+		</div>
+	</window>
+</zk>

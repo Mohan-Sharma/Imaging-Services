@@ -1,0 +1,42 @@
+<?page title="Patient" contentType="text/html;charset=UTF-8"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native">
+    <?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+    <?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+    <window mode="modal" closable="true" height="400px" title="View Order" id="viewLabOrder" sclass="modalStyle"
+            apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('vm') @init('com.nzion.zkoss.composer.emr.lab.LabOrderInvoiceViewModel')">
+        <listbox model="@bind(vm.labTestsOrdered)" id="patientLabOrderListBox" multiple="true" checkmark="true" selectedItems="@bind(vm.selected)">
+            <listhead>
+                <listheader>Test Panel</listheader>
+                 <listheader>Status</listheader>
+                <listheader>Price</listheader>
+            </listhead >
+            <template name="model" var="patientLabOrder">
+                <listitem value="@bind(patientLabOrder)">
+                <attribute name="onCreate">
+                    if(self.getValue().getStatus()!=null) {
+                        self.setDisabled("Cancelled".equalsIgnoreCase(self.getValue().getStatus().toString()));
+                    }
+                </attribute>
+                    <listcell label="@bind(patientLabOrder.labTest.testDescription)" if = "${not empty patientLabOrder.labTest}"></listcell>
+                    <listcell label="@bind(patientLabOrder.labTestProfile.profileName)" if = "${not empty patientLabOrder.labTestProfile}"></listcell>
+                    <listcell label="@bind(patientLabOrder.labTestPanel.panelDescription)" if = "${not empty patientLabOrder.labTestPanel.panelDescription}"></listcell>
+                     <listcell label="@bind(patientLabOrder.billingStatus)"></listcell>
+                   <!--  <listcell label="@bind(patientLabOrder.labTestPanel.price)"></listcell> -->
+                </listitem>
+            </template>
+        </listbox>
+
+        <div zclass="panelFoot">
+            <button label="Generate Invoice" sclass="btn-primary" onClick="@command('GenerateInvoice')"
+                    visible="@bind(vm.generateInvoice)" disabled="@bind(vm.allLabOrderCancelled)"></button>
+            <button label="Mark Invoice Ready" sclass="btn-primary" onClick="@command('MarkInvoiceAsFinal')"
+                    visible="@bind(vm.invoiceReady &amp;&amp; !vm.enableReceipt)" ></button>
+            <button label="Cancel Order" sclass="btn-warning" visible="@bind(!vm.invoiceReady)" onClick="@command('CancelOrder')" disabled="@bind(vm.allLabOrderCancelled)"></button>
+             <button label="Cancel Invoice" sclass="btn-warning"   visible="@bind(vm.invoiceReady &amp;&amp; !vm.enableReceipt)" onClick="@command('cancelInvoice')" ></button>
+            <button label="Create Receipt" visible="@bind(vm.enableReceipt)" sclass="btn btn-success"  onClick="@command('CreateReceipt')"></button>
+            <button label="Close" onClick="viewLabOrder.detach()"></button>
+        </div>
+    </window>
+</zk>

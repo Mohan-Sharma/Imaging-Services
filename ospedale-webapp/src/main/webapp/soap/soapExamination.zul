@@ -1,0 +1,110 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapReviewOfSystemWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<?xel-method prefix="disable" name="ds" class="com.nzion.domain.emr.soap.PatientExamination" signature="boolean isNotAsked(java.lang.String)"?>
+	<zscript>
+	com.nzion.zkoss.composer.SoapExaminationController examinationController = new com.nzion.zkoss.composer.SoapExaminationController();
+	com.nzion.domain.emr.QATemplate qat;
+	</zscript>
+	<window id="soapReviewOfSystemWindow" width="100%"
+		apply="${examinationController}">
+		<zscript>
+			<![CDATA[
+				List qts = new ArrayList(examinationController.getQaTemplates());
+				if(com.nzion.util.UtilValidator.isNotEmpty(qts))
+					 qat = qts.get(0);
+			]]>
+	    </zscript>
+		<div align="center" style="margin:10px">	
+		<hlayout width="80%">
+			<label value="Choose a template" />
+			<combobox model="@{examinationController.qaTemplates}"
+				id="templateComboBox" itemRenderer="${examinationController}"
+				onSelect="examinationController.setSelectedTemplate((com.nzion.domain.emr.QATemplate)self.getSelectedItem().getValue()); examinationController.renderTemplateBasedPatientExaminationQA();qaAreaDiv.setVisible(true);clearBtn.setDisabled(false);"
+				selectedItem="@{qat}" >
+				
+				</combobox>
+				 <space/>
+		 <button label="Clear" onClick='examinationController.deletePatientExaminations();
+		 Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null);' disabled="true" id="clearBtn"/>
+		</hlayout>
+		</div>
+		<div id="qaAreaDiv" visible="true">
+			<h:table width="100%">
+				<h:tr width="100%">
+					<h:td class="soapNoteContL"
+						style="vertical-align:top;width:30%;">
+						<panel title="Organ Systems" width="100%"
+							id="organSystemPanel">
+							<panelchildren>
+								<vlayout>
+									<div sclass="dataTables_scrollBody"
+										style="overflow: auto; height: 400px;">
+										<listbox 
+											model="@{examinationController.patientExaminationsForSelectedTemplate,load-after='templateComboBox.onSelect,onReload'}"
+											id="organSytemListBox">
+											<listitem
+												self="@{each='examinationQa'}" value="@{examinationQa}">
+												<listcell
+													label="@{examinationQa.organSystem.desc}" />
+												<listcell>
+													<listbox mold="select" 
+													selectedItem="@{examinationQa.normal}">
+														<listitem
+															label="Not Reviewed" value="NOTASKED" />
+														<listitem
+															label="Normal" value="NORMAL" />
+														<listitem
+															label="Examination" value="ABNORMAL" />
+														<attribute name="onSelect">
+															examinationController.selectStatus(self, patientRosSectionPanel);
+			//												self.setDisabled(!("NOTASKED".equalsIgnoreCase((String)self.getSelectedItem().getValue())));
+														</attribute>
+													</listbox>
+												</listcell>
+												<attribute name="onClick">
+examinationController.setSelectedPatientExamination((com.nzion.domain.emr.soap.PatientExamination) self.getValue());
+examinationController.selectPatientExamination(patientRosSectionPanel, patientRosSectionDiv);
+</attribute>
+											</listitem>
+										</listbox>
+									</div>
+									<vlayout>
+										<label
+											value="Overall Observation" style="font-weight:bold" />
+										<textbox
+											value="@{examinationSection.examinationNote}" rows="2"
+											cols="50" />
+									</vlayout>
+								</vlayout>
+							</panelchildren>
+						</panel>
+					</h:td>
+					<h:td class="soapNoteContR"
+						style="vertical-align:top;width:60%;">
+						<panel id="patientRosSectionPanel">
+							<panelchildren>
+								<div id="patientRosSectionDiv" />
+							</panelchildren>
+						</panel>
+					</h:td>
+				</h:tr>
+			</h:table>
+		<div align="start" sclass="panelFoot">
+			<button disabled="${patientSoapNoteController.readonly}"
+				id="saveButton" label="Save" zclass="btn btn-success"
+				onClick='examinationController.getPatientSoapNoteController().saveSoapSection();Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null);'>
+				<attribute name="onCreate">
+				if(qat != null){
+				 examinationController.setSelectedTemplate(qat);
+				 examinationController.renderTemplateBasedPatientExaminationQA();
+				 qaAreaDiv.setVisible(true);clearBtn.setDisabled(false);
+				 Events.postEvent("onReload",organSytemListBox,null);
+				}
+				</attribute>
+				</button>
+		</div>
+		</div>
+	</window>
+</zk>

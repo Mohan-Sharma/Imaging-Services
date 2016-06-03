@@ -1,0 +1,18 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./writeOffWindow"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+	xmlns:h="http://www.w3.org/1999/xhtml">
+	<zscript>
+		com.nzion.zkoss.composer.BillingController bController = arg.get("billingController");
+	</zscript>
+	<window id="writeOffWindow" mode="modal" width="350px" height="250px;" position="center" title="Write Off" closable="true">
+		<div sclass="panelCont">
+			<div><label value="Reason"></label></div>
+			<textbox cols="30" rows="5" value="@{bController.invoice.writtenOffReason}"></textbox>
+		</div>
+		<div sclass="panelFoot">
+				<button label="Save" onClick="bController.writeOffBillAmt();
+				 writeOffWindow.detach();com.nzion.util.UtilMessagesAndPopups.showSuccess();"> </button>
+				<button label="Cancel" onClick="writeOffWindow.detach();"></button>
+		</div>
+	</window>
+</zk>

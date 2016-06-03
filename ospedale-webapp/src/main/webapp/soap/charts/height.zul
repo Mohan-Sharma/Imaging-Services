@@ -1,0 +1,113 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml">
+<window title="new page title" border="normal">
+	<h:div id="container" style="width: 100%; height: 400px"></h:div>
+</window>
+
+
+<script src="http://www.highcharts.com/js/highcharts.js" type="text/javascript"></script>
+
+<script>
+<![CDATA[
+	
+	var options = {
+    chart: {
+        renderTo: 'container',
+        defaultSeriesType: 'line'
+    },
+    title: {
+        text: 'Fruit Consumption'
+    },
+    series: [],
+    legend :{}
+	};
+	$.get('statage.csv', function(data) {
+    // Split the lines
+    var lines = data.split('\n');
+    	var series1 = {
+    		name:'3rd Percentile',
+            data: []
+        };
+    	var series2 = {
+                data: []
+        };
+    	var series3 = {
+                data: []
+        };
+    	var series4 = {
+                data: []
+        };
+       	var series5 = {
+                   data: []
+        };
+       	var series6 = {
+                   data: []
+        };
+       	var series7 = {
+                   data: []
+        };
+       	var series8 = {
+                   data: []
+        };
+       	var series9 = {
+                   data: []
+        };
+       	
+    	// Iterate over the lines and add categories or series
+   		$.each(lines, function(lineNo, line) {
+        var items = line.split(',');
+        // header line containes categories
+        if (lineNo == 0) {
+        }
+        // the rest of the lines contain data with their name in the first position
+        else {
+        	var prevItemNo=1;
+            $.each(items, function(itemNo, item) {
+                if (itemNo==1) {
+                    series1.data.push(new Array(parseFloat(items[0]),parseFloat(item)));
+                }
+                if (itemNo==2) {
+                    series2.data.push(new Array(parseFloat(items[0]),parseFloat(item)));
+                }
+                if (itemNo==3) {
+                    series3.data.push(new Array(parseFloat(items[0]),parseFloat(item)));
+                }
+                if (itemNo==4) {
+                    series4.data.push(new Array(parseFloat(items[0]),parseFloat(item)));
+                }
+                if (itemNo==5) {
+                    series5.data.push(new Array(parseFloat(items[0]),parseFloat(item)));
+                }
+                if (itemNo==6) {
+                    series6.data.push(new Array(parseFloat(items[0]),parseFloat(item)));
+                }
+                if (itemNo==7) {
+                    series7.data.push(new Array(parseFloat(items[0]),parseFloat(item)));
+                }
+                if (itemNo==8) {
+                    series8.data.push(new Array(parseFloat(items[0]),parseFloat(item)));
+                }
+                if (itemNo==9) {
+                    series9.data.push(new Array(parseFloat(items[0]),parseFloat(item)));
+                }
+            });
+        }
+    });
+    options.series.push(series1);
+    options.series.push(series2);
+    options.series.push(series3);
+    options.series.push(series4);
+    options.series.push(series5);
+    options.series.push(series6);
+    options.series.push(series7);
+    options.series.push(series8);
+    options.series.push(series9);
+
+    
+    // Create the chart
+    var chart = new Highcharts.Chart(options);
+    alert(chart);
+});
+	]]>
+</script>
+</zk>

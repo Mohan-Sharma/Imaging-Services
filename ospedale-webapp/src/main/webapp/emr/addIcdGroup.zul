@@ -1,0 +1,73 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./icdGroupWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	<![CDATA[
+	import com.nzion.domain.emr.IcdGroup;
+	import com.nzion.zkoss.composer.emr.IcdGroupController;
+	String windowTitle = "New";
+	IcdGroup icdGroup = arg.get("entity");
+	if (icdGroup != null && icdGroup.getId() != null) 
+		windowTitle = "Edit";
+	IcdGroupController icdGroupController = new IcdGroupController();
+]]>
+	</zscript>
+	<window id="icdGroupWindow"  closable="true" width="55%"
+		apply="${icdGroupController}">
+		<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>${windowTitle}  Diagnosis Group</h:small>
+                <button type="button" zclass="close" onClick="icdGroupWindow.detach();">×</button>
+            </h:h1>
+        </div>
+	<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span4">
+						<label value="Name" mold="required" />
+						<textbox value="@{icdGroupController.icdGroup.groupName,save-when='saveBtn.onClick'}"  constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+					</div>
+					</div>
+					<div zclass="row-fluid">
+				    <div zclass="span5">
+						<label value="Description" />
+						<textbox value="@{icdGroupController.icdGroup.groupDescription,save-when='saveBtn.onClick'}" sclass="span12"   rows="2" cols="50" />
+					</div>
+					</div>
+					</div>
+				
+		<panel title="Diagnosis Elements" collapsible="true" onAddClick="icdGroupController.openAddIcdWindow()" onDeleteClick="icdGroupController.removeIcd()" id="icdPanel">
+			<panelchildren>
+			<toolbar listenercomponent="${icdPanel}" hidecancel="true" hidesearch="true"/>
+					<div width="100%" style="overflow:auto;height:200px;">
+						<listbox id="icdElementListbox" model="@{icdGroupController.icdElements,load-after='self.onReloadRequest'}" mold="paging"
+							pageSize="10" multiple="true" pagingPosition="top" checkmark="true">
+							<listhead>
+								<listheader label="Diagnosis Code" />
+								<listheader label="Diagnosis Description" />
+							</listhead>
+							<listitem self="@{each='icd'}" value="@{icd}">
+								<listcell label="@{icd.code}" />
+								<listcell label="@{icd.description}" />
+							</listitem>
+						</listbox>
+					</div>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot" />
+		<separator height="10px" />
+		<div sclass="panelFoot">
+			<button label="Save" id="saveBtn" zclass="btn-success btn">
+				<attribute name="onClick">
+				if(com.nzion.util.UtilValidator.isEmpty(icdGroupController.getIcdElements())){
+					com.nzion.util.UtilMessagesAndPopups.showError("Add atleast one Diagnosis Element");
+					return;
+					}
+					icdGroupController.saveIcdGroup();
+					icdGroupWindow.detach();
+				</attribute>
+			</button>
+			<button label="Cancel" onClick='icdGroupWindow.detach()' />
+		</div>
+	</window>
+</zk>

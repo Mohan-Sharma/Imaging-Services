@@ -1,0 +1,72 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./settingPopup"?>
+  <zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+   <zscript>
+	 List providerList = null;
+	 List specialities= commonCrudService.getAll(com.nzion.domain.Speciality.class);
+	com.nzion.zkoss.ext.EntityDropdownRenderer entityDropdownRenderer = new com.nzion.zkoss.ext.EntityDropdownRenderer("description");
+	</zscript>
+	<div id="settingPopup">
+		  <hbox style="width:100%">
+					      <label>First Name</label><textbox id="pfirstName"/>
+					      <label>Last Name</label><textbox id="plastName"/>
+					      <label>Speciality</label> <combobox id="speciality" model="@{specialities}"
+							itemRenderer="${entityDropdownRenderer}" width="100px"/>
+					      <n:span id="lookUpBtn" class="linkBtn linkBtnOn" style="margin-left:2px;">
+					      <a  label="Search" id="search" sclass="lookupBtn"
+					      onClick='providerList = providerService.searchProviderBy(pfirstName.getValue(),plastName.getValue(),speciality.getSelectedItem() != null ? speciality.getSelectedItem().getValue() : null, locationCombo.getSelectedItem() != null ? locationCombo.getSelectedItem().getValue() : null);'/>
+					      <n:span/>
+					      </n:span>
+			</hbox>
+			<listbox model="@{providerList,load-after='search.onClick'}" width="100%" multiple="true" checkmark="true" id="providersListbox" 
+				selectedItem="@{view.providers, converter=com.nzion.view.component.MultipleListitemBindingConverter}" rows="2">
+				<listitem self="@{each='provider'}" value="@{provider}" >
+						<listcell>
+							<hbox>
+				
+					<image width="40px" height="40px" hover="@{provider,converter='com.nzion.view.component.GenderImageConverter'}"/>
+					
+					<h:table width="100%">
+					<h:tr>
+					<h:td width="400px">
+							<hbox>
+								<label value="@{provider.firstName}" />,
+								<label value="@{provider.lastName}" />
+							</hbox>
+					</h:td>
+					
+					<h:td width="100px">
+					 <label value="@{provider.gender}" />
+					</h:td>
+					
+					</h:tr>
+					
+					<h:tr>
+					<h:td>
+						<label value="@{provider.contacts.postalAddress}" />
+					</h:td>
+					<h:td align="right">
+						 <hbox>
+							 <image src="../images/email.png" tooltiptext="@{provider.contacts.email}" width="10px" height="10px"></image>
+							 <image src="../images/mobile.png" tooltiptext="@{provider.contacts.mobileNumber}" width="10px" height="10px"></image>
+						 	 <image src="../images/contact.png" tooltiptext="@{provider.contacts.officePhone}" width="10px" height="10px"></image>
+						 </hbox>
+					</h:td>
+					</h:tr>
+					
+					</h:table>
+				</hbox>
+				
+						</listcell>
+				</listitem>
+			</listbox>
+			
+			<button label="Save"> 
+				<attribute name="onClick">
+					view.setType("DASHBOARD");
+					commonCrudService.save(view);
+					com.nzion.util.UtilMessagesAndPopups.showSuccess();
+				</attribute>
+			</button>
+ </div>
+</zk>

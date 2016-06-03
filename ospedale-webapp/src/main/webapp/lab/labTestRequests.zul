@@ -1,0 +1,138 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./labTestReqWin"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native">
+    <zscript>
+        import com.nzion.domain.emr.lab.LabOrderRequest;
+        import com.nzion.domain.emr.soap.PatientLabOrder;
+        com.nzion.service.common.CommonCrudService commonCrudService =
+        com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+        com.nzion.service.emr.lab.LabService labService = com.nzion.util.Infrastructure.getSpringBean("labService");
+        LabOrderRequest labOrderRequest = new com.nzion.domain.emr.lab.LabOrderRequest();
+        com.nzion.domain.emr.soap.PatientLabOrder patientLabOrder = new com.nzion.domain.emr.soap.PatientLabOrder();
+        List patientLabOrders = labService.getLabOrdersForProcessing();
+        com.nzion.domain.emr.soap.PatientLabOrder.STATUS[] statuses=
+        com.nzion.domain.emr.soap.PatientLabOrder.STATUS.values();
+    </zscript>
+    <window zclass="boxStyle" id="labTestReqWin">
+
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Ordering Doctor"/>
+                    <providerlookup
+                            onChange="labOrderRequest.setProvider((com.nzion.domain.Provider)event.getData());"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Test Panel Name" sclass="name"/>
+                    <textbox value="@{patientLabOrder.LabTestPanel.panelName}" id="panelNameBox"
+                             sclass="span12"></textbox>
+                </div>
+                <div zclass="span2">
+                    <label value="Billing Status" sclass="name"/>
+                    <combobox readonly="true" constraint="no empty"
+                              maxlength="20" onSelect="patientLabOrder.setStatus(self.getSelectedItem().getValue());">
+                        <comboitem forEach="${statuses}" label="${each.description}" value="${each}">
+                        </comboitem>
+                    </combobox>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Patient" sclass="name"/>
+                    <patientlookup
+                            onChange="labOrderRequest.setPatient((com.nzion.domain.Patient)event.getOrigin().getData());"/>
+                </div>
+
+            </div>
+        </div>
+        <div align="center" width="100%" style="border:none">
+            <button label="Search">
+                <attribute name="onClick">
+                    alert("searching");
+                    patientLabOrders =
+                    labService.getPatientLabOrderBy(labOrderRequest.getPatient(),labOrderRequest.getProvider(),patientLabOrder.getStatus(),panelNameBox.getValue(),null);
+                    Events.postEvent("onReloadRequest",labTestOrdersGroup,null);
+                </attribute>
+            </button>
+        </div>
+<separator/>
+<paging id="configPanel"></paging>
+<listbox id="labTestOrdersGroup" model="@{patientLabOrders,load-after='onReloadRequest'}" mold="paging"
+         paginal="${configPanel}" pageSize="15">
+    <listhead>
+        <listheader label="Test Name"/>
+        <listheader label="Test Code"/>
+        <listheader label="Start Date"/>
+        <listheader label="End Date"/>
+        <listheader label="Billing Status"/>
+        <listheader label="Patient"/>
+        <listheader label="Ordered By"/>
+        <listheader label="Action"/>
+    </listhead>
+    <listitem self="@{each='labOrder'}" value="@{labOrder}">
+        <listcell>
+            <label value="@{labOrder.testName}"/>
+        </listcell>
+        <listcell>
+            <label value="@{labOrder.testCode}"/>
+        </listcell>
+        <listcell>
+            <label value="@{labOrder.startDate,converter='com.nzion.view.component.DateConverter'}"/>
+        </listcell>
+        <listcell>
+            <label value="@{labOrder.endDate,converter='com.nzion.view.component.DateConverter'}"/>
+        </listcell>
+        <listcell>
+            <label value="@{labOrder.billingStatus}"/>
+        </listcell>
+        <listcell>
+            <name value="@{labOrder.patient}"/>
+        </listcell>
+        <listcell>
+            <name object="@{labOrder.labOrderRequest.patientSoapNote.provider}" sclass="nameLeft"/>
+
+            <name object="@{labOrder.labOrderRequest.referral}" sclass="nameLeft"/>
+
+        </listcell>
+        <listcell>
+            <a label="Process |">
+                <attribute name="onClick">
+                    PatientLabOrder pLabOrder = (PatientLabOrder)self.getParent().getParent().getValue();
+                    process(pLabOrder);
+
+                </attribute>
+                <attribute name="onCreate">
+                    com.nzion.domain.emr.soap.PatientLabOrder pLabOrder =
+                    ((Listitem)self.getParent().getParent()).getValue();
+                    self.setVisible(pLabOrder.getStatus() !=
+                    com.nzion.domain.emr.soap.PatientLabOrder.STATUS.COMPLETED);
+                </attribute>
+            </a>
+            <a label="Result">
+                <attribute name="onClick">
+                    com.nzion.domain.emr.soap.PatientLabOrder patientLabOrder =
+                    (com.nzion.domain.emr.soap.PatientLabOrder)((Listitem)self.getParent().getParent()).getValue();
+                    com.nzion.domain.emr.lab.LabOrderRequest labReq = patientLabOrder.getLabOrderRequest();
+                    Executions.getCurrent().sendRedirect(
+                    "/lab/viewLabResult.zul?labOrderReqId=" + labReq.getId()+"&amp;pageName=Resultview", "_resultview");
+                </attribute>
+            </a>
+        </listcell>
+    </listitem>
+</listbox>
+<div>
+</div>
+<zscript>
+void process(PatientLabOrder pLabOrder)
+{
+if(!pLabOrder.getBillingStatus().equals(PatientLabOrder.BILLINGSTATUS.PAID)){
+    com.nzion.util.UtilMessagesAndPopups.showError("Cannot Process This Test Order With The Status " +
+pLabOrder.getStatus().getDescription());
+return;
+}
+com.nzion.zkoss.ext.Navigation.navigate("/lab/processLabTestRequest",com.nzion.util.UtilMisc.toMap("pLabOrder",pLabOrder),"contentArea");
+}
+</zscript>
+        </window>
+        </zk>

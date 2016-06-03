@@ -1,0 +1,13 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		setPageTitle("Immunization", "");
+	</zscript>
+	
+<window id="immunizationnList">
+<screen width="100%" listtitle="List of Vaccines" addpage="addImmunization" editpage="addImmunization" addmodepopup="true"
+	entityclass="com.nzion.domain.emr.Immunization" fields="shortDescription,fullVaccineName" 
+	labels="Vaccine Short Name,Vaccine Full Name" hidedeletebtn="true"/>
+</window>
+</zk>

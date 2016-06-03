@@ -1,0 +1,41 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./searchPersonWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	import com.nzion.domain.PersonDelegation;;
+	Textbox userTextBox = (Textbox) arg.get("userTextBox");
+	PersonDelegation personDelegation = (PersonDelegation) arg.get("personDelegation");
+	com.nzion.service.PersonService personService = com.nzion.util.Infrastructure.getSpringBean("personService");
+	List personsAccordingToUserLoginRole = personService.getPersonsAccordingToUserLoginRole(com.nzion.util.Infrastructure.getRolesOfLoggedInUser());
+	personsAccordingToUserLoginRole.remove(com.nzion.util.Infrastructure.getLoggedInPerson());
+]]>
+	</zscript>
+	<window id="searchPersonWindow" width="50%" title="Person LookUp" closable="true" mode="modal">
+	<div height="200px" style="overflow:auto">
+		<listbox model="@{personsAccordingToUserLoginRole}">
+			<listhead>
+				<listheader label="User Name" />
+				<listheader label="Gender"/>
+				<listheader label="Mobile Number"/>
+				<listheader label="Email"/>
+			</listhead>
+			<listitem self="@{each='person'}" value="@{person}">
+				<listcell>
+					<name object="@{person}" />
+				</listcell>
+				<listcell label="@{person.gender.description}"/>
+				<listcell label="@{person.contacts.mobileNumber}"/>
+				<listcell label="@{person.contacts.email}"/>
+				<attribute name="onDoubleClick">
+					com.nzion.domain.Person person = (com.nzion.domain.Person) self.getValue();
+					personDelegation.setPersonToBeDelegated(person);
+					userTextBox.setValue(com.nzion.util.ViewUtil.getFormattedName(person));
+					searchPersonWindow.detach();
+				</attribute>
+			</listitem>
+		</listbox>
+	</div>	
+	</window>
+</zk>

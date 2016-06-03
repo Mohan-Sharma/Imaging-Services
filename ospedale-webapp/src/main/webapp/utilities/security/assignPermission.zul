@@ -1,0 +1,95 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./winAssignPermission"?>
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		<![CDATA[		         
+		 setPageTitle("Assign Permission Groups","");
+         import com.nzion.security.PermissionGroup;
+         import com.nzion.security.SecurityGroup;
+		 import com.nzion.service.common.CommonCrudService;
+		 import com.nzion.util.Infrastructure;
+		 import com.nzion.zkoss.ext.PermissionGroupTreeModelAndRenderer;
+		 commonCrudService =  Infrastructure.getSpringBean("commonCrudService");
+		 PermissionGroupTreeModelAndRenderer permissionGroupsModelAndRenderer = new PermissionGroupTreeModelAndRenderer(commonCrudService.getById(PermissionGroup.class,new Long(30)));
+		 List secPermiGroups = commonCrudService.getAll(SecurityGroup.class);	
+		 SecurityGroup group = secPermiGroups.get(0);
+		 permissionGroupsModelAndRenderer.setSecGroup(group);
+		]]>	
+	</zscript>
+<window title="Assign Permissions" border="normal" id="winAssignPermission">
+  <div style="width:90%">
+  <separator></separator>
+  
+   <separator></separator>
+  <div  style="width:30%;float:left;margin:3px">
+  	<div>   <a label="Add Security Group">
+							<attribute name="onClick">
+								Window w = Executions.createComponents("/utilities/security/addSecurityGroup.zul", winAssignPermission,com.nzion.util.UtilMisc.toMap("securityGroup",securityGroup,"secPermiGroups",secPermiGroups));
+								w.addForward("onDetach",securityGroup, "onReloadRequest");
+							</attribute>
+			</a> | 
+			<a label=" Edit Security Group" >
+							<attribute name="onClick">
+								Window w = Executions.createComponents("/utilities/security/addSecurityGroup.zul", winAssignPermission,com.nzion.util.UtilMisc.toMap("entity",group,"securityGroup",securityGroup,"secPermiGroups",secPermiGroups));
+								w.addForward("onDetach",securityGroup, "onReloadRequest");
+								
+							</attribute>
+			</a>
+   </div>
+   <div>
+   <listbox id="securityGroup" checkmark="true" multiple="false" model="@{secPermiGroups,load-after='self.onReloadRequest'}" selectedItem="@{group}" onSelect="checkPermissionTree(self);">
+   		<listhead >
+   			<listheader label="Name"></listheader>
+   		</listhead>
+   			<listitem label="@{each.securityGroupName}" value="@{each}">   			
+   		</listitem>
+   </listbox>
+   </div>
+   </div>
+   <div  style="width:60%;float:left;margin:3px;padding-top:15px;" id="treeC" >   
+    <tree id="permissionTree" model="@{permissionGroupsModelAndRenderer}" checkmark="true" multiple="true" treeitemRenderer="@{permissionGroupsModelAndRenderer}" >    		
+    	<treecols><treecol label="Permission Group"></treecol><treecol label="Description"></treecol></treecols>
+    		
+    </tree>
+   </div>  
+		<separator></separator>
+		<div sclass="buttonPanel"  style="width:90%;">
+			<button id="Save" label="Save" sclass="btn" >
+				<attribute name="onClick">
+							Set permissiomGrp = permissionTree.getSelectedItems();
+							group.getGrantedSecurityPermissions().clear();
+							for(Object item : permissiomGrp){
+								group.add((com.nzion.security.PermissionGroup)item.getValue());
+							}										
+							commonCrudService.save(group);
+							com.nzion.util.UtilMessagesAndPopups.showSuccess();
+				</attribute>
+			</button>
+			<button id="Cancel" label="Cancel" sclass="btn"/>
+       </div>
+		  <separator height="10px"></separator>
+	</div>
+      <zscript>
+           /*To check Tree Items which are previously assigned securoty group selected */ 
+            
+            public void checkPermissionTree(Listbox listItemSecGroup){
+            	group = listItemSecGroup.getSelectedItem().getValue(); 
+            	permissionGroupsModelAndRenderer.setSecGroup(group);
+            	 permissionTree.setModel(permissionGroupsModelAndRenderer);            	
+            	permissionTree.invalidate();
+            } 
+            public void s(Treeitem ti)
+            {
+                Treechildren  tc =	ti.getTreechildren();
+            	
+            }  
+            public void s1(Tree ti){
+            	
+                Treechildren  tc =	ti.getTreechildren();            	
+            	
+            }           
+        
+      </zscript>
+</window>
+</zk>

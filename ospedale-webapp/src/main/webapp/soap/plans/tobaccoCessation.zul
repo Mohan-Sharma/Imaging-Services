@@ -1,0 +1,80 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./tobaccoCessationWindow"?>
+<?component name="followup" macro-uri="/soap/plans/follow-up-macro.zul" inline="true"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window id="tobaccoCessationWindow">
+		<zscript>
+			import com.nzion.domain.emr.soap.*;
+			com.nzion.zkoss.composer.SoapRecommendationController recommendationController = rc;
+			com.nzion.zkoss.composer.PatientSoapNoteController soapNoteController = recommendationController.soapNoteController;
+			Set docs = recommendationController.getDocumentsForSOAPPlan(com.nzion.enums.MATERIALCATEGORY.TOBACCOCESSATION);
+			SOAPPlan plan = recommendationController.getRecommendationSection().retrieveSoapPlanAnyWay(	RecommendationSection.TOBACCO_PLAN);
+			SocialHistorySection shSection = recommendationController.soapNoteController.getSoapSection(SocialHistorySection.class, false);
+			Set selectedDocs = new HashSet();
+		</zscript>
+		<label style="margin:10px;" value="Smoking Status not recorded for this encounter"
+			unless="${not empty shSection.patientSocialHistory.smokingAsSentence}" />
+		<div id="tobaccoCessationDiv" if="${not empty shSection.patientSocialHistory.smokingAsSentence}">
+			<groupbox visible="${not empty shSection.patientSocialHistory.smokingAsSentence}">
+				<label value="${shSection.patientSocialHistory.smokingAsSentence}" />
+			</groupbox>
+			<space height="10px;" width="100%" />
+			<n:table style="width:100%">
+				<n:tr>
+					<n:td style="width:50%" rowspan="2">
+						<label value="Counselling Notes" />
+						<textbox rows="15" cols="25" id="counsellingNotesTxtBox"
+							value="@{recommendationController.tobaccoCessationPlan.doctorsPlan,load-after='tobaccoCessationDiv.onReloadRequest'}" />
+						<div width="200px" id="followUp1">
+							<followup plan="${plan}" />
+						</div>
+						<checkbox id="medicationChkBox"
+							checked="@{recommendationController.tobaccoCessationPlan.medicationGiven,load-after='tobaccoCessationDiv.onReloadRequest'}"
+							label="Medication Given" />
+					</n:td>
+				</n:tr>
+				<n:td>
+					<label value="Notes" />
+					<textbox rows="4" id="notesTxtBox" cols="25"
+						value="@{recommendationController.tobaccoCessationPlan.note,load-after='tobaccoCessationDiv.onReloadRequest'}" />
+					Language
+					<div width="30%">
+						<enumeration enumType="LANGUAGE" id="languageEnum" value="@{recommendationController.language}"
+							readonly="true"
+							onSelect='docs = new HashSet(planAndRecommendationService.getPatientEducationDocumentsFor(com.nzion.enums.MATERIALCATEGORY.TOBACCOCESSATION,self.getSelectedItem().getValue().getDescription(),recommendationController.getRecommendationSection().getSoapNote().getPatient(),recommendationController.soapNoteController.getSoapNote().getDate()));' />
+					</div>
+					Handout Docs
+					<listbox model="@{docs,load-after='languageEnum.onSelect'}">
+						<listhead>
+							<listheader label="Language" />
+							<listheader label="File" />
+						</listhead>
+						<listitem self="@{each='doc'}" value="@{doc}">
+							<listcell label="@{doc.language}" />
+							<listcell>
+								<a label="@{doc.file.fileName}" disabled="${soapNoteController.readonly}">
+									<attribute name="onClick">
+										selectedDocs.add(self.getParent().getParent().getValue());
+										recommendationController.downloadPatientEducationDocument("Tobacco-Cessation.zip", selectedDocs,recommendationController.getTobaccoCessationPlan(), recommendationController.getRecommendationSection());
+									</attribute>
+								</a>
+							</listcell>
+						</listitem>
+					</listbox>
+				</n:td>
+			</n:table>
+			<button label="Save" disabled="${soapNoteController.readonly}">
+				<attribute name="onClick">
+					if (com.nzion.util.UtilValidator.isEmpty(recommendationController.getTobaccoCessationPlan().getUpdatedBy()))
+						recommendationController.soapNoteController.setEventMessage("Tobacco Cessation Plan Created");
+					else
+						recommendationController.soapNoteController.setEventMessage("Tobacco Cessation Plan Updated");
+					recommendationController.soapNoteController.saveSoapSection();
+					com.nzion.util.UtilMessagesAndPopups.showSuccess();
+				</attribute>
+			</button>
+			<button label="Clear" id="clearBtn" disabled="${soapNoteController.readonly}"
+				onClick="recommendationController.clearTobaccoCessation(tobaccoCessationDiv);" />
+		</div>
+	</window>
+</zk>

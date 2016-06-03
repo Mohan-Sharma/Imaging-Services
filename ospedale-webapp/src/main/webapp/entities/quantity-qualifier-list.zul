@@ -1,0 +1,14 @@
+<?component name="screen" macro-uri="/home-grid-macro.zul"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	setPageTitle("Quantity Qualifier", "");
+	com.nzion.domain.drug.DrugSig dSig = new com.nzion.domain.drug.DrugSig("QUANTITY_QUALIFIER");
+	List entities = commonCrudService.searchByExample(dSig);
+</zscript>
+	<window>
+		<screen width="100%" pagetitle="Quantity Qualifier" listtitle="List of Quantity Qualifier" addpage="addQuantityQualifier" editpage="addQuantityQualifier"
+			entityclass="com.nzion.domain.drug.DrugSig" listModel="${entities}" hideSearch="false" 
+			fields="code, description" hidedeletebtn="true"	labels="Code,Description" addmodepopup="true" searchfields="code, description"/>
+	</window>
+</zk>

@@ -1,0 +1,42 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./facesheetWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	com.nzion.zkoss.composer.PatientSoapNoteController patientSoapNoteController = arg.get("patientSoapNoteController");
+	com.nzion.domain.Patient patient = patientSoapNoteController.getPatient();
+	List latestPatientRx = soapNoteService.getLatestPatientRxs(patient, 5);
+</zscript>                                 
+	<div id="facesheetWindow" sclass="soapNoteContL col2">
+		<panel title="Medications" collapsible="true">
+			<panelchildren>
+				<div sclass="dataTables_scrollBody" style="overflow: auto; height: 125px;">
+					<listbox>
+						<listhead>
+							<listheader label="Drug Name" />
+							<listheader label="Drug Strength" />
+							<listheader label="Uom" />
+							<listheader label="Dosage Form" />
+							<listheader label="Route" />
+							<listheader label="Physician Name" />
+							<listheader label="Prescription Notes" />
+							<listheader label="Refills" />
+							<listheader label="Prescription Date" />
+						</listhead>
+						<listitem  forEach="${latestPatientRx}">
+							<listcell label="${each.drugName}" />
+							<listcell label="${each.strength}" />
+							<listcell label="${each.strengthUOM}" />
+							<listcell label="${each.dosageForm}" />
+							<listcell label="${each.route}" />
+							<listcell label="${each.physicianName}" />
+							<listcell label="${each.prescriptionNotes}" />
+							<listcell label="${each.refills}"/>
+							<listcell label="${each.prescriptionDate}"/>
+						</listitem>
+					</listbox>
+				</div>
+			</panelchildren>
+		</panel>
+	</div>
+</zk>

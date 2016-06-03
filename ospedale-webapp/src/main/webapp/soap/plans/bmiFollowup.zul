@@ -1,0 +1,163 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./bmiFollowUpWindow"?>
+<?component name="followup" macro-uri="/soap/plans/follow-up-macro.zul" inline="true"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+		<zscript>
+		<![CDATA[
+			com.nzion.zkoss.composer.SoapRecommendationController recommendationController = rc;
+			com.nzion.zkoss.composer.PatientSoapNoteController soapNoteController = recommendationController.soapNoteController;
+			com.nzion.service.emr.PlanAndRecommendationService planAndRecommendationService = com.nzion.util.Infrastructure.getSpringBean("planAndRecommendationService");
+			Set docs = recommendationController.getDocumentsForSOAPPlan(com.nzion.enums.MATERIALCATEGORY.BMIFOLLOWUP);
+			List referralLetterTemplates = commonCrudService.getAll(com.nzion.domain.emr.ReferalLetterTemplate.class);
+			Set selectedDocs = new HashSet();
+			Div followUpDiv;
+			com.nzion.domain.emr.soap.SOAPPlan plan = recommendationController.getBmiFollowUpPlan();
+			boolean previewBtnDisabled = recommendationController.getBmiFollowUpPlan().getReferral() == null && recommendationController.getBmiFollowUpPlan().getReferalLetterTemplate() == null ? true : (recommendationController.getBmiFollowUpPlan().getReferral() != null &&  recommendationController.getBmiFollowUpPlan().getReferalLetterTemplate() != null ? false : true);
+			]]>
+		</zscript>
+	<window id="bmiFollowUpWindow">
+		<zscript>
+		 <![CDATA[
+			public void isPreviewBtnDisabled(){
+			if(recommendationController.getBmiFollowUpPlan().getReferral() == null || recommendationController.getBmiFollowUpPlan().getReferalLetterTemplate() == null)
+				return;
+			previewBtnDisabled = false;
+			previewBtnLink.setDisabled(previewBtnDisabled);
+			previewBtnLink.invalidate();
+			}
+		]]>
+		</zscript>
+		<label value="BMI not recorded for this encounter." unless="${recommendationController.bmiRecorded}"/>
+		<div if="${recommendationController.bmiRecorded}" id="bmiFollowUpdiv">
+		<zscript>
+			boolean	isExcluded = com.nzion.domain.emr.soap.SOAPPlan.EXCLUSION.equalsIgnoreCase(recommendationController.getBmiFollowUpPlan().getFollowUpType());
+			String status = planAndRecommendationService.getBMIStatusFor(recommendationController.getBmi().getValue(),recommendationController.soapNoteController.getPatient().getDateOfBirth(),recommendationController.soapNoteController.getSoapNote().getDate());
+		</zscript>
+		<groupbox>
+			<caption label="Vital"/>
+			<n:table style="margin:10px;">
+			<n:tr>
+				<n:td>
+					<label value="Height - "/>
+					<label value="${recommendationController.height.value} ${recommendationController.height.vitalSign.unitOfMeasurement.description}"/>
+				</n:td>
+				<n:td>
+					<label value="Weight - "/>
+					<label value="${recommendationController.weight.value} ${recommendationController.weight.vitalSign.unitOfMeasurement.description}"/>
+				</n:td>
+				<n:td>
+					<label value="BMI - "/>
+					<label value="${recommendationController.bmi.value} ${recommendationController.bmi.vitalSign.unitOfMeasurement.description}"/>
+				</n:td>
+			</n:tr>
+			<n:tr>
+				<n:td colspan="2">
+					BMI Norms: 18.5 - 25 (Age 18-64),  22-30 (Age > 65)
+				</n:td>
+				<n:td>
+					Status:<label value="${status}"/>
+				</n:td>
+			</n:tr>
+			</n:table>
+		</groupbox>
+		<groupbox>
+			<caption label="Follow-up Plan"/>
+			<n:table style="width:100%">
+				<n:tr>
+					<checkbox label="Exclusion" id="exclusionChkBox" onCreate="self.setChecked(isExcluded);" style="margin:10px;">
+						<attribute name="onCheck">
+							exclusionDiv.setVisible(self.isChecked());						
+							nonExclusionDiv.setVisible(!self.isChecked());
+							notesDiv.setVisible(!self.isChecked());
+							recommendationController.getBmiFollowUpPlan().setFollowUpType(self.isChecked() ? com.nzion.domain.emr.soap.SOAPPlan.EXCLUSION : null);
+							if(!self.isChecked())
+								recommendationController.getBmiFollowUpPlan().setExclusionReason(null);
+						</attribute>
+					</checkbox>
+				</n:tr>
+				<n:tr>
+					<n:td style="width:50%">
+					<div id="nonExclusionDiv" visible="${!isExcluded}" style="margin:10px;">
+						<label value="Counselling Notes"/>
+						<textbox rows="6" cols="25" value="@{plan.doctorsPlan,load-after='bmiFollowUpdiv.onReloadRequest'}" id="counsellingNotesTxtBox"/>
+						<div width="220px;">
+						<label value="Referral"/>
+						<referrallookup onChange="recommendationController.getBmiFollowUpPlan().setReferral(event.getOrigin().getData());isPreviewBtnDisabled()" value="${recommendationController.bmiFollowUpPlan.referral}" id="referralLookUpId"/>
+						<label value="Referral Letter Templates"/>
+						<hbox>
+						<combobox model="@{referralLetterTemplates}" id="referralLetterTemplateCombobox" onSelect="isPreviewBtnDisabled()"
+						 selectedItem="@{plan.referalLetterTemplate,load-after='bmiFollowUpdiv.onReloadRequest'}" readonly="true"/>
+						<span id="previewbtn" sclass="linkBtn linkBtnOn">
+							<a disabled="${previewBtnDisabled}" sclass="addBtn" id="previewBtnLink"
+								label="Preview" onClick="recommendationController.showReferralTemplatePreview()"/>
+							<span />
+						</span>
+						</hbox>
+						<zscript>
+							followUpDiv = (Div)bmiFollowUpWindow.getFellowIfAny("bmiFollowUpdiv",true);
+						</zscript>
+						<followup plan="${recommendationController.bmiFollowUpPlan}" id="followUpId" divs="${followUpDiv}"/>
+						<button label="Save" id="savePlanForNonExclusion" >
+							<attribute name="onClick">
+								if (com.nzion.util.UtilValidator.isEmpty(recommendationController.getBmiFollowUpPlan().getUpdatedBy()))
+									recommendationController.soapNoteController.setEventMessage("BMI FollowUp Plan Created");
+								else
+									recommendationController.soapNoteController.setEventMessage("BMI FollowUp Plan Updated");
+								recommendationController.soapNoteController.saveSoapSection();
+								com.nzion.util.UtilMessagesAndPopups.showSuccess();
+							</attribute>
+						</button>
+						<button label="Clear"  disabled="${soapNoteController.readonly}" onClick="recommendationController.clearBmiFollowUp(bmiFollowUpWindow);"/>
+						</div>
+						</div>
+						<div id="exclusionDiv" visible="${isExcluded}" style="width:200px;margin:10px;">
+							<label value="Exclusion Reason"/>
+							<label zclass="labelReq" value="*"/>
+							<combobox selectedItem ="@{plan.exclusionReason,load-after='bmiFollowUpdiv.onReloadRequest',save-when='savePlanBtnForExclusion.onClick'}" id="exclusionReasonComboBox" constraint="no empty">
+								<comboitem label="Active Dx: Pregnancy" value="Active Dx: Pregnancy"/>
+								<comboitem label="Terminal Illness" value="Terminal Illness"/>
+								<comboitem label="Exam not done: Patient reason" value="Exam not done: Patient reason"/>
+								<comboitem label="Exam not done: Medical reason" value="Exam not done: Medical reason"/>
+								<comboitem label="Exam not done: System reason" value="Exam not done: System reason"/>
+							</combobox>
+						<button label="Save" onClick='Events.postEvent("onClick",savePlanForNonExclusion,null)' id="savePlanBtnForExclusion"/>
+						<button label="Clear" id="clearBtn" disabled="${soapNoteController.readonly}" onClick="recommendationController.clearBmiFollowUp(bmiFollowUpWindow);"/>
+						</div>
+					</n:td>
+					<n:td>
+						<div style="margin:10px;" id="notesDiv" visible="${!isExcluded}">
+						<label value="Notes"/>
+						<textbox rows="4" cols="25" value="@{plan.note,load-after='bmiFollowUpdiv.onReloadRequest'}" id="notesTxtBox"/>
+						Language
+						<div width="30%">
+						<enumeration enumType="LANGUAGE" id="languageEnum" value="@{recommendationController.language}"
+						 readonly="true" onSelect='docs = new HashSet(planAndRecommendationService.getPatientEducationDocumentsFor(com.nzion.enums.MATERIALCATEGORY.BMIFOLLOWUP,self.getSelectedItem().getValue().getDescription(),recommendationController.getRecommendationSection().getSoapNote().getPatient(),recommendationController.soapNoteController.getSoapNote().getDate()));'/>
+						</div>
+						Handout Docs
+						<listbox model="@{docs,load-after='languageEnum.onSelect'}">
+							<listhead>
+								<listheader label="Language"/>
+								<listheader label="File"/>
+							</listhead>
+							<listitem self="@{each='doc'}" value="@{doc}">
+								<listcell label="@{doc.language}"/>				
+								<listcell>
+								<a label="@{doc.file.fileName}" disabled="${soapNoteController.readonly}">
+									<attribute name="onClick">
+										selectedDocs.add(self.getParent().getParent().getValue());
+										recommendationController.downloadPatientEducationDocument("BMI-Follow-UP.zip", selectedDocs, recommendationController.getBmiFollowUpPlan(), recommendationController.getRecommendationSection());
+										selectedDocs.clear();
+									</attribute>
+								</a>
+								</listcell>				
+							</listitem>
+						</listbox>
+						</div>
+					</n:td>
+				</n:tr>
+			</n:table>
+		</groupbox>
+		</div>
+	</window>
+</zk>

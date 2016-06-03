@@ -1,0 +1,13 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/verticalTemplate.zul"?>
+<zk>
+<div self="@{insert(utilityContent)}" >
+	<zscript><![CDATA[
+	String[] labels = new String[]{"Drug","Drug Direction","Drug Form","Quantity","Quantity Qualifier","Route","Site","Drug Relations","Supply UOM"};
+	String[] ids = new String[]{"drug","drugDirection","drugDosageForm","quantity","quantityQualifier","route","site","gsm","supplyUom"};
+	renderTabs(labels, ids);
+	]]></zscript>
+</div>
+</zk>
+
+
+

@@ -1,0 +1,19 @@
+
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native">
+    <zscript>
+       Component patientAccountNumber = arg.get("patientAccountNumber");
+    </zscript>
+    <div zclass="form-search">
+        <div zclass="input-append">
+            <a zclass="lookupbtn">
+                <n:i class="icon-search"></n:i>
+                <attribute name="onClick">
+                    Executions.createComponents("/patient/patient-fetch-window.zul",null,com.nzion.util.UtilMisc.toMap("patientAccountNumber", patientAccountNumber)).doModal();
+                </attribute>
+                Patient Lookup in Afya
+            </a>
+        </div>
+    </div>
+</zk>

@@ -1,0 +1,53 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientPastHistoryWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import com.nzion.domain.emr.soap.PastHistorySection;
+	import com.nzion.zkoss.composer.PatientSoapNoteController;
+	import com.nzion.domain.emr.soap.PatientPastHistory;
+	PatientPastHistory patientPastHistory = arg.get("entity");
+	String sectionType = arg.get("sectionType");
+	PastHistorySection section = arg.get("section");
+	PatientSoapNoteController controller = arg.get("controller");
+	if (patientPastHistory == null) {
+		patientPastHistory = new PatientPastHistory();
+		patientPastHistory.setPastHistoryType(sectionType);
+	}
+	String title = "New " + sectionType;
+	List patientPastHistories = arg.get("patientPastHistories");
+]]></zscript>
+	<window id="patientPastHistoryWin" style="border: 5px solid #2d2d2d" mode="modal" width="60%">
+		<div sclass="panelTop">
+			<button  label="Add" id="Save"
+				onClick="section.addPatientPastHistory(patientPastHistory);patientPastHistories.add(patientPastHistory);patientPastHistoryWin.detach();" />
+			<button  label="Cancel" forward="onClick=onCancel" />
+		</div>
+		<panel title="${title}">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div>
+						<label value="Name" />
+						<textbox id="name" value="@{patientPastHistory.operationName,save-when='Save.onClick'}" />
+					</div>
+					<div>
+						<label value="Location" />
+						<textbox id="familymembers" value="@{patientPastHistory.locationName,save-when='Save.onClick'}" />
+					</div>
+					<div>
+						<label value="Doctor Name" />
+						<textbox value="@{patientPastHistory.operatedBy,save-when='Save.onClick'}" />
+					</div>
+					<div>
+						<label value="Occurred on" />
+						<datebox value="@{patientPastHistory.occuranceDate,save-when='Save.onClick'}" />
+					</div>
+					<div sclass="chkBox">
+						<checkbox checked="@{patientPastHistory.confidential,save-when='Save.onClick'}"
+							label="Confidential" />
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+	</window>
+</zk>

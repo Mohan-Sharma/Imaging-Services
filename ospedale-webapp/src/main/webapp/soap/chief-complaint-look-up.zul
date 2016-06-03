@@ -1,0 +1,47 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./chiefComplaintLookUpWina"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<window  mode="modal" id="chiefComplaintLookUpWina" closable="true" title="Chief Complaints" style="width:45%;">
+			<hbox>
+			<toolbarbutton width="100%" label="Speciality Based Chief Complaints" id="specialityChiefComplaint" onClick='loadMasterData(providerService.getProviderSpecializedChiefComplaints(provider),"Chief Complaint Not Configured For Doctor Speciality");' style="margin-right:10px;"/>
+			<space  width="230px"/>
+			<toolbarbutton width="100%" label="Pull from favourites" onClick='loadMasterData(personService.getFavouriteChiefComplaints(),"Favourites Not Configured");' style="margin-right:10px;"/>
+			</hbox>
+			<listbox model="@{masterData,load-after='self.onReloadRequest,specialityChiefComplaint.onClick'}" id="masterDataDisplayGrid" rows="8">
+				<listhead>
+					<listheader label="Chief Complaints"/>
+				</listhead> 
+				<listitem self="@{each='chiefComplaint'}" value="@{chiefComplaint}">
+					<attribute name="onClick">
+						component.setValue(self.getValue().getComplainName());
+						Events.postEvent("onChange", component, null);
+						chiefComplaintLookUpWina.detach();
+					</attribute>
+					<listcell label="@{chiefComplaint.complainName}"/>
+				</listitem>
+				<listfoot style="background:white;">
+					<listfooter visible="false" id="footerId">
+						<label id="footerLabel" style="color:#FF0000;text-align:center;font-size:14;font-weight:bold;"/>
+					</listfooter>
+				</listfoot>
+			</listbox>
+<zscript><![CDATA[
+	Textbox component=arg.get("chiefComplaintTxt");
+	com.nzion.domain.Provider provider = arg.get("provider");
+	List masterData = new ArrayList();
+	provider = commonCrudService.getById(com.nzion.domain.Provider.class,provider.getId());
+	
+	public void loadMasterData(List list, String msg){
+		masterData.clear();
+		masterData.addAll(list);
+		footerLabel.setValue(msg);
+		footerId.setVisible(com.nzion.util.UtilValidator.isEmpty(masterData));
+		Events.postEvent("onReloadRequest",masterDataDisplayGrid,null);
+	}
+	loadMasterData(providerService.getProviderSpecializedChiefComplaints(provider),"Chief Complaint Not Configured For Doctor Speciality");
+	]]></zscript>
+			
+</window>
+</zk>

@@ -1,0 +1,74 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./letterPreviewPanelWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+<![CDATA[
+com.nzion.domain.emr.ReferalLetterTemplate referalLetterTemplate = rlt;
+Long referalId = referralId; 
+com.nzion.domain.Referral referralObj = (com.nzion.domain.Referral)commonCrudService.getById(com.nzion.domain.Referral.class,referalId);
+com.nzion.domain.Provider provider = (com.nzion.domain.Provider)person;
+com.nzion.domain.emr.soap.PatientSoapNote note =(com.nzion.domain.emr.soap.PatientSoapNote)soapNote;
+com.nzion.domain.Location location = note.getSchedule().getLocation();
+com.nzion.domain.Patient patient = note.getPatient();
+]]>
+</zscript>
+	<div id="letterPreviewPanelWindow" style="background:white">
+		<h:table CELLSPACING="10" width="100%">
+			<h:tr>
+				<h:td>
+				<div align="center">
+				<include src="/soap/soapPrintBanner.zul"/>
+				</div>
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td>
+					<label value="@{referalLetterTemplate.salutation}" />
+					<label value=","/>
+					<name object="@{referralObj}" />
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td>
+					<label value="@{referalLetterTemplate.introductoryNote}"></label>
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td>
+					<label value="Case History" />
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td>
+					<separator orient="horizontal" bar="true" width="100%" />
+				</h:td>
+			</h:tr>
+			<h:tr width="100%">
+				<h:td width="100%">
+					<div>
+						<zscript>
+							desktop.setAttribute("referalLetterTemplate",referalLetterTemplate);
+						</zscript>
+						<include src="/soap/fullSoapNotePreview.zul"/>
+					</div>
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td>
+					<label value="@{referalLetterTemplate.endNote}" />
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td>
+					<label value="@{referalLetterTemplate.complimentaryClose}" />
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td>
+				<include src="/soap/soapPrintFooter.zul"/>
+				</h:td>
+			</h:tr>
+		</h:table>
+	</div>
+</zk>

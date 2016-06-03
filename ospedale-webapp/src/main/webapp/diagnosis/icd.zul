@@ -1,0 +1,36 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./signinWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<window width="100%" apply="${signinController}" id="signinWindow">
+
+<zscript>
+<![CDATA[
+	import com.nzion.zkoss.ext.IcdTreeModel;
+	import com.nzion.domain.emr.IcdElement;
+	
+	IcdTreeModel model = new IcdTreeModel(diagnosisRepository);
+	
+	public void search(String searchString){
+		List icdElements = diagnosisRepository.searchIcd(searchString);
+		searchResult.getChildren().clear();
+		for(int i = 0 ; i < icdElements.size() ; ++i){
+			Tree tree = new Tree();
+			tree.setModel(new IcdTreeModel(icdElements.get(i), diagnosisRepository));
+			tree.setParent(searchResult);
+		}
+	}
+	
+	TreeitemRenderer renderer = new TreeitemRenderer(){
+		public void render(Treeitem treeitem, Object data){
+		}
+	}
+]]>	
+</zscript>
+	Search <textbox value="" id="query"/> <button label="Search" onClick="search(query.getValue());"/>
+	<vbox id="searchResult">
+		<tree model="${model}" />
+	</vbox>
+</window>
+</zk>

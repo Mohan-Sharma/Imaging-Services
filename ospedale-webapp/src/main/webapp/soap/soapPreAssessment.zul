@@ -1,0 +1,152 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./recommendationSectionWin"?>
+<?component name="cptlookup" macro-uri="/utilities/cptlookup.zul" inline="false"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+    <zscript>
+        import com.nzion.domain.emr.soap.FollowUp;
+        import com.nzion.service.common.CommonCrudService;
+        import com.nzion.domain.emr.soap.PreAdmissionSection;
+        import com.nzion.domain.emr.soap.DiagnosisSection;
+        CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+        com.nzion.zkoss.composer.PatientSoapNoteController controller = arg.get("controller");
+        PreAdmissionSection preAdmissionSection = (PreAdmissionSection)
+        controller.getSoapSection(PreAdmissionSection.class);
+        List bedCharacteristicList = commonCrudService.getAll(com.nzion.domain.pfm.BedCharacteristic.class);
+        Set locations = com.nzion.util.Infrastructure.getUserLogin().getPerson().getLocations();
+        List wards = commonCrudService.getAll(com.nzion.domain.pfm.Ward.class);
+        if (preAdmissionSection != null) if (preAdmissionSection.getPreferredLocation() == null) {
+        preAdmissionSection.setPreferredLocation(com.nzion.util.Infrastructure.getSelectedLocation());
+        }
+        List cpts = new ArrayList();
+
+        DiagnosisSection diagnosisSection = (DiagnosisSection) controller.getSoapSection(DiagnosisSection.class, false);
+        if(diagnosisSection == null)
+        return;
+        for (com.nzion.domain.emr.soap.PatientCpt patientCpt : diagnosisSection.getCpts())
+        cpts.add(patientCpt.getCpt());
+        preAdmissionSection.setProcedures(cpts);
+
+    </zscript>
+
+    <window id="recommendationSectionWin" width="100%" height="100%">
+        <panel title="Hospitalization Details" id="admissionReq" visible="true">
+            <panelchildren>
+                <div zclass="container-fluid">
+                    <div zclass="row-fluid">
+                        <div zclass="span3">
+                            <radiogroup id="admissionTypeRadio" sclass="span12" style="margin-left:10px;margin-top:20px"
+                                        selectedItem="@{preAdmissionSection.localAdmission,converter='com.nzion.view.component.RadioGroupBinder'}">
+                                <radio label="External Admission" id="outside" value="false" zclass="radio">
+                                </radio>
+                                <n:br/>
+                                <radio label="Internal Admission" id="inside" value="true" zclass="radio">
+                                </radio>
+                                <attribute name="onCheck">
+                                    hospital.setDisabled(Boolean.valueOf(preAdmissionSection.getLocalAdmission()));
+                                    if(Boolean.valueOf(preAdmissionSection.getLocalAdmission()))
+                                    preAdmissionSection.setHospitalName(null);
+                                </attribute>
+                            </radiogroup>
+                        </div>
+                        <div zclass="span2">
+                            <label value="Admission Date" mold="required"/>
+                            <datebox value="@{preAdmissionSection.exceptedAdmissionDate}" sclass="span12"
+                                     id="admissionDate" readonly="true" constraint="no past,no empty"
+                                     w:showError_="function(mesg){displayError(this,mesg);}"
+                                     w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                        </div>
+                        <div sclass="span2">
+                            <label value="Priority"/>
+                            <combobox selectedItem="@{preAdmissionSection.priority}">
+                                <comboitem label="Normal" value="Normal"/>
+                                <comboitem label="Urgent" value="Urgent"/>
+                            </combobox>
+                        </div>
+                        <div zclass="span2">
+                            <label value="LOS (in Days)" style="width:100px"/>
+                            <intbox value="@{preAdmissionSection.anticipatedLos}" sclass="span12"
+                                    placeholder="Length of Stay"/>
+                        </div>
+                    </div>
+                    <div zclass="row-fluid">
+                        <div zclass="span3">
+                            <label value="Ward" style="width:100px"/>
+                            <combobox id="listWard" model="@{wards}" sclass="span12"
+                                      selectedItem="@{preAdmissionSection.wardType}">
+                                <comboitem self="@{each='wardObj'}" value="@{wardObj}" label="@{wardObj.wardName}">
+                                </comboitem>
+                            </combobox>
+                        </div>
+
+                        <div zclass="span2">
+                            <label value="Hospital Name" style="width:100px"/>
+                            <textbox sclass="span12"
+                                     value="@{preAdmissionSection.hospitalName,load-after='admissionTypeRadio.onCheck'}"
+                                     id="hospital" disabled="true"></textbox>
+                        </div>
+                        <div zclass="span2">
+                            <label value="Location" style="width:100px"/>
+                            <combobox model="@{locations}" sclass="span12"
+                                      selectedItem="@{preAdmissionSection.preferredLocation}" readonly="true">
+                                <comboitem self="@{each='location'}" label="@{location.name}" value="@{location}"/>
+                            </combobox>
+                        </div>
+                    </div>
+
+                    <div zclass="row-fluid">
+                        <div zclass="span3">
+                                        <label value="Any Special Bed (Requirements)"/>
+
+                                        <listbox id="bedCharacteristBox" sclass="span12" checkmark="true"
+                                                 multiple="true"
+                                                 model="@{bedCharacteristicList}"
+                                                 selectedItem="@{preAdmissionSection.bedCharacteristic, converter=com.nzion.view.component.MultipleListitemBindingConverter}"
+                                                 height="99px" width="200px"
+                                                 style="float:left;border:1px solid #86A4BE;background:none;padding-top:6px;padding-bottom:6px">
+                                            <listitem self="@{each=charcteristic}" value="@{charcteristic}"
+                                                      label="@{charcteristic.name}"/>
+                                        </listbox>
+                        </div>
+                        <div zclass="span5">
+                            <label value="Notes" />
+                            <textbox cols="50" rows="4"  sclass="span12"
+                                     value="@{preAdmissionSection.admissionNotes}" />
+                        </div>
+                    </div>
+                </div>
+                <div id="cptSection">
+                    <n:h4>Hospitalization for following Treatment/Surgeries</n:h4>
+                    <listbox id="cptListbox" model="@{preAdmissionSection.procedures}" height="100px" emptyMessage="No Treatment / Surgery mentioned.">
+                        <listhead>
+                            <listheader label="Treatment/Surgeries" width="20%"/>
+                            <listheader label="Description" width="65%"/>
+                            <listheader label="Action" width="15%"/>
+                        </listhead>
+                        <listitem self="@{each='cpt'}" value="@{cpt.description}">
+                            <listcell label="@{cpt.id}"/>
+                            <listcell label="@{cpt.description}" sclass="z-word-wrap"/>
+                            <listcell>
+                                <a class="delBtn">
+                                    <attribute name="onClick">
+                                        List cpts = preAdmissionSection.getProcedures();
+                                        cpts.remove((com.nzion.domain.emr.Cpt) self.getParent().getParent().getValue());
+                                        preAdmissionSection.setProcedures(cpts);
+                                        self.getParent().getParent().detach();
+                                    </attribute>
+                                </a>
+                            </listcell>
+                        </listitem>
+                    </listbox>
+                </div>
+            </panelchildren>
+        </panel>
+        <div sclass="buttonPanel">
+            <button label="Save" zclass="btn-success btn" id="saveButton" disabled="${controller.readonly}">
+                <attribute name="onClick">
+                    admissionDate.getValue();
+                    controller.saveSoapSection();
+                </attribute>
+            </button>
+        </div>
+    </window>
+</zk>

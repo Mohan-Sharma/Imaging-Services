@@ -1,0 +1,92 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientDrugWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+			import com.nzion.util.*;
+			
+	        com.nzion.zkoss.ext.EntityDropdownRenderer dropdownRenderer = com.nzion.zkoss.ext.EntityDropdownRenderer.DEFAULT_INSTANCE; 
+	    	Collection patientRxs=arg.get("patientRxs");
+	    	com.nzion.zkoss.composer.PatientSoapNoteController controller = arg.get("controller");
+	    	com.nzion.domain.emr.soap.PatientRx patientRx = new com.nzion.domain.emr.soap.PatientRx();
+	    	com.nzion.domain.drug.Drug selectedDrug;
+	    	List directions=commonCrudService.getAll(com.nzion.domain.drug.DrugDirection.class);
+	]]></zscript>
+	<window id="patientDrugWin" style="border: 5px solid #2d2d2d" mode="modal" width="60%">
+		<div sclass="panelTop">
+			<button  label="Add" id="Save">
+			<attribute name="onClick">
+			com.nzion.domain.drug.Drug drug =drug.getResult();
+			if(drug!=null)
+			patientRx.setDrugGroupId(Long.parseLong(drug.getDrugGroup().getCpnum()));
+			patientRxs.add(patientRx);
+			patientDrugWin.detach();
+			</attribute>
+			</button>
+			<button  label="Cancel" forward="onClick=onCancel"/>
+		</div>
+		<panel>
+			<panelchildren>
+				<div sclass="panelCont">
+					<div>
+						<label value="Drug" />
+						<suggest  id="drug" value="@{patientRx.drug}"	entity="com.nzion.domain.drug.Drug" 
+									searchcolumns="tradeName" displaycolumns="tradeName" requiredcolumn="tradeName" constraint="no empty">
+						 <attribute name="onLookedUp">
+						 	selectedDrug = commonCrudService.getById(com.nzion.domain.drug.Drug.class,drug.getResult().getId());
+				    		patientRx.populateDrugAttributes(personService.getPersonDrugsByPersonAndDrug(controller.getProvider(),drug.getResult()));
+				    		drugAttributesDiv.setVisible(true);
+						 </attribute>
+						</suggest>			
+					</div>
+					<div visible="false" id="drugAttributesDiv">
+						<hbox>
+						<div>
+							<label value="Route" id="routeLabel" />
+							<combobox id="route"  model="@{selectedDrug.routes,load-after='drug.onLookedUp'}" 
+							itemRenderer="${dropdownRenderer}" value="@{patientRx.route,load-after='drug.onLookedUp'}" />
+						</div>
+						<div>
+							<label value="Dose" id="doseLabel" />
+							<combobox id="dosage" model="@{selectedDrug.strengths,load-after='drug.onLookedUp'}"  
+							itemRenderer="${dropdownRenderer}" value="@{patientRx.dosage, load-after='drug.onLookedUp'}"/>
+						</div>
+						<div>
+							<label value="Direction" id="directionLabel"/>
+							<combobox id="direction" model="@{directions,load-after='drug.onLookedUp'}"
+							itemRenderer="${dropdownRenderer}" value="@{patientRx.drugDirection,load-after='drug.onLookedUp'}"/>
+						</div>		
+						</hbox>				
+					</div>
+				</div>
+			</panelchildren>
+	</panel>
+	<panel>
+		<panelchildren>	
+			<div sclass="panelCont">
+				<div>
+					<label value="Start Date" />
+					<datebox value="@{patientRx.startDate}"/>
+				</div>
+				<div>
+					<label value="End Date" />
+					<datebox value="@{patientRx.endDate}"/>
+				</div>
+				<div>
+					<label value="Interval" />
+					<hbox>
+					<textbox value="@{patientRx.drugInterval,save-when='Save.onClick'}" id="intervalTxt"/>
+					<button  label="Add" popup="msg"/>
+					</hbox>
+				</div>
+			</div>
+		</panelchildren>
+	</panel>
+	<popup id="msg">
+				<timebox id="timeBoxInterval" format="hh:mm a" 
+				onCreate='self.setValue(UtilDateTime.timeOnly());Events.postEvent("onChange", self, null);'/>
+				<button  label="Add" id="addClicked" 
+				onClick='intervalTxt.setValue(UtilDisplay.appendStrings(intervalTxt.getValue(),",",UtilDateTime.format(timeBoxInterval.getValue(), UtilDateTime.AM_PM_FORMATTER)));'/>
+		</popup>
+</window>
+</zk>

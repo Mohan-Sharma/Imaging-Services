@@ -1,0 +1,109 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addSoapModuleWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript><![CDATA[
+	import com.nzion.enums.*;
+	import com.nzion.view.RolesValueObject;
+
+	SoapModuleType[] soapModuleTypes = SoapModuleType.values();
+	List soapComponents = commonCrudService.getAll(com.nzion.domain.SoapComponentAuthorization.class);
+	com.nzion.domain.emr.SoapModule soapModule = arg.get("entity");
+	if (soapModule == null){
+		soapModule = new com.nzion.domain.emr.SoapModule();
+		soapModule.setSoapComponentAuthorization((com.nzion.domain.SoapComponentAuthorization)soapComponents.get(0));
+	}
+	RolesValueObject valueObject=new RolesValueObject(new com.nzion.domain.Authorization(soapModule.effectiveAuthorization()));
+	]]></zscript>
+	<window  id="addSoapModuleWin" mode="modal" width="60%"
+		 closable="true" height="75%" position="center,top">
+		<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Add/Edit Encounter Module</h:small>
+                  <button type="button" zclass="close" onClick="addSoapModuleWin.detach();">×</button>
+            </h:h1>
+         </div>
+         <div class="container-fluid">
+		       <div zclass="row-fluid">
+                 <div zclass="span4">
+						<label value="Module Name"/>
+						<label value="*" zclass="labelReq"/>
+						<textbox value="@{soapModule.moduleName, save-when='AddSoapModule.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty:Module Name Required" />
+					</div>
+					  <div zclass="span4">
+						<label value="Module Description"/>
+						<textbox sclass="span12" value="@{soapModule.moduleDescription, save-when='AddSoapModule.onClick'}"  />	
+					</div>
+					 <div zclass="span4">
+						<label value="Module Short Name"/>
+						<label value="*" zclass="labelReq"/>
+						<textbox value="@{soapModule.moduleShortName, save-when='AddSoapModule.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"  constraint="no empty"/>
+					</div>
+					</div>
+					 <div zclass="row-fluid">
+					  <!-- <div zclass="span3">
+						<label value="Type"/>
+						<label value=" *" zclass="labelReq"/>
+						<combobox id="soapModuleTypeCombo" model="@{soapModuleTypes}"  
+							itemRenderer="${enumDropdownRenderer}" readonly="true"
+							selectedItem="@{soapModule.soapModuleType, save-when='AddSoapModule.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"/>
+					</div> -->
+					  <div zclass="span3">
+						<label value="Encounter"/>
+						<label value=" *" zclass="labelReq"/>
+						<combobox id="soapComponentsCombo" readonly="true" model="@{soapComponents}" itemRenderer="${enumDropdownRenderer}" 
+							selectedItem="@{soapModule.soapComponentAuthorization, save-when='AddSoapModule.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"/>
+					</div>	
+					</div>
+					</div>
+					 
+	<panel title="Select Roles">
+		<panelchildren>			
+			<grid>
+				<rows>
+					<row>
+						<checkbox label=" Doctor" checked="@{valueObject.provider}" disabled="true"/>
+					</row>
+					<row>
+						<checkbox label=" Medical Assistant" checked="@{valueObject.medicalAssistant}"/>
+					</row>
+					<row>
+						<checkbox label=" Nurse" checked="@{valueObject.nurse}"/>
+					</row>
+					<row>
+						<checkbox label=" Technician" checked="@{valueObject.technician}"/>
+					</row>
+					<row>
+						<checkbox label=" Patient" checked="@{valueObject.patient}"/>
+					</row>
+				</rows>
+			</grid>
+		</panelchildren>
+	</panel>
+		<div sclass="panelFoot" />
+		<separator/>
+	
+			<div sclass="panelFoot">					
+			<button label="Save" id="AddSoapModule" zclass="btn-success btn">
+				<attribute name="onClick">
+				<![CDATA[
+						try{
+							if(valueObject.dirty)
+								soapModule.setAuthorization(valueObject.authorization);
+							commonCrudService.save(soapModule);
+							com.nzion.util.UtilMessagesAndPopups.showSuccess();
+							addSoapModuleWin.detach();
+						}catch(org.springframework.dao.DataIntegrityViolationException e){
+							if(e.getCause()!=null && e.getCause() instanceof org.hibernate.exception.ConstraintViolationException){
+							int code = org.hibernate.exception.JDBCExceptionHelper.extractErrorCode(((org.hibernate.exception.ConstraintViolationException)(e.getCause())).getSQLException());
+								if(1062==code){
+									com.nzion.util.UtilMessagesAndPopups.showError("SOAP Module '"+soapModule.getModuleName()+"' already exists.");
+								}
+							}
+						}
+				]]>
+				</attribute>
+			</button>
+			<button label="Cancel" forward="onClick=onCancel"></button>
+		</div>
+	</window>
+</zk>

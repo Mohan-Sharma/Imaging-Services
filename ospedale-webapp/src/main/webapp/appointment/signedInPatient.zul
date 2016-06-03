@@ -1,0 +1,61 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./signedInPatientWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+<![CDATA[
+         Datebox date = arg.get("datebox");
+         com.nzion.zkoss.composer.appointment.SigninController signinController = arg.get("signinController");
+         Panel signinWindow = arg.get("signinWindow");
+	]]>
+</zscript>
+<window id="signedInPatientWindow">
+<listbox id="signedinListbox" oddRowSclass="whiteBackground"
+			model="@{signinController.statusWiseSchedules.SIGNEDIN, load-after='date.onChange, self.onReloadRequest'}" rows="5">
+			<listhead>
+				<listheader label="MRN" style="font-weight:bold" width="130px"/>
+				<listheader label="Patient Name" style="font-weight:bold" />
+				<listheader label="To Meet" style="font-weight:bold" />
+				<listheader label="Room" style="font-weight:bold" />
+				<listheader label="Attended By" style="font-weight:bold" />
+				<listheader label="Status" style="font-weight:bold" />
+				<listheader label="Report" style="font-weight:bold" />
+			</listhead>
+			<listitem self="@{each='schedule'}" value="@{schedule}">
+				<attribute name="onDoubleClick">
+					Executions.createComponents("/soap/soapnote.zul", signinWindow.getParent(), UtilMisc.toMap("entity", self.getValue()));
+					signinWindow.detach();
+				</attribute>
+				<listcell>
+					<label value="@{schedule.patient.accountNumber}" />
+				</listcell>
+				<listcell>
+					<name object="@{schedule.patient}" />
+				</listcell>
+				<listcell>
+					<name object="@{schedule.provider}" />
+				</listcell>
+				<listcell>
+					<name object="@{schedule.lastPatientVisit.room, load-after='self.onReloadRequest'}" />
+				</listcell>
+				<listcell>
+					<name object="@{schedule.lastPatientVisit.metWith, load-after='self.onReloadRequest'}" />
+				</listcell>
+				<listcell>
+					<button label="Change">
+						<attribute name="onClick">
+							Map args = UtilMisc.toMap("scheduleInToReceiveANewTrack", self.getParent().getParent().getValue(),
+									"signinController", signinController);
+							Executions.createComponents("/appointment/add-edit-patient-visit.zul", signinWindow, args);
+						</attribute>
+					</button>
+				</listcell>
+				<listcell>
+					<button label="Report"
+						onClick='Executions.createComponents("/appointment/patient-visits-per-schedule.zul", signinWindow, UtilMisc.toMap("schedule", self.getParent().getParent().getValue()));' />
+				</listcell>
+			</listitem>
+		</listbox>
+</window>
+</zk>

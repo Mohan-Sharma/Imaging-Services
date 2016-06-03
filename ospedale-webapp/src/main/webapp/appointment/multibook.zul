@@ -1,0 +1,101 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./multiBookModalWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+
+<window mode="modal" id="multiBookModalWindow" width="600px" closable="true" title="Multi Book">
+	<zscript>
+		Map data = Executions.getCurrent().getArg();
+		com.nzion.domain.Schedule schedule = data.get("schedule");	
+		com.nzion.zkoss.composer.appointment.ScheduleController controller = data.get("scheduleController");
+		com.nzion.view.MultiBookValueObject multiBookValueObject = new com.nzion.view.MultiBookValueObject(schedule);
+		controller.setMultiBookValueObject(multiBookValueObject);
+		com.nzion.service.impl.ScheduleScanner scanner;
+		Window parentWindow = data.get("parentWindow");
+		
+		public void checkThruDate(){
+			if(thruDate.getValue() == null)
+				throw new WrongValueException(thruDate, "Can not be empty");
+			if(thruDate.getValue().before(new Date()))
+				throw new WrongValueException(thruDate, "Thru date should be after today.");
+		}
+	</zscript>
+	<div class="panelTop" width="margin:-1px">
+		<button label="Scan for conflicts" id="scanBtn">
+			<attribute name="onClick">
+				checkThruDate();
+				scanner = controller.scan();
+			</attribute>
+		</button>
+		<button label="Skip conflicts and book">
+			<attribute name="onClick">
+				checkThruDate();
+				controller.saveMultiBookRequest(scanner);
+				multiBookModalWindow.detach();
+				parentWindow.detach();
+			</attribute>		
+		</button>
+	</div>
+	<panel>
+		<panelchildren>
+			<div sclass="panelCont">
+				<div>
+					<label value="Start Date" />
+					<datebox value="${schedule.startDate}" disabled="true" buttonVisible="false" readonly="true"	style="background: transparent;"/>
+				</div>
+				<div>
+					<label value="Time" />
+					<timebox readonly="true" disabled="true" value="${schedule.startTime}" buttonVisible="false" format="hh:mm a" style="background: transparent;"/>
+				</div><!--
+				<div>
+					<vbox>
+						<label value="Length" />
+						<label value="${schedule.length}" />
+					</vbox>
+				</div>
+				--><div>
+					<label value="Date Thru" />
+					<datebox value="@{multiBookValueObject.thruDate}" id="thruDate"/>
+				</div>
+				<div>
+					<label value="Physician" />
+					<name object="${schedule.person}" />
+				</div>
+				<div>
+					<label value="Patient" />
+					<name object="${schedule.patient}"/>
+				</div>
+			</div>
+			<space height="5px;"/>
+			<groupbox width="80%" style="margin: 10px;">
+				<caption label="Select Days" />
+				<space height="5px"/>
+				<hbox>
+					<checkbox checked="@{multiBookValueObject.weekdays.monday}" label="Mon"/>	
+					<checkbox checked="@{multiBookValueObject.weekdays.tuesday}" label="Tue"/>	
+					<checkbox checked="@{multiBookValueObject.weekdays.wednesday}" label="Wed"/>	
+					<checkbox checked="@{multiBookValueObject.weekdays.thursday}" label="Thu"/>	
+					<checkbox checked="@{multiBookValueObject.weekdays.friday}" label="Fri"/>	
+					<checkbox checked="@{multiBookValueObject.weekdays.saturday}" label="Sat"/>	
+					<checkbox checked="@{multiBookValueObject.weekdays.sunday}" label="Sun"/>	
+				</hbox>			
+				<space height="5px"/>
+			</groupbox>
+		</panelchildren>
+	</panel>
+	<space height="5px;"/>
+	<panel title="Scan Result">
+		<panelchildren>
+			<listbox model="@{scanner.conflicts, load-after='scanBtn.onClick'}">
+				<listhead>
+					<listheader label="Date" />
+					<listheader label="Result" />
+				</listhead>	
+				<listitem self="@{each='scanResult'}" >
+					<listcell><label value="@{scanResult.on, converter='com.nzion.view.component.DateConverter'}" /></listcell>
+					<listcell><label value="@{scanResult.nonAvailabilityReason}"/> </listcell>
+				</listitem>
+			</listbox>
+		</panelchildren>
+	</panel>
+</window>
+</zk>

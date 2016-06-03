@@ -1,0 +1,29 @@
+<?page contentType="text/html;charset=UTF-8"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./hpiPreview"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+	import com.nzion.zkoss.composer.SoapSentenceComposer;
+	import com.nzion.domain.emr.soap.ChiefComplainSection;
+	com.nzion.domain.emr.SoapModule hpi = commonCrudRepository.findUniqueByEquality(com.nzion.domain.emr.SoapModule.class, new String[]{"moduleName"}, new Object[]{"HPI"});
+	SoapSentenceComposer sentenceComposer = (SoapSentenceComposer) arg.get("controller");
+	sentenceComposer.getSoapNoteController().setSelectedModule(hpi);
+	ChiefComplainSection section = (ChiefComplainSection) sentenceComposer.getSoapNoteController().getSoapSection(ChiefComplainSection.class);
+	sentenceComposer.setSelectedSection(section);
+	boolean editable=(arg.get("editable")!=null);
+	List sentences = new ArrayList();
+	for(com.nzion.domain.emr.soap.PatientChiefComplaint patientChiefComplaint : section.getPatientChiefComplaints())
+	sentences.add(patientChiefComplaint.getSentence());
+	sentenceComposer.setEventMessage("HPI"+"\t updated");
+</zscript>
+	<window style="margin-left:10px" id="hpiPreview">
+		<n:h2>History of Present Illness</n:h2>
+		<n:br />
+		<div style="overflow:hidden;">
+			<label value="${each}" forEach="${sentences}"/>
+		</div>
+	</window>
+</zk>

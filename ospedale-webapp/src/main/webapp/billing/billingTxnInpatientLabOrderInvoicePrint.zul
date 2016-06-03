@@ -1,0 +1,260 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./txnItemPrintWindow"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:h="http://www.w3.org/1999/xhtml">
+    <zscript><![CDATA[
+		import com.nzion.domain.billing.InvoiceType;
+        com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+        com.nzion.service.billing.BillingService billingService = com.nzion.util.Infrastructure.getSpringBean("billingService");
+        String invId = param.get("invoiceId")[0];
+        com.nzion.zkoss.composer.BillingController billingController  = new com.nzion.zkoss.composer.BillingController();
+        com.nzion.domain.inpatient.PatientAdmission patientAdmission;
+        com.nzion.domain.billing.Invoice invoice;
+        if(com.nzion.util.UtilValidator.isNotEmpty(invId)){
+            invoice = billingController.getInvoice();
+            patientAdmission = invoice.getPatientAdmission();
+        }
+        else{
+            patientAdmission= commonCrudService.getById(com.nzion.domain.inpatient.PatientAdmission.class, new Long(param.get("paId")[0]));
+            Map invoiceAndItemsToUpd = billingService.viewInvoiceFor(patientAdmission);
+            invoice = invoiceAndItemsToUpd.get("INVOICE");
+            billingController.extractInvoiceToDisplay(invoice);
+        }
+        
+        java.text.SimpleDateFormat format = new java.text.SimpleDateFormat(com.nzion.util.UtilDateTime.DATE_FORMAT);
+        String admittedDate = com.nzion.util.UtilDateTime.format(patientAdmission.getAdmittedDate());
+        String dischargedDate = com.nzion.util.UtilDateTime.format(patientAdmission.getDischargedate());
+        
+        Date date=new Date();
+        List invoicePayments;
+        if(invoice.getInvoicePayments() != null)
+            invoicePayments = new ArrayList(invoice.getInvoicePayments());
+            String paymentMode = "Payment Mode : ";
+        if(com.nzion.util.UtilValidator.isNotEmpty(invoicePayments)){
+            paymentMode += invoicePayments.size() > 1? "Multiple" : invoicePayments.get(0).getPaymentMethod().getDescription();
+        }
+        com.nzion.domain.emr.UnitOfMeasurement billingCurrency = billingService.getConfiguredCurrency();
+        List decdutibleItems  = billingController.getInvoiceDeductibleItemMap().get(InvoiceType.DEDUCTIBLE.name());
+        List adavanceItems = billingController.getInvoicePrevAdvanceItemMap().get(InvoiceType.IPD_ADVANCE.name());
+        Boolean deductiblesAvailable = com.nzion.util.UtilValidator.isNotEmpty(decdutibleItems);
+        Boolean advanceAvailable = com.nzion.util.UtilValidator.isNotEmpty(billingController.getInvoicePrevAdvanceItemMap().get(InvoiceType.IPD_ADVANCE.name()));
+        boolean isWrittenOff = billingController.getInvoice().getInvoiceStatus().equals(com.nzion.domain.billing.InvoiceStatusItem.WRITEOFF.toString());
+        billingController.getInvoiceItemMap();
+        com.nzion.domain.Practice practice = com.nzion.util.Infrastructure.getPractice();
+        com.nzion.view.component.InpatientInvoiceItemTypeConverter inpatientInvoiceItemTypeConverter = new com.nzion.view.component.InpatientInvoiceItemTypeConverter();
+        java.math.BigDecimal totalAmount = new java.math.BigDecimal(0);
+        com.nzion.util.CurrencyConverter currencyConverter = new com.nzion.util.CurrencyConverter();
+        String currencyInWords = "";
+    ]]></zscript>
+    <style>
+        .notePreview{ bottom: -10px; position: relative; }
+        .summaryHeader{ background-color: #ECECEC; border: 1px solid #A2A2A2; border-radius: 3px 3px 3px 3px; margin-top:10px; padding: 8px; }
+        .footerClass{ font-family: arial,sans-serif; font-size: 11px; font-weigh t: normal; text-align: right; }
+        .mid, .pgTtl {padding: 0 98px; }
+        .rCont { top: -10px; width: 97%; z-index: 1; }
+        .total{ margin-right:19% }
+        .personDet{
+            border: 1px solid #333;
+            align:center;
+            margin : 2px 0px 0px 0px;
+        }
+        .invoiceTable{
+            border: 1px solid #333;
+            align:center;
+        }
+        .invoiceTable th{
+            text-align:left;
+            font-size: 13px;
+            font-weight:bold;
+            border: 1px solid #333;
+            border-collapse:collapsed;
+            padding-left:5px;
+            color:#333;
+            padding:5px;
+        }
+        .invoiceTable td{
+            text-align:left;
+            font-size: 12px;
+            font-weight:bold;
+            border-right: 1px solid #333;
+            border-left: 1px solid #333;
+            border-collapse:collapsed;
+            padding:0px 2px 4px 5px;
+        }
+        .personDet td{
+            padding:2px;
+        }
+    </style>
+    <window id="txnItemPrintWindow" apply="${billingController}" self="@{define(content)}">
+        <attribute name="onCreate">
+            Clients.print();
+        </attribute>
+        <div sclass="wrapper">
+            <div>
+                <n:div id="CCTop" height="100%" style="width:710px;margin:auto">
+                    <n:div class="clr patDetCont" style="margin-top:10px;">
+                        <div align="center">
+                            <n:table>
+                                <n:tr>
+                                    <h:td align="center"><n:strong style="font-size:24px;text-decoration:underline">InPatient Lab Order Invoice</n:strong></h:td>
+                                </n:tr>
+                            </n:table>
+                        </div>
+                    </n:div>
+                    <n:div class="clr" style="width:95%;horizontal-align:center;margin:20px 0px 0px 30px">
+                        <n:table class="personDet" style="align:center;width:94%">
+                            <n:tr>
+                                <n:td>
+                                    <div class="z-hlayout" style="width:100%;">
+                                        <div style="width:50%" class="z-hlayout-inner">
+                                            <div>
+                                                <label value="Patient Name : " style="font-size:12px;font-weight:bold;padding-left: 10px;" />
+                                                <name object="@{invoice.patient}" style="font-size:14px;font-weight:normal;" />
+                                            </div>
+                                        </div>
+                                        <div style="width:50%" class="z-hlayout-inner">
+                                            <div>
+                                                <label value="Age/Sex : " style="font-size:12px;font-weight:bold;" />
+                                                <label value="@{invoice.patient.age}" style="font-size:14px;font-weight:normal;" />
+                                                <label value="/" style="font-size:14px;font-weight:normal;" />
+                                                <label value="@{invoice.patient.gender.description}" style="font-size:14px;font-weight:normal;" />
+                                            </div>
+                                        </div>
+                                        </div>
+                                </n:td>
+                            </n:tr>
+                            <n:tr>
+                                <n:td>
+                                    <div class="z-hlayout" style="width:100%;">
+                                        <div style="width:25%" class="z-hlayout-inner">
+                                            <div if="${patientAdmission != null}">
+                                                <label value="IP Number : " style="font-size:12px;font-weight:bold;padding-left: 10px;" />
+                                                <label value="@{patientAdmission.accountNumber}" style="font-size:14px;font-weight:normal;" />
+                                            </div>
+                                        </div>
+                                        <div style="width:25%" class="z-hlayout-inner">
+                                            <div>
+                                                <label value="Bill Number : " style="font-size:12px;font-weight:bold;" />
+                                                <label value="@{invoice.invoiceNumber}" style="font-size:14px;font-weight:normal;" />
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="width:25%" class="z-hlayout-inner">
+                                            <div>
+                                                <label value="DOA : " style="font-size:12px;font-weight:bold;" />
+                                                <label value="@{admittedDate}" style="font-size:14px;font-weight:normal;" />
+                                            </div>
+                                        </div>
+                                        
+                                        
+                                        <div style="width:25%" class="z-hlayout-inner">
+                                            <div>
+                                                <label value="DOD : " style="font-size:12px;font-weight:bold;" />
+                                                <label value="@{dischargedDate}" style="font-size:14px;font-weight:normal;" />
+                                            </div>
+                                        </div>
+                                        
+                                        
+                                    </div>
+                                </n:td>
+                            </n:tr>
+                        </n:table>
+                    </n:div>
+                    <n:div class="clr" style="width:100%;horizontal-align:center;margin-top:3px">
+                        <n:table style="align:center;width:99%">
+                            <n:tr>
+                                <n:td>
+                                  <listbox oddRowSclass="false" model="@{billingController.labInvoiceItemList}" zclass="none">
+                                    <listitem self="@{each='invoiceItem'}" value="@{invoiceItem}">
+                                      <listcell> 
+                                       <label value="@{invoiceItem.description}" style="font-size:14px;margin-left:30px;"/>
+                                      </listcell>
+                                      <listcell>
+                                         <hlayout spacing="3px" style="text-align: right;">
+                                           <label value="@{invoiceItem.factor}" style="font-size:14px"  >
+                                              <attribute name="onCreate">
+                                                 String factor=self.getValue();
+                                                 java.text.DecimalFormat df = new java.text.DecimalFormat("#.##");
+                                                 if(com.nzion.util.UtilValidator.isNotEmpty(factor)){
+                                                 Double doubleFactor=Double.parseDouble(factor);
+                                                 String newFactor=df.format(doubleFactor);
+                                                 self.setValue(newFactor);
+                                                   }
+                                               </attribute>
+                                           </label>
+                                           <label value="x" style="font-weight:bold;font-size:14px;margin-left:5px;margin-right:5px;"/>
+                                          </hlayout>
+                                                            </listcell>
+                                                            <listcell>
+                                                                <hlayout spacing="3px">
+                                                                    <label value="@{invoiceItem.quantity}" style="font-size:14px">
+                                                                    <attribute name="onCreate">
+                                                                   String quantity=self.getValue();
+                                                                   java.text.DecimalFormat df = new java.text.DecimalFormat("#.##");
+                                                                   if(com.nzion.util.UtilValidator.isNotEmpty(quantity)){
+                                                                   Double doubleQuantity=Double.parseDouble(quantity);
+                                                                   String n=df.format(doubleQuantity);
+                                                                   self.setValue(n);
+                                                                   }
+                                                                    </attribute>
+                                                                    </label>
+                                                                </hlayout>
+                                                            </listcell>
+                                                            <listcell>
+                                                                <hlayout spacing="3px" style="text-align: right;padding-right:50px;">
+                                                                    <label value="@{invoiceItem.price}" style="font-size:14px" >
+                                                                     <attribute name="onCreate">
+                                                                   String price=self.getValue();
+                                                                   java.text.DecimalFormat df = new java.text.DecimalFormat("#.00");
+                                                                   if(com.nzion.util.UtilValidator.isNotEmpty(price)){
+                                                                   Double doubleQuantity=Double.parseDouble(price);
+                                                                   String n=df.format(doubleQuantity);
+                                                                   self.setValue(n);
+                                                                   }
+                                                                    </attribute>
+                                                                    </label>
+                                                                    
+                                                                    
+                                                                </hlayout>
+                                                            </listcell>
+                                                        </listitem>
+                                                    </listbox>
+						</n:td>
+                         </n:tr>
+                            
+                        </n:table>
+                    </n:div>
+                    <hlayout spacing="10px" width="96%" style="margin:3px 3px 3px 3px;text-align: right;">
+                        <div style="padding: 6px 6px 30px 6px;">
+                            <label value="Total :" style="font-weight:bold;" />
+                            <label id="overAllAmt" value="@{billingController.labItemTotalAmount,load-after='self.onReload'}" style="font-size:14px;font-weight:bold;border-top:1px dashed #333;border-bottom:1px dashed #333;padding: 5px 0px 5px 2px;">
+                                <attribute name="onCreate">
+                                    <![CDATA[
+                                       
+                                        String str = self.getValue().toString();
+                                        String finalstr = str.replace(" INR","");
+                                        totalAmount = new java.math.BigDecimal(finalstr);
+                                        currencyInWords = currencyConverter.rupeesInWords(totalAmount.toString(), null, null);
+                                    ]]>
+                                </attribute>
+                                </label>
+                                <label value="@{invoiceItem.price.currency.code}"></label>
+                        </div>
+                    </hlayout>
+                    <hlayout spacing="10px" width="90%" style="margin:3px 0px 3px 0px;padding-left:40px;">
+                        <div>
+                            <label value="IN WORDS" style="font-weight:bold;font-size:20px;font-family:'Times New Roman',Georgia,Serif;text-decoration:underline" />
+                            <label value=" :" style="font-weight:bold;font-size:20px;font-family:'Times New Roman',Georgia,Serif;" />
+                            <label id="overAllAmtInWords" value="@{currencyInWords,load-after='overAllAmt.onCreate'}" style="font-size:20px;font-family:'Times New Roman',Georgia,Serif;" />
+                        </div>
+                    </hlayout>
+                    <hlayout spacing="10px" width="96%" style="text-align:right;margin-top:120px;">
+                        <div style="margin-bottom:5px;">
+                            <label value="Seal &amp; Signature" style="font-size:20px;font-family:'Times New Roman',Georgia,Serif;padding-right:20px;" />
+                        </div>
+                    </hlayout>
+                </n:div>
+            </div>
+        </div>
+    </window>
+</zk>

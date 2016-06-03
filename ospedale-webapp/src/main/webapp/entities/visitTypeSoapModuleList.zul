@@ -1,0 +1,14 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<style>.soapBox{ display:block; height:16px; margin:0 0 0 10px; text-align:center; width:69px; }</style>
+	<window>
+	<zscript><![CDATA[
+setPageTitle("Visit Type SOAP Modules", "");
+
+]]></zscript>
+		<screen width="100%" pagetitle="Visit Type and SOAP Module Configuration" listtitle="List of Visit Type and SOAP Module Configurations"
+		addpage="addEditVisitTypeSoapModules" hidedeletebtn="true"
+		entityclass="com.nzion.domain.emr.VisitTypeSoapModule" labels="Visit Type,Provider" fields="slotType,provider.firstName"  
+		addmodepopup="true"/>
+	</window>
+</zk>

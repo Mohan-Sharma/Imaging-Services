@@ -1,0 +1,142 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./accountInfoWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript><![CDATA[
+    import com.nzion.domain.Roles;
+	com.nzion.domain.Person up = com.nzion.util.Infrastructure.getUserLogin().getPerson();
+	com.nzion.domain.Person person = commonCrudService.getById(com.nzion.domain.Person.class,up.getId());
+	com.nzion.zkoss.composer.emr.StateRenderer stateRenderer = new com.nzion.zkoss.composer.emr.StateRenderer();
+	boolean provider = Roles.hasRole(Roles.PROVIDER);
+	]]></zscript>
+	
+<window id="accountInfoWin">
+	<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Person Details</h:small>
+                  <button type="button" zclass="close" onClick="accountInfoWin.detach();">×</button>
+            </h:h1>
+         </div>
+         <div class="container-fluid">
+		       <div zclass="row-fluid">
+					<div zclass="span2">
+						<label value="First Name"  mold="required"/>
+						<textbox value="@{person.firstName,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" maxlength="50" onChange="com.nzion.util.UtilDisplay.validateOnlyAlphaNumericAndWhiteSpaces(self)" />
+					</div>
+					<div zclass="span2">
+						<label value="Last Name" mold="required"/>					
+						<textbox value="@{person.lastName,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" maxlength="50" onChange="com.nzion.util.UtilDisplay.validateOnlyAlphaNumericAndWhiteSpaces(self)" />
+					</div>
+					<div zclass="span2" if="${provider}">
+						<label value="Regd No" />					
+						<textbox value="@{person.regdNo,save-when='Save.onClick'}" sclass="span12" maxlength="50" />
+						<!-- <textbox value="@{person.regdNo,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" maxlength="50" onChange="com.nzion.util.UtilDisplay.validateOnlyAlphaNumericAndWhiteSpaces(self)" /> -->
+					</div>
+					<div zclass="span2">
+						<label value="DOB" />
+						<datebox value="@{person.dateOfBirth,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no future" />
+					</div>
+					</div>
+					<div zclass="row-fluid">
+						<div zclass="span2">
+						<label value="Gender"/>
+						<enumeration enumType="GENDER" selectedItem="@{person.gender}" sclass="span12"  id="gender" />
+					</div>
+						<div zclass="span2">
+						 <label value="Marital Status" />
+						 <enumeration id="maritalstatusenum" enumType="MARITAL_STATUS" sclass="span12"
+							selectedItem="@{person.maritalStatus,save-when='Save.onClick'}" />
+					</div>
+					<div zclass="span2">
+					<vbox>
+						<h:div align="center" style="margin:4px">
+						<image id="frontComponent" width="150px" height="120px" hover="@{person,converter='com.nzion.view.component.GenderImageConverter'}"/>
+						<button label="Upload Picture" upload="true" >
+							<attribute name="onUpload">
+							org.zkoss.util.media.Media media = event.getMedia();
+							if (media instanceof org.zkoss.image.Image) {
+								org.zkoss.zul.Image image = new org.zkoss.zul.Image();
+								image.setContent((org.zkoss.image.Image) media);
+								frontComponent.setContent((org.zkoss.image.Image) media);
+								com.nzion.domain.DataResource fsrc = new com.nzion.domain.DataResource();
+								fsrc.setResource(org.hibernate.Hibernate.createBlob(media.getByteData()));
+								person.setProfilePicture(fsrc);
+							} else {
+								Messagebox.show("Not an image: " + media, "Error", Messagebox.OK, Messagebox.ERROR);
+								return;
+							}
+							</attribute>
+						</button>
+						</h:div>
+					</vbox>
+				</div>
+				</div>
+				<div zclass="row-fluid">
+						<div zclass="span2">
+						<label value="Email" mold="required"/>						
+						<email value="@{person.contacts.email,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"/>
+					</div>
+						<div zclass="span2">
+						<label value="Home phone" />
+						<phonebox value="@{person.contacts.homePhone,save-when='Save.onClick'}" sclass="span12" />
+					</div>
+						<div zclass="span2">
+						<label value="Office phone" />
+						<phonebox value="@{person.contacts.officePhone,save-when='Save.onClick'}" sclass="span12"  />
+					</div>
+					</div>
+					<div zclass="row-fluid">
+						
+						<div zclass="span2">
+						<label value="Mobile phone" />
+						<phonebox value="@{person.contacts.mobileNumber,save-when='Save.onClick'}" sclass="span12"  />
+					</div>
+						<div zclass="span2">
+						<label value="Fax number" />
+						<phonebox value="@{person.contacts.faxNumber,save-when='Save.onClick'}" sclass="span12" />
+					</div>
+					</div>
+					<div zclass="row-fluid">
+						<div zclass="span3">					
+						<label value="Address1" id="lbladdress1" mold="required"/>
+					   <textbox rows="2" cols="50" value="@{person.contacts.postalAddress.address1,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"
+						id="address1" maxlength="50"/>
+					</div>
+						<div zclass="span3">
+						<label value="Address2" id="lbladdress2" />
+						<textbox rows="2" cols="50"
+							value="@{person.contacts.postalAddress.address2,save-when='Save.onClick'}" sclass="span12"  id="address2"
+							maxlength="50" />
+					</div>
+					</div>
+					<div zclass="row-fluid">
+						<div zclass="span2">
+					<label value="City" id="lblcity" mold="required"/>
+						<textbox cols="22" value="@{person.contacts.postalAddress.city,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+							id="city" maxlength="50" onBlur="com.nzion.util.UtilDisplay.validateNonDigits(self)" constraint="no empty"/>
+					</div>
+					
+						<div zclass="span2">
+						<label value="State" id="lblstate"  mold="required"/>
+						<enumeration id="state" enumType="STATE" itemRenderer="${stateRenderer}"
+														 value="@{person.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick'}"
+														 sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+														 constraint="no empty"/>
+						<!-- <textbox value="@{person.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick'}"
+							id="state" cols="22" maxlength="2" constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+							onBlur="com.nzion.util.UtilDisplay.validateNonDigits(self);self.setValue(self.getValue().toUpperCase());"/> -->
+					</div>
+						<div zclass="span2">
+						<label value="Postal code" id="lblpostalCode" mold="required"/>
+						<zipcodebox value="@{person.contacts.postalAddress.postalCode,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+						   id="postalCode" constraint="no empty"/>
+					</div>
+					</div>
+					</div>
+					
+					
+		<div sclass="panelFoot">
+			<button label="Save" id="Save" zclass="btn-success btn" onClick="commonCrudService.save(person);com.nzion.util.UtilMessagesAndPopups.showSuccess();" />
+		</div>
+</window>
+</zk>

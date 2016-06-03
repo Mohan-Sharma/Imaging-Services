@@ -1,0 +1,41 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./personVitalSignsWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?component name="toolbar" macro-uri="/toolbar.zul"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window  id="personVitalSignsWin">
+	<zscript>
+	com.nzion.zkoss.composer.PersonProfileController profileController = desktop.getAttribute("profileController");
+	List personVitalSigns = profileController.getPersonFavourites(com.nzion.domain.person.PersonVitalSign.class);
+	</zscript>
+	<div sclass="panelTop">
+		<button label="Save" onClick="profileController.saveFavourites(personVitalSigns);"/>
+	</div>
+	<panel title="Person Vital Signs" id="vitalSignPanel"
+		onAddClick='profileController.favouriteAddClicked(personVitalSignsWin, personVitalSignDisplayGrid, personVitalSigns,"/person/add-person-vital-sign.zul")'
+		onDeleteClick="profileController.deleteFavourites(personVitalSignDisplayGrid, personVitalSigns)">
+		<panelchildren>
+		<toolbar listenercomponent="${vitalSignPanel}" hidecancel="true" hidesearch="true"/>
+				<listbox multiple="true" id="personVitalSignDisplayGrid" checkmark="true" mold="paging" pageSize="10" pagingPosition="top"
+					model="@{personVitalSigns,load-after='vitalSignPanel.onSearchClick, self.onReloadRequest,vitalSignPanel.onDeleteClick'}">
+					<listhead>
+						<listheader label="Vital Sign"/>
+						<listheader label="Encounter"/>
+						<listheader label="MR"/>
+					</listhead>
+						<listitem self="@{each='personVitalSign'}" value="@{personVitalSign}">
+						<listcell>
+							<label value="@{personVitalSign.vitalSign.name}"  />
+						</listcell>
+						<listcell>
+							<checkbox checked="@{personVitalSign.soap}"/>
+						</listcell>
+						<listcell>
+							<checkbox checked="@{personVitalSign.mr}" />			
+						</listcell>
+						</listitem>
+				</listbox>
+			</panelchildren>
+		</panel>
+</window>
+</zk>

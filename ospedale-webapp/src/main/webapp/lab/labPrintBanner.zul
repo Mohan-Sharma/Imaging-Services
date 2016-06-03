@@ -1,0 +1,90 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+<window width="98%">
+<separator/>
+	<n:div width="98%">
+	<n:table>
+	<n:tr>
+		<h:td align="center"><n:strong style="font-size:20px">${practice.practiceName}</n:strong></h:td>
+	</n:tr>
+	<n:tr>
+		<h:td>
+		<n:strong style="font-size:12px;margin-right:2px;padding:10px">${location.contacts.postalAddress.address1}</n:strong>
+		<n:strong style="font-size:12px;margin-right:2px;padding:10px">${location.contacts.postalAddress.city}</n:strong>
+		<n:strong style="font-size:12px;margin-right:2px;padding:10px">${location.contacts.postalAddress.stateProvinceGeo}</n:strong>
+		</h:td>
+		</n:tr>
+		<n:tr>
+		<h:td>
+		<n:strong style="font-size:12px;margin-right:2px;padding:10px">Tel :${location.contacts.officePhone}</n:strong>
+		<n:strong style="font-size:12px;padding:10px">Fax :${location.contacts.faxNumber}</n:strong>
+		</h:td>
+	</n:tr>
+	</n:table>
+	</n:div>
+	<separator/>
+    <n:div width="98%">
+	
+	</n:div>
+	<separator/>
+	 <div sclass="container-fluid">
+	 <div zclass="span6">
+                    <div zclass="form-horizontal">
+                        <div sclass="control-group">
+                            <label zclass="control-label" value="MRN :"/>
+                            <div zclass="controls">
+                                <label value="${patient.accountNumber}" />
+                            </div>
+                        </div>
+                        <div sclass="control-group">
+                            <label zclass="control-label" value="Doctor Name:"/>
+                            <div zclass="controls">
+                                <name object="${provider}"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div zclass="span2"/>
+                <div  zclass="span2">
+                    <div  zclass="form-horizontal" width="1px">
+                        <div zclass="control-group">
+                            <label sclass="control-label" value="Admission Date :"/>
+                            <div zclass="controls" >
+                                <label  value="${labOrderReq.patientAdmission.admittedDate}"/>
+                            </div>
+                        </div>
+                        <div zclass="control-group">
+                            <label sclass="control-label" value="Charge Type :"/>
+                            <div zclass="controls">
+                                 <label value="@{labOrderReq.patientAdmission.soapNote.encounterType.chargeType}"/>
+                            </div>
+                        </div>
+                        <div >
+                            <label sclass="control-label" value="Ward/Bed/Type :"/>
+                            <div zclass="controls">
+                                <label value="@{labOrderReq.patientAdmission.latestAllocatedBed.ward.wardName}"/>/
+                                 <label value="@{labOrderReq.patientAdmission.latestAllocatedBed.bed.bedNo}"/>
+                                 
+                            </div>
+                            </div>
+                       
+                    </div>
+                </div>
+                </div>
+                
+	<!-- <n:table width="98%">
+	<n:caption style="font-size:14px">Patient Detail</n:caption>
+	<n:tr>
+		<h:td><n:strong>Account : ${patient.accountNumber}</n:strong></h:td>
+		<n:td><n:strong>Name : <span style="margin-top:2px"> <name object="${patient}" style="font-weight:bold;"/> </span></n:strong></n:td>
+		<n:td><n:strong>Gender :${patient.gender}</n:strong></n:td>
+	</n:tr>
+	<n:tr>
+		<h:td><n:strong>DOB : ${display:fd(patient.dateOfBirth)}</n:strong></h:td>
+	</n:tr>
+	</n:table> -->
+<separator/>
+</window>
+</zk>

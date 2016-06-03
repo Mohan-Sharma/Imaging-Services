@@ -1,0 +1,273 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./collectionReportWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<zscript>
+    <![CDATA[
+		import com.nzion.util.UtilValidator;
+		import com.nzion.report.dto.CollectionReportDto;
+		com.nzion.zkoss.ext.DataExporter exporter = new com.nzion.zkoss.ext.CsvDataExporter();
+        com.nzion.zkoss.composer.emr.BillingSearchController billingSearchController = new com.nzion.zkoss.composer.emr.BillingSearchController(); 
+		com.nzion.service.billing.BillingService billingService=com.nzion.util.Infrastructure.getSpringBean("billingService");
+		
+		com.nzion.zkoss.composer.emr.CollectionReportController collectionReportController=new com.nzion.zkoss.composer.emr.CollectionReportController();
+		
+		List collectionList;
+		List dischargeCollectionList;
+		List advanceCollectionList;
+		Map invoiceItemsGroup;
+		List listMap;
+		
+		List chargeTypeList= new ArrayList();
+		chargeTypeList.add(com.nzion.domain.billing.AcctgTransTypeEnum.OPD);
+		chargeTypeList.add(com.nzion.domain.billing.AcctgTransTypeEnum.IPD);
+		com.nzion.domain.billing.AcctgTransTypeEnum chargeType=null;com.nzion.report.dto.CollectionReportDto dischargeItemDto;
+		]]>
+</zscript>
+
+<window id="collectionReportWindow" apply="${billingSearchController}">
+<div style="padding:5px" zclass="page-header titled-well">
+    <h:h1>
+        <h:small>Collection Reports</h:small>
+    </h:h1>
+</div>
+<div style="margin-left:350px;">
+    <div class="container-fluid">
+        <div zclass="row-fluid">
+
+            <div zclass="span2">
+                <label value="Invoice Date From"/>
+                <datebox id="fromDate" value="@{billingSearchController.billingSearchVO.fromDate}" sclass="span12"/>
+            </div>
+            <div zclass="span2" style="margin-left:100px;">
+                <label value="Invoice Date Thru"/>
+                <datebox id="thruDate" value="@{billingSearchController.billingSearchVO.thruDate}" sclass="span12"/>
+            </div>
+
+            <div zclass="span2" style="margin-left:100px;">
+                <label value="Charge Type"/>
+                <combobox sclass="span12" model="@{chargeTypeList}" selectedItem="@{chargeType}">
+                    <comboitem self="@{each='chargeType'}" value="@{chargeType}" label="@{chargeType}"/>
+                </combobox>
+            </div>
+        </div>
+    </div>
+</div>
+<div align="center" sclass="panelFoot">
+    <button label="Search Bills" id="searchButton" zclass="btn-primary btn">
+        <attribute name="onClick">
+            <![CDATA[
+							
+						if (chargeType == null){
+								com.nzion.util.UtilMessagesAndPopups.showError("Please Provide Charge Type");
+								return;
+								}
+						if(com.nzion.domain.billing.AcctgTransTypeEnum.IPD.equals(chargeType)){
+							collectionList=collectionReportController.getCollectionReportList(chargeType,fromDate.getValue(),thruDate.getValue());
+							groupByForInvoiceItems.setVisible(false);
+							groupByInpatientCollectionReport.setVisible(true);
+							collectionReportTotalCount.setValue(collectionReportController.getTotalCount(collectionList).toString());
+							collectionReportTotalAmount.setValue(collectionReportController.getTotalAmount(collectionList).toString());
+							
+							dischargeCollectionList=collectionReportController.getDischargeCollectionReportList();
+							totalDischargeCollectionAmount.setValue(collectionReportController.getTotalAmount(dischargeCollectionList).toString());
+							groupByDischargeCollection.setVisible(true);
+							
+							advanceCollectionList=collectionReportController.getAdvanceCollectionReportList();
+							totalAdvanceCollectionAmount.setValue(collectionReportController.getTotalAmount(advanceCollectionList).toString());
+							groupByAdvanceCollection.setVisible(true);
+
+							}
+						else{
+							billingSearchController.getBillingSearchVO().setStatus("RECEIVED");
+							billingSearchController.getBillingSearchVO().setOrStatus("WRITEOFF");
+							billingSearchController.searchInvoiceBy(fromDate.getValue(),thruDate.getValue());
+							groupByForInvoiceItems.setVisible(true);
+							groupByInpatientCollectionReport.setVisible(false);
+							groupByDischargeCollection.setVisible(false);
+							groupByAdvanceCollection.setVisible(false);
+							invoiceItemsGroup = billingSearchController.groupByInvoiceItems();
+							listMap = billingSearchController.groupByInvoiceItemsCollection(invoiceItemsGroup);
+							collectedAmount.setValue(billingSearchController.getCollectionAmount().toString());
+							writeoffAmount.setValue(billingSearchController.getWriteOffAmount().toString());
+							totalAmountLabel.setValue(billingSearchController.getTotalCollectionAmount().toString());
+							}
+						   	searchResults.setVisible(true);
+							searchResultsSplitter.setVisible(true);
+													
+								]]>
+        </attribute>
+    </button>
+</div>
+<separator></separator>
+<space height="5px"/>
+<hlayout width="100%" style="text-align:center;background-color:grey" id="searchResultsSplitter" visible="false">
+    <image src="/images/collapse-content.png" style="text-align:center">
+        <attribute w:name="onClick">
+            jq(this.$f('searchForm')).slideToggle(1000);
+        </attribute>
+        <attribute name="onClick">
+            if(self.getSrc().contains("expand")){
+            self.setSrc("/images/collapse-content.png");
+            }
+            else if(self.getSrc().contains("collapse")){
+            self.setSrc("/images/expand-content.png");
+            }
+        </attribute>
+    </image>
+</hlayout>
+<space height="5px"/>
+<panel visible="false" id="searchResults" title="Search Results" width="100%">
+    <caption height="15px">
+        <div style="float:right">
+					<span sclass="linkBtn linkBtnOn" style="margin:-3px 13px;">
+					<a tooltiptext="Export" label="Export" sclass="reminderBtn">
+                        <attribute name="onClick">
+                            if(com.nzion.domain.billing.AcctgTransTypeEnum.OPD.equals(chargeType)){
+                            exportData();
+                            }
+                            else if(com.nzion.domain.billing.AcctgTransTypeEnum.IPD.equals(chargeType)){
+                            exportInPatientData();
+                            }
+                        </attribute>
+                    </a>
+					</span>
+        </div>
+    </caption>
+
+    <panelchildren>
+        <div height="500px" style="overflow:auto" id="searchResultDiv">
+            <listbox id="groupByForInvoiceItems" model="@{listMap,load-after='searchButton.onClick'}">
+                <listhead>
+                    <listheader label="Name"/>
+                    <listheader label="Count"/>
+                    <listheader label="Item Amount"/>
+                </listhead>
+                <listitem self="@{each='invoiceItm'}" value="@{invoiceItm.value}">
+                    <listcell>
+                        <label value="@{invoiceItm.itemName}" style="@{invoiceItm.style}"/>
+                    </listcell>
+                    <listcell>
+                        <label value="@{invoiceItm.itemCount}" style="@{invoiceItm.style2}"/>
+                    </listcell>
+                    <listcell>
+                        <label value="@{invoiceItm.itemValue}" style="@{invoiceItm.style2}"/>
+                    </listcell>
+                </listitem>
+
+                <listfoot>
+                    <listfooter></listfooter>
+                    <listfooter>
+                        <label value="Total Amount" style="font-weight:bold"/>
+                    </listfooter>
+                    <listfooter>
+                        <div>
+                            <label id="collectedAmount" style="font-weight:bold"/> -
+                            <label id="writeoffAmount" style="font-weight:bold"/>(Discounted Amount) =
+                            <label id="totalAmountLabel" zclass="blackHeading" style="font-weight:bold"> </label>
+                        </div>
+                    </listfooter>
+                </listfoot>
+
+            </listbox>
+
+
+            <grid id="groupByInpatientCollectionReport" model="@{collectionList,load-after='searchButton.onClick'}">
+                <columns>
+                    <column width="40px"></column>
+                    <column label="Name"></column>
+                    <column label="Count"/>
+                    <column label="Item Amount"/>
+                </columns>
+                <rows>
+                    <row self="@{each='collectionReportList'}" value="@{collectionReportList}">
+                        <label value="@{collectionReportList.description}" style="font-weight:bold"/>
+                        <label value="@{collectionReportList.count}" style="font-weight:bold"/>
+                        <label value="@{collectionReportList.amount}" style="font-weight:bold"/>
+                        <detail open="true">
+                            <listbox id="collectionReportItemList"
+                                     model="@{collectionReportList.collectionReportItemDto}">
+                                <listitem self="@{each='itemList'}" value="@{itemList}">
+                                    <listcell>
+                                        <label value="@{itemList.description}"/>
+                                    </listcell>
+                                    <listcell>
+                                        <label value="@{itemList.count}"/>
+                                    </listcell>
+                                    <listcell>
+                                        <label value="@{itemList.amount}"/>
+                                    </listcell>
+                                </listitem>
+
+                            </listbox>
+                        </detail>
+                    </row>
+                </rows>
+                <foot>
+                    <footer/>
+                    <footer><label value="Grand Total" style="font-weight:bold"/></footer>
+                    <footer><label id="collectionReportTotalCount" style="font-weight:bold"/></footer>
+                    <footer><label id="collectionReportTotalAmount" style="font-weight:bold"/></footer>
+                </foot>
+            </grid>
+
+            <separator></separator>
+            <separator></separator>
+            <separator></separator>
+            <grid id="groupByDischargeCollection" model="@{dischargeCollectionList,load-after='searchButton.onClick'}"
+                  width="50%" style="margin-left:350px;">
+                <columns>
+                    <column><label value="Discharge Collection" style="font-weight:bold"/></column>
+                    <column/>
+                    <column><label id="totalDischargeCollectionAmount" style="font-weight:bold"/></column>
+                </columns>
+                <rows>
+                    <row self="@{each='collectionReportList'}" value="@{collectionReportList}">
+                        <label value="@{collectionReportList.description}" style="font-weight:bold"/>
+                        <label value="@{collectionReportList.count}" style="font-weight:bold"/>
+                        <label value="@{collectionReportList.amount}" style="font-weight:bold"/>
+                    </row>
+                </rows>
+            </grid>
+			<separator></separator>
+            <grid id="groupByAdvanceCollection" model="@{advanceCollectionList,load-after='searchButton.onClick'}"
+                  width="50%" style="margin-left:350px;">
+                <columns>
+                    <column><label value="Advance" style="font-weight:bold"/></column>
+                    <column/>
+                    <column><label id="totalAdvanceCollectionAmount" style="font-weight:bold"/></column>
+                </columns>
+                <rows>
+                    <row self="@{each='collectionReportList'}" value="@{collectionReportList}">
+                        <label value="@{collectionReportList.description}" style="font-weight:bold"/>
+                        <label value="@{collectionReportList.count}" style="font-weight:bold"/>
+                        <label value="@{collectionReportList.amount}" style="font-weight:bold"/>
+                    </row>
+                </rows>
+            </grid>
+
+
+        </div>
+    </panelchildren>
+</panel>
+
+    <zscript>
+        void exportData(){
+        Set keySet=new LinkedHashSet();
+        keySet.add("itemName");
+        keySet.add("itemCount");
+        keySet.add("itemValue");
+        if(com.nzion.util.UtilValidator.isNotEmpty(listMap))
+        exporter.exportCollectionReport(listMap,keySet, new String[]{"Item Name","Item Count","Item Value"},
+        "collection.csv");
+        }
+
+        void exportInPatientData(){
+         List exportCollectionList=new ArrayList();
+       	 exportCollectionList.addAll(collectionList);
+         collectionReportController.exportIPDCollectionReport(exportCollectionList);
+       
+        }
+    </zscript>
+</window>
+</zk>	

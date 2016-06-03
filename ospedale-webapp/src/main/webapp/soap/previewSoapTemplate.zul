@@ -1,0 +1,77 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./previewTemplateWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	import com.nzion.zkoss.composer.emr.*;
+	import com.nzion.domain.emr.*;
+	TemplateSetupController templateSetupController = (TemplateSetupController) Executions.getCurrent().getArg().get(
+			"conntroller");
+	QATemplate qaTemplate = (QATemplate) Executions.getCurrent().getArg().get("entity");
+	List answers = new ArrayList();
+	void move(Component dragged) {
+	self.parent.insertBefore(dragged, self);
+	List questions = templateSetupController.getSelectedQuestions();
+	questions.remove(((Listitem)dragged).getValue());
+	questions.add(questions.indexOf(((Listitem)self).getValue()),((Listitem)dragged).getValue());
+	templateSetupController.setSelectedQuestions(questions);
+	}
+	
+]]>
+	</zscript>
+	<window id="previewTemplateWindow" apply="${templateSetupController}" width="60%" height="60%"
+		style="border: 5px solid #2d2d2d">
+		<div sclass="panelFoot">
+			<button label="Save" onClick="templateSetupController.save();previewTemplateWindow.detach()" visible="false"/>
+			<button label="Cancel" onClick="previewTemplateWindow.detach()" />
+		</div>
+		<separator />
+		<div>
+			<label value="Module:" />
+			<combobox id="soapModuleCombo" model="@{templateSetupController.modules}"
+				selectedItem="@{templateSetupController.selectedModule}" readonly="true"
+				onSelect="templateSetupController.fetchModuleQAsFor()">
+				<comboitem self="@{each='module'}" label="@{module.moduleName}" value="@{module}" />
+			</combobox>
+		</div>
+		<div>
+			<label value="Sentence:" />
+			<textbox id="sentenceBox" cols="100" multiline="true" />
+		</div>
+		<separator />
+		<h:table width="100%" height="75%">
+			<h:tr>
+				<h:td width="50%" height="100%" style="vertical-align:top;">
+					<panel title="Questions" width="100%" height="100%" collapsible="false">
+						<panelchildren>
+							<listbox id="questionListBox"
+								model="@{templateSetupController.selectedQuestions,load-after='soapModuleCombo.onSelect'}" style="border:0px"
+								selectedItem="@{templateSetupController.selectedQuestion}" 
+								onSelect="answerListBox.setVisible(true)">
+								<listitem self="@{each='question'}" label="@{question.desc}" value="@{question}">
+									<listcell label="@{question.desc}">
+										<checkbox disabled="true"/>
+									</listcell>
+								</listitem>
+							</listbox>
+						</panelchildren>
+					</panel>
+				</h:td>
+				<h:td width="50%" height="100%" style="vertical-align:top;">
+					<panel title="Answers" width="100%" height="100%" collapsible="false">
+						<panelchildren>
+							<listbox id="answerListBox"
+								style="border:0px"
+								itemRenderer="${templateSetupController.previewAnswersRendrer}"
+								model="@{templateSetupController.selectedAnswers,load-after='questionListBox.onSelect'}"
+								visible="false">
+								<listitem self="@{each='answer'}" label="@{answer.name}" value="@{answer}" />
+							</listbox>
+						</panelchildren>
+					</panel>
+				</h:td>
+			</h:tr>
+		</h:table>
+	</window>
+</zk>

@@ -1,0 +1,31 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./userAgreementWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+com.nzion.domain.PracticeUserAgreement agreement = practiceService.getTermsAndConditionsForPractice(com.nzion.util.Infrastructure.getPractice());
+agreement = agreement == null ? new com.nzion.domain.PracticeUserAgreement() : agreement;
+setPageTitle("User Agreement", "");
+</zscript>
+<window id="userAgreementWindow">
+	<panel title="Agreement">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div sclass="col2">
+						<label value="Terms And Conditions"  />
+						<textbox value="@{agreement.termsAndConditions}" rows="7"  style="width:90%"/>
+					</div>
+				</div>
+			</panelchildren>
+	</panel>
+	<separator></separator>
+			<div  align="center" >
+			<button label="Save" id="Save" sclass="btn btn-success" >
+				<attribute name="onClick">
+					commonCrudService.save(agreement);
+					com.nzion.util.UtilMessagesAndPopups.showSuccess();
+				</attribute>
+			</button>
+		</div>
+</window>
+</zk>

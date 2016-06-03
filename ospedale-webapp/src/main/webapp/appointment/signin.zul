@@ -1,0 +1,152 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/practiceTemplate.zul"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./signinWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	import com.nzion.domain.Patient;
+	import com.nzion.util.UtilMisc;
+	import com.nzion.domain.Roles;
+	setPageTitle("Patient Sign In", null);
+	com.nzion.zkoss.composer.appointment.SigninController signinController = new com.nzion.zkoss.composer.appointment.SigninController();
+	boolean isVisible=Roles.hasAnyRole(new long[]{ Roles.PROVIDER,Roles.RECEPTION});
+	boolean isProviderOrNurse = Roles.hasAnyRole(new long[]{Roles.PROVIDER,Roles.NURSE});
+
+</zscript>
+	<style>
+	.z-datebox{
+		  display:inline-block;
+	 }
+	</style>
+	<div id="signinWindow" self="@{define(content)}" apply="${signinController}">
+	<panel  sclass="gridCont">
+	<panelchildren>
+		<div sclass="panelHeadTop pagination" if="${isVisible}">
+			<div sclass="fl">
+				<a href="#" label="List of Appointments"></a>
+			</div>
+		</div>
+		<div sclass="grid clr prel">
+		<h:table cellspacing="0" cellpadding="0" border="0">
+		<h:thead>
+		<h:tr>
+		<h:td>
+		<div sclass="apptDt">
+			<label value="Appointment Date" />
+				<datebox value="@{signinController.selectedDate}" id="date" />
+		</div>
+		<span class="linkBtn linkBtnOn" style="padding-left:5px;margin-left:10px" if="${isVisible}">
+			<a class="newAppt" href="#newAppt" label="New Appointment">
+				<attribute name="onClick">
+					Window w = Executions.createComponents("/appointment/signin-new-appoinment.zul", signinWindow, UtilMisc.toMap("controller", signinController,"schedulesOfTheDayListBox",schedulesOfTheDayListBox));
+				</attribute>
+			</a>
+			<span />
+		</span>
+		</h:td>
+		</h:tr>
+		</h:thead>
+		</h:table>
+		<listbox model="@{signinController.allRelevantSchedules, load-after='date.onChange, self.onReloadRequest'}" sclass="whiteBackground"
+				itemRenderer="${signinController}" width="100%" id="schedulesOfTheDayListBox"  rows="10" height="260px" if="${isVisible}">
+				<auxhead zclass="none">
+					 <auxheader>
+			                <image src="/images/funnel.png" />
+			                <textbox id="filter1"  width="100%" onChanging="signinController.getFilterData(event,false)"/>
+			            </auxheader>
+					 <auxheader>
+			                <image src="/images/funnel.png" />
+			                <textbox id="filter2"  width="100%" onChanging="signinController.getFilterData(event,true)" />
+			         </auxheader>
+			         <auxheader colspan="6"></auxheader>
+				</auxhead>
+				<listhead>
+					<listheader label="MRN" style="font-weight:bold" width="130px"/>
+					<listheader label="Patient Name" style="font-weight:bold" />
+					<listheader label="To Meet" style="font-weight:bold" />
+					<listheader label="Visit Type" style="font-weight:bold" width="130px"/>
+					<listheader label="Status" style="font-weight:bold" />
+					<listheader label="Appointment Time" style="font-weight:bold" width="130px"/>
+					<listheader label="In Time" style="font-weight:bold" width="100px"/>
+					<listheader label="Out Time" style="font-weight:bold" width="100px"/>
+				</listhead>
+			</listbox>
+		</div>
+		</panelchildren>
+		</panel>
+		<div sclass="panelFoot" if="${isVisible}"/>
+		<separator height="20px"/>
+		<div sclass="panelHeadTop pagination">
+			<div sclass="fl">
+				<a href="#" label="List of Encounters"></a>
+			</div>
+		</div>	
+		<div id="innerTabs" >
+			<tabbox>
+				<tabs  sclass="panelFoot">
+					<tab label="Signed In" id="signedInTab" sclass="tabCont" />
+					<tab label="Signed out" id="signedoutTab" sclass="tabCont"
+						onClick='signinController.renderTab(signedout, "/appointment/patients-by-status.zul", "SIGNEDOUT")' />
+					<tab label="No shows" id="noshowTab" sclass="tabCont"
+						onClick='signinController.renderTab(noshow, "/appointment/patients-by-status.zul", "NOSHOW")' />
+				</tabs>
+				<tabpanels>
+					<tabpanel id="signedin">
+		<listbox id="signedinListbox"
+			model="@{signinController.statusWiseSchedules.SIGNEDIN, load-after='date.onChange, self.onReloadRequest'}" rows="5">
+			<listhead>
+				<listheader label="MRN" style="font-weight:bold" width="130px"/>
+				<listheader label="Patient Name" style="font-weight:bold" />
+				<listheader label="To Meet" style="font-weight:bold" />
+				<listheader label="Room" style="font-weight:bold" />
+				<listheader label="Attended By" style="font-weight:bold" />
+				<listheader label="Status" style="font-weight:bold" />
+				<listheader label="Report" style="font-weight:bold" />
+			</listhead>
+			<listitem self="@{each='schedule'}" value="@{schedule}">
+				<attribute name="onDoubleClick">
+					if(isProviderOrNurse){
+					Executions.getCurrent().sendRedirect("/soap/soapnote.zul?scheduleId="+self.getValue().getId(),"_soapNote");
+					}
+				</attribute>
+				<listcell>
+					<label value="@{schedule.patient.accountNumber}" />
+				</listcell>
+				<listcell>
+					<name object="@{schedule.patient}" />
+				</listcell>
+				<listcell>
+					<name object="@{schedule.provider}" />
+				</listcell>
+				<listcell>
+					<label value="@{schedule.lastPatientVisit.room, load-after='self.onReloadRequest'}" />
+				</listcell>
+				<listcell>
+					<name object="@{schedule.lastPatientVisit.metWith, load-after='self.onReloadRequest'}" />
+				</listcell>
+				<listcell>
+					<button label="Change">
+						<attribute name="onClick">
+							Map args = UtilMisc.toMap("scheduleInToReceiveANewTrack", self.getParent().getParent().getValue(),
+									"signinController", signinController);
+							Executions.createComponents("/appointment/add-edit-patient-visit.zul", signinWindow, args);
+						</attribute>
+					</button>
+				</listcell>
+				<listcell>
+					<button label="Report"
+						onClick='Executions.createComponents("/appointment/patient-visits-per-schedule.zul", signinWindow, UtilMisc.toMap("schedule", self.getParent().getParent().getValue()));' />
+				</listcell>
+			</listitem>
+		</listbox>
+		</tabpanel>
+		<tabpanel id="signedout">
+		</tabpanel>
+		<tabpanel id="noshow">
+		</tabpanel>
+		</tabpanels>
+	</tabbox>
+		</div>
+		<div sclass="panelFoot"/>
+</div>
+</zk>

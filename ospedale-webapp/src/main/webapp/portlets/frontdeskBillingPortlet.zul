@@ -1,0 +1,200 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./billingPortletWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native">
+    <zscript>
+    <![CDATA[
+      import com.nzion.domain.billing.Invoice;
+    com.nzion.repository.common.CommonCrudRepository commonCrudRepository = com.nzion.util.Infrastructure.getSpringBean("commonCrudRepository");
+    com.nzion.service.billing.BillingService billingService = com.nzion.util.Infrastructure.getSpringBean("billingService");
+    com.nzion.domain.billing.Invoice invoicSearchObject=new com.nzion.domain.billing.Invoice();
+    List invoices;
+    com.nzion.domain.billing.InvoiceStatusItem[] billingStatusesArray = com.nzion.domain.billing.InvoiceStatusItem.values();
+    com.nzion.domain.billing.InvoiceType OPD = com.nzion.domain.billing.InvoiceType.OPD;
+    boolean isBiller = com.nzion.domain.Roles.hasRole(com.nzion.domain.Roles.BILLING);
+    List statuses = new ArrayList();
+    statuses.add("FINAL");
+    statuses.add("READY");
+    statuses.add("INPROCESS");
+    
+    List allStatuses = new ArrayList();
+    allStatuses.add("FINAL");
+    allStatuses.add("READY");
+    allStatuses.add("INPROCESS");
+    allStatuses.add("RECEIVED");
+    allStatuses.add("CANCELLED");
+    allStatuses.add("WRITEOFF");
+    
+    invoices = billingService.getInvoice(statuses,null,null,null,null,null);
+    Collections.sort(invoices);
+
+]]>
+</zscript>
+    <window id="billingPortletWindow">
+    <separator></separator>
+    <div align="right" style="margin-right:15px;">
+    <!--<button label="Add" >
+    <attribute name="onClick">
+    Executions.createComponents("/billing/addNewMiscellaneousCharges.zul",null,null);
+    </attribute>
+    </button>-->
+        <a visible="${isBiller}" target="_blank" href="../superBill/superBill.html"><button label="Add" ></button></a>
+    </div>
+    <separator></separator>
+    <separator></separator>
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+
+                <div zclass="span3">
+                    <label value="Patient"/>
+                    <patientlookup style="height:24px"
+                            onChange="invoicSearchObject.setPatient((com.nzion.domain.Patient)event.getOrigin().getData())"/>
+                </div>
+                <div zclass="span3">
+                    <label value="Doctor"/>
+                    <providerlookup style="height:24px"
+                            onChange="invoicSearchObject.setConsultant((com.nzion.domain.Provider)event.getOrigin().getData())"/>
+                </div>
+                <div zclass="span2">
+                    <label value="IP Number" />
+                    <textbox id="ipNumber" sclass="span12"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Invoice From Date"/>
+                    <datebox id="fromDate" sclass="span12"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Invoice Thru Date"/>
+                    <datebox id="thruDate" sclass="span12"/>
+                </div>
+                
+                <checkbox id="outsidePatient" label="External Patients" />
+            </div>
+        </div>
+        <div align="center" sclass="panelFoot buttonPanel" >
+            <hlayout spacing="10px">
+                <button label="Search" id="Search" zclass="btn btn-primary">
+                    <attribute name="onClick">
+                        <![CDATA[
+                        /*if(fromDate.getValue()!=null||thruDate.getValue()!=null || ipNumber.getValue()!=null){
+                           invoices = billingService.getInvoice(allStatuses,invoicSearchObject.getPatient(),invoicSearchObject.getConsultant(),fromDate.getValue(),thruDate.getValue(),ipNumber.getValue());
+                          return;
+                           }
+                         */ 
+                         if(outsidePatient.isChecked())   
+                                invoices = billingService.getInvoiceForOutsidersPatients(com.nzion.domain.billing.InvoiceType.OPD_PHARMACY,fromDate.getValue(),thruDate.getValue());
+                            else if(invoicSearchObject.getPatient()!=null){
+                                invoices = billingService.getInvoice(new ArrayList(),invoicSearchObject.getPatient(),invoicSearchObject.getConsultant(),fromDate.getValue(),thruDate.getValue(),ipNumber.getValue());
+                            }
+                            else
+                               invoices = billingService.getInvoice(allStatuses,invoicSearchObject.getPatient(),invoicSearchObject.getConsultant(),fromDate.getValue(),thruDate.getValue(),ipNumber.getValue());
+                           
+                         	Collections.sort(invoices);
+                          for(Invoice invoice : invoices){
+                                if(com.nzion.domain.billing.InvoiceType.OPD_PHARMACY.equals(invoice.getInvoiceType()) && invoice.getPatient()==null  ){
+                                    lstboxId.setVisible(false);	
+                                    lstboxId1.setVisible(true);
+                                }
+                                if(com.nzion.domain.billing.InvoiceType.OPD.equals(invoice.getInvoiceType())
+                                		||(com.nzion.domain.billing.InvoiceType.OPD_PHARMACY.equals(invoice.getInvoiceType()) && invoice.getPatient()!=null)){
+                                    lstboxId.setVisible(true);	
+                                    lstboxId1.setVisible(false);
+                                }
+                            }
+                            
+                        ]]>
+                    </attribute>
+                </button>
+            </hlayout>
+        </div>
+
+        <paging id="paging" pageSize="10"></paging>
+        <listbox model="@{invoices,load-after='Search.onClick'}" mold="paging" paginal="${paging}"  id="lstboxId" >
+            <listhead>
+                <listheader label="Invoice Date" />
+                <listheader label="Invoice No" />
+                <listheader label="Patient Name" />
+                <listheader label="IP Number" />
+                <listheader label="Requested By" />
+                <listheader label="Status" />
+                <listheader label="Action" />
+            </listhead>
+            <listitem self="@{each='invoiceObj'}" value="@{invoiceObj}">
+                <listcell>
+                    <label value="@{invoiceObj.invoiceDate,converter='com.nzion.view.component.DateConverter'}" />
+                </listcell>
+                <listcell label="@{invoiceObj.invoiceNumber}"/>
+                <listcell>
+                    <name object="@{invoiceObj.patient}"    />
+                </listcell>
+                <listcell>
+                    <label value="@{invoiceObj.ipNumber}" />
+                </listcell>
+                <listcell>
+                    <name object="@{invoiceObj.consultant}" />
+                </listcell>
+                <listcell label="@{invoiceObj.invoiceStatus}" />
+                <listcell>
+                    <button label="Receive Payment">
+                        <attribute name="onCreate">
+                          //  if(com.nzion.domain.billing.InvoiceType.IPD.equals(((com.nzion.domain.billing.Invoice)self.getParent().getParent().getValue()).getInvoiceType()))
+                           // self.setLabel("View");
+                            Invoice invoice =self.getParent().getParent().getValue();
+                            if("RECEIVED".equals(invoice.getInvoiceStatus()) || "WRITEOFF".equals(invoice.getInvoiceStatus()))
+                            self.setLabel("View");
+                        </attribute>
+                        <attribute name="onClick"><![CDATA[
+                       
+                         if(com.nzion.domain.billing.InvoiceType.OPD.equals(((com.nzion.domain.billing.Invoice)self.getParent().getParent().getValue()).getInvoiceType())) 
+                             Executions.getCurrent().sendRedirect("/billing/billingTxnItem.zul?invoiceId=" + self.getParent().getParent().getValue().getId(),"_BillSoapNote");
+                            
+                         
+                         if(com.nzion.domain.billing.InvoiceType.OPD_PHARMACY.equals(((com.nzion.domain.billing.Invoice)self.getParent().getParent().getValue()).getInvoiceType()))
+                             Executions.getCurrent().sendRedirect("/billing/billingTxnItem.zul?invoiceId=" + self.getParent().getParent().getValue().getId(),"_BillSoapNote");
+                      
+                         
+                                         ]]>
+                        </attribute>
+                    </button>
+                </listcell>
+            </listitem>
+        </listbox>
+        
+        
+        <listbox model="@{invoices,load-after='Search.onClick'}" mold="paging" paginal="${paging}"  id="lstboxId1" visible="false" >
+            <listhead>
+                <listheader label="Invoice Date" />
+                <listheader label="Invoice No" />
+                <listheader label="Patient Name" />
+                <listheader label="Consultant" />
+                <listheader label="Status" />
+                <listheader label="Action" />
+            </listhead>
+            <listitem self="@{each='invoiceObj'}" value="@{invoiceObj}">
+                <listcell>
+                    <label value="@{invoiceObj.invoiceDate,converter='com.nzion.view.component.DateConverter'}" />
+                </listcell>
+                <listcell label="@{invoiceObj.invoiceNumber}"/>
+                <listcell>
+                    <label value="@{invoiceObj.externalPatient}"    />
+                </listcell>
+                <listcell>
+                    <label value="@{invoiceObj.externalProvider}" />
+                </listcell>
+                <listcell label="@{invoiceObj.invoiceStatus}" />
+                <listcell>
+                    <button label="Receive Payment">
+                        <attribute name="onCreate">
+                            Invoice invoice =self.getParent().getParent().getValue();
+                            if("RECEIVED".equals(invoice.getInvoiceStatus()) || "WRITEOFF".equals(invoice.getInvoiceStatus()))
+                            self.setLabel("View");
+                        </attribute> 
+                        <attribute name="onClick">
+                                 if(com.nzion.domain.billing.InvoiceType.OPD_PHARMACY.equals(((com.nzion.domain.billing.Invoice)self.getParent().getParent().getValue()).getInvoiceType()))
+                                Executions.getCurrent().sendRedirect("/billing/billingTxnItemEternalPatients.zul?invoiceId=" + self.getParent().getParent().getValue().getId(),"_BillSoapNote");
+                        </attribute>
+                    </button>
+                </listcell>
+            </listitem>
+        </listbox>
+    </window>
+</zk>

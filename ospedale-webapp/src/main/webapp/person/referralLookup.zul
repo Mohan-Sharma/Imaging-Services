@@ -1,0 +1,95 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./referralLookupWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	com.nzion.domain.PatientOtherContactDetail patientOtherContactDetail = arg.get("patientOtherContactDetail");
+	Textbox referalNameTextBox = (Textbox)arg.get("referalNameTextBox");
+	String patientPage = arg.get("patientPage");
+	Panel panel = arg.get("panel");
+	HtmlMacroComponent component = arg.get("component");
+	//com.nzion.domain.emr.soap.PatientReferral patientReferral = arg.get("patientReferral");
+	List referrals;
+	]]>
+	</zscript>
+	<window id="referralLookupWindow" width="60%" title="Referral Lookup ( Double Click to Select )" closable="true" mode="modal">
+		<panel title="Search Referral">
+			<panelchildren>
+				<div sclass="panelCont" height="85px">
+					<div sclass="col2">
+						<label value="First Name" />
+						<textbox id="firstNameTextbox" />
+					</div>
+					<div sclass="col2">
+						<label value="Last Name" />
+						<textbox id="lastNameTextbox" />
+					</div>
+					<div sclass="col2">
+						<label value="Speciality" />
+						<textbox id="specialityTextbox" />
+					</div>
+				</div>
+				<div sclass="panelFoot">
+					<button id="searchBtn" label="Search" zclass="btn btn-primary">
+						<attribute name="onClick">
+						<![CDATA[
+							if(firstNameTextbox.getValue().isEmpty() && lastNameTextbox.getValue().isEmpty() && specialityTextbox.getValue().isEmpty()){
+								com.nzion.util.UtilMessagesAndPopups.showError(org.zkoss.util.resource.Labels.getLabel("nosearchcondition"));
+								return;
+							}	
+							referrals = providerService.searchReferral(firstNameTextbox.getValue(), lastNameTextbox.getValue(),specialityTextbox.getValue());
+							searchResultLabel.setVisible(com.nzion.util.UtilValidator.isEmpty(referrals));
+							newBtnSpan.setVisible("PatientPage".equalsIgnoreCase(patientPage) && com.nzion.util.UtilValidator.isEmpty(referrals));
+						]]>
+						</attribute>
+					</button>
+				</div>
+			</panelchildren>
+		</panel>
+		<panel title="Search Result">
+			<panelchildren>
+				<div id="searchResultLabel"  style="padding:10px" visible="false">
+					<hlayout spacing="20px">
+					<label id="" value="No Record Found"/>
+					<span sclass="linkBtn linkBtnOn" style="margin-top:-3px;" id="newBtnSpan">
+							<a sclass="addBtn" label="Create New Referral">
+							<attribute name="onClick">
+								Window window =	(Window)Executions.createComponents("/person/referral.zul",null,com.nzion.util.UtilMisc.toMap("panel",panel,"patientOtherContactDetail",patientOtherContactDetail,"referalNameTextBox",referalNameTextBox));
+								referralLookupWindow.detach();
+							</attribute>
+							</a>
+							<span/>
+					</span>
+					</hlayout>	
+				</div>
+				<div height="200px" style="overflow:auto">
+					<listbox model="@{referrals,load-after='searchBtn.onClick'}">
+						<listhead>
+							<listheader label="First Name" />
+							<listheader label="Last Name" />
+							<listheader label="Email" />
+						</listhead>
+						<listitem self="@{each='referral'}" value="@{referral}">
+							<listcell label="@{referral.firstName}" />
+							<listcell label="@{referral.lastName}" />
+							<listcell label="@{referral.contacts.email}" />
+							<attribute name="onDoubleClick">
+								com.nzion.domain.Referral referral = (com.nzion.domain.Referral) self.getValue();
+								if(referalNameTextBox!=null)
+								referalNameTextBox.setValue(referral.getFirstName() + " " + referral.getLastName());
+								//if(patientReferral!=null)
+								//patientReferral.setReferral(referral);
+								Events.postEvent("onChange", referalNameTextBox, referral);
+								referralLookupWindow.detach();
+							</attribute>
+						</listitem>
+					</listbox>
+				</div>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot">
+			<button label="Cancel" forward="onClick=onCancel"/>
+		</div>
+	</window>
+</zk>

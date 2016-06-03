@@ -1,0 +1,71 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<div sclass="gridCont">
+		<div sclass="panelHeadTop pagination">
+			<div sclass="fl">
+				<a href="#" label="Qualifications" />
+			</div>
+			<div sclass="fr">
+				<paging detailed="true" id="listboxPaging" pageSize="10" pageIncrement="1"/>
+			</div>
+		</div>
+		<n:table border="0" cellspacing="0" cellpadding="0" width="100%">
+			<n:thead>
+				<n:tr>
+					<n:td>
+						<a href="#popup" class="addBtn" label="Add" id="addBtn" onClick='openAddQual()' />
+						<a href="#" class="delBtn" id="deleteQualBtn" label="Delete" onClick='deleteQual()' />
+					</n:td>
+				</n:tr>
+			</n:thead>
+		</n:table>
+		<listbox id="qualificationsGrid" model="@{controller.provider.qualifications,load-after='deleteQualBtn.onClick, self.onReloadRequest'}"
+			multiple="true" checkmark="true" mold="paging" pageSize="5" selectedItem="@{selected}" rows="2"
+			paginal="${listboxPaging}" width="100%">
+			<listhead>
+				<listheader label="Start Date"></listheader>
+				<listheader label="End Date"></listheader>
+				<listheader label="Title"></listheader>
+				<listheader label="Major"></listheader>
+				<listheader label="Description"></listheader>
+			</listhead>
+			<listitem self="@{each='qualification'}" value="@{'qualification'}">
+				<listcell>
+					<datebox value="@{qualification.fromDate}" inplace="true" />
+				</listcell>
+				<listcell>
+					<datebox value="@{qualification.thruDate}" inplace="true" />
+				</listcell>
+				<listcell>
+					<textbox value="@{qualification.title}" inplace="true" />
+				</listcell>
+				<listcell>
+					<textbox value="@{qualification.major}" inplace="true" />
+				</listcell>
+				<listcell>
+					<textbox value="@{qualification.description}" inplace="true" />
+				</listcell>
+			</listitem>
+		</listbox>
+	</div>
+
+
+
+	<zscript>
+	public void openAddQual() {
+	Map m = new HashMap();
+	m.put("controller", controller);
+	m.put("qualificationsGrid", qualificationsGrid);
+	Window win = (Window) Executions.createComponents("/provider/newQualification.zul", null, m);
+	}
+	
+	public void deleteQual() {
+	if (qualificationsGrid.getSelectedItems() != null) {
+		for (Iterator iter = qualificationsGrid.getSelectedItems().iterator(); iter.hasNext();) {
+			com.nzion.domain.Qualification qual = ((Listitem) iter.next()).getValue();
+			controller.getQualification().remove(qual);
+		}
+	}
+	}
+</zscript>
+</zk>

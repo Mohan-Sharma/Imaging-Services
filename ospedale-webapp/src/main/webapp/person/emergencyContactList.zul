@@ -1,0 +1,51 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./emergencyContactWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+		import com.nzion.zkoss.composer.PersonDelegationController;
+		PersonDelegationController personDelegationController = new PersonDelegationController();
+		boolean admin = com.nzion.domain.Roles.hasRole(com.nzion.domain.Roles.ADMIN);
+	]]>
+	</zscript>
+	<window id="emergencyContactWindow" apply="${personDelegationController}">
+		<panel title="List of Emergency Access" id="emergencyContactPanel"
+			onAddClick='personDelegationController.openProviderDelegationWindow(emergencyContactListbbox,null)'
+			onDeleteClick="personDelegationController.deleteProviderDelegations(emergencyContactListbbox)">
+			<panelchildren>
+				<toolbar listenercomponent="${emergencyContactPanel}" hidecancel="true" hidesearch="true" if="${!admin}"/>
+				<div height="400px" style="overflow:auto">
+					<listbox id="emergencyContactListbbox"
+						model="@{personDelegationController.personDelegations,load-after='self.onReloadRequest'}" checkmark="true"
+						multiple="true"
+						selectedItem="@{personDelegationController.selectedPersonDelegations,converter=com.nzion.view.component.MultipleListitemBindingConverter}">
+						<listhead>
+							<listheader label="User Name" />
+							<listheader label="From Date " />
+							<listheader label="Thru Date" />
+							<listheader label="Comments" />
+						</listhead>
+						<listitem self="@{each='emergencyContact'}" value="@{emergencyContact}">
+							<listcell>
+								<name object="@{emergencyContact.personToBeDelegated}" />
+							</listcell>
+							<listcell>
+								<label
+									value="@{emergencyContact.fromDate,converter='com.nzion.view.component.DateConverter'}" />
+							</listcell>
+							<listcell>
+								<label
+									value="@{emergencyContact.thruDate,converter='com.nzion.view.component.DateConverter'}" />
+							</listcell>
+							<listcell label="@{emergencyContact.comments}"/>
+							<attribute name="onDoubleClick">
+								personDelegationController.openProviderDelegationWindow(emergencyContactListbbox,(com.nzion.domain.PersonDelegation) self.getValue());
+							</attribute>
+						</listitem>
+					</listbox>
+				</div>
+			</panelchildren>
+		</panel>
+	</window>
+</zk>

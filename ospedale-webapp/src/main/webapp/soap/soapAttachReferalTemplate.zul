@@ -1,0 +1,62 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./attachReferalLetterWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	import com.nzion.zkoss.composer.SoapReferalComposer;
+	import com.nzion.domain.emr.ReferalLetterTemplate;
+	import com.nzion.zkoss.composer.PatientSoapNoteController;
+	import com.nzion.domain.emr.soap.PatientReferral;
+	PatientSoapNoteController controller = (PatientSoapNoteController) arg.get("controller");
+	String scheduleId = controller.getSchedule().getId().toString();
+	SoapReferalComposer soapReferalComposer = (SoapReferalComposer) arg.get("soapReferalComposer");
+	Set soapModules;
+	ReferalLetterTemplate referalLetterTemplate;
+	PatientReferral patientReferral = (PatientReferral)arg.get("patientReferral");
+]]>
+	</zscript>
+	<window title="Referal Template" closable="true" width="60%" mode="modal" id="attachReferalLetterWindow"
+		apply="${soapReferalComposer}">
+		<panel title="Referal Templates" collapsible="true">
+			<panelchildren>
+				<grid model="@{soapReferalComposer.referalLetterTemplateMap}">
+					<rows>
+						<row self="@{each='patientReferal'}" value="@{patientReferal}">
+							<label value="@{patientReferal.key}" />
+							<detail>
+								<listbox id="referalTemplateListbox" model="@{patientReferal.value}">
+									<listhead>
+										<listheader label="Template Name" />
+									</listhead>
+									<listitem self="@{each='template'}" label="@{template.templateName}"
+										value="@{template}">
+									</listitem>
+										<attribute name="onSelect">
+											referalLetterTemplate = (ReferalLetterTemplate) self.getSelectedItem().getValue();
+											soapModules = soapReferalComposer.getSoapModules(referalLetterTemplate);
+										</attribute>
+								</listbox>
+							</detail>
+						</row>
+					</rows>
+				</grid>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot">
+			<button label="Attach" >
+			<attribute name="onClick">
+			patientReferral.setReferalLetterTemplate(referalLetterTemplate);
+			previewButton.setVisible(true);
+			</attribute>
+			</button>
+			<button  label="Preview" visible="false" id="previewButton">
+			<attribute name="onClick">
+			session.setAttribute("referalLetterTemplate",referalLetterTemplate);
+			Executions.getCurrent().sendRedirect("/soap/soapPreviewReferalTemplate.zul?templateId="+referalLetterTemplate.getId()+"&amp;scheduleId="+scheduleId,"_referalPreview");
+			</attribute>
+			</button>
+			<button  label="Cancel" onClick="attachReferalLetterWindow.detach();"/>
+		</div>
+	</window>
+</zk>

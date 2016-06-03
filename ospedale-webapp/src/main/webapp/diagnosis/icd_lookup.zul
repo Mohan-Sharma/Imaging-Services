@@ -1,0 +1,16 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<hbox>
+	<textbox id="icdLookupTextBox" forward="onChange=onChange" readonly="true" value="${arg.value}" constraint="no empty"/>
+	<n:div>
+		<a   sclass="btn" disabled="${patientSoapNoteController.readonly}">
+		 <n:i class="icon-search"></n:i>
+			<attribute name="onClick">
+				Executions.createComponents("/diagnosis/icdSearch.zul",null,com.nzion.util.UtilMisc.toMap("icdLookupTextBox", icdLookupTextBox,"multiple",false));
+			</attribute>
+			Lookup
+		</a>
+	</n:div>
+	</hbox>
+</zk>

@@ -1,0 +1,35 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addDrugRoutesWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	com.nzion.domain.drug.Drug drug = arg.get("drug");  
+	List drugDosageRoutes = drugService.getUnaddedRoutesForDrug(drug);
+	]]></zscript>
+	<window id="addDrugRoutesWin" mode="modal" position="center,top" width="60%" height="70%"
+	title="Add Drug Dosage Routes" closable="true">
+	<div width="97%" style="padding:5px">
+		<panel title="Drug Dosage Routes" id="routes">
+			<attribute name="onAddClick">
+			drug.getRoutes().addAll(com.nzion.util.ViewUtil.getSelectedItems(drugDosageDisplayGrid));
+			commonCrudService.save(drug);
+			addDrugRoutesWin.detach();
+			</attribute>
+			<panelchildren>
+				<toolbar listenercomponent="${routes}" hidedelete="true" hidesearch="true" hidecancel="true"/>
+				<listbox multiple="true" checkmark="true" width="100%" id="drugDosageDisplayGrid"  mold="paging"
+					model="@{drugDosageRoutes}" pageSize="10" pagingPosition="top">
+					<listhead>
+						<listheader label="Drug Dosage Routes"/>
+					</listhead>
+					<listitem self="@{each='drugDosageRoute'}" value="@{drugDosageRoute}">
+						<listcell>
+							<label value="@{drugDosageRoute}" />
+						</listcell>
+					</listitem>
+				</listbox>
+			</panelchildren>
+		</panel>
+		</div>
+	</window>
+</zk>

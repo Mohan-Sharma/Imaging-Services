@@ -1,0 +1,11 @@
+<?page title="Location" contentType="text/html;charset=UTF-8"?>
+<zk>
+<zscript>
+setPageTitle("Locations", "");
+</zscript>
+	<window self="@{define(content)}">
+		<screen width="100%" pagetitle="Locations" listtitle="List of Locations" addpage="newLocation" editpage="newLocation" addmodepopup="true"
+			fields="locationCode, name, contacts.postalAddress.city,contacts.officePhone,locationType"
+			entityclass="com.nzion.domain.Location" hidedeletebtn="true" labels="Code, Location Name,City,Phone,Location Type" />
+	</window>
+</zk>

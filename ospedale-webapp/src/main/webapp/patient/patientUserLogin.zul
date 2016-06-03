@@ -1,0 +1,70 @@
+<?page id = "PUL"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientUserLogin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+    <zscript><![CDATA[
+		import com.nzion.util.UtilValidator;
+		import com.nzion.domain.Patient;
+		import com.nzion.zkoss.ext.Navigation;
+		import com.nzion.enums.CommunicationPreference;
+		com.nzion.service.UserLoginService userLoginService = com.nzion.util.Infrastructure.getSpringBean("userLoginService");
+		com.nzion.service.PatientService patientService = com.nzion.util.Infrastructure.getSpringBean("patientService");
+		Patient patient = Executions.getCurrent().getArg().get("entity");
+		com.nzion.zkoss.composer.PatientViewComposer viewComposer = new com.nzion.zkoss.composer.PatientViewComposer();
+		viewComposer.setId(patient.getId());
+
+		setPageTitle("Account No", patient.getAccountNumber());
+		viewComposer.setEventMessage("patient record updated");
+		boolean checkForUserLoginEligibility(){
+			return !userLoginService.hasPatientHavingUserLogin(patient) && UtilValidator.isNotEmpty(patient.getContacts().getEmail());
+		}
+	]]>
+    </zscript>
+    <window id="patientUserLogin" apply="${viewComposer}" style="margin-top:0px;" mode="modal" sclass="modalStyle">
+        <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Patient User Login</h:small>
+                <button type="button" zclass="close" onClick="patientUserLogin.detach();">×</button>
+            </h:h1>
+        </div>
+        <div class="container-fluid">
+            <div zclass="row-fluid">
+
+                <div zclass="span4">
+                    <label value="User Name"  mold="required"/>
+                    <textbox value="@{viewComposer.userName,save-when='updatePatient.onClick'}"
+                             constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}"
+                             w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                </div>
+                <div zclass="span4">
+                    <label value="Password" mold="required" />
+                    <textbox type="password"
+                             value="@{viewComposer.password,save-when='updatePatient.onClick'}"
+                             constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}"
+                             w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"  />
+                </div>
+                <div zclass="span4">
+                    <label value="Email" mold="required" />
+                    <textbox
+                            value="@{viewComposer.emailId,save-when='updatePatient.onClick'}"
+                            constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}"
+                            w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"  />
+                </div>
+
+            </div>
+
+        </div>
+
+        <div sclass="panelFoot">
+            <button id="updatePatient" label="Save" zclass="btn-success btn">
+                <attribute name="onClick">
+                    viewComposer.createOrUpdateUser();
+                    patientUserLogin.detach();
+                    com.nzion.util.UtilMessagesAndPopups.showSuccess();
+                </attribute>
+            </button>
+        </div>
+
+    </window>
+</zk>

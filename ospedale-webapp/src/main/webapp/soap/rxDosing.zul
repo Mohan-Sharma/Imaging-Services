@@ -1,0 +1,68 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./rxDosing"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk>
+	<zscript>
+	import com.nzion.service.common.CommonCrudService;
+	import com.nzion.util.Infrastructure;
+	import com.nzion.domain.emr.soap.PatientRx;
+	CommonCrudService commonCrudService = Infrastructure.getSpringBean("commonCrudService");
+	PatientRx patientRx=arg.get("patientRx");
+	com.nzion.domain.drug.Drug drug = commonCrudService.getById(com.nzion.domain.drug.Drug.class,patientRx.getDrug().getId());
+	Set drugRoutes = drug.getRoutes();
+	Set strengths = drug.getStrengths();
+	patientRx.setDrugDosageForm(drug.getDosageForm());
+	List quantities = commonCrudService.findByEquality(com.nzion.domain.drug.DrugSig.class,new String[]{"type"},new Object[]{"QUANTITY"});
+	List quantityQualifiers = commonCrudService.findByEquality(com.nzion.domain.drug.DrugSig.class,new String[]{"type"},new Object[]{"QUANTITY_QUALIFIER"});
+	List frequencies = commonCrudService.findByEquality(com.nzion.domain.drug.DrugSig.class,new String[]{"type"},new Object[]{"FREQUENCY"});
+	List supplyUoms = commonCrudService.findByEquality(com.nzion.domain.drug.DrugSig.class,new String[]{"type"},new Object[]{"SUPPLY_UOM"});
+</zscript>
+	<window title="Drug Dosing" height="50%" width="50%" border="normal" mode="modal" closable="true"
+		id="rxDosing">
+		<hlayout style="valign:top">
+			<vlayout width="100px">
+				<label value="Quantity" />
+				<listbox rows="10" model="@{quantities}" selectedItem="@{patientRx.quantity}">
+					<listitem self="@{each='quantity'}" label="@{quantity.description}" value="@{quantity}"/>
+				</listbox>
+			</vlayout>
+			<vlayout width="100px">
+				<label value="Qualifier" />
+				<listbox rows="10" model="@{quantityQualifiers}" selectedItem="@{patientRx.quantityQualifier}">
+					<listitem self="@{each='quantityQualifier'}" label="@{quantityQualifier.description}" value="@{quantityQualifier}"/>
+				</listbox>
+			</vlayout>
+			<vlayout width="100px">
+				<label value="Frequency" />
+				<listbox rows="10" model="@{frequencies}" selectedItem="@{patientRx.drugDirection}">
+					<listitem self="@{each='dosageFrequency'}" label="@{dosageFrequency.description}" value="@{dosageFrequency}"/>
+				</listbox>
+			</vlayout>
+			<vlayout width="150px">
+				<label value="Total Supply"></label>
+				<intbox value="@{patientRx.totalSupply}"/>
+				<label value="Supply Uom" />
+				<listbox rows="8" model="@{supplyUoms}" selectedItem="@{patientRx.supplyUom}">
+					<listitem self="@{each='dosageSupplyUom'}" label="@{dosageSupplyUom.description}" value="@{dosageSupplyUom}"/>
+				</listbox>
+			</vlayout>
+			<vlayout width="100px">
+				<label value="Route"/>
+				<listbox rows="10" model="@{drugRoutes}" selectedItem="@{patientRx.drugDosageRoute}">
+					<listitem self="@{each='route'}" label="@{route.description}" value="@{route}"/>
+				</listbox>
+			</vlayout>
+			<vlayout width="100px">
+				<label value="Strength"/>
+				<listbox rows="10" model="@{strengths}" selectedItem="@{patientRx.drugStrength}">
+					<listitem self="@{each='strength'}" label="@{strength}" value="@{strength}"/>
+				</listbox>
+			</vlayout>
+		</hlayout>
+		<button label="Close">
+			<attribute name="onClick">
+				rxDosing.detach();
+			</attribute>
+		</button>
+	</window>
+</zk>

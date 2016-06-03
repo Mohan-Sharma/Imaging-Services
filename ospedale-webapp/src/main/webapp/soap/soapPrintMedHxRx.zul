@@ -1,0 +1,68 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./printPatientRxWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xmlns:w="http://www.zkoss.org/2005/zk/client">
+
+<n:script>
+     //window.resizeTo(800,800);
+</n:script>
+
+	<zscript>
+		com.nzion.zkoss.composer.PatientSoapNoteController controller = new com.nzion.zkoss.composer.PatientSoapNoteController(Executions.getCurrent().getParameter("scheduleId"));
+		com.nzion.domain.Patient patient = controller.getPatient();
+		com.nzion.domain.Provider provider = controller.getProvider();
+		com.nzion.domain.Location location = controller.getSchedule().getLocation();
+		Date date = new Date();
+		
+		String sectionId = param.get("sectionId")[0];
+		Set patientRxs;
+		if(!(sectionId.equals("null"))){
+			Long RxSectionId = new Long(sectionId);
+			com.nzion.domain.emr.soap.MedicationHistorySection medHxSection = commonCrudService.getById(com.nzion.domain.emr.soap.MedicationHistorySection.class,new Long(sectionId));
+			patientRxs = medHxSection.getPatientRxs();
+			}
+		
+	</zscript>
+	<window id="printPatientRxWin"  width="100%"  height="100%" onCreate="Clients.print();" style="background: #fff;" >
+	<panel width="90%" height="100%" style="margin:50px">
+		<panelchildren>
+			<n:div align="center">
+			<include src="/soap/soapPrintBanner.zul" width="100%" height="100%" soapnotedate="${controller.soapNote.date}"/>
+			</n:div>
+			<separator/>
+			<image src="/images/icon-img-rx.jpg" height="25px" width="25px"/>
+			<space orient="vertical"/>
+			<n:table width="100%" border="1px" cellspacing="10px" cellpadding="10px">
+			<n:thead>
+				<n:tr>
+					<n:th>Drug Trade Name</n:th>
+					<n:th>Strength</n:th>
+					<n:th>Route</n:th>
+					<n:th>Direction</n:th>
+					<n:th>Site</n:th>
+					<n:th>Start Date</n:th>
+					<n:th>Discontinue Date</n:th>
+					<n:th>Status</n:th>
+				</n:tr>
+			</n:thead>
+			<n:tr forEach="${patientRxs}">
+					<n:td><label value="${each.drug.tradeName}"/></n:td>
+					<n:td><label value="${each.drugStrength}"/></n:td>
+					<n:td><label value="${each.drugDosageRoute}"/></n:td>
+					<n:td><label value="${each.drugDirection}"/></n:td>
+					<n:td><label value="${each.site}"/></n:td>
+					<n:td><label value="${each.startDate}"/></n:td>
+					<n:td><label value="${each.discontinueDate}"/></n:td>
+					<n:td><label value="${each.status}"/></n:td>
+			</n:tr>
+			</n:table>
+				<separator/>
+				<n:div align="center">
+				<include src="/soap/soapPrintFooter.zul" width="100%" height="100%"/>
+				</n:div>
+		</panelchildren>
+	</panel>
+	</window>
+</zk>

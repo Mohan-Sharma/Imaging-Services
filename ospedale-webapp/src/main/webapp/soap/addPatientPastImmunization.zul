@@ -1,0 +1,43 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addPatientPastImmunizationWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+<![CDATA[
+	com.nzion.domain.emr.soap.ImmunizationSection immunizationSection = arg.get("immunizationSoapSection");
+	com.nzion.zkoss.composer.PatientSoapNoteController patientSoapNoteController = arg.get("patientSoapNoteController");
+	com.nzion.domain.emr.soap.PatientImmunization patientImmunization = new com.nzion.domain.emr.soap.PatientImmunization();
+]]>
+</zscript>
+	<window id="addPatientPastImmunizationWindow" width="65%" mode="modal" title="New Immunizations"
+		closable="true" height="35%">
+		<div width="98%" style="padding:5px">
+		<div sclass="panelFoot">
+			<button label="Save">
+				<attribute name="onClick">
+				patientImmunization.setImmunization((com.nzion.domain.emr.Immunization)immunizationLookUp.getResult());
+				immunizationSection.addPatientImmunization(patientImmunization);
+				patientSoapNoteController.saveSoapSection();
+				addPatientPastImmunizationWindow.detach();
+				</attribute>
+			</button>
+			<button label="Cancel" forward="onClick=onCancel" />
+		</div>
+		<panel title="Add Past Vaccines">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div>
+						<label value="Vaccines" />
+						<lookup id="immunizationLookUp" entity="com.nzion.domain.emr.Immunization"
+							searchcolumns="code,description" displaycolumns="code,description" requiredcolumn="code" />
+					</div>
+					<div>
+						<label value="Location" />
+						<textbox value="@{patientImmunization.clinicLocation}"/>
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+		</div>
+	</window>
+</zk>

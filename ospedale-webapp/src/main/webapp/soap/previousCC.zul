@@ -1,0 +1,37 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./historyWindow"?>
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<zk>
+<zscript>
+	List soapNotes = arg.get("soapNotes");
+</zscript>
+<window id="historyWindow" height="30%" width="60%" title="Visit History" mode="modal" closable="true">
+		<!-- <div forEach="${soapNotes}">	
+			<label value="${each.date}"></label>
+			<name object="${each.provider}"/>
+		</div>	 -->
+		
+		<listbox model="@{soapNotes,load-after='self.onReloadRequest'}" >
+		<listhead>
+		     <listheader label="Date" /> 
+			 <listheader label="Doctor"/>
+		     <listheader label="${c:l('action')}"/> 
+		</listhead>
+		<listitem self="@{each='soap'}" value="@{soap}"> 
+		    <listcell>
+			<label value="@{soap.date}"></label>	
+			</listcell> 
+			<listcell>
+				<name object="@{soap.provider}" ></name>
+			</listcell>
+			<listcell>
+			<a label="View" id="view">
+			<attribute name="onClick">
+			com.nzion.domain.emr.soap.PatientSoapNote patientSoapNote = (com.nzion.domain.emr.soap.PatientSoapNote)self.getParent().getParent().getValue();
+			Executions.getCurrent().sendRedirect("/soap/soapnote.zul?scheduleId="+patientSoapNote.getSchedule().getId(),"_soapNote");
+			</attribute>
+			</a>
+			</listcell>
+			</listitem>
+			</listbox>
+	</window>
+</zk>

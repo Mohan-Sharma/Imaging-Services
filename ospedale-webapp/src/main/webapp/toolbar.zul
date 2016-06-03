@@ -1,0 +1,34 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+	Component listenercomponent = arg.get("listenercomponent");
+	boolean hideSearch = Boolean.parseBoolean((String) arg.get("hidesearch"));
+	boolean hideAdd = Boolean.parseBoolean((String) arg.get("hideadd"));
+	boolean hideDelete = Boolean.parseBoolean((String) arg.get("hidedelete"));
+	boolean hideCancel = Boolean.parseBoolean((String) arg.get("hidecancel"));
+</zscript>
+<div sclass="gridCont">
+	<div sclass="grid clr">
+		<n:table border="0" cellspacing="0" cellpadding="0" width="100%">
+			<n:thead>
+				<n:tr>
+					<n:td>
+						<a href="#popup" class="btn btn-mini" label="Add" id="addBtn" onClick='Events.postEvent("onAddClick", listenercomponent, null);' visible="${!hideAdd}"/>
+						<a href="#" class="btn btn-mini" label="Delete" onClick='Events.postEvent("onDeleteClick", listenercomponent, null);' visible="${!hideDelete}"/>
+						<a href="#" class="btn btn-mini" label="Cancel" onClick='Events.postEvent("onCancelClick", listenercomponent, null);' visible="${!hideCancel}"/>
+						<n:form>
+							<!-- <label value="Search" visible="${!hideSearch}"/> -->
+							<span class="searchBox" visible="${!hideSearch}">
+								<textbox name="search" id="txtSearch" onFocus="self.setValue(null);" onOK='Events.postEvent("onClick", searchBtn, null);'/>
+								<!-- <toolbarbutton zclass="toolbarSearchImg" id="searchBtn" onClick='Events.postEvent("onSearchClick", listenercomponent, txtSearch.getValue());'/> -->
+								<a href="#" id="searchBtn" class="btn btn-mini" label="Search" onClick='Events.postEvent("onSearchClick", listenercomponent, txtSearch.getValue());'/>
+							</span>
+						</n:form>
+					</n:td>
+				</n:tr>
+			</n:thead>
+		</n:table>
+	</div>
+</div>
+</zk>

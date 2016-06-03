@@ -1,0 +1,52 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./FixedAssets"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<zscript><![CDATA[
+	com.nzion.domain.FixedAsset fixedAsset = arg.get("entity");
+	fixedAsset = fixedAsset == null ? new com.nzion.domain.FixedAsset() : fixedAsset;
+    List locations = commonCrudService.getAll(com.nzion.domain.Location.class);
+	]]></zscript>
+<window id="FixedAssets" mode="modal" closable="true"  width="50%"  position="center" >
+			<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Consultation Room</h:small>
+                  <button type="button" zclass="close" onClick="FixedAssets.detach();">×</button>
+            </h:h1>
+        </div>
+        
+         <div zclass="container-fluid">
+           <div zclass="row-fluid">
+                <div zclass="span4">
+	              <label value="Name"></label> 
+				  <label value=" *" zclass="labelReq"/>
+				  <textbox id = "name" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" value="@{fixedAsset.fixedAssetName,save-when='Save.onClick'}" constraint="no empty"/>
+                </div>
+             </div>   
+             <div zclass="row-fluid">
+                <div zclass="span4">
+	              <label value="Description"></label> 
+				  <label value=" *" zclass="labelReq"/>
+				  <textbox id = "des" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" 
+				  w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" 
+				  value="@{fixedAsset.description,save-when='Save.onClick'}" constraint="no empty" rows="2"/>
+                </div>
+          </div>
+         </div>
+		<div sclass="panelFoot">					
+			<button label="Save" zclass="btn-success btn" id="Save">
+			<attribute name="onClick">
+			try{
+			if(com.nzion.util.UtilValidator.isEmpty(fixedAsset.getId())){
+				fixedAsset.setLocatedAt(com.nzion.util.Infrastructure.getSelectedLocation());
+			}
+				commonCrudService.save(fixedAsset);
+				FixedAssets.detach();
+			}catch(Exception e){
+				com.nzion.util.ViewUtil.disPlayUniqueErrorMessage(e,"Resource Name '"+fixedAsset.getFixedAssetName()+"' already exists.");
+			}
+			</attribute>
+			</button>
+			<button  label="Cancel" id="Cancel" onClick='FixedAssets.detach()' ></button>
+		</div>
+</window>
+</zk>

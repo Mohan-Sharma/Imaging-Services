@@ -1,0 +1,13 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		setPageTitle("Drug Direction", "");
+		com.nzion.domain.drug.DrugSig dSig = new com.nzion.domain.drug.DrugSig("FREQUENCY");
+		List entities = commonCrudService.searchByExample(dSig);
+	</zscript>
+	<window>
+		<screen width="100%" pagetitle="Drug Direction" listtitle="List of Drug Directions" addpage="addDrugDirection" entityclass="com.nzion.domain.drug.DrugSig"
+			fields="code, description" labels="Code,Description" addmodepopup="true" hidedeletebtn="true" hideSearch="false" listModel="${entities}" searchfields="code,description"/>
+	</window>
+</zk>

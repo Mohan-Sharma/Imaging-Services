@@ -1,0 +1,306 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./rcmPreferenceWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+    <window id="rcmPreferenceWindow" vflex="min"  hflex="min" contentStyle="overflow:auto;" apply="org.zkoss.bind.BindComposer" viewModel="@id('vm') @init('com.nzion.view.practice.RCMPreferenceVM')" >
+      <panel title="Lab RCM Preferences" border="normal">
+      <panelchildren style="overflow:auto;height:400px; border:1px solid #86A4BE;border-left:0px;border-right:0px;">
+        <listbox model="@bind(vm.schedulingPreference)"  >
+              <listhead>
+                <listheader label="Visit Type"/>
+                <listheader label="Request Type"/>
+                <listheader>
+                 <vbox>
+                        <label value = "Advance " zclass=" z-listheader-cnt"/>
+                        <label value = "Amount %" zclass=" z-listheader-cnt"/>
+                 </vbox>
+                </listheader>
+                <listheader>
+                <vbox>
+                     <label value ="Advance" zclass=" z-listheader-cnt"/>
+                     <label value ="Amount" zclass=" z-listheader-cnt"/>
+                </vbox>
+                </listheader>
+                <listheader>
+                      <vbox>
+                      <label value="Value Added" zclass=" z-listheader-cnt" />
+                      <label value="Fee %" zclass=" z-listheader-cnt" />
+                      </vbox>
+                </listheader>
+                <listheader>
+                     <vbox>
+                     <label value="Value Added" zclass=" z-listheader-cnt" />
+                     <label value="Fee " zclass=" z-listheader-cnt" />
+                     </vbox>
+                </listheader>
+                <listheader>
+                 <vbox>
+                     <label value = "Show Value" zclass="z-listheader-cnt"/>
+                     <label value = "Added Fee"  zclass="z-listheader-cnt"/>
+                 </vbox>
+                 </listheader>
+                <listheader>
+                    <vbox>
+                        <label value="Lead Time " zclass="z-listheader-cnt"></label>
+                        <label value="Allowed" zclass="z-listheader-cnt"></label>
+                        <label value="(# of hours)" zclass="z-listheader-cnt"></label>
+                    </vbox>
+                </listheader>
+                <listheader>
+                    <vbox>
+                        <label value="Maximum " zclass="z-listheader-cnt"></label>
+                        <label value="Amount Allowed" zclass="z-listheader-cnt"></label>
+                        <label value="(# of hours)" zclass="z-listheader-cnt"></label>
+                    </vbox>
+                </listheader>
+              </listhead>
+              <template name="model" var="scp">
+              <listitem value="@bind(scp)">
+                 <listcell label="@bind(scp.visitType.description)"/>
+                 <listcell label="Scheduling"/>
+                 <listcell>
+                      <decimalbox value="@bind(scp.advanceAmountPercent)" constraint="no negative" format="#,##0.000">
+                          <attribute name="onChange">
+                              <![CDATA[
+                                 if(self.getValue().compareTo(new java.math.BigDecimal("50"))<0 || self.getValue().compareTo(new java.math.BigDecimal("100"))>0 ) {
+                                    com.nzion.util.UtilMessagesAndPopups.showError("Advance %ge will not be less than 50% (>=50% and upto 100%)");
+                                    self.setValue(java.math.BigDecimal.ZERO);
+                                 }
+                              ]]>
+                          </attribute>
+                      </decimalbox>
+                 </listcell>
+                 <listcell>
+                      <decimalbox value="@bind(scp.advanceAmount)" constraint="no negative" format="#,##0.000" disabled="true" />
+                 </listcell>
+                 <listcell>
+                      <decimalbox value="@bind(scp.convenienceFeePercent)" constraint="no negative" format="#,##0.000" disabled="true" />
+                 </listcell>
+                 <listcell>
+                      <decimalbox value="@bind(scp.convenienceFee)" constraint="no negative" format="#,##0.000" disabled="true" />
+                 </listcell>
+                 <listcell>
+                     <combobox selectedItem="@bind(scp.showConvenienceFee)" width="60px" disabled="true">
+                        <comboitem label="Y" value="Y"></comboitem>
+                        <comboitem label="N" value="N"></comboitem>
+                     </combobox>
+                 </listcell>
+                 <listcell>
+                      <decimalbox value="@bind(scp.leadTimeAllowed)"  constraint="no negative" disabled="true" />
+                 </listcell>
+                 <listcell>
+                       <decimalbox value="@bind(scp.maxTimeAllowed)"  constraint="no negative" disabled="true" />
+                 </listcell>
+              </listitem>
+              </template>
+        </listbox>
+        <listbox model="@bind(vm.patientCancellationPreferences)">
+               <listhead>
+                   <listheader label="Visit Type" />
+                   <listheader label="Request Type" />
+                   <listheader >
+                    <vbox>
+                        <label value="Cancellation Time" zclass="z-listheader-cnt"/>
+                        <label value="(# of hours before)" zclass="z-listheader-cnt"/>
+                    </vbox>
+                   </listheader>
+                   <listheader >
+                      <vbox>
+                            <label value="Patient Cancellation" zclass="z-listheader-cnt"/>
+                            <label value="Charge Provider %" zclass="z-listheader-cnt"/>
+                      </vbox>
+                   </listheader>
+                   <listheader >
+                      <vbox>
+                            <label value="Patient Cancellation" zclass="z-listheader-cnt"/>
+                            <label value="Charge Afya %" zclass="z-listheader-cnt"/>
+                      </vbox>
+                   </listheader>
+                   <listheader >
+                        <vbox>
+                            <label value="Refund Trigger" zclass="z-listheader-cnt"></label>
+                            <label value="(days after)" zclass="z-listheader-cnt"></label>
+                        </vbox>
+                   </listheader>
+               </listhead>
+                    <template name="model" var="pcp">
+                        <listitem value="@bind(pcp)">
+                            <listcell label="@bind(pcp.visitType.description)">
+                            </listcell>
+                            <listcell label="Patient Cancellation"/>
+                            <listcell>
+                               <decimalbox value="@bind(pcp.cancellationTime)" constraint="no negative" disabled="true"/>
+                            </listcell>
+                            <listcell>
+                               <decimalbox value="@bind(pcp.patientCancellationChargePercent)" constraint="no negative" format="#,##0.000" disabled="true"/>
+                            </listcell>
+                            <listcell>
+                               <decimalbox value="@bind(pcp.patientCancelationChargeAfyePercent)" constraint="no negative" format="#,##0.000" disabled="true"/>
+                            </listcell>
+                            <listcell>
+                               <decimalbox value="@bind(pcp.refundTrigger)" constraint="no negative" disabled="true"/>
+                            </listcell>
+                        </listitem>
+                    </template>
+        </listbox>
+        <listbox model="@bind(vm.labCancellationPreferences)">
+                    <listhead>
+                        <listheader label="Visit Type" />
+                        <listheader label="Request Type" />
+                        <listheader >
+        	                <vbox>
+        	                	<label value="Cancellation Time" zclass="z-listheader-cnt"/>
+        	                	<label value="(# of hours before)" zclass="z-listheader-cnt"/>
+        	                </vbox>
+                        </listheader>
+                        <listheader >
+        	                <vbox>
+        	                	<label value="Refund Amount as % of" zclass="z-listheader-cnt"/>
+        	                	<label value="Advance Amount" zclass="z-listheader-cnt"/>
+        	                </vbox>
+                        </listheader>
+                        <listheader >
+                           <vbox>
+                           		<label value="Value Added Fee" zclass="z-listheader-cnt"/>
+                           </vbox>
+                        </listheader>
+                        <listheader >
+                           <vbox>
+                           		<label value="Lab Cancellation" zclass="z-listheader-cnt"/>
+                           		<label value="Charge on Provider %" zclass="z-listheader-cnt"/>
+                           </vbox>
+                        </listheader>
+                    </listhead>
+                    <template name="model" var="lcp">
+        	            <listitem value="@bind(lcp)">
+        	            	<listcell label="@bind(lcp.visitType.description)">
+        	            	</listcell>
+        	            	<listcell label="Lab Cancellation"/>
+        	            	<listcell>
+        	            	   <decimalbox value="@bind(lcp.cancellationTime)" constraint="no negative" disabled="true"/>
+        	            	</listcell>
+        	            	<listcell>
+        	            	   <decimalbox value="@bind(lcp.refundAdvanceAmountPercent)" constraint="no negative" format="#,##0.000" disabled="true"/>
+        	            	</listcell>
+        	            	<listcell>
+        	            	   <label value="No Refund"/>
+        	            	</listcell>
+        	            	<listcell>
+        	            	   <decimalbox value="@bind(lcp.labCancellationChargePercent)" constraint="no negative" format="#,##0.000" disabled="true"/>
+        	            	</listcell>
+        	            </listitem>
+                    </template>
+        </listbox>
+        <listbox model="@bind(vm.patientReschedulingPreferences)">
+                    <listhead>
+                        <listheader label="Visit Type" />
+                        <listheader label="Request Type" />
+                        <listheader >
+        	                <vbox>
+        	                	<label value="Rescheduling Time" zclass="z-listheader-cnt"/>
+        	                	<label value="( # of hours before)" zclass="z-listheader-cnt"/>
+        	                </vbox>
+                        </listheader>
+                        <listheader >
+                           <vbox>
+                           		<label value="Patient Cancellation" zclass="z-listheader-cnt"/>
+                           		<label value="Charge Provider%" zclass="z-listheader-cnt"/>
+                           </vbox>
+                        </listheader>
+                        <listheader >
+                           <vbox>
+                           		<label value="Patient Cancellation" zclass="z-listheader-cnt"/>
+                           		<label value="Charge  Afya %" zclass="z-listheader-cnt"/>
+                           </vbox>
+                        </listheader>
+                        <listheader >
+                           <vbox>
+                           		<label value="Value Added Fee" zclass="z-listheader-cnt"/>
+                           </vbox>
+                        </listheader>
+                        <listheader >
+                           <vbox>
+                           		<label value="Refund Trigger" zclass="z-listheader-cnt"/>
+                           		<label value="(days after)" zclass="z-listheader-cnt"/>
+                           </vbox>
+                        </listheader>
+                    </listhead>
+                    <template name="model" var="patientRescheduling">
+        	            <listitem value="@bind(patientRescheduling)">
+        	            	<listcell label="@bind(patientRescheduling.visitType.description)">
+        	            	</listcell>
+        	            	<listcell label="Patient Rescheduling"/>
+        	            	<listcell>
+        	            	   <decimalbox value="@bind(patientRescheduling.reschedulingTime)" constraint="no negative" disabled="true"/>
+        	            	</listcell>
+        	            	<listcell>
+        	            	   <decimalbox value="@bind(patientRescheduling.patientCancellationChargeProviderPercent)" constraint="no negative" format="#,##0.000" disabled="true"/>
+        	            	</listcell>
+        	            	<listcell>
+        	            	   <decimalbox value="@bind(patientRescheduling.patientCancellationChargeAfyaPercent)" constraint="no negative" format="#,##0.000" disabled="true"/>
+        	            	</listcell>
+        	            	<listcell>
+        	            	   <label value="No Refund"/>
+        	            	</listcell>
+        	            	<listcell>
+        	            	   <decimalbox value="@bind(patientRescheduling.refundTrigger)" constraint="no negative" disabled="true"/>
+        	            	</listcell>
+        	            </listitem>
+                    </template>
+        </listbox>
+        <listbox model="@bind(vm.labReschedulingPreferences)">
+                    <listhead>
+                        <listheader label="Visit Type" />
+                        <listheader label="Request Type" />
+                        <listheader >
+        	                <vbox>
+        	                	<label value="Rescheduling Time" zclass="z-listheader-cnt"/>
+        	                	<label value="( # of hours before)" zclass="z-listheader-cnt"/>
+        	                </vbox>
+                        </listheader>
+                        <listheader >
+        	                <vbox>
+        	                	<label value="Refund Amount as % of" zclass="z-listheader-cnt"/>
+        	                	<label value="Advance Amount" zclass="z-listheader-cnt"/>
+        	                </vbox>
+                        </listheader>
+                        <listheader >
+                           <vbox>
+                           		<label value="Value Added Fee" zclass="z-listheader-cnt"/>
+                           </vbox>
+                        </listheader>
+                        <listheader >
+                           <vbox>
+                           		<label value="Lab Cancellation" zclass="z-listheader-cnt"/>
+                           		<label value="Charge %" zclass="z-listheader-cnt"/>
+                           </vbox>
+                        </listheader>
+                    </listhead>
+                    <template name="model" var="labRescheduling">
+        	            <listitem value="@bind(labRescheduling)">
+        	            	<listcell label="@bind(labRescheduling.visitType.description)">
+        	            	</listcell>
+        	            	<listcell label="Lab Rescheduling"/>
+        	            	<listcell>
+        	            	   <decimalbox value="@bind(labRescheduling.reschedulingTime)" constraint="no negative" disabled="true"/>
+        	            	</listcell>
+        	            	<listcell>
+        	            	   <decimalbox value="@bind(labRescheduling.refundAdvanceAmountPercent)" constraint="no negative" format="#,##0.000" disabled="true"/>
+        	            	</listcell>
+        	            	<listcell>
+        	            	   <label value="No Refund"/>
+        	            	</listcell>
+        	            	<listcell>
+        	            	   <decimalbox value="@bind(labRescheduling.labCancellationPercent)" constraint="no negative" format="#,##0.000" disabled="true"/>
+        	            	</listcell>
+        	            </listitem>
+                    </template>
+        </listbox>
+
+        <separator></separator>
+        <div sclass="panelFoot"  align="center" style="margin-top: 20px;">
+            <button label="Save" zclass="btn-success btn" onClick="@command('save')"/>
+        </div>
+      </panelchildren>
+      </panel>
+    </window>
+</zk>

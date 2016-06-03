@@ -1,0 +1,104 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./cptLookupWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+		import com.nzion.domain.emr.Cpt;
+		Textbox cptTextBox = arg.get("cptTextBox");
+		List cpts = new ArrayList();
+		Boolean multipleOpt = Boolean.valueOf((String)arg.get("multiple"));
+		Boolean txtBoxVisible = Boolean.valueOf((String)arg.get("txtboxvisible"));
+	]]>
+	</zscript>
+	<window id="cptLookupWindow" mode="modal" width="60%"  closable="true">
+		<panel title="Search Procedure By">
+			<panelchildren>
+			<div zclass="container-fluid">
+		                     <div zclass="row-fluid">
+                             <div zclass="span6">
+						<label value="Procedure Code" />
+						<textbox sclass="span12" id="codeTextbox" />
+					</div>
+					<div zclass="span6">
+						<label value="Procedure Description" />
+						<textbox sclass="span12" id="descriptionTextBox" />
+					</div>
+				</div>
+				</div>
+				<space></space>
+				<div sclass="panelFoot">
+					<button label="Search" id="searchBtn" zclass="btn-primary btn">
+						<attribute name="onClick">
+						<![CDATA[
+						       //  if(com.nzion.util.UtilValidator.isEmpty(codeTextbox.getValue()) && com.nzion.util.UtilValidator.isEmpty(descriptionTextBox.getValue()) || (com.nzion.util.UtilValidator.isNotEmpty(codeTextbox.getValue()) && codeTextbox.getValue().length()<3) || (com.nzion.util.UtilValidator.isNotEmpty(descriptionTextBox.getValue()) && descriptionTextBox.getValue().length()<3)){
+								  //  	com.nzion.util.UtilMessagesAndPopups.showError("Enter atleast 3 character to search");
+								  //  	return;
+								  //  }
+							cpts = diagnosisService.searchCptBy(codeTextbox.getValue(), descriptionTextBox.getValue());
+							searchLabel.setVisible(com.nzion.util.UtilValidator.isEmpty(cpts));
+							cptDisplayGrid.setMultiple(multipleOpt);
+							cptDisplayGrid.setCheckmark(multipleOpt);
+							addBtnSection.setVisible(multipleOpt);
+						]]>
+						</attribute>
+					</button>
+				</div>
+			</panelchildren>
+		</panel>
+		<panel title="Search Results">
+			<panelchildren>
+				<label id="searchLabel" value="No Record Found" visible="false" />
+				<div sclass="panelFoot" id="addBtnSection" visible="${multipleOpt}">
+					<a label="Add" sclass="btn">
+						 <n:i class="icon-plus"></n:i>
+						<attribute name="onClick">
+						<![CDATA[
+						    Set cpts = new HashSet(com.nzion.util.ViewUtil.getSelectedItems(cptDisplayGrid));
+//						    if(txtBoxVisible){
+//						    StringBuilder cptCodes = new StringBuilder();
+//						    for(Cpt cpt : cpts)
+//						 	   cptCodes.append(cpt.getId()).append(",");
+//						    cptTextBox.setValue(cptCodes.toString());
+//						    }
+							Events.postEvent("onChange",cptTextBox,cpts);
+							cptLookupWindow.detach();
+							]]>	
+						</attribute>
+					</a>
+				</div>
+				<div sclass="dataTables_scrollBody" height="300px" style="overflow:auto">
+					<listbox model="@{cpts,load-after='self.onReloadRequest,searchBtn.onClick'}" id="cptDisplayGrid">
+						<listhead>
+							<listheader label="Procedure Code" width="20%" />
+							<listheader label="Short Description" width="20%" />
+							<!-- <listheader label="Medium Description" /> -->
+							<listheader label="Long Description" width="60%" />
+						</listhead>
+						<listitem self="@{each='cpt'}" value="@{cpt}">
+							<listcell>
+								<label value="@{cpt.id}" />
+							</listcell>
+							<listcell>
+								<label value="@{cpt.shortDescription}" />
+							</listcell>
+						<!-- 	<listcell label="@{cpt.description}" /> -->
+							<listcell label="@{cpt.longDescription}" />
+							<attribute name="onDoubleClick">
+							if(!multipleOpt){
+								Cpt cpt = (Cpt) self.getValue();
+								cptTextBox.setValue(cpt.getDescription());
+								Events.postEvent("onChange", cptTextBox, cpt);
+								cptLookupWindow.detach();
+							}	
+							</attribute>
+						</listitem>
+					</listbox>
+				</div>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot">
+			<button label="Cancel" forward="onClick=onCancel" />
+		</div>
+	</window>
+</zk>

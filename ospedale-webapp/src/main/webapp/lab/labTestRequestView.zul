@@ -1,0 +1,68 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./labTestViewWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+		List labOrders = labService.getLabOrderByStatus("PENDING");
+	]]>
+	</zscript>
+	<window id="labTestViewWindow" height="100%" apply="${labTestResultController}">
+	<attribute name="onRestore">
+	   labRequestViewPanel.setVisible(true);
+	   processLabRequestInclude.setVisible(false);
+	</attribute>
+		<panel id="labRequestViewPanel">
+			<panelchildren>
+			<separator/>
+			<div align="right">
+				<label value="Filter By Status:"/>
+				<listbox id="statusListBox" mold="select">
+				<listitem label="Pending" value="PENDING"/>
+				<listitem label="Completed" value="Completed"/>
+				<listitem label="Sent" value="Sent"/>
+				<attribute name="onSelect">
+				String labOrderStatus = (String)self.getSelectedItem().getValue();
+				labOrders = labService.getLabOrderByStatus(labOrderStatus);
+				</attribute>
+				</listbox>
+			</div>
+			<separator/>
+				<div sclass="dataTables_scrollBody" style="overflow: auto; height: 330px;">
+					<listbox model="@{labOrders,load-after='statusListBox.onSelect'}">
+						<listhead>
+							<listheader label="Request ID" />
+							<listheader label="Patient Name" />
+							<listheader label="Doctor Name" />
+							<listheader label="Encounter ID" />
+							<listheader label="Status" />
+						</listhead>
+						<listitem self="@{each='labOrder'}" value="@{labOrder}">
+							<listcell label="@{labOrder.orderId}" />
+							<listcell label="@{labOrder.patientId,converter='com.nzion.view.component.IdToNameConverter'}" >
+							<custom-attributes partyType="PATIENT"/>
+							</listcell>
+							<listcell label="@{labOrder.providerId,converter='com.nzion.view.component.IdToNameConverter'}">
+							<custom-attributes partyType="PROVIDER"/>
+							</listcell>
+							<listcell label="@{labOrder.encounterId}" />
+							<listcell label="@{labOrder.status}"/>
+							<attribute name="onDoubleClick">
+								session.setAttribute("labOrder",self.getValue());
+								processLabRequestInclude.setSrc("/lab/processLabTestRequest.zul");
+								labRequestViewPanel.setVisible(false);
+	  							processLabRequestInclude.setVisible(true);
+	  							Events.postEvent("onClick",labTestViewWindow.getParent().getParent().getPreviousSibling().getFirstChild(),null);
+							</attribute>
+						</listitem>
+					</listbox>
+				</div>
+			</panelchildren>
+		</panel>
+		<panel>
+		<panelchildren>
+		  	<include id="processLabRequestInclude"/>
+		</panelchildren>
+	</panel>
+	</window>
+</zk>

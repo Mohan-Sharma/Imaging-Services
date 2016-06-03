@@ -1,0 +1,203 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addEditImmunization"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+		<![CDATA[		
+		import com.nzion.zkoss.composer.PatientSoapNoteController;
+		import com.nzion.domain.emr.soap.*;
+		import com.nzion.zkoss.composer.SoapImmunizationComposer;
+		import com.nzion.domain.emr.soap.PatientImmunization;
+		PatientSoapNoteController patientSoapNoteController = (PatientSoapNoteController) arg.get("patientSoapNoteController");
+		com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+		ImmunizationSection immunizationSoapSection =arg.get("immunizationSoapSection");
+		PatientImmunization patientImmunization = arg.get("patientImmunization");
+		SoapImmunizationComposer soapImmunizationComposer=arg.get("soapImmunizationComposer");
+		soapImmunizationComposer.setImmunization(patientImmunization.getImmunization());
+		com.nzion.domain.emr.VaccineLot vaccineLot = patientImmunization.getLotNumber();
+		List drugSitesAll = commonCrudService.getAll(com.nzion.domain.drug.Site.class);
+		List drugRoutesAll = commonCrudService.getAll(com.nzion.domain.drug.DrugDosageRoute.class);
+		List cpts = null;
+		boolean inhouse = false;         
+		boolean isInhouse = patientImmunization.isAdministeredAtInhouse();
+		]]>
+	</zscript>
+<window title="Immunization" closable="true" width="60%;"  id="addEditImmunization" mode="modal">
+		<div style="margin-right:20px">					
+		<div style="display: block;" id="dataSection">
+			<div id="panelContainer" sclass="panelCont" style="border:0px" height="250px">
+				<div>
+					<radiogroup id="administeredRadioGrp">
+					<attribute name="onCreate">
+                       route.setDisabled("outside".equalsIgnoreCase(self.getSelectedItem().getValue()));
+                       siteCombobox.setDisabled("outside".equalsIgnoreCase(self.getSelectedItem().getValue()));
+                       productTextBox.setDisabled("outside".equalsIgnoreCase(self.getSelectedItem().getValue()));
+                       newlotCombobox.setDisabled("outside".equalsIgnoreCase(self.getSelectedItem().getValue()));
+                   </attribute>
+					<attribute name="onCheck">
+						if("outside".equalsIgnoreCase(self.getSelectedItem().getValue())){
+						patientImmunization.setLotNumber(null);
+						patientImmunization.setRoute(null);
+						patientImmunization.setSite(null);
+						patientImmunization.setImmunization(null);
+						patientImmunization.setAdministeredUnits(null);
+						Events.postEvent("onReload",dataSection,null);
+						}
+						newlotCombobox.setDisabled("outside".equalsIgnoreCase(self.getSelectedItem().getValue()));
+						productTextBox.setDisabled("outside".equalsIgnoreCase(self.getSelectedItem().getValue()));
+						route.setDisabled("outside".equalsIgnoreCase(self.getSelectedItem().getValue()));
+						siteCombobox.setDisabled("outside".equalsIgnoreCase(self.getSelectedItem().getValue()));
+					</attribute>
+						<hbox>
+							<radio id="inhouseRadioButton" label="In House" value="inhouse">
+							<attribute name="onCheck">
+								inhouse = true;
+								//Clients.closeErrorBox(administeredOnDateBox);
+								administeredOnDateBox.clearErrorMessage();
+								administeredOnDateBox.setConstraint("no past");
+							</attribute>
+							<attribute name="onCreate">
+								self.setChecked(isInhouse);
+								if(isInhouse)
+									Events.postEvent("onCheck",self,null);
+							</attribute>
+							</radio>
+							<radio id="outSideRadioButton" label="Outside" value="outside">
+							<attribute name="onCheck">
+								//Clients.closeErrorBox(administeredOnDateBox);
+								administeredOnDateBox.clearErrorMessage();
+								administeredOnDateBox.setConstraint("no future");
+								inhouse = false;
+								unitTxtBox.setReadonly(false);
+							</attribute>
+							<attribute name="onCreate">
+								self.setChecked(!isInhouse);
+								if(!isInhouse)
+									Events.postEvent("onCheck",self,null);
+							</attribute>
+							</radio>
+						</hbox>
+					</radiogroup>
+				</div>
+				<div width="100%">
+					<label value="Vaccine Name" />
+					<label value="*" style="color:red"/>
+						<textbox  id="immunizationTextBox" readonly="true" value="@{patientImmunization.immunization.fullVaccineName,load-after='dataSection.onReload'}"/>
+						<!-- <span id="lookUpBtn" sclass="linkBtn linkBtnOn"> -->
+							<a disabled="${controller.readonly}" sclass="lookupBtn">
+								<attribute name="onClick">
+									Executions.createComponents("/emr/immunization-lookUp.zul", null, com.nzion.util.UtilMisc.toMap(
+											"soapImmunizationComposer", soapImmunizationComposer, "immunizationTextBox", immunizationTextBox,
+											"patientSoapNoteController", patientSoapNoteController, "patientImmunization", patientImmunization,
+											"dataSection", dataSection,"saveButton",saveButton));
+								</attribute>
+								Lookup
+							</a>
+						<!-- </span> -->
+				</div>
+				<div>
+					<label value="Route" />
+					<combobox id="route"  model="@{drugRoutesAll,load-after='dataSection.onReload'}" selectedItem="@{patientImmunization.route,load-after='administeredRadioGrp.onCheck',save-when='saveButton.onClick'}">
+						<comboitem self="@{each='route'}" label="@{route.description}" />
+					</combobox>
+				</div>
+				
+				<div >
+					<label value="Administered On"></label>
+					<datebox
+						value="@{patientImmunization.administeredOn,load-after='dataSection.onReload,newlotCombobox.onSelect',save-when='saveButton.onClick'}" id="administeredOnDateBox" />
+				</div>
+				
+				<div >
+					<label value="Lot Number" />
+					<combobox id="newlotCombobox" style="width:98%" 
+						model="@{soapImmunizationComposer.vaccineLots,load-after='dataSection.onReload'}"
+						selectedItem="@{patientImmunization.lotNumber,load-after='administeredRadioGrp.onCheck',save-when='saveButton.onClick'}" readonly="true">
+						<comboitem self="@{each='vacLot'}" label="@{vacLot.lotNumber}" value="@{vacLot}" />
+						<attribute name="onSelect">
+							vaccineLot = self.getSelectedItem() != null ? self.getSelectedItem().getValue() : null;
+							patientImmunization.setLotNumber(vaccineLot);
+							unitTxtBox.setReadonly(true);
+							patientImmunization.setAdministeredUnits(vaccineLot.getUnit());
+						</attribute>
+					</combobox>
+				</div>
+				<div>
+					<label value="Product Name" />
+					<textbox id="productTextBox"
+					 value="@{patientImmunization.lotNumber.productName,load-after='administeredRadioGrp.onCheck,dataSection.onReload,newlotCombobox.onSelect',save-when='saveButton.onClick'}" />
+				</div>
+				<div>
+					<label value="Administered Amount"></label>
+					<label value="*" style="color:red"/>
+					<doublebox id="amountTxtBx" constraint="no negative,no empty"
+						value="@{patientImmunization.administeredAmount,load-after='dataSection.onReload,newlotCombobox.onSelect',save-when='saveButton.onClick'}" />
+				</div>
+				<div>
+					<label value="Site"  />
+					<combobox id="siteCombobox"  model="@{drugSitesAll,load-after='dataSection.onReload'}" selectedItem="@{patientImmunization.site,load-after='administeredRadioGrp.onCheck',save-when='saveButton.onClick'}">
+						<comboitem self="@{each='site'}" label="@{site.description}" />
+					</combobox>
+				</div>
+				<div >
+					<label value="Expiry Date" />
+					<datebox id="expiryDateBox" readonly="true" disabled="true"
+						value="@{patientImmunization.lotNumber.expiryDate,load-after='administeredRadioGrp.onCheck,dataSection.onReload,newlotCombobox.onSelect',save-when='saveButton.onClick'}" />
+				</div>
+				<div >
+					<label value="Administered Units" mold="required"></label>
+					<textbox id="unitTxtBox"
+						value="@{patientImmunization.administeredUnits,load-after='administeredRadioGrp.onCheck,dataSection.onReload,newlotCombobox.onSelect',save-when='saveButton.onClick'}" />
+				</div>
+				
+				
+			<div >
+				<include src="/soap/soapAuditInfo.zul" record="${patientImmunization}" id="auditInfoInclude"/>
+			</div>	
+			</div>
+		</div>
+		<div sclass="panelFoot">
+			<button disabled="${controller.readonly}" label="Save" zclass="btn btn-success"  id="saveButton">
+				<attribute name="onClick">
+					<![CDATA[
+						if(patientImmunization.getImmunization() == null){
+							com.nzion.util.UtilMessagesAndPopups.showError("Vaccine Name Required");
+							return;
+						}	
+						
+					    if(patientImmunization.getLotNumber() == null && com.nzion.util.UtilValidator.isEmpty(patientImmunization.getAdministeredUnits())){
+					    	com.nzion.util.UtilMessagesAndPopups.showError("Administered units is required");
+							return;
+					    }
+						if (expiryDateBox.getValue() != null && !expiryDateBox.getValue().after(new Date())) {
+							com.nzion.util.UtilMessagesAndPopups.showError("Vaccine Got Expired Cannot be Administered");
+							return;
+						}
+						if(patientImmunization.getLotNumber()!= null && inhouse){
+							if(patientImmunization.getAdministeredAmount() > vaccineLot.getDosesRemaining()){
+								throw new WrongValueException(amountTxtBx,"Administered amount is exceeding choosen vaccine lot dosage amount");
+							}
+							patientImmunization.getLotNumber().setDosesRemaining(vaccineLot.getDosesRemaining() - patientImmunization.getAdministeredAmount());
+							commonCrudService.save(vaccineLot);
+						}
+						if(patientImmunization.getId() == null){
+						patientImmunization.setPatient(patientSoapNoteController.getPatient());
+						patientImmunization.setAdministeredAtInhouse(inhouse);
+						patientImmunization.setLotNumber(vaccineLot);
+						patientImmunization.setStatus("ADMINISTERED");
+						immunizationSoapSection.addPatientImmunization(patientImmunization);
+						patientSoapNoteController.saveSoapSection();
+						}else{
+							commonCrudService.save(patientImmunization);
+						}
+						
+						if(!immunizationSoapSection.equals(patientImmunization.getSoapSection()))
+							commonCrudService.save(patientImmunization);
+						Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null);
+						addEditImmunization.detach();
+						]]>
+					</attribute>
+			</button>
+		</div>
+		</div>
+</window>
+</zk>

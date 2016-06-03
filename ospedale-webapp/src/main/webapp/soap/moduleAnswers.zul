@@ -1,0 +1,147 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapModuleAnswersWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+
+	<zscript>
+	setPageTitle("Module Answers", "");
+	import com.nzion.zkoss.composer.emr.SoapModuleAnswersController;
+	import com.nzion.zkoss.ext.EntityDropdownRenderer;
+	SoapModuleAnswersController answersController = new SoapModuleAnswersController();
+	EntityDropdownRenderer moduleDropdownRenderer = new EntityDropdownRenderer("moduleName");
+	EntityDropdownRenderer questionDropdownRenderer = new EntityDropdownRenderer();
+	List moduleOrganSytems = commonCrudService.getAll(com.nzion.domain.emr.OrganSystem.class);
+</zscript>
+
+	<window apply="${answersController}" width="100%" id="soapModuleAnswersWindow">
+		<style>.z-combobox-inp{ width:320px !important; }</style>
+		<panel title="Manage Answers">
+			<panelchildren style="padding:10px">
+				<h:table width="100%">
+					<h:tr width="100%">
+						<h:td>
+							<label value="Module" />
+							<label value="*" style="color:red" />
+						</h:td>
+						<h:td>
+							<label value="Organ System" id="organSystemLabel" visible="false" />
+						</h:td>
+					</h:tr>
+					<h:tr>
+						<h:td>
+							<combobox model="@{answersController.modules}" itemRenderer="${moduleDropdownRenderer}"
+								id="soapModuleCombo" selectedItem="@{answersController.selectedModule}"
+								onSelect="answersController.fetchModuleQuestions();checkForRos((com.nzion.domain.emr.SoapModule)self.getSelectedItem().getValue())"
+								readonly="true" onChange="checkForRos((com.nzion.domain.emr.SoapModule)self.getSelectedItem().getValue())" />
+						</h:td>
+						<h:td>
+							<combobox id="organSystemCombo" model="@{moduleOrganSytems,load-after='self.onReloadRequest'}"
+								visible="false"
+								onSelect='answersController.fetchModuleQuestions();Events.postEvent("onReloadRequest",soapModuleQuestionCombo,null)'
+								onChange='answersController.fetchModuleQuestions();Events.postEvent("onReloadRequest",soapModuleQuestionCombo,null)'
+								selectedItem="@{answersController.organSystem}">
+								<comboitem self="@{each='organSystem'}" value="@{organSystem}" label="@{organSystem.desc}" />
+							</combobox>
+						</h:td>
+					</h:tr>
+					<h:tr>
+						<h:td>
+							<label value="Module Question" />
+							<label value="*" style="color:red" />
+						</h:td>
+
+					</h:tr>
+					<h:tr width="100%">
+						<h:td>
+							<combobox model="@{answersController.moduleQuestions, load-after='self.onReloadRequest'}"
+								itemRenderer="${questionDropdownRenderer}" id="soapModuleQuestionCombo"
+								onSelect="answersController.fetchModuleQuestionAnswers()" selectedItem="@{answersController.selectedQuestion}"
+								onChange="answersController.fetchModuleQuestionAnswers()">
+							</combobox>
+						</h:td>
+					</h:tr>
+				</h:table>
+			</panelchildren>
+		</panel>
+		<zscript>
+		<![CDATA[
+	void checkForRos(com.nzion.domain.emr.SoapModule soapModule) {
+	organSystemLabel.setVisible("ROS".equals(soapModule.getModuleName())
+			|| "Examination".equals(soapModule.getModuleName()));
+	organSystemCombo.setVisible("ROS".equals(soapModule.getModuleName())
+			|| "Examination".equals(soapModule.getModuleName()));
+	Events.postEvent("onReloadRequest", soapModuleQuestionCombo, null);
+
+	}
+	void validate() {
+	if (soapModuleCombo.getSelectedItem() == null) throw new WrongValueException(soapModuleCombo, "Module Required");
+	if (soapModuleQuestionCombo.getSelectedItem() == null)
+		throw new WrongValueException(soapModuleQuestionCombo, "Question Required");
+	}
+]]>
+		</zscript>
+		<box widths="100%" width="100%" id="gridRoot">
+			<div sclass="gridCont">
+				<div sclass="panelHeadTop pagination">
+					<div sclass="fl">
+						<a href="#" label="Answers" />
+					</div>
+					<div sclass="fr">
+						<paging detailed="true" id="listboxPaging" pageSize="10" pageIncrement="1" />
+					</div>
+				</div>
+			</div>
+			<div sclass="grid clr">
+				<n:table border="0" cellspacing="0" cellpadding="0">
+					<n:head>
+						<n:tr>
+							<n:td>
+								<a href="#popup" class="addBtn" label="Add" id="addAnswer"
+									onClick="validate();answersController.addAnswer()" />
+									<a href="#" class="actvBtn" onClick='answersController.activateAnswer()' label="Activate" />
+								<a href="#" class="dactvBtn" label="Deactivate"
+									onClick="answersController.openDeactivateReasonWindow()" />
+							</n:td>
+						</n:tr>
+					</n:head>
+				</n:table>
+				<listbox multiple="true" id="answerListBox" selectedItem="@{answersController.selectedAnswers,converter=com.nzion.view.component.MultipleListitemBindingConverter}"
+					model="@{answersController.moduleQuestionAnswers,load-after='soapModuleQuestionCombo.onSelect,self.onReloadRequest'}"
+					mold="paging" paginal="${listboxPaging}" checkmark="true">
+					<listhead>
+						<listheader label="Name" />
+						<listheader label="Type" />
+					</listhead>
+					<listitem self="@{each='answer'}" value="@{answer}">
+						<listcell label="@{answer.name}" />
+						<listcell label="@{answer.answerType}" />
+						<attribute name="onDoubleClick">
+							answersController.openEditAnswerWindow(self);
+						</attribute>
+					</listitem>
+				</listbox>
+				<!-- Set visible True when Required -->
+				<tree id="answersTree"
+					model="@{answersController.answersTreeModel,load-after='soapModuleQuestionCombo.onSelect'}"
+					treeitemRenderer="${answersController.answersTreeItemRenderer}" multiple="true" checkmark="true" zclass="z-dottree"
+					fixedLayout="true" mold="paging" pageSize="10" pagingPosition="top" visible="false">
+					<treecols>
+						<treecol label="Name" />
+						<treecol label="Type" />
+					</treecols>
+				</tree>
+
+				<menupopup id="alphaNumericTreeRowPopup">
+					<menuitem label="Add" onClick="answersController.addResponse(com.nzion.enums.AnswerType.ALPHANUMERIC)" />
+				</menupopup>
+				<menupopup id="answerTreeRowPopup">
+					<menuitem label="Add AlphaNumeric Response"
+						onClick="answersController.addResponse(com.nzion.enums.AnswerType.ALPHANUMERIC)" />
+					<menuitem label="Add Numeric Response"
+						onClick="answersController.addResponse(com.nzion.enums.AnswerType.NUMERIC)" />
+				</menupopup>
+			</div>
+		</box>
+	</window>
+
+</zk>

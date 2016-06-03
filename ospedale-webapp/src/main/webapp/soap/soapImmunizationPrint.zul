@@ -1,0 +1,43 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	com.nzion.service.SoapNoteService soapNoteService = com.nzion.util.Infrastructure.getSpringBean("soapNoteService");
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+		Long scheduleId = new Long(param.get("scheduleId")[0]);
+		com.nzion.domain.Schedule schedule = commonCrudService.getById(com.nzion.domain.Schedule.class,scheduleId);
+		com.nzion.domain.Patient patient = schedule.getPatient();
+		com.nzion.domain.Provider provider = (com.nzion.domain.Provider)schedule.getPerson();
+		Set immunizations = soapNoteService.getAllPatientImmunization(patient);
+		com.nzion.domain.emr.soap.PatientSoapNote patientSoapNote = commonCrudService.findUniqueByEquality(com.nzion.domain.emr.soap.PatientSoapNote.class,new String[]{"schedule"},new Object[]{schedule});
+	</zscript>
+	<window id="soapNotePrintWin" width="100%" height="50%">
+		<attribute name="onCreate">
+			Clients.print();
+		</attribute>
+		<div align="center" width="100%" height="100%">
+<panel width="90%" height="100%" style="border:none" zclass="none">
+	<panelchildren>
+	<n:div align="center">
+	<include src="/soap/soapPrintBanner.zul" width="100%" height="100%" soapnotedate="${patientSoapNote.date}"/>
+	</n:div>
+	<separator/>
+			<listbox id="pastImmunizationListBox">
+					<listhead style="border:none">
+						<listheader label="Vaccine"/>
+						<listheader label="Date Given"/>
+					</listhead>
+					<listitem forEach="${immunizations}">
+						<listcell label="${each.immunization.fullVaccineName}"/>
+						<listcell label="${each.administeredOn}"/>
+					</listitem>
+			</listbox>
+		<separator/>
+		<n:div align="center">
+		<include src="/soap/soapPrintFooter.zul" width="100%" height="100%"/>
+		</n:div>
+		</panelchildren>
+		</panel>
+</div>
+	</window>
+</zk>

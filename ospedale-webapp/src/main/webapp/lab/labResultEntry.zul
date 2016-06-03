@@ -1,0 +1,190 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+	<window apply="org.zkoss.bind.BindComposer"
+		viewModel="@id('vm') @init('com.nzion.zkoss.composer.emr.lab.LabTestResultController')">
+		<zscript>
+		com.nzion.domain.emr.lab.LabRequisition labRequisition = vm.getLabRequisition();
+		</zscript>
+		<div style="padding:5px" zclass="page-header titled-well">
+			<h:h1>
+				<h:small>Lab Result Entry</h:small>
+			</h:h1>
+		</div>
+		<button label="HTML Print View" id="printBtn">
+			<attribute name="onClick">
+				<![CDATA[
+						Executions.getCurrent().sendRedirect("/lab/labResultEnrtyPrint.zul?obrId=" + labRequisition.getId(),"_blank");
+				]]> 
+			</attribute>
+		</button>
+		<div zclass="container-fluid">
+			<div sclass="pull-left">
+				<h:dl class="dl-horizontal">
+					<h:dt>MRN:</h:dt>
+					<h:dd>
+						<label value="@load(vm.labRequisition.patient.accountNumber)" />
+					</h:dd>
+				</h:dl>
+				<h:dl class="dl-horizontal">
+					<h:dt>Name :</h:dt>
+					<h:dd>
+						<name object="@load(vm.labRequisition.patient)" />
+					</h:dd>
+				</h:dl>
+			</div>
+			<div sclass="pull-right" style="margin-right:25%">
+				<h:dl class="dl-horizontal">
+					<h:dt class="fl">Ordered Date:</h:dt>
+					<h:dd>  
+						<label value="@load(vm.labRequisition.labOrderRequest.createdTxTimestamp)@converter('formatedDate', format='dd/MM/yyyy')" />
+					</h:dd>
+				</h:dl>
+				<h:dl class="dl-horizontal">
+					<div if="${provider ne null}">
+						<h:dt>Provider Account :</h:dt>
+						<h:dd>
+							<label value="@load(vm.provider.accountNumber)" />
+						</h:dd>
+						<h:dt>Name :</h:dt>
+						<h:dd>
+							<name object="@load{vm.provider}" />
+						</h:dd>
+					</div>
+				</h:dl>
+				<h:dl class="dl-horizontal">
+					<div if="${refferal ne null}">
+						<h:dt>Reffered By:</h:dt>
+						<h:dd>
+							<name object="@load(vm.refferal)" />
+						</h:dd>
+					</div>
+				</h:dl>
+			</div>
+			<n:dl class="dl-horizontal"
+				unless="${patientSoapNoteId ne null}">
+				<h:dt></h:dt>
+				<h:dd></h:dd>
+			</n:dl>
+			<n:dl class="dl-horizontal"
+				unless="${patientSoapNoteId ne null}">
+				<h:dt>Clinical History:</h:dt>
+				<h:dd>
+					<label value="@load(vm.labRequisition.clinicalHistory)" />
+				</h:dd>
+			</n:dl>
+			<n:dl class="dl-horizontal"
+				unless="${patientSoapNoteId ne null}">
+				<h:dt>Remarks:</h:dt>
+				<h:dd>
+					<label value="@load(vm.labRequisition.remarks)" />
+				</h:dd>
+			</n:dl>
+			<h:dl class="dl-horizontal">
+				<h:dt>
+					<label value="Ordered Lab Tests"></label>
+				</h:dt>
+				<h:dd>
+					<combobox model="@bind(vm.labTestResultList)" selectedItem="@save(vm.selectedLabTestResult)"
+						onSelect="@command('LoadSpecimen',editor=fckEditor)" sclass="span4">
+						<template name="model" var="labTestResult">
+							<comboitem value="@bind(labTestResult)" 	label="@load(labTestResult.testName)" />
+						</template>
+					</combobox>
+				</h:dd>
+			</h:dl>
+			<h:dl class="dl-horizontal">
+				<h:dt>
+					<label value="Select Specimen Source"></label>
+				</h:dt>
+				<h:dd>
+					<listbox checkmark="true" onSelect="@command('LoadLabTests',editor=fckEditor)" selectedItem="@bind(vm.selectedSpecimenModel)"
+						model="@bind(vm.specimenModelList)" emptyMessage="Select a Lab Test">
+						<listhead>
+							<listheader label="Specimen Label" width="15%" />
+							<listheader label="Collection Method" />
+							<listheader label="Collection Volume" />
+							<listheader label="Collection Date Time" width="25%" />
+							<listheader label="Specimen Source" width="15%" />
+						</listhead>
+						<template name="model" var="specimenModel">
+							<listitem>
+								<listcell label="@load(specimenModel.specimenLabel)"/>
+								<listcell>
+									<name value="@load(specimenModel.collectionMethod)" />
+								</listcell>
+								<listcell label="@load(specimenModel.collectionVolume)"/>
+								<listcell label="@load(specimenModel.specimenCollectedDateTime)" />
+								<listcell label="@load(specimenModel.labSpecimenSource.description)" />
+							</listitem>
+						</template>
+					</listbox>
+				</h:dd>
+			</h:dl>
+			<listbox model="@load(vm.observations)" style="width:80%">
+				<listhead>
+					<listheader width="30%">Test Name</listheader>
+					<listheader width="10%">Test Result</listheader>
+					<listheader width="10%">Normal Range</listheader>
+					<listheader width="10%">Unit</listheader>
+					<listheader width="40%">Free Text</listheader>
+					<listheader width="25%">upload</listheader>
+				</listhead>
+				<template name="model" var="obxSegment">
+					<listitem value="@bind(obxSegment)">
+						<listcell label="@load(obxSegment.investigation.investigationName)" />
+					<!-- 	<listcell>
+							<textbox width="80%" value="@bind(obxSegment.observationValue)" if="${obxSegment.labTest.numericalValue}"/>
+						</listcell>
+						<listcell>
+							<textbox width="80%" value="@bind(obxSegment.referenceRange)" if="${obxSegment.labTest.numericalValue}"/>
+						</listcell>
+						<listcell>
+							<textbox width="80%" value="@bind(obxSegment.units)" if="${obxSegment.labTest.numericalValue}"/>
+						</listcell>
+						<listcell>
+							<textbox rows="2" cols="50" value="@bind(obxSegment.freeText)" 	if="${obxSegment.labTest.freeText}"/>
+						</listcell> -->
+							<listcell>
+							<textbox width="80%" value="@bind(obxSegment.observationValue)" />
+						</listcell>
+						<listcell>
+							<textbox width="80%" value="@bind(obxSegment.referenceRange)"/>
+						</listcell>
+						<listcell>
+							<textbox width="80%" value="@bind(obxSegment.units)"/>
+						</listcell>
+						<listcell>
+							<textbox rows="2" cols="50" value="@bind(obxSegment.freeText)"/>
+						</listcell>
+						<!-- <listcell>
+							<a label="@bind(obxSegment.file.fileName)" if="${obxSegment.file!=null}" 
+														onClick="@command('downloadAttachment',obxSegmentObject=obxSegment)" />
+							<button label="Upload" upload="true" visible="@bind(obxSegment.labTest.attachment &amp;&amp; obxSegment.file eq null)"
+														onUpload="@command('uploadLabAttachment',eventType=event,obxSegmentObject=obxSegment)" />
+							<a label="Remove" class="delBtn" visible="@bind(obxSegment.file ne null)"
+														onClick="@command('removeAttachment',obxSegmentObject=obxSegment)" />
+						</listcell> -->
+						
+					</listitem>
+				</template>
+			</listbox>
+            <div style="margin-top: 10px">
+                <label value="Remarks" style="font-weight: bold"/>
+                <fckeditor id="fckEditor" customConfigurationsPath="/images/dataTables/media/js/myfckeditor.js"  onChange="vm.getObrSegment().setTechnicianComment(self.getValue())"/>
+            </div>
+            <div style="margin-top: 10px">
+                <label value="Overall Comments" style="font-weight: bold"/>
+                <fckeditor id="overallComments" customConfigurationsPath="/images/dataTables/media/js/myfckeditor.js"/>
+            </div>
+			<div zclass="panelFoot">
+				<button zclass="btn btn-mini" label="Save" onClick="@command('MarkSave')" />
+				<button zclass="btn btn-mini" label="Complete" onClick="@command('MarkComplete',overallComments=overallComments)" />
+			</div>
+		</div>
+	</window>
+</zk>

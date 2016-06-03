@@ -1,0 +1,73 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapAllergySectionWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+		<![CDATA[
+		import com.nzion.zkoss.composer.SoapAllergyComposer;
+		SoapAllergyComposer allergyComposer = new SoapAllergyComposer();
+		com.nzion.domain.emr.soap.AllergySection allergySection;
+		]]>
+	</zscript>
+	<window id="soapAllergySectionWin" apply="${allergyComposer}">
+	<zscript>
+	allergySection = allergyComposer.getAllergySection();
+	</zscript>
+		<div sclass="chiefComp soapNoteCont curSOAP ui-resizable" style="position:relative;">
+			<h:table width="100%" cellpadding="0px" cellspacing="0px" style="border:0px">
+				<h:tr>
+					<h:td class="soapNoteContL" onClick="expandRHS(this.id)">
+						<panel sclass="dataTables_scrollBody" collapsible="false" border="none">
+						<caption label="Allergy"/>
+							<panelchildren>
+							<separator/>
+							<span sclass="linkBtn linkBtnOn">
+								<a id="addBtn1" sclass="addBtn" label="New Allergy" onClick="allergyComposer.openAllergySectionExt()"/>
+								<span />
+							</span>
+							<separator/>
+							</panelchildren>
+							</panel>
+							<panel sclass="dataTables_scrollBody" title="Allergies" collapsible="false" height="250px" border="none">
+							<panelchildren>
+							<listbox model="@{allergySection.extPatientAllergies,load-after='self.onReloadRequest'}"
+									id="allergyListbox" rows="10" height="250px" >
+										<attribute name="onReloadRequest">
+											allergySection = (com.nzion.domain.emr.soap.AllergySection)allergyComposer.getMainCtl().getSoapSection(com.nzion.domain.emr.soap.AllergySection.class);
+										</attribute>
+									<listhead>
+										<listheader label="Name"/>
+										<listheader label="Severity"/>
+									</listhead>
+									<listitem self="@{each='extPatientAllergy'}" value="@{extPatientAllergy}">
+										<attribute w:name="onMouseOver">
+											jQuery('#'+this.uuid).find('img[class=\"delImg\"]').css('display','inline');
+										</attribute>
+										<attribute w:name="onMouseOut">
+											jQuery('#'+this.uuid).find('img[class=\"delImg\"]').css('display','none');
+										</attribute>
+										<attribute w:name="onClick">
+											var rightSide = jQuery('#'+this.uuid).find('td.soapNoteContR');
+											rightSide.toggleClass('CCRCollapse');
+											rightSide.find('div.slideHandle').toggleClass('SHCollapse');
+											rightSide.find('div.panelCont').toggleClass('hidePanelCont');
+										</attribute>
+										<listcell>
+											<div>
+												<span sclass="dragHandle"></span>
+												<label value="@{extPatientAllergy.allergyName}" />
+											</div>
+										</listcell>
+										<listcell label="@{extPatientAllergy.allergySeverityName}"/>
+									</listitem>
+								</listbox>
+							</panelchildren>
+						</panel>
+					</h:td>
+				</h:tr>
+			</h:table>
+		</div>
+		<zscript>
+</zscript>
+	</window>
+
+</zk>

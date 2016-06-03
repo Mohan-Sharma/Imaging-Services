@@ -1,0 +1,6 @@
+<zk>
+<zscript>
+String soapNoteId = Executions.getCurrent().getParameter("soapNoteId");
+Executions.getCurrent().sendRedirect("/soap/error.zul?soapNoteId="+soapNoteId);
+</zscript>
+</zk>

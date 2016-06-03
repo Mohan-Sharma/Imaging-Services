@@ -1,0 +1,78 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./fileListWin" ?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:a="http://www.zkoss.org/2005/zk/annotation">
+	<zscript>
+<![CDATA[
+	import com.nzion.util.Infrastructure;
+	import com.nzion.domain.File;
+	com.nzion.zkoss.composer.FileBasedFolderComposer folderComposer = folderComposer;
+	String folderName = folderComposer.getSelectedFolder().getName();
+	com.nzion.service.common.CommonCrudService commonCrudService = Infrastructure	.getSpringBean("commonCrudService");
+]]>
+</zscript>
+<window id="fileListWin">
+	<panel title="List of Files in ${folderName}" width="100%" >
+		<panelchildren>
+				<a id="addBtn1" sclass="btn" label="Add File" onClick="newDocument();" >
+				<n:i class="icon-plus"></n:i>
+				</a>
+			<listbox model="@{folderComposer.selectedFolder.files,load-after='self.onReloadRequest'}" id="fileListbox">
+				<listhead><!--
+					<listheader label="File Type"></listheader>
+					--><listheader label="File Name"></listheader>
+					<listheader label="Description"></listheader>
+					<listheader label="Content Type"></listheader>
+					<listheader label="Creator"></listheader>
+					<listheader label="Actions"></listheader>
+				</listhead>
+				<listitem self="@{each='zk'}" value="@{zk}"><!--
+					<listcell label="@{zk.fileType,converter=com.nzion.view.component.MimeImageConverter}"/>
+					--><listcell label="@{zk.fileName}"/>
+					<listcell label="@{zk.description}"/>
+					<listcell label="@{zk.documentType}"/>
+					<listcell label="@{zk.createdBy}"/>
+					<listcell>
+						<!--						<image src="/images/kghostview.png" tooltiptext="View" width="15px"></image>-->
+						<space></space>
+						<image src="/images/download.png" tooltiptext="Download" width="15px"
+							onClick="com.nzion.util.IoAndFileUtil.downloadFile(self.getParent().getParent().getValue());">
+						</image>
+						<space></space>
+						<image sclass="delBtn" tooltiptext="Delete" width="10px">
+							<attribute name="onClick">
+	Listitem item = self.getParent().getParent();
+com.nzion.util.UtilMessagesAndPopups.confirm("Are You Sure? You Want to Delete " + ((File)self.getParent().getParent().getValue()).getFileName(), "Information", Messagebox.YES | Messagebox.NO,
+						Messagebox.QUESTION, new org.zkoss.zk.ui.event.EventListener() {
+	public void onEvent(Event event) {
+		if ("onYes".equals(event.getName())) {
+			removeDocument(item);
+		}
+	}
+});
+</attribute>
+						</image>
+					</listcell>
+				</listitem>
+			</listbox>
+		</panelchildren>
+	</panel>
+
+	<zscript>
+	<![CDATA[
+	void newDocument() {
+		Map m = new HashMap();
+		m.put("folderComposer", folderComposer);
+		m.put("fileListbox", fileListbox);
+		Window window =(Window)Executions.createComponents("/patient/newDocument.zul", null, m);
+		window.addForward("onDetach",fileListbox,"onReloadRequest");
+	}
+	void removeDocument(Listitem listitem) {
+		folderComposer.getSelectedFolder().getFiles().remove((File) listitem.getValue());
+		commonCrudService.save(folderComposer.getSelectedFolder());
+		Events.postEvent("onReloadRequest",fileListbox,null);
+		listitem.detach();
+	}
+]]>
+	</zscript>
+	</window>
+</zk>

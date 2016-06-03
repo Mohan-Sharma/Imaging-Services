@@ -1,0 +1,39 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+	import com.nzion.domain.messaging.*;
+	Message message = arg.get("message");
+	</zscript>
+<window id="viewMessagePortlet" title="View Message/Tasks" closable="true"  width="50%" >
+	
+	<div width="100%">
+	
+		  <n:h5>Message</n:h5>
+							<separator bar="true" width="100%"></separator>	
+			<div style="margin-left:10px">
+				<label style="font-size:15px;margin-right:2px"></label>${message.messageText}
+			</div>
+		    <div if="${!((empty message.fromDate)||(empty message.thruDate))}" >
+			  <n:h5  >Date Range Details</n:h5>
+			</div>  
+			<div sclass="form" style="width:95%;margin:auto; padding:10px; border : 3px solid #999; border-radius:4px" if="${!((empty message.fromDate)||(empty message.thruDate))}">
+			<div style="margin-left:10px" >
+				<label style="font-size:15px;margin-right:2px">${c:l('dateFrom')}:</label>${display:fd(message.fromDate)}
+			</div>
+			<div style="margin-left:10px" >
+				<label style="font-size:15px;margin-right:2px">${c:l('thruDate')}:</label>${display:fd(message.thruDate)}
+			</div>
+			
+			</div>
+			<separator/>
+			<div align="center">
+			<button label="Close" sclass="cancelBtn" onClick="viewMessagePortlet.detach();" />
+			</div>
+	</div>
+	</window>	
+</zk>

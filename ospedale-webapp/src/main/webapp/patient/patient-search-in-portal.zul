@@ -1,0 +1,99 @@
+<?page title="Afya Lab" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./searchResultsDiv"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?xel-method prefix="d" name="format" class="com.nzion.util.UtilDateTime" signature="java.lang.String format(java.util.Date)"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.w3.org/1999/xhtml">
+	<div id="searchResultsDiv">
+        <zscript>
+            import com.nzion.util.*;
+            List patientList = new ArrayList();
+            com.nzion.dto.PatientDto patient = new com.nzion.dto.PatientDto();
+        </zscript>
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span2" style="margin-left: -10px;">
+                    <label  class="z-label-bold">Civil ID</label>
+                    <textbox id="civilId" value="@{patient.civilId}" width="90%" onOK='Events.postEvent("onClick",search,null)'/>
+                </div>
+                <div zclass="span1" style="margin-left: 10px;" >
+                    <label class="z-label-bold">Afya ID</label>
+                    <textbox id="afyaId" value="@{patient.afyaId}" width="90%" onOK='Events.postEvent("onClick",search,null)'/>
+                </div>
+                <div zclass="span2" >
+                    <label class="z-label-bold">First Name</label>
+                    <textbox id="pfirstName" value="@{patient.firstName}" width="90%" onOK='Events.postEvent("onClick",search,null)'/>
+                </div>
+                <div zclass="span2">
+                    <label class="z-label-bold">Last Name</label>
+                    <textbox id="plastName" value="@{patient.lastName}" width="90%" onOK='Events.postEvent("onClick",search,null)'/>
+                </div>
+                <div zclass="span2">
+                    <label  class="z-label-bold">Mobile phone</label>
+                    <textbox id="mobilePhone" value="@{patient.mobileNumber}" width="90%" onOK='Events.postEvent("onClick",search,null)'/>
+                </div>
+                <div zclass="span1" >
+                    <label  class="z-label-bold">Gender</label>
+                    <combobox sclass="span10" readonly="true" id = "selectionType" selectedItem="@{patient.gender}">
+                        <comboitem label="Male" value="Male"  />
+                        <comboitem label="Female" value="Female" />
+                    </combobox>
+                </div>
+                <div zclass="span2" >
+                    <label  class="z-label-bold">Date Of Birth</label>
+                    <datebox value="@{patient.dateOfBirth}" id="dateOfBirth"
+                             width="100%" onOK='Events.postEvent("onClick",search,null)' />
+                </div>
+            </div>
+
+            <separator></separator>
+            <div sclass="panelFoot" align="center">
+                <button label="Search" id="search" zclass="btn btn-primary">
+                    <attribute name="onClick">
+                        <![CDATA[
+                            patientList = PortalRestServiceConsumer.fetchPatientsByGivenCriteria(patient);
+                        ]]>
+                    </attribute>
+                </button>
+            </div>
+        </div>
+        <grid id="patientSearchDisplayGrid" mold="paging" pageSize="10" model="@{patientList, load-after='search.onClick,self.onReload'}" style="border:none;" width="100%">
+            <attribute name="onReload">
+                patientList = event.getData();
+            </attribute>
+            <columns>
+                <column width="30%"><label value="Patient Name/Address/Mobile phone" style="font-weight:bold;font-size:14px"/></column>
+                <column width="20%"><label value="Gender/Date of Birth/Age" style="font-weight:bold;font-size:14px"/></column>
+                <column><label value="Afya ID" style="font-weight:bold;font-size:14px"/></column>
+                <column><label value="Civil ID" style="font-weight:bold;font-size:14px"/></column>
+            </columns>
+            <rows sclass="narrow">
+            <row self="@{each='patient'}" value="@{patient}" forward="onDoubleClick=onPatientSelect">
+                <div>
+                    <name object="@{patient}"/>
+                    <n:br/>
+                    <n:label class="muted">Address:</n:label>
+                    <n:br/>
+                    <label value="@{patient.address}"/>
+                    <n:br/>
+                    <n:label class="muted">Mobile phone:</n:label>
+                    <n:br/>
+                    <image src="../images/mobile.png" width="10px" height="10px"/>
+                    <label value="@{patient.mobileNumber}"/>
+                    <n:br/>
+                </div>
+                <div>
+                    <label value="@{patient.gender}"/>
+                    <n:br/>
+                    <label  value="@{patient.dateOfBirth,converter='com.nzion.view.component.DateConverter'}"/>
+                    <n:br/>
+                    <label value="@{patient.age}"/>
+                </div>
+                <label value="@{patient.afyaId}"/>
+                <label value="@{patient.civilId}"/>
+             </row>
+           </rows>
+        </grid>
+	</div>
+</zk>

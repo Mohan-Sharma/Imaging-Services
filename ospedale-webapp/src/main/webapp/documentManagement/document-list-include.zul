@@ -1,0 +1,51 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./resultPanel"?>
+<zk>
+<zscript>
+import com.nzion.domain.inpatient.Document;
+com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+List documents = documentLists;
+</zscript>
+	<panel title="Results" id="resultPanel" visible="true">
+		<panelchildren>
+			<div style="overflow:auto;" height="400px">
+				<listbox id="documentListBox" model="@{documents,load-after='self.onReload'}">
+					<listhead>
+						<listheader label="Name" />
+						<listheader label="Type" />
+						<listheader label="Description" />
+						<listheader label="Action" />
+					</listhead>
+					<listitem self="@{each='documentList'}"
+						value="@{documentList}">
+						<listcell label="@{documentList.documentName}"/>
+						<listcell label="@{documentList.documentType}" />
+						<listcell label="@{documentList.description}" />
+						<listcell>
+							<image src="/images/download.png" tooltiptext="Download"  width="15px">
+							<attribute name="onClick">
+								com.nzion.domain.inpatient.Document document =  commonCrudService.getByUniqueValue(Document.class,"documentName",((Document) self.getParent().getParent().getValue()).getDocumentName());
+								java.io.InputStream ioStream = document.getDocument().getResource().getBinaryStream();
+								String extention = document.getFileName().substring(document.getFileName().lastIndexOf('.'));
+								com.nzion.inpatient.util.IOUtil.downloadFile(document.getDocumentName(),extention,ioStream);
+							</attribute>
+							</image>
+							<a sclass="editBtn">
+							<attribute name="onClick">
+								com.nzion.zkoss.ext.Navigation.navigate("/documentManagement/create-document",com.nzion.util.UtilMisc.toMap("document",self.getParent().getParent().getValue()),contentArea);
+							</attribute>
+							</a>
+							<a sclass="delBtn">
+								<attribute name="onClick">
+									Document document = commonCrudService.refreshEntity(self.getParent().getParent().getValue());
+									commonCrudService.delete(document);
+									documents.remove(document);
+									Events.postEvent("onReload",documentListBox,null);
+								</attribute>
+							</a>
+						</listcell>
+					</listitem>
+				</listbox>
+			</div>
+		</panelchildren>
+	</panel>
+</zk>

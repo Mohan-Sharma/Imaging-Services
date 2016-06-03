@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<language-addon>
+	<addon-name>ospedale</addon-name>
+	<language-name>xul/html</language-name>
+	<!--<stylesheet href="/css/style.css" type="text/css" />
+	<stylesheet href="/css/guifixes.css" type="text/css" />
+	-->
+    <stylesheet href="/css/bootstrap-responsive.css" type="text/css" />
+    <stylesheet href="/css/bootstrap.css" type="text/css" />
+    <stylesheet href="/css/style.css" type="text/css" />
+	<stylesheet href="/css/uifix.css" type="text/css" />
+	<javascript package="zul.wgt" merge="true"/><!-- merge since usually required though optional -->
+	<component>
+		<extends>groupbox</extends>
+		<component-name>groupbox</component-name>
+		<property>
+			<property-name>closable</property-name>
+			<property-value>false</property-value>
+		</property>
+	</component>
+	<component>
+		<extends>window</extends>
+		<component-name>window</component-name>
+		<component-class>com.nzion.view.component.DetachEventPostingWindow</component-class>
+		<property>
+			<property-name>contentStyle</property-name>
+			<property-value>overflow:auto</property-value>
+		</property>
+	</component>
+
+
+	<component>
+		<component-name>phonebox</component-name>
+		<component-class>com.nzion.zkoss.ext.Phonebox</component-class>
+		<extends>textbox</extends>
+		<property>
+			<property-name>maxlength</property-name>
+			<property-value>13</property-value>
+		</property>
+	</component>
+	
+	<component>
+		<component-name>zipcodebox</component-name>
+		<component-class>com.nzion.zkoss.ext.Zipcodebox</component-class>
+		<extends>textbox</extends>
+	</component>
+	
+	<component>
+		<component-name>ssnbox</component-name>
+		<component-class>com.nzion.zkoss.ext.SSNBox</component-class>
+		<extends>textbox</extends>
+	</component>
+
+	<component>
+		<component-name>lookup</component-name>
+		<component-class>com.nzion.view.component.LookupBox</component-class>
+		<extends>bandbox</extends>
+	</component>
+
+	<component>
+		<component-name>enumeration</component-name>
+		<component-class>com.nzion.view.component.EnumerationDropdown</component-class>
+		<extends>combobox</extends>
+	</component>
+
+	<component>
+		<component-name>name</component-name>
+		<component-class>com.nzion.view.component.NameLabel</component-class>
+		<extends>label</extends>
+	</component>
+	
+	<component>
+		<component-name>role</component-name>
+		<component-class>com.nzion.view.component.RoleLabel</component-class>
+		<extends>label</extends>
+	</component>
+	
+	<component>
+		<component-name>email</component-name>
+		<component-class>com.nzion.view.component.EmailTextbox</component-class>
+		<extends>textbox</extends>
+	</component>
+
+	<component>
+		<component-name>name</component-name>
+		<component-class>com.nzion.view.component.NameLabel</component-class>
+		<extends>label</extends>
+	</component>
+
+	<component>
+		<component-name>multidate</component-name>
+		<component-class>com.nzion.view.component.MultidateBox</component-class>
+		<extends>box</extends>
+	</component>
+
+	<component>
+		<component-name>shuttle</component-name>
+		<component-class>com.nzion.view.component.ShuttleBox</component-class>
+		<extends>box</extends>
+	</component>
+
+	<component>
+		<component-name>screen</component-name>
+		<macro-uri>/home-grid-macro.zul</macro-uri>
+	</component>
+	
+	<component>
+		<component-name>toolbar</component-name>
+		<macro-uri>/toolbar.zul</macro-uri>
+	</component>
+	
+	<component>
+		<component-name>referrallookup</component-name>
+		<macro-uri>/provider/referral-lookup.zul</macro-uri>
+	</component>
+	<component>
+		<extends>datebox</extends>
+		<component-name>datebox</component-name>
+		<property>
+			<property-name>format</property-name>
+			<property-value>dd/MM/yyyy</property-value>
+		</property>
+		<property>
+			<property-name>lenient</property-name>
+			<property-value>false</property-value>
+		</property>
+	</component>
+	<component>
+		<component-name>suggest</component-name>
+		<component-class>com.nzion.view.component.AutoSuggestionBox
+		</component-class>
+		<extends>lookup</extends>
+	</component>
+	<component>
+		<component-name>providerlookup</component-name>
+		<macro-uri>/provider/provider-lookup.zul</macro-uri>
+	</component>
+	<component>
+		<component-name>patientlookup</component-name>
+		<macro-uri>/patient/patient-lookup.zul</macro-uri>
+	</component>
+	<component>
+		<component-name>patientlookupfromportal</component-name>
+		<macro-uri>/patient/patient-lookup-in-portal.zul</macro-uri>
+	</component>
+	<component>
+		<component-name>fixedAssetlookup</component-name>
+		<macro-uri>/fixedassets/fixedAsset-lookup.zul</macro-uri>
+	</component>
+	<component>
+		<component-name>employeelookup</component-name>
+		<macro-uri>/utilities/employee_lookup.zul</macro-uri>
+	</component>
+	<component>
+		<component-name>icdlookup</component-name>
+		<macro-uri>/diagnosis/icd_lookup.zul</macro-uri>
+	</component>
+		<component>
+		<component-name>cptlookup</component-name>
+		<macro-uri>/emr/cpt-look-up-code-set.zul</macro-uri>
+	</component>
+	<component>
+		<component-name>resourcelookup</component-name>
+		<macro-uri>/appointment/resource-lookup.zul</macro-uri>
+	</component>
+	<component>
+		<component-name>followup</component-name>
+		<macro-uri>/soap/plans/follow-up-macro.zul</macro-uri>
+	</component>
+	<component>
+		<component-name>bedlookup</component-name>
+		<macro-uri>/ward/bed-lookup.zul</macro-uri>
+	</component>
+	<component>
+		<component-name>bedlookup</component-name>
+		<macro-uri>/ward/bed-lookup.zul</macro-uri>
+	</component>
+	<component>
+		<component-name>productlookup</component-name>
+		<macro-uri>/oms/lookup/product-lookup.zul</macro-uri>
+	</component>
+	<component>
+		<component-name>omsdruglookup</component-name>
+		<macro-uri>/oms/lookup/oms-drug-lookup.zul</macro-uri>
+	</component>
+	<component>
+		<extends>doublebox</extends>
+		<component-name>doublebox</component-name>
+		<property>
+			<property-name>format</property-name>
+			<property-value>#,##0.##</property-value>
+		</property>
+	</component>
+
+	<component>
+		<extends>decimalbox</extends>
+		<component-name>decimalbox</component-name>
+		<property>
+			<property-name>format</property-name>
+			<property-value>#,##0.##</property-value>
+		</property>
+	</component>
+	
+	<component>
+		<extends>timebox</extends>
+		<component-name>timebox</component-name>
+		<component-class>com.nzion.view.component.TimezoneIndependantTimebox</component-class>
+		<property>
+			<property-name>format</property-name>
+			<property-value>KK:mm a</property-value>
+		</property>
+	</component>
+	<component>
+		<component-name>searchbox</component-name>
+		<macro-uri>/report/searchBox.zul</macro-uri>
+	</component>
+	<component>
+		<component-name>time</component-name>
+		<component-class>com.nzion.view.component.TimeLabel</component-class>
+		<extends>label</extends>
+	</component>
+	
+	<component>
+		<component-name>autocomplete</component-name>
+		<component-class>com.nzion.view.component.AutoCompletion</component-class>
+		<widget-class>com.zkoss.AutoCompletion</widget-class>
+		<mold>
+			<mold-name>default</mold-name>
+			<css-uri>css/autocomplete.css.dsp</css-uri>
+		</mold>
+		<annotation>
+			<annotation-name>default-bind</annotation-name>
+			<property-name>value</property-name>
+			<attribute>
+				<attribute-name>access</attribute-name>
+				<attribute-value>both</attribute-value>
+			</attribute>
+			<attribute>
+				<attribute-name>save-when</attribute-name>
+				<attribute-value>self.onSelect</attribute-value>
+			</attribute>
+		</annotation>
+	</component>
+	<component>
+		<component-name>label</component-name>
+		<component-class>org.zkoss.zul.Label</component-class>
+		<widget-class>zul.wgt.Label</widget-class>
+		<text-as>value</text-as>
+		<mold>
+			<mold-name>default</mold-name>
+			<mold-uri>mold/label.js</mold-uri>
+		</mold>
+		<mold>
+			<mold-name>required</mold-name>
+			<mold-uri>mold/reqlabel.js</mold-uri>
+		</mold>
+	</component>
+	<component>
+		<component-name>quickpatientlookup</component-name>
+		<macro-uri>/patient/quickpatient-lookup.zul</macro-uri>
+	</component>
+	
+	<component>
+		<component-name>inpatientlookup</component-name>
+		<macro-uri>/inPatient/inpatient-lookup.zul</macro-uri>
+	</component>
+	
+	
+</language-addon>

@@ -1,0 +1,37 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addEditWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+ List specialityObjList = commonCrudService.getAll(com.nzion.domain.Speciality.class);
+ com.nzion.domain.Provider provider = arg.get("provider");
+ Set specialities = provider.getSpecialities();
+ Button btnSearch = arg.get("btnSearch");
+</zscript>
+<window mode="modal" title="Add/Edit Specialities" id="addEditWin" width="60%" closable="true">
+<div height="200px" style="overflow:auto;">
+<listbox model="@{specialityObjList}" width="100%" multiple="true" checkmark="true"
+				selectedItem="@{specialities, converter=com.nzion.view.component.MultipleListitemBindingConverter}">
+	<listhead>
+			<listheader label="Code" />
+			<listheader label="Name" />
+		</listhead>
+		<listitem self="@{each='specialitie'}" value="@{specialitie}">
+			<listcell label="@{specialitie.code}"/>
+			<listcell label="@{specialitie.description}"/>
+		</listitem>
+</listbox>
+</div>
+	<div sclass="panelFoot">
+			<button label="Save" id="saveOtherDeatils" >
+			<attribute name="onClick">
+			 provider.setSpecialities(specialities);
+			 if(provider.getId() != null)
+				 commonCrudService.save(provider); 
+			 Events.postEvent("onClick",btnSearch,null);
+			 addEditWin.detach();
+			</attribute>
+			</button>
+	</div>
+</window>
+</zk>

@@ -1,0 +1,152 @@
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+
+    <window apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('vm') @init('com.nzion.zkoss.composer.emr.lab.LabRequisitionViewModel')">
+	<zscript><![CDATA[
+	    import com.nzion.domain.Roles;
+		com.nzion.domain.UserLogin userLogin = com.nzion.util.Infrastructure.getUserLogin();
+		boolean isPhlebotomist = false;
+		boolean isTechnician = false;
+		if(userLogin.hasRole(Roles.PHLEBOTOMIST)) isPhlebotomist = true;
+		if(userLogin.hasRole(Roles.TECHNICIAN)) isTechnician = true;
+		Set laboratories = userLogin.getLaboratories();
+		]]></zscript> 
+		
+		  <div class="container-fluid">
+            <div zclass="row-fluid">
+               
+                <div zclass="span4">
+                    <label value="Patient"/>
+                    <patientlookup id="patientLookUpBox"
+                            onChange="vm.setPatient(event.getOrigin().getData())" sclass="span12"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Lab From Date"/>
+                    <datebox id="fromDate" sclass="span12"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Lab Thru Date"/>
+                    <datebox id="thruDate" sclass="span12"/>
+                </div>
+                
+               <!--  <div zclass="span2" visible="false">
+                    <label value="IP Number"/>
+                    <textbox id="ipNumber" sclass="span12"/>
+                </div>
+  -->
+            </div>
+        </div>
+        <div align="center" sclass="panelFoot">
+            <button label="Search" zclass="btn btn-primary" onClick="@command('OPDPATIENTS',fromDate=fromDate,thruDate=thruDate,
+            ipNumber=ipNumber)">
+            </button>
+        </div>
+          
+		
+		
+        <tabbox width="100%" sclass="nav_tabs">
+        <tabs id="tabs">
+            <tab label="Lab Request" id="outpatientTab" onSelect="@command('OPDPATIENTS')"/>
+            <!-- <tab label="In Patient Lab Request" id="inpatientTab" onSelect="@command('INPATIENT_LAB')" visible="false"/> -->
+        </tabs>
+        <tabpanels>
+            <tabpanel>
+                <listbox model="@bind(vm.requisitionList)" mold="paging" autopaging="false" pageSize="30">
+                    <listhead>
+                        <listheader label="Token" width="50px"/>
+                        <listheader label="Patient Name"/>
+                        <listheader label="Invoice Number"/>
+                        <listheader label="Status"/>
+                        <listheader label="Requested Date" />  
+                        <listheader/>
+                    </listhead>
+                    <template name="model" var="requisition">
+                        <listitem value="@bind(requisition)">
+                            <listcell label="@load(requisition.token)"></listcell>
+                            <listcell>
+                                <name value="@load(requisition.patient.firstName)"/>
+                            </listcell>
+                            <listcell label="@load(requisition.invoiceNumber)"></listcell>
+                            <listcell label="@load(requisition.status.description)"/>
+                           <listcell >
+                            <label value="@load(requisition.createdTxTimestamp)@converter('formatedDate', format='dd/MM/yyyy')"/>
+                            </listcell>
+                            <listcell>
+                                <button label="Accession" sclass="btn-mini"
+                                        onClick="@command('Collection',arg1=requisition,arg2=outpatientTab)">
+                                        <attribute name="onCreate"> <![CDATA[
+                                          if(!isPhlebotomist)                                   
+                                           	self.setDisabled(true);
+                                       ]]> </attribute>
+                                </button>      
+                                <button label="Result Entry" sclass="btn-mini"
+                                      onClick='Navigation.navigate("/lab/labResultEntry",com.nzion.util.UtilMisc.toMap("labRequisition",self.getParent().getParent().getValue()),contentArea)'>
+                                      <attribute name="onCreate">
+                                       com.nzion.domain.emr.lab.LabRequisition labRequisition = self.getParent().getParent().getValue();
+                                       Boolean resultEntryStatus=(labRequisition.getStatus()!=com.nzion.domain.emr.lab.LabRequisition.LabRequisitionStatus.COLLECTION_DONE);
+                                       if(resultEntryStatus) self.setDisabled(resultEntryStatus);
+                                       if(!isTechnician)	self.setVisible(false);
+                                      </attribute>
+                                      </button>
+                           
+                            </listcell>
+                            
+                        </listitem>
+                    </template>
+                </listbox>
+            </tabpanel>
+            <tabpanel visible="false">
+                <listbox id="inPatientListBox" model="@bind(vm.inPatientRequisitionList)" mold="paging" autopaging="false" pageSize="30">
+                    <listhead>
+                        <listheader label="Token" width="50px"/>
+                        <listheader label="Patient Name"/>
+                        <listheader label="Ward"/>
+                        <listheader label="Bed No"/>
+                        <listheader label="Ordering Doctor"/>
+                        <listheader label="Status"/>
+                        <listheader label="Requested Date" /> 
+                        <listheader/>
+                    </listhead>
+                    <template name="model" var="requisition">
+                        <listitem value="@bind(requisition)">
+                            <listcell label="@load(requisition.token)"></listcell>
+                            <listcell>
+                                <name value="@load(requisition.patient)"/>
+                            </listcell>
+                           <!--  <listcell label="@load(requisition.patientAdmission.latestAllocatedBed.ward)"></listcell>
+                            <listcell label="@load(requisition.patientAdmission.latestAllocatedBed.bed)"></listcell> -->
+                            <listcell> <name object="@load(requisition.labOrderRequest.provider)"/></listcell>
+                            <listcell label="@load(requisition.status.description)"/>
+                            <listcell >
+                            <label value="@load(requisition.createdTxTimestamp)@converter('formatedDate', format='dd/MM/yyyy')"/>
+                            </listcell>
+                            <listcell>
+                                <button label="Accession" sclass="btn-mini"
+                                        onClick="@command('Collection',arg1=requisition,arg2=inpatientTab)">
+                                </button>
+                                       
+                                <button label="Result Entry" sclass="btn-mini"
+                                      onClick='Navigation.navigate("/lab/labResultEntry",com.nzion.util.UtilMisc.toMap("labRequisition",self.getParent().getParent().getValue()),contentArea)'>
+                                      <attribute name="onCreate"><![CDATA[
+                                       com.nzion.domain.emr.lab.LabRequisition labRequisition = self.getParent().getParent().getValue();
+                                       Boolean resultEntryStatus=(labRequisition.getStatus()!=com.nzion.domain.emr.lab.LabRequisition.LabRequisitionStatus.COLLECTION_DONE);
+                                       if(!isTechnician || !resultEntryStatus)
+                                      		self.setDisabled(true);
+                                       ]]>
+                                      </attribute>
+                                      </button>
+                               </listcell>
+                        </listitem>
+                    </template>
+                </listbox>
+            </tabpanel>
+        </tabpanels>
+        </tabbox>
+    </window>
+
+</zk>

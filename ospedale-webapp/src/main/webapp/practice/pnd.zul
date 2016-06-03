@@ -1,0 +1,59 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./pndWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" 	xmlns:w="http://www.zkoss.org/2005/zk/client">
+<window id="pndWindow">
+	<zscript>
+	import com.nzion.domain.base.FieldRestriction;
+	import com.nzion.domain.Patient;
+	com.nzion.repository.common.CommonCrudRepository repository = com.nzion.util.Infrastructure.getSpringBean("commonCrudRepository");
+	com.nzion.service.common.CommonCrudService service = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	com.nzion.zkoss.composer.emr.StateRenderer stateRenderer = new com.nzion.zkoss.composer.emr.StateRenderer();
+	
+	FieldRestriction cityRestriction = repository.findUniqueByEquality(FieldRestriction.class, new String[] { "entityName", "restrictionType", "field"}, 
+					new Object[] {com.nzion.domain.Patient.class.getSimpleName(), FieldRestriction.RESTRICTION_TYPE.DEFAULT_VALUE, "contacts.postalAddress.city" });
+	FieldRestriction stateRestriction = repository.findUniqueByEquality(FieldRestriction.class, new String[] { "entityName", "restrictionType", "field"}, 
+					new Object[] {com.nzion.domain.Patient.class.getSimpleName(), FieldRestriction.RESTRICTION_TYPE.DEFAULT_VALUE, "contacts.postalAddress.stateProvinceGeo" });
+	FieldRestriction zipRestriction = repository.findUniqueByEquality(FieldRestriction.class, new String[] { "entityName", "restrictionType", "field"}, 
+					new Object[] {com.nzion.domain.Patient.class.getSimpleName(), FieldRestriction.RESTRICTION_TYPE.DEFAULT_VALUE, "contacts.postalAddress.postalCode" });
+	</zscript>
+	<panel title="Patient Entry Defaults">
+		<panelchildren>
+			<n:table style="width:80%;" cellspacing="10px" height="100px">
+				<n:tr>
+					<n:td>
+						City
+					</n:td>				
+					<n:td>
+						<textbox value="@{cityRestriction.value, save-when='saveBtn.onClick'}" 
+										maxlength="20" onChange="com.nzion.util.UtilDisplay.validateOnlyAlphabetsAndWhiteSpaces(self)"/>
+					</n:td>				
+				</n:tr>
+				<n:tr>
+					<n:td>
+						State
+					</n:td>				
+					<n:td>
+						<div width="20%">
+						<enumeration id="state" enumType="STATE" itemRenderer="${stateRenderer}" 
+							value="@{stateRestriction.value, save-when='saveBtn.onClick'}" />
+						</div>
+					</n:td>				
+				</n:tr>
+				<n:tr>
+					<n:td>
+						Zip Code
+					</n:td>				
+					<n:td>
+						<zipcodebox value="@{zipRestriction.value, save-when='saveBtn.onClick'}"/>
+					</n:td>				
+				</n:tr>
+			</n:table>
+		</panelchildren>
+	</panel>
+	<separator></separator>
+	<div align="center">
+	<button label="Save" onClick="service.save(com.nzion.util.UtilMisc.toList(cityRestriction, stateRestriction, zipRestriction)); com.nzion.util.UtilMessagesAndPopups.showSuccess();" id="saveBtn"/>
+	</div>
+</window>
+</zk>

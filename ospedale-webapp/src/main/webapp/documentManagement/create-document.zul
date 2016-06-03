@@ -1,0 +1,72 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./newDocument"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript><![CDATA[
+	import com.nzion.domain.inpatient.Document;
+	import com.nzion.service.common.CommonCrudService;
+	import com.nzion.util.UtilMessagesAndPopups;
+	Document document = arg.get("entity");
+	document = document == null ? new Document() : document;
+	List documentType = Arrays.asList(Document.DocumentEnumType.values());
+	CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+]]></zscript>
+
+	<window id="newDocument" width="50%"   >
+	<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Document</h:small>
+                  <button type="button" zclass="close" onClick="newDocument.detach();">×</button>
+            </h:h1>
+        </div>
+	<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+             <div zclass="span4">
+				<label value="Name" mold="required" />
+				<textbox value="@{document.documentName,save-when='save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"/>
+				</div>
+				</div>
+				 <div zclass="row-fluid">
+                 <div zclass="span2">
+				<label value="Type" mold="required" />
+				<combobox selectedItem="@{document.documentType,save-when='save.onClick'}" model="@{documentType}" 
+								itemRenderer="${com.easyhmis.zkoss.ext.EntityDropdownRenderer.DEFAULT_INSTANCE}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"/>
+								</div>
+								</div>
+		 <div zclass="row-fluid">
+             <div zclass="span4">
+				<label value="Document" mold="required" />
+				<textbox id="uploadTextBox" readonly="true" constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" value="@{document.fileName,save-when='save.onClick'}"/>
+				</div>
+				
+             <div zclass="span2">
+				<button label="Upload" upload="true" >
+					<attribute name="onUpload">
+							org.zkoss.util.media.Media media = event.getMedia();
+							uploadTextBox.setValue(media.getName());
+							com.nzion.domain.DataResource fsrc = new com.nzion.domain.DataResource();
+							fsrc.setResource(org.hibernate.Hibernate.createBlob(media.getByteData()));
+							document.setDocument(fsrc);
+					</attribute>
+				</button>
+				</div>
+				</div>
+				 <div zclass="row-fluid">
+                   <div zclass="span5">
+				    <label value="Description"  sclass="span12"/>
+					<textbox value="@{document.description,save-when='save.onClick'}" rows="3" cols="53"/>
+				  </div>
+				  </div>
+				</div>
+	 <div sclass="panelFoot">
+		<button label="Save" id="save" zclass="btn-success btn">
+		<attribute name="onClick">
+			commonCrudService.save(document);
+			UtilMessagesAndPopups.displaySuccess();
+			newDocument.detach();
+		</attribute>
+		</button>
+		<button id="Cancel" label="Cancel" sclass="btn" onClick="newDocument.detach();"/>
+	</div>
+	
+	</window>
+</zk>

@@ -1,0 +1,42 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./personLookup"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<window title="Security Settings" id="personLookup" mode="modal" width="40%" position="center" closable="true">
+<zscript>
+	com.nzion.zkoss.composer.PatientSoapNoteController controller = arg.get("controller");
+	String command=arg.get("command");
+	com.nzion.domain.emr.soap.SoapAccessRecord accessRecord =  arg.get("accessRecord");
+	char[] ALPHABETS = com.nzion.util.Constants.ALPHABETS;
+	Collection masterData=componentRepository.getMasterDataStartingWith(com.nzion.domain.Employee.class,"A","firstName");
+	Set selectedPersons = new HashSet();
+</zscript>
+	<div width="97%" style="padding:5px">
+	<panel id="personLookupPanel">
+		<panelchildren>
+		<vbox>
+			<hbox>
+				<toolbarbutton forEach="${ALPHABETS}" label="${each}" width="15px;"
+				onClick='masterData=componentRepository.getMasterDataStartingWith(com.nzion.domain.Employee.class,self.label,"firstName");Events.postEvent("onReloadRequest",masterDataDisplayGrid,null)'/></hbox>
+		</vbox>	
+			<listbox model="@{masterData,load-after='self.onReloadRequest'}" multiple="true" checkmark="true"  mold="paging" id="masterDataDisplayGrid"  rows="10"
+			selectedItem="@{selectedPersons,converter=com.nzion.view.component.MultipleListitemBindingConverter}" pagingPosition="both"> 
+				<listhead>
+					<listheader label="Name" />
+				</listhead>
+				<listitem self="@{each='person'}" value="@{person}">
+					<listcell>
+						<name object="@{person}"/>
+					</listcell>
+				</listitem>
+			</listbox>
+		</panelchildren>
+	</panel>
+	<div sclass="panelFoot">
+		<button label="Apply" onClick="controller.applySecurity(command, selectedPersons, accessRecord);personLookup.detach();"></button>
+		<button label="Close" forward="onClick=onCancel"/>
+	</div>
+	</div>
+</window>
+</zk>

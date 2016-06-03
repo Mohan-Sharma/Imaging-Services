@@ -1,0 +1,139 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapAllergySectionWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+		<![CDATA[
+		import com.nzion.domain.emr.soap.PatientAllergy;
+		import com.nzion.zkoss.composer.SoapAllergyComposer;
+		PatientAllergy patientAllergy = new PatientAllergy();
+		SoapAllergyComposer allergyComposer = new SoapAllergyComposer();
+		boolean knownAllergy = true;
+		boolean currentRadioChecked = false;
+		com.nzion.service.common.CommonCrudService ccs = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+		]]>
+	</zscript>
+	<window id="soapAllergySectionWin" apply="${allergyComposer}">
+	<zscript>
+	<![CDATA[
+	com.nzion.domain.emr.soap.AllergySection allergySection = allergyComposer.getAllergySection();
+	Set patientAllergies = new HashSet();
+	Object objEnu = ccs.findUniqueByEquality(Enumeration.class,  new String[]{"enumCode","enumType"},new Object[]{"INACTIVE","ALLERGY_STATUS"});
+	com.nzion.service.SoapNoteService soapNoteService = (com.nzion.service.SoapNoteService)com.nzion.util.Infrastructure.getSpringBean("soapNoteService");
+	if(allergyComposer.hasActiveAllergyInCurrentSection()){
+		knownAllergy = false;
+	}
+	allergySection.setNoKnownAllergy(knownAllergy);
+	patientAllergies.addAll(allergyComposer.getAllergySection().getPatientAllergies());
+	patientAllergies.addAll(allergyComposer.getPatientAllergies());
+	]]>
+	</zscript>
+		<div sclass="chiefComp soapNoteCont curSOAP ui-resizable" style="position:relative;">
+			<panel sclass="dataTables_scrollBody" collapsible="false" border="none">
+			<caption label="Allergy"/>
+				<panelchildren>
+					<h:table width="100%" cellpadding="0px" cellspacing="0px" style="border:0px">
+						<h:tr>
+							<h:td class="soapNoteContL">
+								  <div style="padding:10px;">
+									<div>
+										<span sclass="linkBtn linkBtnOn">
+											<a id="historyBtn" label="History">
+												<attribute name="onClick">
+												   showHistory();
+												</attribute>
+												</a>
+											<span />
+										</span>
+									</div>	
+									<div>
+										<span sclass="linkBtn linkBtnOn">
+											<a disabled="${allergyComposer.mainCtl.readonly}" id="addBtn" sclass="addBtn" label="New">
+												<attribute name="onClick">
+												addEdit(null);
+												</attribute>
+												<n:i class="icon-plus-sign"></n:i>
+											</a>
+											<span />
+										</span>
+									</div>
+								   <div id="noAllergySection" sclass="col2" style="float:right;">
+										<checkbox id="noKnownAllergyCheckBox" label="No Known Allergy" checked="@{allergySection.noKnownAllergy}" onCreate="self.setDisabled(!knownAllergy);"/>
+									</div>
+								 </div>
+							</h:td>
+						</h:tr>	
+						<h:tr>
+							<h:td class="soapNoteContL">	
+									<div style="padding:5px">
+										<n:table id="allergyListbox" cellpadding="0" cellspacing="0" border="0" class="display" >
+											<n:thead>
+												<n:tr>
+													<n:th>Reaction</n:th>
+													<n:th>Name</n:th>
+													<n:th>Severity</n:th>
+													<n:th>Status</n:th>
+													<n:th>OnSet Date</n:th>
+													<n:th>Action</n:th>
+												</n:tr>
+											</n:thead>
+											<n:tbody>
+												<n:tr forEach="${patientAllergies}">
+													<n:td>${each.reactionName}</n:td>											
+													<n:td>${each.allergy}</n:td>
+													<n:td>${each.severity}</n:td>
+													<n:td>${each.allergyStatus.description}</n:td>
+													<n:td>${display:fd(each.onSetDate)}</n:td>
+													<n:td>
+													<div>
+														<custom-attributes value="${each}"/>
+														<a class="group"  disabled="${allergyComposer.mainCtl.readonly}" onClick="addEdit(self.getId())" id="${each.id}">Edit |</a>
+														<a label="Remove" disabled="${allergyComposer.mainCtl.readonly}"
+														onClick='allergyComposer.getMainCtl().removeSoapRecord(self.getParent().getAttribute("value"),"soapSection","patientAllergies");'/>
+													</div>
+													</n:td>
+												</n:tr>
+											</n:tbody>
+										</n:table>
+									</div>
+							</h:td>
+						</h:tr>
+					</h:table>
+				</panelchildren>
+			</panel>
+			<div sclass="buttonPanel" style="margin-top:5px;">
+				<button disabled="${controller.readonly}" label="Save" zclass="btn btn-success" onClick="allergyComposer.getMainCtl().saveSoapSection();" id="Save"/>
+			</div>
+		</div>
+		<script type="text/javascript">
+			zk.afterMount(function() { 
+				jq("#allergyListbox").dataTable({
+				"bJQueryUI": true,
+				"sPaginationType": "full_numbers", 
+				"aoColumns":
+							[null,null, null, null,null,{ "bSortable": false,"sType": "html"} ] 
+						}); 
+			});
+		</script>
+		<zscript>
+			void addEdit(String  id){
+				patientAllergy = null;
+				if(id!=null){
+					com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+					patientAllergy = commonCrudService.getById(PatientAllergy.class, new Long(id));
+				}else{
+					patientAllergy = new PatientAllergy();
+				}
+				Window w =com.nzion.zkoss.ext.Navigation.navigateToModalWindow("/soap/soapPatientAllergy",com.nzion.util.UtilMisc.toMap("allergyComposer",allergyComposer,"patientAllergy",patientAllergy,"allergySection",allergySection,"noKnownAllergyCheckBox",noKnownAllergyCheckBox));
+				
+			}
+			void showHistory(){
+				Window window = Executions.createComponents("/soap/soapAllergyHistory.zul",soapAllergySectionWin,
+					com.nzion.util.UtilMisc.toMap("allergyComposer",allergyComposer));
+				window.doModal();
+			}
+		</zscript>
+	</window>
+
+</zk>

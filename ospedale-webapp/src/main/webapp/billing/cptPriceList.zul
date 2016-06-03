@@ -1,0 +1,12 @@
+<?page title="Patient" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./cptPriceListWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk>
+<zscript>
+	setPageTitle("Procedures Price", "");
+</zscript>
+	<window id="cptPriceListWindow" self="@{define(content)}">
+		<screen width="100%" listtitle="Price List" addpage="addEditCptPrice" entityclass="com.nzion.domain.billing.CptPrice"  addmodepopup="true"
+			fields="cpt.id,cpt.description,price" labels="Code,Description,Price" hideactivation="true" hidedeletebtn="true" />
+	</window>
+</zk>

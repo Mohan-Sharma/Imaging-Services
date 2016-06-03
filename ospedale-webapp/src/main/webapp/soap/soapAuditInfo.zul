@@ -1,0 +1,38 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+	import com.nzion.domain.Person;
+	com.nzion.domain.base.BaseEntity entity = record;
+	com.nzion.service.UserLoginService loginService = com.nzion.util.Infrastructure.getSpringBean("userLoginService");
+	Person createdBy;
+	Person updatedBy;
+	createdBy = updatedBy = null;
+	if(entity.getId()!=null){
+	createdBy = loginService.getUserByUsername(entity.getCreatedBy()).getPerson();
+	if(entity.getUpdatedBy()!=null)
+	updatedBy = loginService.getUserByUsername(entity.getUpdatedBy()).getPerson();
+	}
+	</zscript>
+	<hbox if="${entity.id != null}">
+	<vbox>
+		<hbox>
+				<n:strong>Created By : <name object="${createdBy}"/></n:strong>
+		</hbox>
+		<hbox>
+				<n:strong>Created On : <label value="${display:fd(entity.createdTxTimestamp)}"/></n:strong>
+		</hbox>
+	</vbox>
+	<separator width="20px"/>
+	<vbox if="${updatedBy !=null }">
+		<hbox>
+				<n:strong>Modified By : <name object="${updatedBy}"/></n:strong>
+		</hbox>
+		<hbox>
+				<n:strong>Modified On : <label value="${display:fd(entity.updatedTxTimestamp)}"/></n:strong>
+		</hbox>
+	</vbox>
+	</hbox>
+</zk>

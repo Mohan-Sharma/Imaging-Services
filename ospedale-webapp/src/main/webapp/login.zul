@@ -1,0 +1,131 @@
+<n:zk xmlns:n="http://www.zkoss.org/2005/zk/native">
+       
+	<n:style>
+		body{ font-family:"Lucida Grande", "Lucida Sans Unicode", Verdana, Arial, Helvetica, sans-serif; font-size:12px;  vertical-align:middle;} p,
+		h1, form, button{border:0; margin:0; padding:0;} .spacer{clear:both; height:1px;} /* ----------- My Form -----------
+		*/ .myform{ margin:0 auto; width:400px; padding:14px; vertical-align:top;}
+
+		 ----------- stylized ----------- 
+		
+		#stylized h1 {
+		font-size:14px; font-weight:bold; margin-bottom:8px;  color: #000000;} 
+		#stylized p{ font-size:11px; color: #000000;
+		margin-bottom:20px; padding-bottom:10px; } 
+		#stylized label{ display:block;
+		font-weight:bold; text-align:right; width:140px; float:left; color: #000000; padding-top:6px} 
+		#stylized .small{ color:#cccccc; display:block;
+		font-size:11px; font-weight:normal; text-align:right; width:140px; } 
+		#stylized input{ float:left; font-size:12px;
+		padding:4px 2px; border:solid 1px #aacfe4; width:200px; margin:2px 0 20px 10px; } 
+		
+		#stylized button{ clear:both;
+		margin-left:150px; width:125px; height:31px; text-align:center;
+		line-height:31px; color:#ffffff; font-size:17px; font-weight:bold;  border-radius: 5px 5px 5px 5px;
+		background-color:#777;background-image:-ms-linear-gradient(bottom,#6d6d6d,#808080);
+	background-image:-moz-linear-gradient(bottom,#6d6d6d,#808080);background-image:-o-linear-gradient(bottom,#6d6d6d,#808080);
+	background-image:-webkit-gradient(linear,left bottom,left top,from(#6d6d6d),to(#808080));
+	background-image:-webkit-linear-gradient(bottom,#6d6d6d,#808080);background-image:linear-gradient(bottom,#6d6d6d,#808080);
+		 } 
+
+	      .loginTdbg {   border-top:2px solid #999999;  background-color:#f9f9f9; background-image:-ms-linear-gradient(top,#f9f9f9,#ececec);	background-image:-moz-linear-gradient(top,#f9f9f9,#ececec);background-image:-o-linear-gradient(top,#f9f9f9,#ececec);
+	background-image:-webkit-gradient(linear,left top,left bottom,from(#f9f9f9),to(#ececec));
+	background-image:-webkit-linear-gradient(top,#f9f9f9,#ececec);
+	background-image:linear-gradient(top,#f9f9f9,#ececec); height:89px;  background-position: center bottom;   background-repeat: repeat-x;}
+		.loginBoxTable{ border: 2px solid #999999;width:700px; border-top:none }
+}
+	</n:style>
+
+
+	<n:script>
+	function myIP() {
+    if (window.XMLHttpRequest)
+     xmlhttp = new XMLHttpRequest();
+    else xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+
+    xmlhttp.open("GET","http://api.hostip.info/get_html.php",false);
+    xmlhttp.send();
+    hostipInfo = xmlhttp.responseText.split("\n");
+    for (i=0; hostipInfo.length >= i; i++) {
+        ipAddress = hostipInfo[i].split(":");
+        if ( ipAddress[0] == "IP" ) return ipAddress[1];
+    }
+    return false;
+	}
+	var hostIp =myIP();
+	</n:script>
+	 <div align="center" style="display: table; height: 100%;width:100%; overflow: hidden;">
+			 <n:table border="0" cellpadding="0" cellspacing="0" align="center" width="100%" height="100%" style="vertical-align: middle;">
+    <n:tr><n:td valign="middle" align="center" style="vertical-align: middle;">
+	<n:table width="700" border="0" cellpadding="0" cellspacing="0" >
+		<n:tbody><n:tr>
+			<n:td align="center">
+			<!-- <n:h1 style="font-size:17px; font-weight:bold; margin-bottom:8px;  color: #777">Easy HMIS</n:h1>  -->
+			</n:td>
+		</n:tr>
+	 </n:tbody>
+	</n:table>
+	
+	<n:table class="loginBoxTable" border="0" cellpadding="0" cellspacing="0">
+		<n:tbody><n:tr height="89px">
+			<n:td class="loginTdbg" width="50%" height="50px" align="left" ><n:image id="companyLogo" src="images/nthdimezionLogo.png" width="60px" style="margin:0px 20px 0px 10px" /></n:td>
+			<n:td class="loginTdbg" width="50%" align="right"  height="50px"><n:h1 style="font-size:20px; font-weight:bold; margin:0px 10px 8px 0px;  color: #777">EasyHMIS</n:h1></n:td>
+		</n:tr>
+		<n:tr>
+			<n:td class="" align="center" >
+				<n:table class="small" border="0" cellpadding="0" cellspacing="0">
+				<n:tbody><n:tr>
+					<n:td class="loginBillBoard small" valign="top" width="60%" align="center" height="250">
+						<n:table width="275px">
+						<n:tbody>
+						<n:tr>
+							<n:td class="small" width="50%" align="center">
+								<n:br/><n:br/>
+							</n:td>
+						</n:tr>
+						<n:tr>
+							<n:td class="small" width="50%" align="center"><n:br/><n:br/><n:b></n:b></n:td>
+							<n:td class="small" width="50%" align="center"><n:br/><n:br/><n:b></n:b></n:td>
+						</n:tr>
+						<n:tr>
+							<n:td colspan="2" class="small" align="center"><n:br/>
+							<n:font size="1"></n:font></n:td><n:td>
+						</n:td></n:tr> 
+					</n:tbody></n:table>
+				</n:td>
+			  </n:tr>
+			  </n:tbody></n:table>
+		</n:td>
+		
+		<n:td  align="center" valign="top">
+				<n:br/>
+				<n:div id="stylized" class="myform">
+					<n:div style="float:right"><n:a href="#">Forgot Password?</n:a></n:div>
+					<n:br/>
+					<n:div class="signinHdr"><n:img src="images/signin.gif" alt="Sign in" title="Sign in"/></n:div>
+					<n:p style="border-bottom:1px dotted #777"></n:p>
+				<n:form id="form" name="form" action="j_spring_security_check" method="POST" autocomplete="off">					
+					<n:label>
+						Username
+					</n:label>
+					<n:input type="text" name="j_username" id="name" />
+					<n:label>
+						Password
+					</n:label>
+					<n:input type="password" name="j_password" id="password" />
+					<n:button type="submit">Sign In</n:button>
+					<n:div class="spacer"></n:div>
+				</n:form>
+			</n:div>
+			</n:td>
+		</n:tr>
+	</n:tbody></n:table>
+	</n:td>
+		</n:tr>
+	</n:table>
+	</div>
+	<n:zscript>
+		session.removeAttribute(org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY);
+	</n:zscript>
+
+
+</n:zk>

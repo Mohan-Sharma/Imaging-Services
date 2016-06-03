@@ -1,0 +1,45 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addLabCategory"?>
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<zscript><![CDATA[
+          
+           import com.nzion.util.UtilMessagesAndPopups;
+           com.nzion.domain.emr.lab.LabCategory labCategory = arg.get("entity");
+           com.nzion.domain.emr.lab.LabTestPanel labTestPanel=new com.nzion.domain.emr.lab.LabTestPanel();
+           labCategory = labCategory == null ? new com.nzion.domain.emr.lab.LabCategory() : labCategory;
+           com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	]]></zscript>
+<window  id="addLabCategory"   closable="true" width="40%" >
+<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Lab Category</h:small>
+                  <button type="button" zclass="close" onClick="addLabCategory.detach();">×</button>
+            </h:h1>
+        </div>
+			<div zclass="container-fluid">
+		          <div zclass="row-fluid">
+                     <div zclass="span5">
+				      <label value="Lab Categorty Name" class="name" mold="required"></label>
+					  <textbox value="@{labCategory.name,save-when='save.onClick'}"  constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" ></textbox>
+					 </div>
+				</div>
+			   <div zclass="row-fluid">
+                    <div zclass="span2">
+					 <label value="Description"   sclass="name"/>
+					 <textbox rows="4" cols="40" value="@{labCategory.description,save-when='save.onClick'}" ></textbox>
+				   </div>
+			</div>
+		</div>
+		<div align="center">
+		<button label="Save" id="save" zclass="btn-success btn">
+		<attribute name="onClick">
+		//labCategory.addLabPanel(labTestPanel);
+				commonCrudService.save(labCategory);
+				addLabCategory.detach();
+			</attribute>
+		</button>
+		<button label="Cancel" onClick="addLabCategory.detach()"></button>
+		</div>
+		</window>
+</zk>

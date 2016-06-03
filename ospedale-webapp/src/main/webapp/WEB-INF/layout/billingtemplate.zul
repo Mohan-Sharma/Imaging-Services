@@ -1,0 +1,9 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/billingHeaderFooterTemplate.zul"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<div sclass="tabs clr" self="@{define(menuContent)}">
+		<tabbox id="mainTabBox">
+			<tabs zclass="e-tabs">
+			</tabs>
+		</tabbox>
+	</div>
+</zk>

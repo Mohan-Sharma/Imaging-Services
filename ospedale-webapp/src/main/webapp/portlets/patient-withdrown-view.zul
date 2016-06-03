@@ -1,0 +1,75 @@
+<?page title="Afya Lab" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientWithdrawViewWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+
+    <zscript>
+        import com.nzion.domain.PatientWithDraw;
+        import com.nzion.service.common.CommonCrudService;
+        import com.nzion.util.Infrastructure;
+        String refundId;
+        PatientWithDraw patientWithdraw = arg.get("patientWithDraw");
+        String patientWithdrawId;
+        if(patientWithdraw == null){
+            patientWithdrawId = Executions.getCurrent().getParameter("patientWithdrawId");
+            patientWithdraw = commonCrudService.getById(PatientWithDraw.class,Long.valueOf(patientWithdrawId));
+        }
+
+        if(patientWithdraw != null){
+            Long l =  patientWithdraw.getId();
+            refundId = l+"";
+        }
+    </zscript>
+
+    <window id="patientWithdrawViewWin">
+        <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Patient Refund View</h:small>
+                <button type="button" zclass="close" onClick="patientWithdrawViewWin.detach();">×</button>
+            </h:h1>
+        </div>
+
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Patient" class="z-label-bold"/>
+                    <name object="${patientWithdraw.patient}"/>
+                </div>
+                <div zclass="span3">
+                    <label value="Refund Date" class="z-label-bold"/>
+                    <label value="${patientWithdraw.withdrawDate}"/>
+                </div>
+                <div zclass="span3">
+                    <label value="Refund ID" class="z-label-bold"/>
+                    <label value="${refundId}"/>
+                </div>
+            </div>
+
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Refund Amount" class="z-label-bold"/>
+                    <label value="${patientWithdraw.withdrawAmount}"/> <label value="KD"/>
+                </div>
+                <div zclass="span3">
+                    <label value="Refund Mode" class="z-label-bold"/>
+                    <label value="${patientWithdraw.withdrawMode}" />
+                </div>
+            </div>
+
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Notes" class="z-label-bold"/>
+                    <label value="${patientWithdraw.withdrawNotes}" />
+                </div>
+                <div zclass="span3">
+                    <label value="Status" class="z-label-bold"/>
+                    <label value="${patientWithdraw.status}" />
+                </div>
+            </div>
+        </div>
+
+    </window>
+
+</zk>            

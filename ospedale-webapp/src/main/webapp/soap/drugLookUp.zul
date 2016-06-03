@@ -1,0 +1,151 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./drugLooupWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	import com.nzion.zkoss.composer.emr.DrugSearchController;
+	import com.nzion.domain.emr.soap.PatientRx;
+	import com.nzion.domain.drug.Drug;
+	String paneltitle = "Search From" + " ";
+	List searchedDrugs;
+	DrugSearchController drugSearchController = new DrugSearchController();
+	PatientRx patientRx = (PatientRx) arg.get("patientRx");
+	Textbox drugBox = (Textbox) arg.get("drugBox");
+	A addToFavouriteLink = (A) arg.get("favouriteLink");
+	boolean isMedicationHx = arg.get("medicationHistory") == null ? false : arg.get("medicationHistory");
+	com.nzion.zkoss.composer.SoapRxComposer rxComposer = arg.get("rxComposer");
+	com.nzion.zkoss.composer.MedicationHxComposer medHxComposer = arg.get("medHxComposer");
+]]>
+	</zscript>
+	<window id="drugLooupWindow" mode="modal" height="80%" width="60%" title="Drug Lookup" closable="true"
+		apply="${drugSearchController}">
+		<style>
+			.z-toolbarbutton-over{ border-bottom:none; border-top:none; padding:none; text-decoration: underline; border:0
+			none; } .z-toolbarbutton-over .z-toolbarbutton-body{ border-left:none; border-right:none; padding:none; }
+			.z-toolbarbutton{ margin:0 0; } tr.z-vbox-sep { height:0; } .selected{
+			background:url("/ecosmos/images/leftmenu_active.gif") no-repeat scroll left center #FFFFFF; color:#006699;
+			border-right:1px solid #FFFFFF; border-bottom:1px solid #E0E0E0; display:block; padding:6px 10px; } .unSelected{
+			background:url(none); color:#249; border-bottom:1px solid #E0E0E0; display:block; padding:7px 10px; } .divStyle{
+			background:url("../images/grey_bdr_1x1.gif") repeat-y scroll right top #F6F7F8; vertical-align:top;
+			border-spacing:none; padding:0; height:100%; }
+		</style>
+		<h:table width="100%" height="100%">
+			<h:tr>
+				<h:td style="text-align:left;vertical-align:top;width:20%" class="divStyle">
+					<vbox height="100px">
+						<toolbarbutton id="favouriteLink" label="Favourite" sclass="unSelected" width="100px">
+							<attribute name="onClick">
+setToolbarbuttonColor(self);
+searchCriteriaPanel.setTitle(paneltitle + self.getLabel());
+inactivesection.setVisible(false);
+drugSearchController.setSearchCriteria("Favourite");
+</attribute>
+						</toolbarbutton>
+						<toolbarbutton id="globalLink" label="Global" sclass="unSelected" width="100px">
+							<attribute name="onClick">
+setToolbarbuttonColor(self);
+searchCriteriaPanel.setTitle(paneltitle + self.getLabel());
+inactivesection.setVisible(false);
+drugSearchController.setSearchCriteria("global");
+</attribute>
+						</toolbarbutton>
+						<toolbarbutton id="inactiveLink" label="Rx" sclass="unSelected" width="100px">
+							<attribute name="onClick">
+setToolbarbuttonColor(self);
+searchCriteriaPanel.setTitle(paneltitle + self.getLabel());
+inactivesection.setVisible(true);
+drugSearchController.setSearchCriteria("PatientRx");
+</attribute>
+						</toolbarbutton>
+					</vbox>
+				</h:td>
+				<h:td style="vertical-align:top; border-spacing:none; padding:0; height:100%;">
+					<panel id="searchCriteriaPanel" collapsible="true">
+						<panelchildren>
+							<div sclass="panelCont" height="70px" id="otherDiv">
+								<div sclass="col2">
+									<label value="Trade Name"></label>
+									<textbox id="tradeNameTextBox" value="@{drugSearchController.tradeName}" />
+								</div>
+								<div sclass="col2">
+									<label value="Generic Name"></label>
+									<textbox id="genericNameTextBox" value="@{drugSearchController.genericName}" />
+								</div>
+								<div id="inactivesection" visible="false">
+									<checkbox checked="@{drugSearchController.inactive}" />
+									<label value="Include Inactive" />
+								</div>
+							</div>
+							<div sclass="panelFoot" id="searchSection">
+								<button label="Search" id="searchBtn">
+									<attribute name="onClick">
+										<![CDATA[
+if (tradeNameTextBox.getValue().isEmpty() && genericNameTextBox.getValue().isEmpty()) {
+	com.nzion.util.UtilMessagesAndPopups.showError(org.zkoss.util.resource.Labels.getLabel("nosearchcondition"));
+	return;
+}
+searchedDrugs = drugSearchController.lookUpDrug();
+searchResultPanel.setVisible(true);
+noresultLabel.setVisible(com.nzion.util.UtilValidator.isEmpty(searchedDrugs));
+]]>
+									</attribute>
+								</button>
+							</div>
+						</panelchildren>
+					</panel>
+					<separator height="10px" />
+					<panel title="Search Result" collapsible="true" visible="false" id="searchResultPanel">
+						<panelchildren>
+							<label value="No Record Found" id="noresultLabel" visible="false" style="font-weight:bold" />
+							<div sclass="panelHeadTop pagination">
+								<div sclass="fl" />
+								<div sclass="fr">
+									<paging id="searchPaging" pageSize="10" detailed="true" pageIncrement="1" />
+								</div>
+							</div>
+							<listbox id="searchResultGrid" model="@{searchedDrugs,load-after='searchBtn.onClick'}"
+								mold="paging" paginal="${searchPaging}" oddRowSclass="z-listbox-odd">
+								<listhead>
+									<listheader label="Trade Name"></listheader>
+									<listheader label="Brand Name"></listheader>
+									<listheader label="Generic Name"></listheader>
+								</listhead>
+								<listitem self="@{each='drug'}" value="@{drug}">
+									<listcell label="@{drug.tradeName}" />
+									<listcell label="@{drug.brandName}" />
+									<listcell label="@{drug.genericName}" />
+									<attribute name="onClick">
+									 	<![CDATA[
+										Drug d = (Drug) self.getValue();
+									if (rxComposer != null) rxComposer.setDrug(d);
+									d = commonCrudService.getById(Drug.class, d.getId());
+									patientRx.setDrug(d);
+									drugBox.setValue(d.getTradeName());
+									if (medHxComposer != null) medHxComposer.setSelectedDrug(d);
+									if (addToFavouriteLink != null) addToFavouriteLink.setVisible(true);
+									Events.postEvent("onLookedUp", drugLooupWindow.getParent(), null);
+									drugLooupWindow.detach();
+										]]>
+				 					</attribute>
+								</listitem>
+							</listbox>
+						</panelchildren>
+					</panel>
+					<div onCreate='Events.postEvent("onClick",favouriteLink,null)' />
+				</h:td>
+			</h:tr>
+		</h:table>
+	</window>
+	<zscript>
+		<![CDATA[
+	Component lastSelectedComponent;
+	void setToolbarbuttonColor(Component cmp) {
+	((Toolbarbutton) cmp).setSclass("selected");
+	if (lastSelectedComponent != null && !lastSelectedComponent.equals(cmp))
+		((Toolbarbutton) lastSelectedComponent).setSclass("unSelected");
+	lastSelectedComponent = cmp;
+	}
+]]>
+		</zscript>
+</zk>

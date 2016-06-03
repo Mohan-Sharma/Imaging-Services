@@ -1,0 +1,9 @@
+<?component name="masterEntity" macroURI="../entities/master-entity.zul" inline="true"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk>
+	<zscript><![CDATA[
+	        com.nzion.domain.drug.DrugDosageRoute route = Executions.getCurrent().getArg().get("entity");
+	    	route = route == null ? new com.nzion.domain.drug.DrugDosageRoute() : route;
+]]></zscript>
+		<masterEntity entityvalue="${route}" panelvalue="Add/Edit Route" errorMessage="Route"/>
+</zk> 

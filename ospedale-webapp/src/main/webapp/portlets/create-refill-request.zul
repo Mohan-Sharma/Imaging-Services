@@ -1,0 +1,79 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./refillRequestWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		com.nzion.domain.UserLogin userLogin = com.nzion.util.Infrastructure.getUserLogin();
+		com.nzion.domain.drug.RefillRequest request = refillRequest;
+		boolean b = userLogin.hasRole(com.nzion.domain.Roles.RECEPTION);
+	</zscript>
+	<div id="refillRequestWin"> 
+	<div>
+				<listbox id="activeRxsListBox" model="@{request.patientRxs}">
+				<listhead>
+					<listheader label="Drug"/>
+					<listheader label="Prescribed Date"/>
+					<listheader label="Visit Date"/>
+					<listheader label="Doctor"/>
+					<listheader label="Dosage Route"/>
+					<listheader label="Strength"/>
+					<listheader label="Direction"/>
+					<listheader label="Taken"/>
+					<listheader label="Requested"/>
+					<listheader label="Approved" if="${!b}"/>
+				</listhead>
+				<listitem self="@{each='patientRx'}" value="@{patientRx}">
+					<listcell>
+						<label value="@{patientRx.drug.tradeName}" />
+					</listcell>
+					<listcell>
+						<label value="@{patientRx.prescriptionDate}" />
+					</listcell>
+					<listcell>
+						<label value="@{patientRx.rxSection.soapNote.date}" />
+					</listcell>
+					<listcell>
+						<label value="@{patientRx.provider.firstName}" />
+						<label value="@{patientRx.provider.middleName}" />
+						<label value="@{patientRx.provider.lastName}" />
+					</listcell>
+					<listcell>
+						<label value="@{patientRx.drugDosageRoute}" />
+					</listcell>
+					<listcell>
+						<label value="@{patientRx.drugStrength}" />
+					</listcell>
+					<listcell>
+						<label value="@{patientRx.providerDirections}" />
+					</listcell>
+					<listcell>
+						<label value="@{patientRx.refillsTaken}" />
+					</listcell>
+					<listcell>
+						<intbox value="@{patientRx.refillsRequested}" />
+					</listcell>
+					<listcell if="${!b}">
+						<intbox  value="@{patientRx.approved}" if="${!b}" />
+					</listcell>
+				</listitem>
+			</listbox>
+	</div>
+			<separator/>
+			<hbox>
+			<separator/>
+			<label value="Comments"/>
+			<textbox value="@{request.comments}" />
+			</hbox>
+			<hbox>
+			<button label="Acknowledge" onClick='refillRequestService.ackNurseRefillRequest(request);Executions.sendRedirect(com.nzion.view.HomePageHelper.getHomePageForLoggedInUser());'>
+				<attribute name="onCreate">
+					if(userLogin.hasRole(com.nzion.domain.Roles.RECEPTION))
+					self.setVisible(false);
+				</attribute>
+			</button>
+			<button label="Send To Doctor" id="sendToProviderBtn" onClick="refillRequestService.sendRefillRequestToProvider(request);Executions.sendRedirect(com.nzion.view.HomePageHelper.getHomePageForLoggedInUser());"/>
+			<button label="Save" id="saveBtn" onClick="refillRequestService.saveRefillRequest(request);Executions.sendRedirect(com.nzion.view.HomePageHelper.getHomePageForLoggedInUser());"/>
+			</hbox>
+	</div>		
+</zk>

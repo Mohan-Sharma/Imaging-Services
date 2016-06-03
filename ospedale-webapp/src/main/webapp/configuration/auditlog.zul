@@ -1,0 +1,136 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<zk>
+	<zscript><![CDATA[
+	import com.googlecode.hibernate.audit.model.*;
+	import com.googlecode.hibernate.audit.model.property.AuditObjectProperty;
+	import com.googlecode.hibernate.audit.model.property.SimpleObjectProperty;
+	import com.googlecode.hibernate.audit.model.property.EntityObjectProperty;
+	import com.googlecode.hibernate.audit.model.property.ComponentObjectProperty;
+	import com.googlecode.hibernate.audit.HibernateAudit;
+	import com.nzion.util.Infrastructure;
+	import org.hibernate.SessionFactory;
+	import org.hibernate.Session;
+	import org.hibernate.Query;
+	import com.googlecode.hibernate.audit.model.clazz.AuditType;
+	import com.nzion.util.UtilValidator;
+	import com.googlecode.hibernate.audit.model.clazz.AuditTypeField;
+	
+	public List getHeaderList(List auditObjectPropertyList){
+	List headerList = new LinkedList();
+	if(auditObjectPropertyList==null)
+		return headerList;
+	String prevAuditFieldName = null;
+	for(int i=0;i<auditObjectPropertyList.size();i++){
+		AuditObjectProperty auditObjectProperty = (AuditObjectProperty)auditObjectPropertyList.get(i);
+		String auditFieldName = null;		
+		if(auditObjectProperty!=null && auditObjectProperty.getAuditField()!=null){
+			auditFieldName = auditObjectProperty.getAuditField().getName();
+			if(prevAuditFieldName==null || !auditFieldName.equals(prevAuditFieldName)){
+				headerList.add(auditFieldName);
+			}
+		}
+		prevAuditFieldName = auditFieldName;
+	}
+	return headerList;
+	}
+	
+	public List getRowFromAuditObjectPropertyList(List auditObjectPropertyList,int jumpInterval,int startIndex){
+	List singleRow = new LinkedList();
+	if(UtilValidator.isEmpty(auditObjectPropertyList))
+		return singleRow;
+	for(int iCount=startIndex;iCount<auditObjectPropertyList.size();iCount=iCount+jumpInterval){
+		AuditObjectProperty auditObjectProperty = (AuditObjectProperty)auditObjectPropertyList.get(iCount);
+		singleRow.add(getDataFromAuditObjectProperty(auditObjectProperty));
+	}
+	return singleRow;
+	}
+	
+	public String getDataFromAuditObjectProperty(AuditObjectProperty auditObjectProperty){
+	String data = null;
+	if(auditObjectProperty instanceof SimpleObjectProperty){
+ 			data = ((SimpleObjectProperty)auditObjectProperty).getValue();
+ 	}else if (auditObjectProperty instanceof EntityObjectProperty){
+ 		data = ((EntityObjectProperty)auditObjectProperty).getTargetEntityId();
+ 	}else if (auditObjectProperty instanceof ComponentObjectProperty){
+ 		data =  ((ComponentObjectProperty)auditObjectProperty).toString();
+ 	}
+	return data;
+	}
+	
+	
+	SessionFactory sf = Infrastructure.getSpringBean("auditSessionFactory");
+	Session hSession = sf.openSession();
+	Object entity = arg.get("entity");
+	String auditedEntity = null;
+	String primarKey = null;
+	if(entity!=null){
+		auditedEntity = entity.getClass().getName();
+		primarKey = ((com.nzion.domain.base.BaseEntity)entity).getId().toString();
+	}
+	AuditType type = HibernateAudit.getAuditType(hSession, auditedEntity);
+	List auditFields = type.getAuditFields();
+	
+	List finalAuditFields = new LinkedList();
+	
+	for(int i=0;i<auditFields.size();i++){
+		AuditTypeField auditTypeField = (AuditTypeField)auditFields.get(i);
+		if(auditTypeField.getFieldType().getType()!=AuditType.COLLECTION_TYPE){
+			finalAuditFields.add(auditTypeField);	
+		}
+	}
+	List auditObjectPropertyList = HibernateAudit.getModifiedAuditObjectProperties(hSession,finalAuditFields,primarKey,0L);
+	
+	SimpleListModel model = null;
+	if(UtilValidator.isNotEmpty(auditObjectPropertyList))
+		model = new SimpleListModel(auditObjectPropertyList);
+	
+	ListitemRenderer auditRenderer = new ListitemRenderer(){
+	 public void render(Listitem listItem, Object data){
+	 	AuditObjectProperty auditProperty = (AuditObjectProperty)data;
+	 	new Listcell(auditProperty.getAuditField().getName()).setParent(listItem);
+	 	
+	 	
+	 }
+	}
+	]]></zscript>
+	<window  mode="modal" closable="true" id="auditLogwin" contentStyle="overflow:auto">
+	<panel title="Audit Log" style="overflow:auto">
+			<panelchildren>
+<!--				<div sclass="panelCont">-->
+					<div>
+		<listbox id="auditLogListBox" style="overflow:auto">
+		</listbox>
+	</div>
+<!--</div>-->
+</panelchildren>
+</panel>
+	<zscript><![CDATA[
+	//createAuditListBox();	                  
+	//public void createAuditListBox(){
+	Listhead listhead = new Listhead();
+	listhead.setParent(auditLogListBox);
+	String prevAuditFieldName = null;
+	List headerList = getHeaderList(auditObjectPropertyList);
+	for(int i=0;i<headerList.size();i++){
+		Listheader listheader = new Listheader((String)headerList.get(i));
+		listheader.setParent(listhead);
+	}
+	int noOfRows = 0;
+	if(UtilValidator.isNotEmpty(auditObjectPropertyList) && UtilValidator.isNotEmpty(headerList))
+		noOfRows = auditObjectPropertyList.size()/headerList.size();
+	for(int i=0;i<noOfRows;i++){
+	List row = getRowFromAuditObjectPropertyList(auditObjectPropertyList,noOfRows,i);
+	Listitem listitem = new Listitem();
+	listitem.setParent(auditLogListBox);
+	for(int iCount=0;iCount<row.size();iCount++){
+		Listcell listcell = new Listcell();
+		if(UtilValidator.isNotEmpty((String)row.get(iCount))){
+		listcell.setLabel((String)row.get(iCount));
+		}
+		listitem.appendChild(listcell);
+		}
+	}
+	]]></zscript>
+	<button label="Close" onClick="auditLogwin.detach();"></button>
+	</window>
+</zk>

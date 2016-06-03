@@ -1,0 +1,83 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./vaccineCodeSetWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	 com.nzion.domain.emr.VaccineCodeSet vaccineCodeSet = arg.get("entity");    
+	 vaccineCodeSet = vaccineCodeSet == null ? new com.nzion.domain.emr.VaccineCodeSet() : commonCrudService.getById(com.nzion.domain.emr.VaccineCodeSet.class,vaccineCodeSet.getId());        
+	String windowTitle = vaccineCodeSet.getId() != null ? "Edit" : "New";
+	</zscript>
+	<window id="vaccineCodeSetWindow" title="${windowTitle}  Vaccine Code Set" closable="true" width="55%">
+	<zscript>
+	<![CDATA[
+	
+	public void saveVaccineCodeSet(){
+	if(vaccineCodeSet.getId() == null)
+		vaccineCodeSet.setId(vaccineCodeSet.getName()+"_"+com.nzion.util.Infrastructure.getPracticeId());
+	commonCrudService.save(vaccineCodeSet);
+	com.nzion.util.UtilMessagesAndPopups.showSuccess();
+	}
+	
+	public void removeImmunizations(){
+	vaccineCodeSet.getImmunizations().removeAll(com.nzion.util.ViewUtil.getSelectedItems(immunizationListbox));
+	Events.postEvent("onReloadRequest", immunizationListbox, null);
+	}
+]]>
+	</zscript>
+		<panel title="Vaccine Code Set Details" collapsible="true">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div sclass="col2">
+						<label value="Name" />
+						<label value=" *" zclass="labelReq"/>
+						<textbox value="@{vaccineCodeSet.name,save-when='saveBtn.onClick'}" cols="45" constraint="no empty" onBlur="self.setValue(self.getValue().toUpperCase());" disabled="false"/>
+					</div>
+					<div sclass="col2">
+						<label value="Description" />
+						<textbox value="@{vaccineCodeSet.description,save-when='saveBtn.onClick'}" cols="45" disabled="false"/>
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot" />
+		<separator height="10px" />
+		<panel title="Immunizations" collapsible="true" onDeleteClick="removeImmunizations();" id="immunizationPanel">
+		<attribute name="onAddClick">
+		Window window = (Window)Executions.createComponents("/emr/immunization-search.zul", vaccineCodeSetWindow,com.nzion.util.UtilMisc.toMap("VaccineCodeSet", vaccineCodeSet));
+		window.addForward("onDetach",immunizationListbox,"onReloadRequest");
+		</attribute>
+			<panelchildren>
+			<toolbar listenercomponent="${immunizationPanel}" hidecancel="true" hidesearch="true"/>
+				<div sclass="panelCont">
+					<div width="100%" style="overflow:auto;height:300px;">
+						<listbox id="immunizationListbox" model="@{vaccineCodeSet.immunizations,load-after='self.onReloadRequest'}" mold="paging"
+							pageSize="10" multiple="true" pagingPosition="top" checkmark="true">
+							<listhead>
+								<listheader label="Vaccine Short Name" />
+								<listheader label="Vaccine Full Name" />
+							</listhead>
+							<listitem self="@{each='immunization'}" value="@{immunization}">
+								<listcell label="@{immunization.shortDescription}" />
+								<listcell label="@{immunization.fullVaccineName}" />
+							</listitem>
+						</listbox>
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot" />
+		<separator height="10px" />
+		<div sclass="panelFoot">
+			<button label="Save" id="saveBtn">
+				<attribute name="onClick">
+				if(com.nzion.util.UtilValidator.isEmpty(vaccineCodeSet.getImmunizations())){
+					Messagebox.show("Add atleast one Vaccine");
+					return;
+					}
+					saveVaccineCodeSet();
+					vaccineCodeSetWindow.detach();
+				</attribute>
+			</button>
+		</div>
+	</window>
+</zk>

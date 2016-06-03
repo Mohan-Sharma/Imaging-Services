@@ -1,0 +1,50 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+		import com.nzion.zkoss.composer.SoapSentenceComposer;
+		import com.nzion.domain.emr.soap.AllergySection;
+		
+		SoapSentenceComposer sentenceComposer = (SoapSentenceComposer)arg.get("controller");
+		AllergySection allergySection = (AllergySection)sentenceComposer.getSoapNoteController().getSoapSection(AllergySection.class,false);
+		sentenceComposer.setSelectedSection(allergySection);
+	</zscript>
+<div style="margin-left:10px">
+		<style>
+		tr.z-row td.z-row-inner, tr.z-row .z-cell{
+ 			border-style:none none none;
+ 		}
+		</style>
+		<n:h2>${allergySection.soapModule.moduleDescription}</n:h2>
+		<n:br/>
+		<n:h4>
+			<label value="Patient has reported he has no known allergies or no known drug allergies." if="${empty allergySection.patientAllergies}"/>
+		</n:h4>
+		<n:table width="100%" border="1px" cellspacing="10px" cellpadding="10px" if="${not empty allergySection.patientAllergies}">
+		<n:thead>
+			<n:tr style="text-align:left">
+				<n:th>Allergy Name</n:th>
+				<n:th>Allergy Type</n:th><!--
+				<n:th>Classification</n:th>
+				--><n:th>Reaction</n:th>
+				<n:th>Status</n:th>
+				<n:th>Severity</n:th><!--
+				<n:th>Source</n:th>
+				--><n:th>Onset Date</n:th>
+			</n:tr>
+		</n:thead>
+		<n:tr forEach="${allergySection.patientAllergies}">
+				<n:td><label value="${each.allergy}"/></n:td>
+				<n:td><label value="${each.allergyType}"/></n:td>
+				<n:td><label value="${each.reactionName}"/></n:td><!--
+				<n:td><label value="${each.reaction}"/></n:td>
+				--><n:td><label value="${each.allergyStatus}"/></n:td>
+				<n:td><label value="${each.severity}"/></n:td>
+				<n:td><label value="${each.onSetDate}"/></n:td>
+		</n:tr>
+		</n:table>
+		<n:br/>
+</div>
+</zk>

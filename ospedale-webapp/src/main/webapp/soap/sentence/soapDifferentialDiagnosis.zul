@@ -1,0 +1,62 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+		import com.nzion.zkoss.composer.SoapSentenceComposer;
+		import com.nzion.domain.emr.soap.DiagnosisSection;;
+		SoapSentenceComposer sentenceComposer = (SoapSentenceComposer)arg.get("controller");
+		DiagnosisSection diagnosisSection = (DiagnosisSection)sentenceComposer.getSoapNoteController().getSoapSection(DiagnosisSection.class,false);
+		sentenceComposer.setSelectedSection(diagnosisSection);
+	</zscript>
+	<div style="margin-left:10px">
+		<style>
+		tr.z-row td.z-row-inner, tr.z-row .z-cell{
+ 			border-style:none none none;
+ 		}
+		</style>
+		<n:h2>${diagnosisSection.soapModule.moduleDescription}</n:h2>
+		<n:br/>
+		<n:table width="100%" cellspacing="10px" cellpadding="10px">
+		<n:thead>
+			<n:tr style="text-align:left">
+				<n:th>Diagnosis Code - Description</n:th>
+				<n:th>Procedures Code</n:th>
+			</n:tr>
+		</n:thead>
+		<n:tr forEach="${diagnosisSection.icds}">
+				<n:td><label value="${each.icdElement.code}"/><space width="5px"></space><label value="${each.icdElement.description}"/></n:td>
+				<n:td>
+					<label value="${each.cpt.id}, " forEach="${each.cpts}"/><space width="5px"></space>
+				</n:td>
+		</n:tr>
+		</n:table>
+		<n:br/>
+		<n:h3>Procedures</n:h3>
+		<n:table width="100%" cellspacing="10px" cellpadding="10px">
+			<n:thead>
+				<n:tr style="text-align:left">
+					<n:th>Procedures Code</n:th>
+					<n:th>Procedures Description</n:th>
+					<n:th>Unit</n:th>
+				</n:tr>
+			</n:thead>
+			<n:tr forEach="${diagnosisSection.cpts}">
+				<n:td><label value="${each.cpt.id}"/></n:td>
+				<n:td><label value="${each.cpt.description}"/></n:td>
+				<n:td><label value="${each.unit}"/></n:td>
+			</n:tr>
+		</n:table>
+		<n:h3 if="${diagnosisSection.soapNote.patient.dateOfDeath != null}">Patient Death Details</n:h3>
+			<label if="${diagnosisSection.soapNote.patient.dateOfDeath != null }">Patient died on ${display:fd(diagnosisSection.soapNote.patient.dateOfDeath)}</label>
+			<n:br/>		
+			<label if="${!(empty diagnosisSection.soapNote.patient.causeOfDeath)}">Cause of death  ${diagnosisSection.soapNote.patient.causeOfDeath}</label>		
+			<n:br/>		
+			<label if="${!(empty diagnosisSection.soapNote.patient.placeOfDeath)}">Place of death ${diagnosisSection.soapNote.patient.placeOfDeath}</label>
+		
+	<label value="Comments" style="font-size:12px;font-weight:bold;" if="${diagnosisSection.sectionComments!=null}"/>
+	<textbox value="@{diagnosisSection.sectionComments}" style="border:none" cols="100" multiline="true" if="${diagnosisSection.sectionComments!=null}"/>
+	<n:br/>
+</div>
+</zk>

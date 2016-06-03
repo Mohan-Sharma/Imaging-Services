@@ -1,0 +1,21 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./drugInteractionWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	List patientRxAlerts = arg.get("patientRxAlerts");
+</zscript>
+	<window id="drugInteractionWindow" title="Drug Interaction" width="50%" closable="true" mode="modal">
+		<box forEach="${patientRxAlerts}">
+			<html>
+				<![CDATA[ <ul class="rxAlertCont"> <li class="rxAlert">${each.alertMessage}</li> </ul> ]]>
+				
+				</html>
+			<separator orient="horizontal" bar="true" width="100%" />
+		</box>
+		<separator height="10px" />
+		<div sclass="panelFoot">
+			<button  sclass="btn submit" label="Cancel" forward="onClick=onCancel" />
+		</div>
+	</window>
+</zk>

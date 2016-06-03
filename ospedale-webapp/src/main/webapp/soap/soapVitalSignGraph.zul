@@ -1,0 +1,46 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapVitalSignsGraphWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window id="soapVitalSignsGraphWin" contentStyle="overflow:auto;">
+	<zscript>
+		List personVitalSigns = session.getAttribute("personVitalSigns");		
+		com.nzion.zkoss.composer.PatientSoapNoteController controller = session.getAttribute("controller");		
+		com.nzion.zkoss.composer.ChartController chartController = new com.nzion.zkoss.composer.ChartController("Vital Signs", "Recorded On", "Value");
+		Set vitalSignNames = new HashSet();
+		com.nzion.domain.Patient patient = controller.getPatient();
+		com.nzion.domain.Provider provider = controller.getProvider();
+		com.nzion.domain.Location location = controller.getSchedule().getLocation();
+	</zscript>
+	<div sclass="dataTables_scrollBody" style="overflow: auto;">
+		<div align="center">
+				<include src="/soap/soapPrintBanner.zul" soapnotedate="${controller.soapNote.date}"/>
+		</div>
+	<hbox widths="70%,30%">
+		<vbox width="100%" id="chartDiv"><!--
+				<include src="/chart.zul" chartcontroller="${chartController}" id="chartInclude" timeseries="true"/>
+		--></vbox>
+		<vbox width="100%">
+		<checkbox forEach="${personVitalSigns}" label="${each.name}">
+			<attribute name="onCheck">
+				boolean b = (self.isChecked()) ? vitalSignNames.add(self.getLabel()) : vitalSignNames.remove(self.getLabel());
+				controller.prepareVitalSignChartController(vitalSignNames, chartController, controller.getPatient());
+				chartDiv.getChildren().clear();
+				Include include = new Include();
+				include.setSrc("/chart.zul");
+				include.setDynamicProperty("chartcontroller", chartController);
+				include.setDynamicProperty("timeseries", "true");
+				include.setParent(chartDiv);
+//				chartInclude.invalidate();
+			</attribute>
+		</checkbox>
+		<span sclass="linkBtn linkBtnOn" style="margin:10px;">
+			<a  label="Print" onClick="Clients.print()"/>
+		<span />
+		</span>
+		</vbox>
+	</hbox>
+			<include src="/soap/soapPrintFooter.zul"/>
+	</div>
+	</window>
+</zk>

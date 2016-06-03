@@ -1,0 +1,304 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/soapnotetemplate.zul"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./facesheetWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<script type="text/javascript" src="../images/dataTables/media/js/jquery.dataTables.js"></script>
+	<style src="../images/dataTables/media/css/demo_table.css"></style>
+	<style src="../images/dataTables/media/css/demo_page.css"></style>
+	<style src="../images/dataTables/media/css/demo_table_jui.css"></style>
+	<style src="../images/dataTables/media/css/jquery-ui-1.8.16.custom.css"></style>
+	<zscript>
+setPageTitle("Medical Records", "");
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure
+			.getSpringBean("commonCrudService");
+	com.nzion.service.SoapNoteService soapNoteService = com.nzion.util.Infrastructure.getSpringBean("soapNoteService");
+	com.nzion.service.emr.lab.LabService labService = com.nzion.util.Infrastructure.getSpringBean("labService");
+	String patientId = (String) Executions.getCurrent().getParameter("patientId");
+	com.nzion.domain.Patient patient = commonCrudService.getById(com.nzion.domain.Patient.class, new Long(patientId));
+	List patientAllergies = soapNoteService.getAllPatientClinicalRecords(patient,
+			com.nzion.domain.emr.soap.PatientAllergy.class);
+	List patientImmunizations = soapNoteService.getAllPatientClinicalRecords(patient,
+			com.nzion.domain.emr.soap.PatientImmunization.class);
+	List allProblemList = soapNoteService.getLatestPatientRecords(patient, "patientIcds",
+			com.nzion.domain.emr.soap.ProblemListSection.class, 0);
+	List vitalSignReadings = soapNoteService.getAllPatientClinicalRecords(patient,
+			com.nzion.domain.emr.soap.vitalsign.VitalSignReading.class);
+	List medications = soapNoteService.getAllPatientClinicalRecords(patient, com.nzion.domain.emr.soap.PatientRx.class);
+	List labTestResults = labService.getLabResultFor(patient, null, null, null);
+</zscript>
+	<div id="facesheetWindow" self="@{define(content)}" style="overflow:hidden;">
+		<div style="overflow:hidden;">
+			<div sclass="mid" width="99%">
+				<h:table border="0" cellspacing="0" cellpadding="0" width="99%" class="showpayCost">
+					<h:tr>
+						<h:td class="ws_top_left">
+							<html><![CDATA[&nbsp;]]></html>
+						</h:td>
+						<h:td class="ws_top_x">
+							<html><![CDATA[&nbsp;]]></html>
+						</h:td>
+						<h:td class="ws_top_right">
+							<html><![CDATA[&nbsp;]]></html>
+						</h:td>
+					</h:tr>
+					<h:tr>
+						<h:td class="ws_left_y">
+							<space />
+						</h:td>
+						<h:td valign="top" class="ws_middle" style="padding-left: 10px;">
+							<h:table width="100%" border="0" cellspacing="0" cellpadding="0">
+								<h:tr>
+									<h:td>
+
+										<span class="label">MRN # :</span>
+										<span sclass="value">
+											<label value="@{patient.accountNumber}"></label>
+										</span>
+										<span class="div">|</span>
+										<!-- 	<span class="label">SSN Number:</span> -->
+										<!-- <span sclass="value">
+											<label
+											value="@{patient.ssnNumber,save-when='updatePatient.onClick'}" />
+											</span> -->
+										<span class="div">|</span>
+										<span class="label">Name:</span>
+										<span sclass="value">
+											<name object="@{patient}" />
+										</span>
+									</h:td>
+								</h:tr>
+							</h:table>
+						</h:td>
+					</h:tr>
+					<h:tr>
+						<h:td class="ws_bottom_left">
+							<html><![CDATA[&nbsp;]]></html>
+						</h:td>
+						<h:td class="ws_bottom_x">
+							<html><![CDATA[&nbsp;]]></html>
+						</h:td>
+						<h:td class="ws_bottom_right">
+							<html><![CDATA[&nbsp;]]></html>
+						</h:td>
+					</h:tr>
+				</h:table>
+			</div>
+		</div>
+		<panel title="Problem List" collapsible="true" id="problemListPanel">
+			<panelchildren>
+				<div style="padding:5px">
+					<n:table id="illnessListBox" cellpadding="0" cellspacing="0" border="0" class="display">
+						<n:thead>
+							<n:tr>
+								<n:th>Problem Code/Description</n:th>
+								<n:th>Source</n:th>
+								<n:th>OnSet Date</n:th>
+								<n:th>Severity</n:th>
+								<n:th>Status</n:th>
+							</n:tr>
+						</n:thead>
+						<n:tbody>
+							<n:tr forEach="${allProblemList}">
+								<n:td>${each}</n:td>
+								<n:td>
+									<name object="${each.soapNote.provider}" />
+								</n:td>
+								<n:td>${display:fd(each.onSetDate)}</n:td>
+								<n:td>${each.severity}</n:td>
+								<n:td>${each.status}</n:td>
+							</n:tr>
+						</n:tbody>
+					</n:table>
+				</div>
+				<script type="text/javascript">
+					zk.afterMount(function() { jq("#illnessListBox").dataTable( {"bJQueryUI": true, "bFilter": false,"bInfo":
+					false,"sPaginationType":"full_numbers", "aoColumns": [ null, null, null, null,{ "bSortable":
+					false,"sType": "html"} ]} ); });
+				</script>
+			</panelchildren>
+		</panel>
+		<panel title="Medications" collapsible="true">
+			<panelchildren>
+				<div style="padding:5px">
+					<n:table id="medicationListbox" cellpadding="0" cellspacing="0" border="0" class="display">
+						<n:thead>
+							<n:tr>
+								<n:th>Drug Name</n:th>
+								<n:th>Quantity</n:th>
+								<n:th>Drug Form</n:th>
+								<n:th>Frequency</n:th>
+								<n:th>Total Supply</n:th>
+								<n:th>Supply UOM</n:th>
+								<n:th>Start Date</n:th>
+								<n:th>End Date</n:th>
+								<n:th>Status</n:th>
+							</n:tr>
+						</n:thead>
+						<n:tbody>
+							<n:tr forEach="${medications}">
+								<n:td>${each.drug.tradeName} ${each.drug.genericName}</n:td>
+								<n:td>${each.quantity}</n:td>
+								<n:td>${each.drugDosageForm}</n:td>
+								<n:td>${each.drugDirection}</n:td>
+								<n:td>${each.totalSupply}</n:td>
+								<n:td>${each.supplyUom}</n:td>
+								<n:td>${display:fd(each.startDate)}</n:td>
+								<n:td>${display:fd(each.endDate)}</n:td>
+								<n:td>${each.status}</n:td>
+							</n:tr>
+						</n:tbody>
+					</n:table>
+				</div>
+				<script type="text/javascript">
+					zk.afterMount(function() { jq("#medicationListbox").dataTable({ "bJQueryUI": true,"bFilter":
+					false,"bInfo": false, "sPaginationType": "full_numbers", "aoColumns": [ null,null,null,null,null, null,
+					null, null,{ "bSortable": false,"sType": "html"} ] }); });
+				</script>
+			</panelchildren>
+		</panel>
+		<panel title="Allergies" collapsible="true" height="300px" id="allergyPanel">
+			<panelchildren>
+				<div style="padding:5px">
+					<n:table id="allergyListbox" cellpadding="0" cellspacing="0" border="0" class="display">
+						<n:thead>
+							<n:tr>
+								<n:th>Reaction</n:th>
+								<n:th>Name</n:th>
+								<n:th>Severity</n:th>
+								<n:th>Status</n:th>
+								<n:th>OnSet Date</n:th>
+							</n:tr>
+						</n:thead>
+						<n:tbody>
+							<n:tr forEach="${patientAllergies}">
+								<n:td>${each.reactionName}</n:td>
+								<n:td>${each.allergy}</n:td>
+								<n:td>${each.severity}</n:td>
+								<n:td>${each.allergyStatus.description}</n:td>
+								<n:td>${display:fd(each.onSetDate)}</n:td>
+							</n:tr>
+						</n:tbody>
+					</n:table>
+				</div>
+				<script type="text/javascript">
+					zk.afterMount(function() { jq("#allergyListbox").dataTable( {"bJQueryUI": true, "bFilter": false,"bInfo":
+					false,"sPaginationType":"full_numbers", "aoColumns": [ null, null, null, null,{ "bSortable":
+					false,"sType": "html"} ]} ); });
+				</script>
+			</panelchildren>
+		</panel>
+		<panel title="Immunizations" collapsible="true" id="immunizationPanel">
+			<panelchildren>
+				<div style="padding:5px">
+					<n:table id="immunizationListbox" cellpadding="0" cellspacing="0" border="0" class="display">
+						<n:thead>
+							<n:tr>
+								<n:th>
+									<n:b>Immunization</n:b>
+								</n:th>
+								<n:th>
+									<n:b>Administered Amount</n:b>
+								</n:th>
+								<n:th>
+									<n:b>Administered Units</n:b>
+								</n:th>
+								<n:th>
+									<n:b>Administered On</n:b>
+								</n:th>
+							</n:tr>
+						</n:thead>
+						<n:tbody>
+							<n:tr forEach="${patientImmunizations}">
+								<n:td>${each.immunization.fullVaccineName}</n:td>
+								<n:td>${each.administeredAmount}</n:td>
+								<n:td>${each.administeredUnits}</n:td>
+								<n:td>${display:fd(each.administeredOn)}</n:td>
+							</n:tr>
+						</n:tbody>
+					</n:table>
+					<script type="text/javascript">
+						zk.afterMount(function() { jq("#immunizationListbox").dataTable( {"bJQueryUI": true, "bFilter":
+						false,"bInfo": false,"sPaginationType":"full_numbers", "aoColumns": [ null, null, null,{ "bSortable":
+						false,"sType": "html"} ]} ); });
+					</script>
+				</div>
+			</panelchildren>
+		</panel>
+		<panel id="vitalSignPanel" title="Vital Signs" collapsible="true">
+			<panelchildren>
+				<n:div id="metricDiv">
+					<n:table id="vitalSignReading" class="display">
+						<n:thead>
+							<n:tr>
+								<n:th>Recorded On</n:th>
+								<n:th>Height</n:th>
+								<n:th>Weight</n:th>
+								<n:th>Head Circumference</n:th>
+								<n:th>Chest Circumference</n:th>
+								<n:th>Blood Pressure</n:th>
+								<n:th>Temperature</n:th>
+								<n:th>Pulse</n:th>
+								<n:th>Respiration</n:th>
+								<n:th>BMI</n:th>
+							</n:tr>
+						</n:thead>
+						<n:tbody>
+							<n:tr forEach="${vitalSignReadings}">
+								<n:td>${display:fd(each.dateOfMeasurement)}</n:td>
+								<n:td>${each.height.metricValue} ${each.height.metricUnit}</n:td>
+								<n:td>${each.weight.metricValue} ${each.weight.metricUnit}</n:td>
+								<n:td>${each.headCircumference.metricValue} ${each.headCircumference.metricUnit}</n:td>
+								<n:td>${each.chestCircumference.metricValue} ${each.chestCircumference.metricUnit}</n:td>
+								<n:td>${each.bloodPressure}</n:td>
+								<n:td>${each.temperature}</n:td>
+								<n:td>${each.pulse}</n:td>
+								<n:td>${each.respiration}</n:td>
+								<n:td>${each.bmi} ${each.bmiCategory}</n:td>
+							</n:tr>
+						</n:tbody>
+					</n:table>
+				</n:div>
+				<script type="text/javascript">
+					zk.afterMount(function() { jq("#vitalSignReading").dataTable({ "bJQueryUI": true,"bFilter":
+					false,"bInfo":false,"sPaginationType": "full_numbers" }); });
+				</script>
+			</panelchildren>
+		</panel>
+		<panel title="Lab Results" collapsible="true" id="labOrderPanel">
+			<panelchildren>
+				<div style="padding:5px">
+					<n:table id="labTestResultsGrid" cellpadding="0" cellspacing="0" border="0" class="display">
+						<n:thead>
+							<n:tr>
+								<n:th>Test Performed Date</n:th>
+								<n:th>Test Id - Test Name</n:th>
+								<n:th>Observation Value</n:th>
+								<n:th>Unit</n:th>
+								<n:th>Reference Range</n:th>
+								<!-- <n:th>Result Status</n:th> -->
+							</n:tr>
+						</n:thead>
+						<n:tbody>
+							<n:tr forEach="${labTestResults}">
+								<n:td>${display:fd(each.observationDateTime)}</n:td>
+								<n:td>${each.obxName}</n:td>
+								<n:td>${each.observationValue}</n:td>
+								<n:td>${each.units}</n:td>
+								<n:td>${each.referenceRange}</n:td>
+								<!-- <n:td>${each.resultStatus}</n:td> -->
+							</n:tr>
+						</n:tbody>
+					</n:table>
+				</div>
+				<script type="text/javascript">
+					zk.afterMount(function() { jq("#labTestResultsGrid").dataTable( {"bJQueryUI": true, "bFilter":
+					false, "bInfo": false, "sPaginationType":"full_numbers", "aoColumns": [ null, null, null,null,null,{ "bSortable":
+					false, "sType": "html"} ]} ); });
+				</script>
+			</panelchildren>
+		</panel>
+	</div>
+</zk>

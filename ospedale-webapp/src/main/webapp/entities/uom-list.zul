@@ -1,0 +1,13 @@
+<?component name="screen" macro-uri="/home-grid-macro.zul"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	setPageTitle("Unit of Measurement", "");
+</zscript>
+	<window>
+		<screen width="100%" pagetitle="Unit of Measurement" listtitle="List of Unit of Measurements"
+			addpage="addUom" editpage="addUom" hidedeletebtn="true"  
+			entityclass="com.nzion.domain.emr.UnitOfMeasurement" fields="code,description"
+			labels="Code,Description," addmodepopup="true" editModePopup="true"/>
+	</window>
+</zk>

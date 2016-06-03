@@ -1,0 +1,9 @@
+<?component name="masterEntity" macroURI="../entities/master-entity.zul" inline="true"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk>
+	<zscript><![CDATA[
+	        com.nzion.domain.drug.DrugGenericName genericName = Executions.getCurrent().getArg().get("entity");
+	        genericName = genericName == null ? new com.nzion.domain.drug.DrugGenericName() : genericName;
+]]></zscript>
+		<masterEntity entityvalue="${genericName}" panelvalue="Add/Edit Drug Generic Name" errorMessage="Route"/>
+</zk> 

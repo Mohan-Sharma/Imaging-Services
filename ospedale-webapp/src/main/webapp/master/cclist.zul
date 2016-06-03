@@ -1,0 +1,13 @@
+<?page title="Chief Complaint" contentType="text/html;charset=UTF-8"?>
+<zk>
+	<zscript>
+setPageTitle("Chief Complaints", "");
+</zscript>
+
+	<window self="@{define(content)}">
+		<screen width="100%" title="List of Chief Complaints" addpage="newChiefComplaint" editpage="newChiefComplaint"
+			fields="complainName, active, isMultiple, genderApplicabilityForQuestion.migrationCode"
+			entityclass="com.nzion.domain.emr.ChiefComplaint" labels="Complain Name, Enabled,Multiple,Applicable For" />
+	</window>
+
+</zk>

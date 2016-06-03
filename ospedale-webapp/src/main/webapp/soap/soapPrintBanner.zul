@@ -1,0 +1,93 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xmlns:w="http://www.zkoss.org/2005/zk/client">
+	
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<?xel-method prefix="displayName" name="fn" class="com.nzion.util.ViewUtil" signature="String getFormattedName(java.lang.Object)"?>
+	<?xel-method prefix="displayAge" name="da" class="com.nzion.util.UtilDateTime" signature="String calculateAge(java.util.Date,java.util.Date)"?>
+	<zscript>
+	Date visitDate = soapnotedate;
+	
+	</zscript>
+<window width="98%">
+<separator/>
+	<n:div width="98%">
+	<n:table>
+	<n:tr>
+		<h:td align="center"><n:strong style="font-size:20px">${practice.practiceName}</n:strong></h:td>
+	</n:tr>
+	<n:tr>
+		<h:td align="center">
+			<n:strong style="font-size:15px;margin-right:2px;padding:10px">${location.contacts.postalAddress.address1}</n:strong>
+			<n:strong style="font-size:15px;margin-right:2px;padding:10px">${location.contacts.postalAddress.city}</n:strong>
+			<n:strong style="font-size:15px;margin-right:2px;padding:10px">${location.contacts.postalAddress.stateProvinceGeo}</n:strong>
+		</h:td>
+	</n:tr>
+		<n:tr>
+			<h:td>
+				<n:strong style="font-size:15px;margin-right:2px;padding:10px">Tel : </n:strong> ${location.contacts.officePhone}
+				<n:strong style="font-size:15px;padding:10px">Fax : </n:strong> ${location.contacts.faxNumber}
+			</h:td>
+	</n:tr>
+	</n:table>
+	</n:div>
+	
+	  <div sclass="container-fluid">
+	  <div zclass="span6">
+                    <div width="57%" zclass="form-horizontal" >
+                        <div  sclass="control-group">
+                            <label zclass="control-label" value="Doctor Name :"/>
+                            <div zclass="controls">
+                                <label value= "${displayName:fn(provider)}"/>
+                               
+                            </div>
+                        </div>
+                        <div sclass="control-group">
+                            <label zclass="control-label" value="Regd No : "/>
+                            <div zclass="controls">
+                                <label value="${provider.regdNo}"/>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+                
+                <div zclass="span2"/>
+                <div zclass="span2">
+                    <div width="1px" zclass="form-horizontal">
+                        
+                            <div >
+                            <label sclass="control-label" value="Admission Date :"/>
+                            <div zclass="controls">
+                                <label value= "${display:fd(patientAdmission.admittedDate)}"/>
+                            </div>
+                            </div>
+                            <div >
+                            <label sclass="control-label" value="Ward/Bed/Type :"/>
+                            <div zclass="controls">
+                                <label value="${patientAdmission.latestAllocatedBed.ward.wardName}"/>/
+                                 <label value="${patientAdmission.latestAllocatedBed.bed.bedNo}"/>
+                            </div>
+                            </div>
+                            <div >
+                            <label sclass="control-label" value="Charge Type :"/>
+                            <div zclass="controls">
+                                <label value="${patientAdmission.soapNote.encounterType.chargeType}"/>
+                            </div>
+                            </div>
+                    </div>
+                </div>
+                </div>
+		<n:br/>
+		<n:table width="98%" cellpadding="2">
+		<n:tr>
+			<n:td style="font-size:15px">
+			<n:strong>Patient: </n:strong> 
+			<span style="margin-top:2px"> <n:label style="font-weight:bold;">${displayName:fn(patient)},</n:label> </span>
+			${displayAge:da(patient.dateOfBirth,visitDate)},${patient.gender}.
+			</n:td>
+		</n:tr>
+		</n:table>
+		<n:br/>
+<separator/>
+</window>
+</zk>

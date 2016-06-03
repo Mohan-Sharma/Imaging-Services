@@ -1,0 +1,58 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?component name="signinmenu" macro-uri="/portlets/signin-menus.zul" inline="true"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./signinPortletWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	import com.nzion.view.component.StringAscendingComparator;
+	import com.nzion.view.component.GenericDescendingCompartor;
+	import com.nzion.view.component.GenericAscendingComparator;
+	com.nzion.zkoss.composer.appointment.SigninPortletController signinController = new com.nzion.zkoss.composer.appointment.SigninPortletController(false);
+	GenericAscendingComparator ascComp = new GenericAscendingComparator("patient.firstName");
+	GenericDescendingCompartor descComp = new GenericDescendingCompartor("patient.firstName");
+	com.nzion.zkoss.ext.EntityDropdownRenderer dropdownRenderer = new com.nzion.zkoss.ext.EntityDropdownRenderer(new com.nzion.zkoss.ext.EntityDropDownPersonNameAdapter());
+	
+</zscript>
+	<window id="signinPortletWindow" apply="${signinController}">
+		<panel sclass="gridCont">
+			<panelchildren>
+				<div sclass="grid clr prel">
+<!--					<space height="5px"></space>-->
+<!--					<hlayout spacing="50px" style="margin-left:10px">-->
+<!--					<hlayout width="100%" spacing="20px">-->
+<!--					<label value="Date"/>-->
+<!--					<datebox value="@{signinController.selectedDate}" id="date" constraint="no future" />-->
+<!--					</hlayout>-->
+<!--					-->
+<!--					<hlayout width="100%" spacing="20px">-->
+<!--					<label value="Location" />-->
+<!--					<combobox id="locationCombo" value="${location.name}" selectedItem="@{signinController.location}">-->
+<!--						<comboitem label="${each.name}" value="${each}" forEach="${userLogin.locations}" />-->
+<!--					</combobox>-->
+<!--					</hlayout>-->
+<!--					</hlayout>-->
+						<hlayout width="100%" spacing="20px" style="margin-top:5px">
+						<label value="Provider" />
+							<combobox id="providerCombo" model="@{signinController.schedulableResourcesByLocation}" selectedItem="@{signinController.person}" itemRenderer="${dropdownRenderer}"/>
+						</hlayout>
+					<space height="5px"></space>
+					<listbox
+						model="@{signinController.todaysSchedules, load-after='providerCombo.onChange'}"
+						sclass="whiteBackground" itemRenderer="${signinController}" width="100%" id="schedulesOfTheDayListBox">
+						<listhead>
+							<listheader label="MRN" style="font-weight:bold" width="120px" />
+							<listheader label="Patient Name" style="font-weight:bold" width="33%" sortAscending="${ascComp}" sortDescending="${descComp}"/>
+							<listheader label="To Meet" style="font-weight:bold" width="33%"/>
+							<listheader label="Visit Status" style="font-weight:bold" width="150px" />
+							<listheader label="Visit Type" style="font-weight:bold" width="200px" id="visitType" />
+							<listheader label="App.Time" style="font-weight:bold" width="100px" />
+							<!--  <listheader label="In Time" style="font-weight:bold" width="100px" />  -->
+							<listheader label="Action" style="font-weight:bold" width="100px" />
+						</listhead>
+					</listbox>
+				</div>
+			</panelchildren>
+		</panel>
+		<signinmenu />
+	</window>
+</zk>

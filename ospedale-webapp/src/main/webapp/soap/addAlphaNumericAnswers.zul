@@ -1,0 +1,93 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addAlphaNumericResponseWin"?>
+<zk>
+	<zscript><![CDATA[
+	import com.nzion.domain.emr.Answer;
+	import com.nzion.zkoss.ext.EntityDropdownRenderer;
+	import com.nzion.domain.emr.AlphaNumericResponse;
+	import com.nzion.zkoss.composer.emr.SoapModuleAnswersController;
+	import com.nzion.util.UtilValidator;
+	import com.nzion.domain.emr.AlphaNumericOption;
+	import com.nzion.enums.AnswerType;
+	Answer answer = (Answer) arg.get("selectedAnswer");
+	AlphaNumericResponse alphaNumericResponse = (AlphaNumericResponse) arg.get("selectedAlphaNumericResponse");
+	alphaNumericResponse = commonCrudService.getById(AlphaNumericResponse.class, alphaNumericResponse.getId());
+	Boolean isEditMode = (Boolean) arg.get("isEditMode");
+	SoapModuleAnswersController soapModuleAnswersController = (SoapModuleAnswersController) arg.get("baseController");
+	boolean isEditMode() {
+	return isEditMode != null && Boolean.TRUE.equals(isEditMode);
+	}
+]]></zscript>
+
+	<window id="addAlphaNumericResponseWin" mode="modal" style="border: 5px solid #2d2d2d">
+		<panel title="Add/Edit Answer">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div>
+						<label value="Name" />
+						<label value="*" style="color:red" />
+						<textbox id="answerName" value="@{alphaNumericResponse.name}" constraint="no empty:Name Required" />
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+		<panel title="Add/Edit Alpha Numeric Option">
+			<panelchildren>
+				<toolbarbutton label="Add Option" onClick="addOption()" id="addOptionButton"></toolbarbutton>
+				<div sclass="panelCont">
+					<listbox
+						model="@{alphaNumericResponse.options,load-after='addOptionButton.onClick,deleteOptionButton.onClick'}"
+						id="alphOptionBox" width="100%">
+						<listhead>
+							<listheader label="Prefix"></listheader>
+							<listheader label="Name"></listheader>
+							<listheader label="Suffix"></listheader>
+							<listheader></listheader>
+						</listhead>
+						<listitem self="@{each='option'}" value="@{option}">
+							<listcell>
+								<textbox id="prefix" value="@{option.prefix}" />
+							</listcell>
+							<listcell>
+								<textbox id="name" value="@{option.name}" />
+							</listcell>
+							<listcell>
+								<textbox id="suffix" value="@{option.suffix}" />
+							</listcell>
+							<listcell>
+								<toolbarbutton label="Delete" id="deleteOptionButton"
+									onClick="removeOption((Listitem)self.getParent().getParent());">
+								</toolbarbutton>
+							</listcell>
+						</listitem>
+					</listbox>
+				</div>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot">
+			<button label="Save" id="Save" onClick="answerName.getValue(); save();addAlphaNumericResponseWin.detach();" />
+			<button label="Cancel" onClick="addAlphaNumericResponseWin.detach();" />
+		</div>
+		<zscript><![CDATA[
+	void save() {
+	commonCrudService.save(alphaNumericResponse);
+	//soapModuleAnswersController.refreshAnswerTree();
+	soapModuleAnswersController.refreshListbox();
+	}
+	void removeOption(Listitem li) {
+	if (li != null) {
+		AlphaNumericOption option = (AlphaNumericOption) li.getValue();
+		alphaNumericResponse.getOptions().remove(option);
+	}
+	}
+	void addOption() {
+	if (alphaNumericResponse.getOptions() == null) {
+		alphaNumericResponse.setOptions(new java.util.ArrayList());
+	}
+	alphaNumericResponse.getOptions().add(new AlphaNumericOption());
+	}
+]]></zscript>
+
+	</window>
+
+</zk>

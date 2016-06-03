@@ -1,0 +1,9 @@
+<?component name="masterEntity" macroURI="../entities/master-entity.zul" inline="true"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk>
+	<zscript><![CDATA[
+       com.nzion.domain.drug.DrugSig  drugQuantity = Executions.getCurrent().getArg().get("entity");
+       drugQuantity = drugQuantity == null ? new com.nzion.domain.drug.DrugSig("QUANTITY") : drugQuantity;
+]]></zscript>
+		<masterEntity entityvalue="${drugQuantity}" panelvalue="Quantity Qualifier" />
+</zk>

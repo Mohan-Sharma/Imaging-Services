@@ -1,0 +1,19 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<hbox>
+	<textbox id="resourceLookupTxt" readonly="true" 
+		onChange='self.setValue(com.nzion.util.ViewUtil.getFormattedName(event.getData()));Events.postEvent("onChange", self.getParent().getParent(), event.getData())'/>
+	<n:div>
+	<span id="lookUpBtn" sclass="linkBtn linkBtnOn">
+		<a sclass="lookupBtn">
+			<attribute name="onClick">
+				Executions.createComponents("/appointment/resource-search.zul",null,com.nzion.util.UtilMisc.toMap("receiver", resourceLookupTxt));
+			</attribute>
+			Lookup
+		</a>
+	<span/>
+	</span>
+	</n:div>
+	</hbox>
+</zk>

@@ -1,0 +1,57 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./ChronicDisease"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<zscript><![CDATA[
+	com.nzion.domain.emr.ChronicDisease chronicDisease = arg.get("entity");
+	chronicDisease = chronicDisease == null ? new com.nzion.domain.emr.ChronicDisease() : chronicDisease;
+    List icdElements = commonCrudService.getAll(com.nzion.domain.emr.IcdElement.class);
+	]]></zscript>
+<window id="ChronicDisease" mode="modal" closable="true"  width="50%"  position="center" >
+			<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Chronic Disease</h:small>
+                  <button type="button" zclass="close" onClick="ChronicDisease.detach();">×</button>
+            </h:h1>
+        </div>
+	<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span6">
+                <label value="Name"></label> 
+							<label value=" *" zclass="labelReq"/>
+							<textbox  id = "name" value="@{chronicDisease.name,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"/>
+                </div>
+          </div>
+          <div zclass="row-fluid">
+            <div zclass="span6">
+                <label value="Description"></label> 
+							<textbox cols="50" rows="2" id = "description" sclass="span12" value="@{chronicDisease.description,save-when='Save.onClick'}" />
+                </div>
+          </div>
+          <div zclass="row-fluid">
+                <div zclass="span6">
+                <label value="ICD Code" />
+							<icdlookup value="${chronicDisease.icdElement.description}" sclass="span12">
+						<attribute name="onChange">
+						com.nzion.domain.emr.IcdElement icd = (com.nzion.domain.emr.IcdElement) event.getOrigin().getData();
+						chronicDisease.setIcdElement(icd);
+						</attribute>
+					</icdlookup>
+          </div>
+          
+                </div>
+                </div>
+		<div sclass="panelFoot">					
+			<button label="Save" id="Save" zclass="btn-success btn">
+			<attribute name="onClick">
+			try{
+				commonCrudService.save(chronicDisease);
+				ChronicDisease.detach();
+			}catch(Exception e){
+				com.nzion.util.ViewUtil.disPlayUniqueErrorMessage(e,"Chronic Disease '"+chronicDisease.getName()+"' already exists.");
+			}
+			</attribute>
+			</button>
+			<button  label="Cancel" id="Cancel" onClick='ChronicDisease.detach()' ></button>
+		</div>
+</window>
+</zk>

@@ -1,0 +1,13 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		setPageTitle("CVX Code Procedures Mapping", "");
+	</zscript>
+	
+<window id="cvxCptMapppingList">
+<screen width="100%" listtitle="List of CVX Procedures Mapping"
+	entityclass="com.nzion.domain.emr.CVXCPTMapping" fields="cvxCode,cpt.id" 
+	labels="CVX Code,Procedures Code" hidedeletebtn="true" hideaddbtn="true" hideactivation="true"/>
+</window>
+</zk>

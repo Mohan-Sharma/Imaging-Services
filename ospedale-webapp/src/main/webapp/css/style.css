@@ -1,0 +1,493 @@
+/* Wrapper Css For Practice template and Menus Ends */
+body {
+    font-size: 14px;
+    font-family: Calibri; /* old one "trebuchet MS", verdana, arial, sans-serif; */
+    word-wrap: break-word;
+}
+
+#header {
+    background-color: #777;
+    background-image: -ms-linear-gradient(bottom, #6d6d6d, #808080);
+    background-image: -moz-linear-gradient(bottom, #6d6d6d, #808080);
+    background-image: -o-linear-gradient(bottom, #6d6d6d, #808080);
+    background-image: -webkit-gradient(linear, left bottom, left top, from(#6d6d6d), to(#808080));
+    background-image: -webkit-linear-gradient(bottom, #6d6d6d, #808080);
+    background-image: linear-gradient(bottom, #6d6d6d, #808080);
+}
+
+#outer1 {
+    float: left;
+    /*width: 15%;*/
+    background: #FFFFFF;
+    /*width : 175px;*/
+}
+
+#outer2 {
+    float: right;
+    /*width: 85%;*/
+    background: #ffffff;
+}
+
+#outer1, #outer2 {
+    padding-bottom: 32767px;
+    margin-bottom: -32767px;
+}
+
+#wrapper {
+    overflow: hidden;
+    background: #ffffff;
+    min-height: 87%;
+
+}
+
+#soapMiddleCont {
+    overflow: hidden;
+    min-height: 87%;
+}
+
+#footer {
+    clear: both;
+    background: #018CB7;
+    text-align: center;
+    background: url('../images/settingsSelUIBg.gif') repeat-x scroll;
+    margin-top: 5px;
+    color: #333;
+    font-weight: bold;
+}
+
+#header {
+    background-color: #777;
+    background-image: -ms-linear-gradient(bottom, #6d6d6d, #808080);
+    background-image: -moz-linear-gradient(bottom, #6d6d6d, #808080);
+    background-image: -o-linear-gradient(bottom, #6d6d6d, #808080);
+    background-image: -webkit-gradient(linear, left bottom, left top, from(#6d6d6d), to(#808080));
+    background-image: -webkit-linear-gradient(bottom, #6d6d6d, #808080);
+    background-image: linear-gradient(bottom, #6d6d6d, #808080);
+}
+
+.content {
+    -moz-border-radius-topleft: 3px;
+    -moz-border-radius-topright: 3px;
+    -webkit-border-radius-topleft: 3px;
+    -webkit-border-radius-topright: 3px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border: solid 1px #C9D2D7;
+    border-width: 1px 1px 0
+}
+
+.nav {
+    /*background: #018cb7;
+     background:url(../images/menu-main-bg.png) repeat-x;;*/
+    border-bottom: 0px solid #000000;
+    border-top: 0px solid #ffffff;
+    font-family: Calibri;
+    height: 36px;
+    margin: 0 auto;
+    position: relative;
+    width: 100%;
+    z-index: 1000;
+}
+
+.menu, .menu ul {
+    list-style: none outside none;
+    margin: 0;
+    padding: 0;
+}
+
+.menu {
+    border-top: 0px solid #455c5a;
+    padding-left: 15px;
+
+}
+
+.menu ul.sub {
+    background: none repeat scroll 0 0 #FFFFFF;
+    box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.3);
+    left: -9999px;
+    padding: 0 0 0 10px;
+    position: absolute;
+    top: 35px;
+    z-index: -1;
+    margin-left: -3px;
+}
+
+.menu ul.sub1 {
+    width: 202px;
+}
+
+.menu ul.sub2 {
+    width: 300px;
+}
+
+.menu ul.sub3 {
+    width: 450px;
+}
+
+.menu ul.sub4 {
+    width: 600px;
+}
+
+.menu ul.sub h5 {
+    color: #D54E21;
+    font-size: 12px;
+    line-height: 20px;
+    margin: 0;
+    padding: 10px 0 5px;
+    width: 140px;
+}
+
+.menu li.top-li {
+    /*background: none repeat scroll 0 0 #455c5a;
+     background: url(../images/main-delimiter.png) 98% 4px no-repeat;*/
+    float: left;
+    position: relative;
+    z-index: 50;
+
+}
+
+.menu li.top-li a.top-a {
+    color: #40B1E4;
+    display: block;
+    float: left;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 35px;
+    padding: 0 18px 0 10px;
+    text-decoration: none;
+}
+
+.menu li.top-li a.top-a:hover a.top-a:ACTIVE {
+    color: #D54E21;
+    font-weight: bold;
+}
+
+.menu li.top-li:hover> a.top-a {
+    color: #D54E21;
+}
+
+.menu li.top-li:ACTIVE > a.top-a {
+    color: #D54E21;
+}
+
+/*
+.menu li.has-sub a.top-a:hover {
+    height: 36px;
+}
+
+*/
+.menu li.close a {
+    background: none repeat scroll 0 0 #D54E21;
+    color: #FFFFFF;
+    display: none;
+    font-size: 12px;
+    font-weight: bold;
+    height: 30px;
+    left: 50%;
+    line-height: 30px;
+    margin: 0 0 0 -50px;
+    padding: 0;
+    position: absolute;
+    text-align: center;
+    text-decoration: none;
+    top: -30px;
+    width: 100px;
+}
+
+.menu ul li {
+    float: left;
+    width: 150px;
+}
+
+.menu ul li a {
+    background: none repeat scroll 0 0 #ffffff;
+    color: #006699;
+    display: block;
+    font-size: 12px;
+    line-height: 15px;
+    margin-bottom: 1px;
+    padding: 5px 10px;
+    text-decoration: none;
+    width: 120px;
+    border-bottom: 1px solid #dddddd;
+}
+
+.menu ul li a:hover {
+    /*	background: none repeat scroll 0 0 #DAE7F6;
+     color: #D54E21;*/
+}
+
+.menu ul li.bottomLine {
+    background: none repeat scroll 0 0 #777;
+    border-top: 1px solid #888888;
+    clear: left;
+    margin-left: -10px;
+    margin-top: 5px;
+    padding: 5px 10px 5px 0;
+    width: 100%;
+    color: #FFF;
+}
+
+.menu ul li.bottomLine p {
+    color: #D54E21;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 20px;
+    margin: 0;
+    padding: 0 0 0 10px;
+    width: 100%;
+}
+
+.menu ul li.bottomLine a {
+    background: none repeat scroll 0 0 transparent;
+    color: #CCCCCC;
+    display: inline;
+    line-height: 20px;
+    padding: 0 3px;
+}
+
+.menu ul li.bottomLine a:hover {
+    /*color: #FFFFFF;*/
+}
+
+.menu *:hover ul.sub {
+    left: -150px;
+}
+
+.menu *:hover ul.left1 {
+    left: -150px;
+}
+
+.menu table {
+    border-collapse: collapse;
+    margin-bottom: -1px;
+}
+
+* html .menu ul.sub {
+    border: 0 none;
+}
+
+.mainMenuVisited {
+    color: #D54E21;
+    float: left;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 35px;
+    padding: 0 18px 0 10px;
+    text-decoration: none;
+}
+
+.current {
+    color: #D54E21;
+}
+
+.menu li.back {
+    background: none no-repeat 0 0 #fff;
+    width: 13px;
+    height: 33px;
+    z-index: 8;
+    position: absolute;
+    margin: 3px -1px 0 -3px;
+    position: absolute;
+    border-radius: 2px 2px 2px 2px;
+
+}
+
+.menu li.back .left {
+    background: none no-repeat right 0 #fff;
+    border-radius: 2px 2px 2px 2px;
+    margin-left: -3px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+    height: 33px;
+}
+
+* html .menu ul li.bottomLine {
+    padding: 5px 0 5px 10px;
+}
+
+.formCont {
+    background-color: #fdfffe;
+    border: solid 1px #C9D2D7;
+    border-bottom: 0;
+    overflow: hidden
+}
+
+.panelHead {
+    border-top: solid 1px #c9d2d7
+}
+
+.panelHead, .panelHeadTop {
+    clear: both;
+    height: 20px;
+    padding-top: 4px;
+}
+
+.panelHeadTop, .rightCont .content {
+    -moz-border-radius-topleft: 3px;
+    -moz-border-radius-topright: 3px;
+    -webkit-border-radius-topleft: 3px;
+    -webkit-border-radius-topright: 3px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border: solid 1px #C9D2D7;
+    border-width: 1px 1px 0
+}
+
+.panelHeadTop strong {
+    padding-left: 5px
+}
+
+.panelCont {
+    padding-bottom: 10px;
+    border-color: #C9D2D7;
+    border-style: solid;
+    border-width: 0;
+}
+
+.panelCont div {
+    float: left;
+    margin: 5px 1%;
+    width: 25%;
+}
+
+.twoCol div {
+    width: 48%
+}
+
+/*To remove the background color*/
+.z-spinner-real-readonly, .z-doublespinner-real-readonly, .z-timebox-real-readonly, .z-datebox-real-readonly, .z-bandbox-real-readonly, .z-combobox-real-readonly {
+    background-color: transparent;
+}
+
+.z-combobox-inp, .z-datebox-inp, .z-timebox-inp {
+    height: 24px;
+    margin-left: 0px;
+    width: 87.94680851063829%;
+}
+
+.z-combobox-rounded .z-combobox-rounded-btn, .z-bandbox-rounded .z-bandbox-rounded-btn, .z-datebox-rounded .z-datebox-rounded-btn, .z-timebox-rounded .z-timebox-rounded-btn, .z-spinner-rounded .z-spinner-rounded-btn, .z-doublespinner-rounded .z-doublespinner-rounded-btn, .z-combobox .z-combobox-btn, .z-bandbox .z-bandbox-btn, .z-datebox .z-datebox-btn, .z-timebox .z-timebox-btn, .z-spinner .z-spinner-btn, .z-doublespinner .z-doublespinner-btn {
+    height: 28px;
+}
+
+.z-combobox, .z-bandbox, .z-datebox, .z-timebox, .z-spinner, .z-doublespinner {
+    background-color: transparent;
+}
+
+textarea.span12 {
+    margin-left: 0.1641% !important;
+    padding-left: 3px;
+}
+
+.z-window-embedded-cnt-no-border [span]:first-child {
+    display: block !important;
+}
+
+.inactive {
+    color: #b94a48;
+    background-color: #f2dede;
+    border-color: #eed3d7;
+}
+
+.blackInPMenu {
+    background-color: #777777;
+    background-image: -moz-linear-gradient(center bottom, #6D6D6D, #808080);
+    border-radius: 4px 4px 4px 4px;
+    border-right: 1px solid #CCCCCC;
+    color: #CCCCCC;
+    direction: ltr;
+    display: inline;
+    float: left;
+    height: 20px;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-top: 6px;
+    text-align: center;
+    z-index: 99999;
+}
+
+.clr {
+    clear: both;
+}
+
+.form {
+    padding: 20px;
+}
+
+.form .name {
+    display: block;
+    text-align: right;
+    width: 150px;
+}
+
+.form .nameRight {
+    display: block;
+    text-align: right;
+    width: 90px;
+}
+
+.form .nameLeft {
+    display: block;
+    text-align: left;
+    width: 82px;
+}
+
+.findSideBar {
+    border: 1px solid #A2A2A2;
+    border-radius: 3px 3px 3px 3px;
+    height: 90px;
+    position: absolute;
+}
+
+.customGrayBox {
+    background-color: #ECECEC;
+    border: 1px solid #A2A2A2;
+    border-radius: 3px 3px 3px 3px;
+    height: 90px;
+    margin-left: 1px;
+}
+
+.customGrayBoxImg {
+    border: 1px solid #CCCCCC;
+    float: left;
+    margin: 7px 0 0 1px;
+}
+
+table .z-label {
+    color: #333333;
+    font: 12px normal Calibri;
+    padding: 0;
+}
+
+.panelContInp .z-label {
+    color: #666666;
+    display: inline-block;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 6px 10px 0 0;
+    text-align: right;
+    vertical-align: top;
+    width: 200px;
+}
+
+.z-paging-inp {
+    margin-bottom: 0px;
+}
+
+.z-bandbox-inp {
+    height: 25px
+}
+
+.z-combobox .z-combobox-text-invalid,
+.z-bandbox .z-bandbox-text-invalid,
+.z-datebox .z-datebox-text-invalid,
+.z-timebox .z-timebox-text-invalid,
+.z-spinner .z-spinner-text-invalid,
+.z-doublespinner .z-doublespinner-text-invalid {
+    width:87%;
+    border-color:#CCCCCC;
+}
+
+.help-inline {
+    width:200px;
+    font-size:12px;
+}

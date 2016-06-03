@@ -1,0 +1,17 @@
+<zk>
+<zscript>
+com.nzion.report.PatientReportSearchController controller = (com.nzion.report.PatientReportSearchController)arg.get("controller");
+</zscript>
+	<hbox>
+		<listbox mold="select" id="${arg.name}_operator" selectedItem="@{controller.patientSearchVO.operator}">
+			<listitem/>
+			<listitem label="Equals" value="eq"/>
+			<listitem label="Greater Than" value="gt"/>
+			<listitem label="Less Than" value="lt"/>
+			<listitem label="Greater or Equal" value="ge"/>
+			<listitem label="Less or Equal" value="le"/>
+			<listitem label="Not Equal" value="ne"/>
+		</listbox>
+		<intbox id="${arg.name}" value="@{controller.patientSearchVO.age}"/>
+	</hbox>
+</zk> 

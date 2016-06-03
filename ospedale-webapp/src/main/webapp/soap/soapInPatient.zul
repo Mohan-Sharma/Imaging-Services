@@ -1,0 +1,125 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./recommendationSectionWin"?>
+<?component name="followup" macro-uri="/soap/plans/follow-up-macro.zul" inline="true"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure
+			.getSpringBean("commonCrudService");
+	com.nzion.zkoss.composer.PatientSoapNoteController controller = desktop.getAttribute("controller");
+	com.nzion.zkoss.composer.SoapRecommendationController recommendationController = new com.nzion.zkoss.composer.SoapRecommendationController(
+			desktop);
+	com.nzion.domain.emr.soap.RecommendationSection section = recommendationController.getRecommendationSection();	
+	com.nzion.domain.emr.soap.FollowUp followUp;
+	if (section.getAnticipatedLos() == null) section.setAnticipatedLos(1);
+    if(section.getFollowUp() == null) section.setFollowUp(new com.nzion.domain.emr.soap.FollowUp());
+	List bedCharacteristicList = commonCrudService.getAll(com.nzion.domain.pfm.BedCharacteristic.class);
+	Set locations = com.nzion.util.Infrastructure.getUserLogin().getPerson().getLocations();
+	List wards = commonCrudService.getAll(com.nzion.domain.pfm.Ward.class);
+</zscript>
+
+	<window id="recommendationSectionWin" width="100%" height="100%"> 
+		<vbox>
+			<div id="remarksDiv" style="padding:10px;">
+				<hbox>
+					<vbox>
+						<label value="Counselling Notes" />
+						<textbox cols="60" rows="3" style="width:75%"
+							value="@{section.recommendedNotes}" />
+					</vbox>
+					<!-- <followup id="followUp" followup="${section.followUp}"/>  -->
+				</hbox>			
+			</div>
+			<panel title="Hospitalization Details" id="admissionReq"
+				visible="true" sclass="panelContInp">
+				<panelchildren>
+					<div style="padding:10px;">
+						<vlayout spacing="10px">
+							<hlayout spacing="10px" width="100%">	
+							      <div>			
+									<label value="Admission Date" mold="required"/>
+									 <datebox style="width:130px"
+										value="@{section.exceptedAdmissionDate,}" id="admissionDate"
+										readonly="true" constraint="no past,no empty" />
+								  </div>
+								  <div>				
+									<label value="Priority" />
+									<combobox style="width:130px"
+										selectedItem="@{section.priority}">
+										<comboitem label="Normal"
+											value="Normal" />
+										<comboitem label="Urgent"
+											value="Urgent" />
+									</combobox>
+								 </div>
+							</hlayout>
+							<hlayout spacing="10px">
+								<div>	
+									<label
+										value="Anticipated LOS (in Days)" />
+									<intbox style="width:130px"
+										value="@{section.anticipatedLos}" />
+								 </div>
+								 <div>
+									<label value="Ward" />
+									<combobox   id="listWard" model="@{wards}" style="width:200px;" selectedItem="@{section.wardType}">
+										  <comboitem self="@{each='wardObj'}" value="@{wardObj}" label="@{wardObj.wardName}">						    	
+										  </comboitem>
+									</combobox>
+								 </div>
+							</hlayout>
+							<hlayout>								
+									<label value="Location" />
+									<combobox model="@{locations}" style="width:130px"
+										selectedItem="@{section.selectedLocation}" readonly="true">
+										<comboitem
+											self="@{each='location'}" label="@{location.name}"
+											value="@{location}" />
+									</combobox>
+							</hlayout>
+							<hlayout spacing="10px">
+							<div width="50%">
+								<label value="Notes" />
+								<textbox cols="30" rows="7" style="width:135px"
+									 value="@{section.admissionNotes}" />
+							</div>
+							<div width="50%" 
+								height="120px">
+								<div height="100px;" >
+									<div style="float:left;"><label value="Bed Characteristics" style="160px"/></div>	
+									<div style="float:left;width:49%">						
+										<listbox id="bedCharacteristBox"
+											checkmark="true" multiple="true"
+											model="@{bedCharacteristicList}"
+											selectedItem="@{section.bedCharacteristic, converter=com.nzion.view.component.MultipleListitemBindingConverter}" height="99px" width="200px" style="float:left;border:1px solid #dddddd;background:none repeat-y scroll 0 0 #dddddd;padding-top:6px;padding-bottom:6px">
+											<listitem
+												self="@{each=charcteristic}" value="@{charcteristic}"
+												label="@{charcteristic.name}" />
+										</listbox>
+									</div>
+							 </div>
+							</div>
+						  </hlayout>
+						</vlayout>
+						<separator></separator>
+					</div>
+				</panelchildren>
+			</panel>
+		</vbox>
+		<div sclass="buttonPanel">
+			<button label="Save" disabled="${controller.readonly}">
+				<attribute name="onClick">
+			<![CDATA[
+	if (section.getExceptedAdmissionDate() != null && !section.isRequestSubmitted()){	
+		controller.saveInPatientAdmission();
+	}
+	else
+		controller.saveSoapSection();
+	]]>			
+			</attribute>
+			</button>
+		</div>
+	</window>
+</zk>

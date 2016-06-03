@@ -1,0 +1,13 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./labCategory"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		setPageTitle("Lab Category ", "");
+</zscript>
+	<window id="labCategory">
+	<screen width="100%" listtitle="List of LabCategories" addpage="addlabCategory" editpage="addlabCategory" addmodepopup="true"
+	entityclass="com.nzion.domain.emr.lab.LabCategory" fields="name,description" 
+	labels="Panel Name,Description," hidedeletebtn="true"/>
+	</window>
+</zk>

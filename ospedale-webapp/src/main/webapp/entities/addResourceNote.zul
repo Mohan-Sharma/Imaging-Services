@@ -1,0 +1,67 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addResourceNoteSetup"?>
+<?component name="enumeration" class="com.nzion.view.component.EnumerationDropdown"?>
+<zk>
+	<zscript><![CDATA[
+import com.nzion.domain.ResourceNoteType;
+import com.nzion.util.UtilValidator;
+import com.nzion.service.common.CommonCrudService;;
+import com.nzion.util.Infrastructure;
+
+Map arguments = Executions.getCurrent().getArg();
+ResourceNoteType resourceNoteType = null;
+if(UtilValidator.isEmpty(arguments))
+	resourceNoteType = new ResourceNoteType();
+else
+	resourceNoteType = (ResourceNoteType)arguments.get("entity");
+
+CommonCrudService commonCrudService = (CommonCrudService)Infrastructure.getSpringBean("commonCrudService");
+]]></zscript>
+<window id="addResourceNoteSetup" style="border: 5px solid #2d2d2d"  mode="modal" closable="true">
+	<panel title="Add/Edit Resource Note">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div>
+						<label value="Resource Note"></label> 
+						<textbox id = "resourceNote" value="@{resourceNoteType.name,save-when='Save.onClick'}"/>
+					</div>
+					<div>
+						<label value="Encounter Note Description"></label> 
+						<textbox id = "soapNoteDescription" value="@{resourceNoteType.description,save-when='Save.onClick'}"/>
+					</div>
+					<div>
+						<label value="Resource Note Header"></label> 
+						<textbox id = "resourceNoteHeader" value="@{resourceNoteType.slotTypeFeatures.reportHeader,save-when='Save.onClick'}"/>
+					</div>
+					<div>
+						<label value="Appt Length *"></label> 
+						<intbox id = "apptLength" value="@{resourceNoteType.slotTypeFeatures.apptLength,save-when='Save.onClick'}"/>
+					</div>
+					<div>
+						<label value="Default Format"></label>
+						<enumeration enumType="DEFAULT_SOAP_NOTE_FORMAT" selectedItem="@{resourceNoteType.slotTypeFeatures.defaultFormat}" />
+					</div>
+					<div>
+						<label value="Color"></label>
+						<colorbox color="@{vo.resourceNoteType.colorCode}" id="colorBox" 
+							onChange="slotNoteVo.resourceNoteType.slotTypeFeatures.colorCode = self.color;"/>
+					</div>
+					<div sclass="chkBox">
+						<checkbox checked="@{resourceNoteType.slotTypeFeatures.DefaultNote,save-when='Save.onClick'}" label="Default Note" ></checkbox>
+					</div>
+					<div sclass="chkBox">
+						<checkbox checked="@{resourceNoteType.slotTypeFeatures.FollowUpNote,save-when='Save.onClick'}" label="Follow Up Note" ></checkbox>
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+		<box width="100%" align="center" style="background:#fff">
+			<button label="Save" id="Save">
+				<attribute name="onClick">
+				commonCrudService.save(resourceNoteType);
+				addResourceNoteSetup.detach();
+				</attribute>
+			</button>
+		</box>
+</window>
+</zk>

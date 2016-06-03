@@ -1,0 +1,7 @@
+<?page title="Patient" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/practiceTemplate.zul"?>
+<zk>
+<window self="@{define(applicationContent)}">
+	<include src="/patient/viewpatient.zul"/>
+</window>
+</zk>

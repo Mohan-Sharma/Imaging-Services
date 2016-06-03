@@ -1,0 +1,44 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./defaultSigninConfigWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+com.nzion.domain.Provider providerObj = commonCrudService.getById(com.nzion.domain.Provider.class, com.nzion.util.Infrastructure.getLoggedInPerson().getId());
+com.nzion.service.ScheduleService scheduleService = com.nzion.util.Infrastructure.getSpringBean("scheduleService");
+List fixedAssets = fixedAssetService.getAllRoomsByLocation(com.nzion.util.Infrastructure.getUserLogin().getLocations());
+</zscript>
+<window id="defaultSigninConfigWin">
+<panel title="Provider Default Signin Settings">
+<panelchildren>
+<separator/>
+<button label="Search" visible="false" id="btnLoad">
+<attribute name="onClick">
+</attribute>
+</button>
+	<div  style="overflow: auto;">
+		<hlayout spacing="25px">
+			<hlayout spacing="10px">
+				<label class="name" value="Defualt Visit Type"  />
+				<combobox id="visitTypebox" model="@{scheduleService.allSoapNoteTypes}" selectedItem="@{providerObj.soapNoteType,save-when='SaveBtn.onClick'}" readonly="true">
+					<comboitem self="@{each='slotType'}" value="@{slotType}" label="@{slotType.name}" />
+  			  </combobox>
+			</hlayout>			
+			<hlayout spacing="10px">
+				<label sclass="name" value="Default Visit Room : " ></label>
+				<combobox  model="@{fixedAssets}" selectedItem="@{providerObj.room,save-when='SaveBtn.onClick'}" readonly="true">
+				<comboitem self="@{each='fixedAsset'}"  label="@{fixedAsset.fixedAssetName}" value="@{each}" />
+			</combobox>		
+			</hlayout>
+		</hlayout>
+	</div>
+	<div sclass="buttonPanel">
+		<button label="Save" id="SaveBtn">
+					<attribute name="onClick">
+						commonCrudService.save(providerObj);
+					</attribute>
+		</button>
+	   </div>
+	</panelchildren>
+</panel>
+</window>
+</zk>

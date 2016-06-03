@@ -1,0 +1,61 @@
+<?page title="Afya Lab" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientWithDrawAddWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+
+    <zscript>
+        Component patientWithdrawListBox = arg.get("patientWithdrawListBox");
+    </zscript>
+
+    <window id="patientWithDrawAddWin" width="60%"  closable="true" mode="modal"
+            apply="org.zkoss.bind.BindComposer" viewModel="@id('vm') @init('com.nzion.zkoss.composer.PatientWithdrawAddViewModel')" >
+        <custom-attributes patientWithdrawListBox="${patientWithdrawListBox}"/>
+
+        <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Patient Refund</h:small>
+                <button type="button" zclass="close" onClick="patientWithDrawAddWin.detach();">×</button>
+            </h:h1>
+        </div>
+
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Patient" class="z-label-bold"/>
+                    <patientlookup style="height:24px"
+                                   onChange="vm.getPatientWithDraw().setPatient((com.nzion.domain.Patient)event.getOrigin().getData())"/>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Refund Amount" class="z-label-bold" mold="required"/>
+                    <decimalbox id="depositAmount" sclass="span10" value="@bind(vm.patientWithDraw.withdrawAmount)" format="#,##0.000" constraint="no negative,no empty:Required Positive Number"
+                                w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                </div>
+            </div>
+
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Refund Mode" class="z-label-bold"/>
+                    <combobox selectedItem="@bind(vm.patientWithDraw.withdrawMode)" sclass="span10">
+                        <comboitem label="Cash" value="CASH"/>
+                        <comboitem label="Cheque" value="CHEQUE"/>
+                        <comboitem label="Credit Card" value="CREDIT_CARD"/>
+                    </combobox>
+                </div>
+                <div zclass="span3">
+                    <label value="Notes" class="z-label-bold"/>
+                    <textbox id="depositNotes" sclass="span12" value="@bind(vm.patientWithDraw.withdrawNotes)" />
+                </div>
+            </div>
+
+            <div style="margin-top:5px" sclass="panelFoot">
+                <button label="Save" id="Save" visible="true" zclass="btn-success btn" onClick="@command('save')"></button>
+                <button label="Close" onClick='patientWithDrawAddWin.detach()' sclass="btn"></button>
+            </div>
+
+        </div>
+    </window>
+</zk>

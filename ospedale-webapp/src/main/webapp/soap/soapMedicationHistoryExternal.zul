@@ -1,0 +1,106 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./medicationSectionDiv"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	import com.nzion.domain.drug.DrugSig;
+	import com.nzion.util.*;
+	import com.nzion.zkoss.composer.MedicationHxComposer;
+	MedicationHxComposer medHxComposer = new MedicationHxComposer();
+	com.nzion.domain.emr.soap.MedicationHistorySection medHxSection;
+</zscript>
+	<window id="medicationSectionDiv" width="100%" apply="${medHxComposer}">
+		<zscript>
+	medHxSection = medHxComposer.getSection();
+</zscript>
+		<div sclass="chiefComp soapNoteCont curSOAP ui-resizable" style="position:relative;">
+			<h:table width="100%" cellpadding="0px" cellspacing="0px" style="border:0px">
+				<h:tr>
+					<h:td class="soapNoteContL" onClick="expandRHS(this.id)">
+						<panel collapsible="false" border="none">
+							<caption label="Medication History" />
+							<panelchildren>
+								<separator />
+								<checkbox label="No Past Medication History" id="noMedicationHistoryCheckbox"
+									checked="@{medHxSection.noKnownMedicationHistory}">
+									<attribute name="onCheck">
+	medHxComposer.getMainCtl().saveSoapSection();
+	newBtn.setDisabled(self.isChecked());
+</attribute>
+								</checkbox>
+								<span sclass="linkBtn linkBtnOn">
+									<a disabled="true" label="New" sclass="addBtn" id="newBtn" onClick="medHxComposer.openMedicationHistoryExt()"/>
+									<span />
+								</span>
+							</panelchildren>
+						</panel>
+						<panel title="Medication History List" collapsible="false" height="400px" border="none">
+							<panelchildren>
+								<div sclass="dataTables_scrollBody" style="overflow:auto">
+									<listbox style="border:0px" oddRowSclass="whiteBackground" id="pastPatientRxsGrid"
+										mold="paging" rows="20" model="@{medHxSection.extPatientRxs,load-after='self.onReloadRequest'}">
+										<attribute name="onReloadRequest">
+	medHxSection = (com.nzion.domain.emr.soap.MedicationHistorySection) medHxComposer
+			.getMainCtl().getSoapSection(
+					com.nzion.domain.emr.soap.MedicationHistorySection.class);
+</attribute>
+										<listhead>
+											<listheader label="Drug Name" />
+											<listheader label="Drug Strength" />
+											<listheader label="Uom" />
+											<listheader label="Dosage Form" />
+											<listheader label="Route" />
+											<listheader label="Physician Name" />
+											<listheader label="Prescription Notes" />
+											<listheader label="Refills" />
+											<listheader label="Archived"/>
+											<listheader label="Prescription Date" />
+										</listhead>
+										<listitem self="@{each='extPatientRx'}" value="@{extPatientRx}">
+											<listcell>
+												<label value="@{extPatientRx.drugName}" />
+											</listcell>
+											<listcell>
+												<label value="@{extPatientRx.strength}" />
+											</listcell>
+											<listcell>
+												<label value="@{extPatientRx.strengthUOM}" />
+											</listcell>
+											<listcell>
+												<label value="@{extPatientRx.dosageForm}" />
+											</listcell>
+											<listcell>
+												<label value="@{extPatientRx.route}" />
+											</listcell>
+											<listcell>
+												<label value="@{extPatientRx.physicianName}" />
+											</listcell>
+											<listcell>
+												<label value="@{extPatientRx.prescriptionNotes}" />
+											</listcell>
+											<listcell>
+												<label value="@{extPatientRx.refills}" />
+											</listcell>
+											<listcell>
+												<label value="@{extPatientRx.archive}" />
+											</listcell>
+											<listcell>
+												<label
+													value="@{extPatientRx.prescriptionDate,converter='com.nzion.view.component.DateConverter'}" />
+											</listcell>
+											<attribute name="onDoubleClick">
+	Executions.createComponents("/soap/viewPatientRxExt.zul", null,
+			com.nzion.util.UtilMisc.toMap("patientRxNewCorpObj",
+					(com.nzion.domain.emr.soap.PatientRx) self
+							.getValue()));
+</attribute>
+										</listitem>
+									</listbox>
+								</div>
+							</panelchildren>
+						</panel>
+					</h:td>
+				</h:tr>
+			</h:table>
+		</div>
+	</window>
+</zk>

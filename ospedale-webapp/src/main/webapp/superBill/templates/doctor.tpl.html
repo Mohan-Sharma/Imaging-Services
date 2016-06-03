@@ -1,0 +1,25 @@
+<ul class="list-group">
+    <li class="list-group-item list-group-item-custom" style="background-color: #428bca;color: #ffffff;text-align: center"><span style="font-weight: bold">Doctor Consultation</span></li>
+    <li class="list-group-item list-group-item-custom">
+        <span class="glyphicon glyphicon-search" style="display: inline-block"></span>
+        <input class="form-control" style="display: inline-block;width: 90%" type="text"  ng-model="selectedItem.doc" typeahead="doc as doc.firstName+'&nbsp;'+doc.lastName for doc in doctorDetails | filter:{firstName:$viewValue} | arrayFilter :selectedDocDetails">
+    </li>
+    <li class="list-group-item list-group-item-custom" ng-if="selectedDocDetails.items.length>0">
+        <ul class="list-group shadow">
+            <li class="list-group-item list-group-item-custom" ng-repeat="doc in selectedDocDetails.items">
+                <table>
+                    <td style="width: 5%"><input  type="checkbox" ng-checked="true" ng-click="removeSelecetedItem(selectedDocDetails,doc,'firstName')"></td>
+                    <td style="text-align: left"><span style="font-size: 12px">{{doc.firstName}}&nbsp;{{doc.lastName}}</span></td>
+                    <td style="width: 25%"><span class="WebRupee">&#x20B9;</span><input class="form-control-custom" placeholder="0" ng-model="doc.amount" type="text" ng-change="calculateTotal(selectedDocDetails)"></td>
+                </table>
+            </li>
+        </ul>
+    </li>
+    <li class="list-group-item list-group-item-custom" ng-repeat="doc in doctorDetails | limitTo:10 | arrayFilter :selectedDocDetails.items">
+        <table>
+            <td style="width: 5%"><input  type="checkbox" ng-click="addToSelectedItem(selectedDocDetails,doc,'firstName','Consultant')"></td>
+            <td style="text-align: left"><span style="font-size: 12px">{{doc.firstName}}&nbsp;{{doc.lastName}}</span></td>
+            <td style="width: 25%"><span class="WebRupee">&#x20B9;</span><input class="form-control-custom" placeholder="0" ng-model="doc.amount" type="text"></td>
+        </table>
+    </li>
+</ul>

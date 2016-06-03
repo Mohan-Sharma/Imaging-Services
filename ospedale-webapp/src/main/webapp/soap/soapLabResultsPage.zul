@@ -1,0 +1,62 @@
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+    List labTestResults = arg.get("labResultTmp");
+    
+    int testCount;
+    if(com.nzion.util.UtilValidator.isNotEmpty(labTestResults))
+    	  testCount = labTestResults.size();
+    com.nzion.zkoss.composer.PatientSoapNoteController controller = arg.get("controller");
+    </zscript>
+	 <div style="margin:auto;width:95%" >
+	   <vlayout spacing="20px;">
+		<div height="330px" width="98%">
+  				<n:table id="labTestResultsGrid" cellpadding="0" cellspacing="0" border="0" class="display" >
+				<n:thead>
+						<n:tr>
+							<n:th>Test Performed Date</n:th>
+							<n:th>Test Name</n:th>
+							<n:th>Free Text</n:th>
+							<n:th>Observation Value</n:th>
+							<n:th>Unit</n:th>
+							<n:th>Reference Range</n:th>
+							<n:th>Lab Category</n:th>
+							<n:th>Action</n:th>
+						</n:tr>
+					</n:thead>
+					<n:tbody>
+						<n:tr forEach="${labTestResults}">
+							<n:td>${display:fd(each.observationDateTime)}</n:td>
+							<n:td>
+							<a class="group" onClick="viewTestHistoryForPatient(self.getLabel())"> ${each.obxName}</a>
+							 </n:td>
+							 <n:td>${each.freeText}</n:td>
+							<n:td>${each.observationValue}</n:td>
+							<n:td>${each.units}</n:td>
+							<n:td>${each.referenceRange}</n:td>
+						    <n:td>${each.labCategory.name}</n:td>
+							<n:td>
+								<!-- <a class="group" onClick="viewDetail(self.getId())" id="${each.id},${each.obxName}">Detail </a> | -->
+								<a class="group" onClick="addEdit(self.getId())" id="${each.id}" disabled="${controller.readonly}"> Edit </a>
+								<a class="group" onClick="deleteRec(self.getId())" id="${each.id},delete" disabled="${controller.readonly}">| Delete</a>
+							</n:td>
+						</n:tr>
+					</n:tbody>
+	 		</n:table>
+  		</div>
+  		</vlayout>
+  		</div>
+		<script type="text/javascript">
+			zk.afterMount(function() {
+				jq("#labTestResultsGrid").dataTable({
+				"bJQueryUI": true,
+				"sPaginationType": "full_numbers",
+				"aoColumns":
+							[ null,null,null,null,null,null,,{ "bSortable": false,"sType": "html"} ]
+						});
+			});
+		</script>
+</zk>

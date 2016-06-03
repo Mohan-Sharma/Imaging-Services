@@ -1,0 +1,13 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		setPageTitle("Encounter Module", "");
+	</zscript>
+	
+<window id="soapModuleSetupList">
+<screen width="100%" listtitle="List of Encounter Modules" addpage="addSoapModule" addmodepopup="true" entityclass="com.nzion.domain.emr.SoapModule"
+	fields="soapComponentAuthorization,moduleName,moduleShortName,moduleDescription,soapModuleType,active" 
+	labels="Encounter Component Authorization,Module Name,Module Short Name,Module Description,Type,Status"  hidedeletebtn="true"/>
+</window>
+</zk>

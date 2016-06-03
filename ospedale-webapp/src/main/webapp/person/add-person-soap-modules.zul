@@ -1,0 +1,45 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./personModulesWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+
+<window id="personModulesWin" mode="modal" position="center,top" width="60%" height="70%"
+	title="Add Soap Modules" closable="true">
+	<div width="97%" style="padding:5px">
+	<zscript>
+	<![CDATA[
+		import com.nzion.domain.person.PersonSoapTypeAndModule;
+		PersonSoapTypeAndModule personSoapTypeAndModule = arg.get("personSoapTypeAndModule");
+    	List personCustomisedModule=personService.getUnAddedSoapModules(personSoapTypeAndModule);
+ 	  	List selectedModules;
+    	
+    	public void setPersonModule(){
+    	if(personModuleDisplayGrid.getSelectedCount() < 1){
+   			com.nzion.util.UtilMessagesAndPopups.showError("Choose Modules");
+   			return;
+    	}
+ 		selectedModules=com.nzion.util.ViewUtil.getSelectedItems(personModuleDisplayGrid);   	
+ 		personSoapTypeAndModule.getPersonCustomisedModules().addAll(selectedModules);
+    	personModulesWin.detach();
+    	}
+    	]]>
+	</zscript>
+<panel title="Modules" id="unAddedModules" onCancelClick="personModulesWin.detach();" onAddClick="setPersonModule();">
+	<panelchildren>
+		<toolbar listenercomponent="${unAddedModules}" hidesearch="true" hidedelete="true"/>
+			<listbox multiple="true" id="personModuleDisplayGrid" checkmark="true" rows="10" model="@{personCustomisedModule}">
+				<listhead>
+					<listheader label="Module Name"/>
+				</listhead>
+				<listitem self="@{each='personModule'}" value="@{personModule}">
+					<listcell>
+						<label value="@{personModule.soapModule.moduleName}"  />
+					</listcell>
+				</listitem>
+		    </listbox>
+	</panelchildren>
+</panel>
+</div>
+</window>
+</zk>

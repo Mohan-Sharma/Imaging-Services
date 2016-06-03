@@ -1,0 +1,51 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./scheduleTrackReports"?>
+<?component name="lookup" class="com.nzion.view.component.LookupBox"?>
+<?component name="name" class="com.nzion.view.component.NameLabel"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	
+<window mode="modal" id="scheduleTrackReports" title="Patient Visits" closable="true">
+<zscript>
+	Map args = Executions.getCurrent().getArg();
+	com.nzion.domain.Schedule schedule = args.get("schedule");
+	schedule = commonCrudService.getById(com.nzion.domain.Schedule.class, schedule.getId());
+	SortedSet exisitingPatientVisits = schedule.getPatientVisits();
+</zscript>
+<n:table>
+	<n:tr>
+		<n:td> <label value="Patient" /></n:td><n:td><name object="${schedule.patient}" /></n:td>
+	</n:tr>
+	<n:tr>
+		<n:td><label value="Appointed for" /></n:td><n:td><name object="${schedule.provider}" /></n:td>
+	</n:tr>
+	<n:tr>
+		<n:td>
+			<label value="On" /> <datebox disabled="true" value="${schedule.startDate}" format="dd MMM, yyyy" readonly="true" buttonVisible="false" width="100px"/>
+		</n:td>
+		<n:td>
+			<label value="At" /> <timebox value="${schedule.startTime}" format="hh:mm a" readonly="true" buttonVisible="false" disabled="true" width="100px"/>
+		</n:td>
+	</n:tr>
+	<n:tr>
+		<n:td><label value="Signed In At" /></n:td><n:td><label value="${schedule.signedInTime}" /></n:td>
+	</n:tr>
+	<n:tr>
+		<n:td><label value="Signed Out At" /></n:td><n:td><label value="${schedule.signedOutTime}" /></n:td>
+	</n:tr>
+</n:table>
+<listbox  mold="paging" pageSize="5" pagingPosition="top" width="100%">
+	<listhead>
+		<listheader label="With" width="20%"/>
+		<listheader label="Room" width="20%"/>
+		<listheader label="Started At" width="20%"/>
+	</listhead>
+	<listitem forEach="${exisitingPatientVisits}">
+		<listcell><name object="${each.metWith}"/></listcell>
+		<listcell><label value="${each.room}"/></listcell>
+		<listcell><label value="${each.time}"/></listcell>
+	</listitem>
+</listbox>
+</window>
+</zk>

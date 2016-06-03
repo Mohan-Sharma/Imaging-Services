@@ -1,0 +1,55 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<div sclass="gridCont">
+		<div sclass="panelHeadTop pagination">
+			<div sclass="fl">
+				<a href="#" label="Specialities" />
+			</div>
+			<div sclass="fr">
+				<paging detailed="true" id="listboxPaging" pageSize="10" pageIncrement="1" />
+			</div>
+		</div>
+		<n:table border="0" cellspacing="0" cellpadding="0">
+			<n:thead>
+				<n:tr>
+					<n:td>
+						<a href="#" class="addBtn" label="Add" id="addSpecialityBtn"
+							onClick='controller.addSpecialty()' />
+						<a href="#" class="delBtn" label="Delete" id="deleteSpecialityBtn"
+							onClick='deleteSpecialities()' />
+					</n:td>
+					<n:td>
+						<label value="Select Speciality" />
+						<listbox mold="select" width="155px" selectedItem="@{controller.speciality}" id="specialities"></listbox>
+					</n:td>
+				</n:tr>
+			</n:thead>
+		</n:table>
+		<listbox id="specialitiesGrid" paginal="${listboxPaging}"
+			model="@{controller.provider.specialities,load-after='addSpecialityBtn.onClick,deleteSpecialityBtn.onClick,'}"
+			mold="paging" pageSize="5" selectedItem="@{selected}" multiple="true" checkmark="true">
+			<listhead>
+				<listheader label="Title"></listheader>
+				<listheader label="Description"></listheader>
+			</listhead>
+			<listitem self="@{each='speciality'}" value="@{'speciality'}">
+				<listcell>
+					<label value="@{speciality.code}" />
+				</listcell>
+				<listcell>
+					<label value="@{speciality.description}" />
+				</listcell>
+			</listitem>
+		</listbox>
+	</div>
+	<zscript>
+	public void deleteSpecialities() {
+	if (specialitiesGrid.getSelectedItems() != null) {
+		for (Iterator iter = specialitiesGrid.getSelectedItems().iterator(); iter.hasNext();) {
+			Listitem li = iter.next();
+			controller.getProvider().getSpecialities().remove(li.getValue());
+		}
+	}
+	}
+</zscript>
+</zk>

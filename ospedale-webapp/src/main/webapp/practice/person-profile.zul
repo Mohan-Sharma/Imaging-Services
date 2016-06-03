@@ -1,0 +1,63 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./personProfile"?>
+<?component name="specialities" macro-uri="/provider/provider-specializations.zul"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		import com.nzion.domain.Roles;
+		import com.nzion.domain.Provider;
+		setPageTitle("Personal Profile", null);
+		com.nzion.zkoss.composer.PersonProfileController profileController = new com.nzion.zkoss.composer.PersonProfileController();
+		desktop.setAttribute("profileController",profileController); 
+		boolean isProvider = com.nzion.domain.Roles.hasRole(com.nzion.domain.Roles.PROVIDER);
+	</zscript>
+<window id="personProfile" self="@{define(applcationContent)}">
+	<tabbox>
+		<tabs>
+			<tab label="Account Information">
+				<attribute name="onClick">
+					if(renderContent.getFirstChild() != null){
+					   renderContent.getFirstChild().detach();
+					}
+				</attribute>
+			</tab>
+			<tab label="Other Details" if="${isProvider}">
+				<attribute name="onClick">
+					if(renderContent.getFirstChild() != null){
+					   renderContent.getFirstChild().detach();
+					}
+				</attribute>
+			</tab>
+			<tab label="Favorites" if="${isProvider}" id="favouritesTab"  onClick='render("/person/person-favourites.zul");'/>
+			<tab label="Security"  onClick='render("/person/person-security-settings.zul");'/>
+		<!-- 	<tab label="Meaningful Use" if="${isProvider}" onClick='render("/person/meaningfulPreference.zul")'/> -->
+		</tabs>
+		<tabpanels>
+			<tabpanel id="personAccountInformation">
+				<include src="/practice/person-details.zul"/>
+			</tabpanel>
+			<tabpanel if="${isProvider}">
+				<include src="/practice/profileLocationList.zul"/>
+				<separator/>
+				<include src="/practice/providerSpecializationList.zul"/>
+				<separator/>				
+				<include src="/practice/ProviderDefaultSigninSettings.zul"/>
+				<separator/>
+				<include src="/practice/providerSignature.zul"/>
+			</tabpanel>
+			<tabpanel id="favourites" sclass="formCont" if="${isProvider}"/>
+			<tabpanel id="adminSecuritySettings"/>
+			<!-- <tabpanel id="meaningfulUseSection" if="${isProvider}"/> -->
+		</tabpanels>
+	</tabbox>
+	<div id="renderContent"></div>
+	<zscript>
+	void render(String url) {
+	if(renderContent.getFirstChild() != null){
+	   renderContent.getFirstChild().detach();
+	}
+		Component component = Executions.createComponents(url, null, null);
+		component.setParent(renderContent);
+	}
+</zscript>
+</window>	
+</zk>

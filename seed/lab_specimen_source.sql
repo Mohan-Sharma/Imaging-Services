@@ -1,0 +1,18 @@
+insert into `lab_specimen_source`(`ID`,`IS_ACTIVE`,`VERSION`,`CODE`,`DESCRIPTION`) values (1,1,1,'ABS','Abscess');
+insert into `lab_specimen_source`(`ID`,`IS_ACTIVE`,`VERSION`,`CODE`,`DESCRIPTION`) values (2,1,1,'AMN','Amniotic fluid ');
+insert into `lab_specimen_source`(`ID`,`IS_ACTIVE`,`VERSION`,`CODE`,`DESCRIPTION`) values (3,1,1,'BIFL','Bile fluid');
+insert into `lab_specimen_source`(`ID`,`IS_ACTIVE`,`VERSION`,`CODE`,`DESCRIPTION`) values (4,null,1,'ASP','Aspirate');
+insert into `lab_specimen_source`(`ID`,`IS_ACTIVE`,`VERSION`,`CODE`,`DESCRIPTION`) values (5,null,1,'BPH','Basophils');
+insert into `lab_specimen_source`(`ID`,`IS_ACTIVE`,`VERSION`,`CODE`,`DESCRIPTION`) values (6,null,1,'BLDA','Blood arterial ');
+insert into `lab_specimen_source`(`ID`,`IS_ACTIVE`,`VERSION`,`CODE`,`DESCRIPTION`) values (7,null,1,'BBL','Blood bag ');
+insert into `lab_specimen_source`(`ID`,`IS_ACTIVE`,`VERSION`,`CODE`,`DESCRIPTION`) values (8,null,1,'BLDC','Blood capillary ');
+insert into `lab_specimen_source`(`ID`,`IS_ACTIVE`,`VERSION`,`CODE`,`DESCRIPTION`) values (9,null,1,'BPU','Blood product unit ');
+insert into `lab_specimen_source`(`ID`,`IS_ACTIVE`,`VERSION`,`CODE`,`DESCRIPTION`) values (10,null,1,'BLDV','Blood venous ');
+insert into `lab_specimen_source`(`ID`,`IS_ACTIVE`,`VERSION`,`CODE`,`DESCRIPTION`) values (11,null,1,'BON','Bone');
+insert into `lab_specimen_source`(`ID`,`IS_ACTIVE`,`VERSION`,`CODE`,`DESCRIPTION`) values (12,null,1,'BRO','Bronchial');
+insert into `lab_specimen_source`(`ID`,`IS_ACTIVE`,`VERSION`,`CODE`,`DESCRIPTION`) values (13,null,1,'BRN','Burn');
+insert into `lab_specimen_source`(`ID`,`IS_ACTIVE`,`VERSION`,`CODE`,`DESCRIPTION`) values (14,null,1,'CALC','Calculus (=Stone) ');
+insert into `lab_specimen_source`(`ID`,`IS_ACTIVE`,`VERSION`,`CODE`,`DESCRIPTION`) values (15,null,1,'CDM','Cardiac muscle ');
+insert into `lab_specimen_source`(`ID`,`IS_ACTIVE`,`VERSION`,`CODE`,`DESCRIPTION`) values (16,null,1,'CNL','Cannula');
+insert into `lab_specimen_source`(`ID`,`IS_ACTIVE`,`VERSION`,`CODE`,`DESCRIPTION`) values (17,null,1,'CTP','Catheter tip ');
+insert into `lab_specimen_source`(`ID`,`IS_ACTIVE`,`VERSION`,`CODE`,`DESCRIPTION`) values (18,null,1,'CSF','Cerebral spinal fluid');

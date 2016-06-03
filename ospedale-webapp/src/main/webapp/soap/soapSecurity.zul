@@ -1,0 +1,64 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapSecurityWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?component name="lookup" class="com.nzion.view.component.LookupBox"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import com.nzion.util.UtilMessagesAndPopups;
+	import com.nzion.util.UtilValidator;
+	import com.nzion.domain.Roles;
+	import com.nzion.domain.SoapComponentAuthorization;
+	List soapComponentAuthorizations = soapNoteService.getSoapComponentAuthorizations();
+]]></zscript>
+	<window id="soapSecurityWin">
+		<div sclass="panelFoot">
+			<button label="Save"
+				onClick='commonCrudService.save(soapComponentAuthorizations);UtilMessagesAndPopups.showSuccess();' zclass="btn btn-success" />
+		</div>
+		<panel>
+			<panelchildren>
+				<div sclass="panelCont">
+					<grid width="100%">
+						<columns>
+							<column label="COMPONENT" width="25%" />
+							<column label="DOCTOR" width="15%" />
+						<!--	<column label="MEDICAL_ASSISTANT" />  -->
+							<column label="NURSE" width="15%" />
+							<column label="TECHNICIAN" width="23%"/>
+							<column label="PATIENT" width="15%" />
+							<column label="RECEPTION" width="20%" />
+							<!-- <column label="EMERGENCY_ACCESS" />  -->
+						</columns>
+						<rows>
+							<row forEach="${soapComponentAuthorizations}">
+								<custom-attributes soapComponentAuthorization="${each}" />
+								<label value="${each.components}" />
+								<checkbox checked="true" disabled="true" />
+								<!--  <checkbox
+									onCheck='Roles.appendRole(self.getParent().getAttribute("soapComponentAuthorization").getAuthorization(),Roles.MEDICAL_ASSISTANT, self.isChecked())'
+									onCreate='self.setChecked(self.getParent().getAttribute("soapComponentAuthorization").getAuthorization().hasRole(Roles.MEDICAL_ASSISTANT))' />
+								-->
+								<checkbox
+									onCheck='Roles.appendRole(self.getParent().getAttribute("soapComponentAuthorization").getAuthorization(),Roles.NURSE, self.isChecked())'
+									onCreate='self.setChecked(self.getParent().getAttribute("soapComponentAuthorization").getAuthorization().hasRole(Roles.NURSE))' />
+								<checkbox
+									onCheck='Roles.appendRole(self.getParent().getAttribute("soapComponentAuthorization").getAuthorization(),Roles.TECHNICIAN, self.isChecked())'
+									onCreate='self.setChecked(self.getParent().getAttribute("soapComponentAuthorization").getAuthorization().hasRole(Roles.TECHNICIAN))' />
+								<checkbox
+									onCheck='Roles.appendRole(self.getParent().getAttribute("soapComponentAuthorization").getAuthorization(),Roles.PATIENT, self.isChecked())'
+									onCreate='self.setChecked(self.getParent().getAttribute("soapComponentAuthorization").getAuthorization().hasRole(Roles.PATIENT))' />
+								<checkbox
+									onCheck='Roles.appendRole(self.getParent().getAttribute("soapComponentAuthorization").getAuthorization(),Roles.RECEPTION, self.isChecked())'
+									onCreate='self.setChecked(self.getParent().getAttribute("soapComponentAuthorization").getAuthorization().hasRole(Roles.RECEPTION))' />
+							<!--	<checkbox
+									onCheck='Roles.appendRole(self.getParent().getAttribute("soapComponentAuthorization").getAuthorization(),Roles.EMERGENCY_ACCESS, self.isChecked())'
+									onCreate='self.setChecked(self.getParent().getAttribute("soapComponentAuthorization").getAuthorization().hasRole(Roles.EMERGENCY_ACCESS))' />
+									 -->
+							</row>
+						</rows>
+					</grid>
+				</div>
+			</panelchildren>
+		</panel>
+	</window>
+</zk>

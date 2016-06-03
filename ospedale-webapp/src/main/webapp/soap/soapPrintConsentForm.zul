@@ -1,0 +1,82 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapPrintConsentWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		import com.nzion.domain.Patient;
+		import com.nzion.domain.emr.soap.ImmunizationSection;
+		import com.nzion.domain.Provider;
+		com.nzion.zkoss.composer.PatientSoapNoteController controller = new com.nzion.zkoss.composer.PatientSoapNoteController(param.get("scheduleId")[0]);
+		Patient patient = controller.getPatient();
+		Provider provider = controller.getProvider();
+		com.nzion.domain.Location location = controller.getSchedule().getLocation();
+		Set immunizations = soapNoteService.getAllPatientImmunization(patient);
+		Date date = new Date();
+		String chk1 = Executions.getCurrent().getParameter("chk1");
+		String chk2 = Executions.getCurrent().getParameter("chk2");
+		String chk3 = Executions.getCurrent().getParameter("chk3");
+	</zscript>
+	<window id="soapPrintConsentWin" width="100%" height="50%">
+		<attribute name="onCreate">
+			Clients.print();
+		</attribute>
+		<div align="center" width="100%" height="100%">
+<panel width="90%" height="100%" style="border:none" zclass="none">
+	<panelchildren>
+	<n:div align="center">
+	<include src="/soap/soapPrintBanner.zul" width="100%" height="100%" soapnotedate="${controller.soapNote.date}"/>
+	</n:div>
+	<separator/>
+	<div id="chk1"  if="${chk1}" align="left">
+		<n:Strong style="font-weight:bold;font-size:12px"> * </n:Strong> Patient denies history of allergic reactions to this Vaccine
+	</div>
+	<separator/>
+	<div id="chk2"  if="${chk2}" align="left">
+		<n:Strong style="font-weight:bold;font-size:12px"> * </n:Strong> Patient is not moderately or severly ill
+	</div>
+	<separator/>
+	<div id="chk3"  if="${chk3}" align="left">
+		<n:Strong style="font-weight:bold;font-size:12px"> * </n:Strong> Vaccine information given and questions answered
+	</div>
+	<separator height="10px"/>
+	<n:div width="50%" align="left" >
+				<label style="font-size:12px;font-weight:bold;text-align:center;" value="I have been given a copy and have read, or had explained to me, the information in the “Vaccine Information Statement(s),”
+					where applicable, for the vaccine(s) indicated below. I have had a chance to ask questions and had them answered to my
+					satisfaction. I understand the benefits and risks of the vaccine(s) requested and ask that the vaccine(s) currently due for which
+					I have signed below be given to me or to the person named above for whom I am authorized pursuant to Section 431.058,
+					RSMo to make this request."/>
+	</n:div>
+	<separator/>
+	<n:div align="center">
+		<n:table width="100%" height="100%">
+		<n:tr>
+			<n:td>
+			<vbox>
+						<separator height="75px"/>
+						<label value="_________________________________________________"/>
+						<label style="font-weight:bold;" value="Parent / Self Signature"/>
+		   </vbox>
+			</n:td>
+			<n:td>
+				<vbox>
+						<separator height="75px"/>
+						<label value="_________________________________________________"/>
+						<label style="font-weight:bold;" value="Doctor Signature"/>
+			    </vbox>
+			</n:td>
+			</n:tr>
+			<n:tr>
+			<n:td >
+				<n:div align="left" style="margin-top:20px">
+					<n:strong>Date Generated : ${date}</n:strong>
+				</n:div>
+			</n:td>
+		</n:tr>	
+	</n:table>
+		</n:div>
+	</panelchildren>
+	</panel>
+</div>
+	</window>
+</zk>

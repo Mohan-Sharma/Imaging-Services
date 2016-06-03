@@ -1,0 +1,173 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./readingWin"?>
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:c="client">
+	<zscript>
+	import com.nzion.zkoss.composer.PatientSoapNoteController;
+	import com.nzion.domain.emr.soap.vitalsign.VitalSignReading;
+	import com.nzion.domain.emr.soap.VitalSignSection;
+	PatientSoapNoteController patientSoapNoteController = (PatientSoapNoteController) arg.get("controller");
+	VitalSignReading reading = (VitalSignReading) arg.get("reading");
+</zscript>
+	<window border="normal" closable="true" id="readingWin" width="55%">
+		<style>
+			.form input{
+				width:50px;
+			}
+			.z-datebox input{
+				width:70px;
+			}
+			.z-decimalbox-disd{
+				background-color:grey !important;	
+			}
+		</style>
+		<script>
+			<![CDATA[
+
+			function toggle(a,b){
+				//var fields = ["height","weight","head","chest","temp"];
+				var fields = ["temp"];
+				for(var i=0; i<fields.length; i++){
+					var pwdWidget = zk.Widget.$("$"+fields[i]+"_"+b);
+  //          		pwdWidget.setValue(null);
+            		pwdWidget.setDisabled(true);
+					zk.Widget.$("$"+fields[i]+"_"+a).setDisabled(false);
+   //         		pwdWidget.fire('onChange',{ value : null });
+            	}
+            }
+			
+			zk.afterMount(function() { 
+				toggle('metric','en');			
+			});
+			]]>
+		</script>
+		
+		<n:h4>Add New Vital</n:h4>
+		<separator bar="true"></separator>
+		<div class="form" style="padding:5px !important">
+			<n:table width="550px" cellspacing="10px">
+				<n:tr>
+					<n:td>
+						<label value="Date of Measurement" class="name"/>
+					</n:td>
+					<n:td colspan="4">
+						<datebox value="@{reading.dateOfMeasurement}" constraint="no empty" style="width:110px;"/>
+					</n:td>
+				</n:tr>
+				<n:tr>
+					<n:td>
+						<label value="Time of Measurement" class="name"/>
+					</n:td>
+					<n:td colspan="4" >
+						<timebox value="@{reading.timeOfMeasurement}" constraint="no empty" style="display:inline-block;width:100px;"/>
+					</n:td>
+				</n:tr>
+				<n:tr>
+					<n:td>
+						<label value="Measurement Unit" class="name"/>
+					</n:td>
+					<n:td colspan="4">
+						<radiogroup selectedItem="@{reading.englishMetricFlag,converter='com.nzion.view.component.RadioGroupBinder'}">
+						<radio label="Metric" value="Metric" >
+							<attribute c:name="onCheck">
+								toggle('metric','en');
+							</attribute>
+						</radio>
+						<radio label="English" value="English" >
+							<attribute c:name="onCheck">
+								toggle('en','metric');
+							</attribute>
+						</radio>
+						</radiogroup>
+					</n:td>
+				</n:tr>
+				<n:tr>
+					<n:td>
+						<label value="Blood Pressure" class="name" />
+					</n:td>
+					<n:td>
+						<intbox value="@{reading.bloodPressure.systolic}"></intbox>
+					</n:td>
+					<n:td>
+						<label value="Systolic"/>
+					</n:td>
+					<n:td>
+						<intbox value="@{reading.bloodPressure.diastolic}" />
+					</n:td>
+					<n:td>
+						<label value="Diastolic" />
+					</n:td>
+				</n:tr>
+				<n:tr>
+					<n:td>
+						<label value="Temperature" class="name" />
+					</n:td>
+					<n:td>
+						<decimalbox value="@{reading.temperature.metricValue}" id="temp_metric"></decimalbox>
+					</n:td>
+					<n:td>
+						<label value="@{reading.temperature.metricUnit}"/>
+					</n:td>
+					<n:td>
+						<decimalbox value="@{reading.temperature.englishValue}" id="temp_en"/>
+					</n:td>
+					<n:td>
+						<label value="@{reading.temperature.englishUnit}" />
+					</n:td>
+				</n:tr>
+				<n:tr>
+					<n:td>
+						<label value="Pulse" class="name" />
+					</n:td>
+					<n:td>
+						<intbox value="@{reading.pulse.value}"></intbox>
+					</n:td>
+					<n:td>
+						<label value="@{reading.pulse.unit}" />
+					</n:td>
+				</n:tr>
+				<n:tr>
+					<n:td style="text-align:right">
+						<label value="Respiration" class="name" />
+					</n:td>
+					<n:td>
+						<intbox value="@{reading.respiration.value}"></intbox>
+					</n:td>
+					<n:td  colspan="2">
+						<label value="@{reading.respiration.unit}" />
+					</n:td>
+				</n:tr>
+				<n:tr>
+					<n:td align="left"><label value="Comments" class="name"></label></n:td>
+					<n:td colspan="4">
+						<textbox rows="3" cols="45" value="@{reading.readingComments}"/>
+					</n:td>
+				</n:tr>
+				
+				<n:tr>
+					<n:td colspan="5" style="text-align:center">
+								<button label="Save" id="saveGrowthData" zclass="btn btn-success">
+									<attribute name="onClick">
+										VitalSignSection vitalSignSection = (VitalSignSection) patientSoapNoteController.getSelectedSection();
+										if (vitalSignSection.getReadings() == null) 
+											vitalSignSection.setReadings(new ArrayList());
+										if(com.nzion.util.UtilValidator.isAllEmpty(reading,new String[]{"height.metricValue","height.englishValue",
+										"weight.metricValue","weight.englishValue","bloodPressure.systolic","bloodPressure.diastolic",
+										"temperature.metricValue","temperature.englishValue","headCircumference.metricValue","headCircumference.englishValue",
+										"chestCircumference.metricValue","chestCircumference.englishValue","pulse.value","respiration.value"})){
+										com.nzion.util.UtilMessagesAndPopups.showError("Enter atleast one vital sign reading");
+										return;
+										}
+										vitalSignSection.getReadings().add(reading);
+										patientSoapNoteController.saveSoapSection();
+										Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null);
+										readingWin.detach();
+									</attribute>
+								</button>
+								<button label="Cancel" onClick="readingWin.detach();" ></button>
+					</n:td>
+				</n:tr>
+			</n:table>
+		</div>
+	</window>
+</zk>

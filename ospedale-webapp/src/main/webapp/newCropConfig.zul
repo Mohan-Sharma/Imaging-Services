@@ -1,0 +1,85 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./newCropCongigWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/practiceTemplate.zul"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+List newCropConfigs  = commonCrudService.getAll(com.nzion.domain.NewCropConfig.class);
+com.nzion.domain.NewCropConfig newCropConfig = newCropConfigs.get(0);
+</zscript>
+<style>
+		.z-grid table, .z-window-embedded-cnt-noborder table {
+		border-collapse: separate;
+	}
+	</style>
+<window id="newCropCongigWindow" self="@{define(content)}">
+	<panel title="New Crop Configuration">
+			<panelchildren>
+				<n:table cellpadding="10px" cellspacing="10px" width="60%">
+					<n:tr>
+						<n:td style="text-align:right">
+								<label value="Rx Url" />
+								<label zclass="labelReq" value="*"/>
+						</n:td>
+						<n:td>
+								<textbox value="@{newCropConfig.rxUrl,save-when='Save.onClick'}" width="100%" constraint="no empty"/>
+						</n:td>
+					</n:tr>
+					<n:tr>
+						<n:td style="text-align:right">
+								<label value="WSDL Url" />
+								<label zclass="labelReq" value="*"/>
+						</n:td>
+						<n:td>
+								<textbox value="@{newCropConfig.wsdlUrl,save-when='Save.onClick'}" width="100%" constraint="no empty"/>
+						</n:td>
+					</n:tr>
+					<n:tr>
+						<n:td style="text-align:right">
+								<label value="UserName" />
+								<label zclass="labelReq" value="*"/>
+						</n:td>
+						<n:td>
+								<textbox value="@{newCropConfig.newCropUserName,save-when='Save.onClick'}" constraint="no empty"/>
+						</n:td>
+					</n:tr>
+					<n:tr>
+						<n:td style="text-align:right">
+								<label value="Password" />
+								<label zclass="labelReq" value="*"/>
+						</n:td>
+						<n:td>
+								<textbox value="@{newCropConfig.newCropPassword,save-when='Save.onClick'}" type="password" constraint="no empty"/>
+						</n:td>
+					</n:tr>
+					<n:tr>
+						<n:td style="text-align:right">
+								<label value="Site Id" />
+								<label zclass="labelReq" value="*"/>
+						</n:td>
+						<n:td>
+								<textbox value="@{newCropConfig.siteId,save-when='Save.onClick'}" constraint="no empty"/>
+						</n:td>
+					</n:tr>
+					<n:tr>
+						<n:td style="text-align:right">
+								<label value="Partner Name" />
+								<label zclass="labelReq" value="*"/>
+						</n:td>
+						<n:td>
+								<textbox value="@{newCropConfig.partnerName,save-when='Save.onClick'}" constraint="no empty"/>
+						</n:td>
+					</n:tr>
+				</n:table>	
+			</panelchildren>
+		</panel>
+			<div sclass="panelFoot">
+			<button label="Save" id="Save" sclass="btn">
+				<attribute name="onClick">
+					commonCrudService.save(newCropConfig);
+					com.nzion.util.UtilMessagesAndPopups.showSuccess();
+				</attribute>
+			</button>
+		</div>
+</window>
+</zk>

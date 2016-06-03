@@ -1,0 +1,47 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+
+<zscript><![CDATA[
+import 	com.nzion.domain.Provider;
+Provider provider = providerService.getProvider(Executions.getCurrent().getDesktop().getAttribute("provider").getId());
+List familyMembers= commonCrudService.getAll(com.nzion.domain.emr.FamilyMember.class);
+
+]]></zscript>
+		<div sclass="panelFoot">
+			<button label="Save" > 
+			<attribute name="onClick">
+				commonCrudService.save(provider);
+				com.nzion.util.UtilMessagesAndPopups.showSuccess();
+			</attribute>
+			</button>
+		</div>
+			<panel title="Doctor Family Members">
+				<panelchildren>
+				<listbox width="100%" multiple="true" checkmark="true" id="familyMembersList" onSelect="" onCreate="" sclass="chkBox">
+				<attribute name="onSelect">
+					provider.getFamilyMember().clear();
+					provider.getFamilyMember().addAll((List)com.nzion.util.ViewUtil.getSelectedItems(self));
+				</attribute>
+				<attribute name="onCreate">
+				<![CDATA[
+					List list=familyMembersList.getChildren();
+					for(int i = 1; i < list.size();++i){
+						Listitem currentItem = (Listitem)list.get(i);
+						if(provider.getFamilyMember().contains(currentItem.getValue()))
+							currentItem.setSelected(true);
+					}
+				]]>
+				</attribute>
+					<listhead>
+						<listheader label="Name"/>
+					</listhead>
+					<listitem forEach="${familyMembers}" value="${each}" >
+						<listcell>
+							<label value="${each.relationshipName}" />
+						</listcell>
+					</listitem>
+		</listbox>
+		</panelchildren>
+	</panel>	
+</zk>

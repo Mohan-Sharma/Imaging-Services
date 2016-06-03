@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:jee="http://www.springframework.org/schema/jee" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+	<context:component-scan base-package="com.nzion.hibernate.ext" />
+    <context:component-scan base-package="com.nzion.service"/>
+    <context:component-scan base-package="com.nzion.superbill.service"/>
+    <context:component-scan base-package="com.nzion.util"></context:component-scan>
+
+	<import resource="classpath*:messagingContext.xml" />
+	<import resource="classpath:core-databaseContext.xml" />
+	<import resource="classpath*:serviceContext.xml" />
+	<import resource="securityContext.xml" />
+
+	<bean name="infrastructure" class="com.nzion.util.Infrastructure" factory-method="getInstance">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<!-- <bean name="patientRemainderJob" class="org.springframework.scheduling.quartz.JobDetailBean">
+		<property name="jobClass">
+			<value>com.nzion.service.PatientRemainderJob</value>
+		</property>
+		<property name="jobDataAsMap">
+			<map>
+				<entry key="mailService" value-ref="mailService" />
+				<entry key="sessionFactory" value-ref="sessionFactory" />
+			</map>
+		</property>
+	</bean>
+	<bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<ref bean="patientRemainderJob" />
+		</property>
+		<property name="cronExpression">
+			<value>0 20/10 * * * ?</value>
+		</property>
+	</bean>
+
+	<bean name="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref local="cronTrigger" />
+			</list>
+		</property>
+	</bean> -->
+
+	<bean id="ecosmosViewResolver" class="com.nzion.zkoss.ext.ResourceBundleViewResolver">
+		<property name="basenames">
+			<array>
+				<value>views.properties</value>
+				<value>soapviews.properties</value>
+				<value>inpatientViews.properties</value>
+			</array>
+		</property>
+	</bean>
+
+
+    <bean id="freemarkerConfiguration" class="org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean">
+        <property name="templateLoaderPaths" value="/WEB-INF/classes/ftl/"/>
+        <!-- Activate the following to disable template caching -->
+        <property name="freemarkerSettings" value="cache_storage=freemarker.cache.NullCacheStorage" />
+    </bean>
+    <!--<bean id="superBillService" class="com.nzion.superbill.service.SuperBillService"></bean>-->
+    <bean id="superBillServlet" class="com.nzion.superbill.view.SuperBillServlet"></bean>
+    <bean id="superBillPatientSearchServlet" class="com.nzion.superbill.view.SuperBillPatientSearchServlet"></bean>
+    <bean id="superBillPaymentServlet" class="com.nzion.superbill.view.SuperBillPaymentServlet"></bean>
+    <bean id="authorizationServlet" class="com.nzion.superbill.view.AuthorizationServlet"></bean>
+</beans>

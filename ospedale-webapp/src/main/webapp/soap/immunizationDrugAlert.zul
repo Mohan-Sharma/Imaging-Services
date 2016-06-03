@@ -1,0 +1,143 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./alertWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	import com.nzion.domain.emr.soap.PatientRxAlert;
+	import com.nzion.zkoss.composer.SoapImmunizationComposer;
+	import com.nzion.zkoss.composer.PatientSoapNoteController;
+	import com.nzion.domain.drug.Drug;
+	import com.nzion.domain.emr.soap.PatientImmunization;
+	import com.nzion.domain.emr.soap.ImmunizationSection;
+	
+	SoapImmunizationComposer immunizationComposer = (SoapImmunizationComposer)arg.get("soapImmunizationComposer");
+	PatientImmunization patientImmunization = arg.get("patientImmunization");
+	ImmunizationSection immunizationSection =  arg.get("immunizationSection");
+	Set rxAlerts = arg.get("immunizationSection").getAlerts();
+	Drug selectedDrug = (Drug)arg.get("drug");
+	String drugName = selectedDrug.getBrandName();
+	PatientSoapNoteController patientSoapNoteController = immunizationComposer.getPatientSoapNoteController();
+	List interactionAlerts = arg.get("result");
+	List allergyAlerts = new ArrayList();
+	List patientRxAlerts = new ArrayList();
+	for(Iterator iter=interactionAlerts.iterator();iter.hasNext();){
+		PatientRxAlert a = (PatientRxAlert)iter.next();
+		if(a.getRating()>0){
+			allergyAlerts.add(a);
+		}else{
+			patientRxAlerts.add(a);
+		}
+	}
+]]>
+	</zscript>
+	<window id="alertWindow" mode="modal" title="Drug Interaction Alert" width="50%"  closable="true" >
+		<style>
+			.rxAlertCont{
+				padding:7px;
+			}
+			.rxAlert{
+			}
+			.lowInteraction{
+			background-color:yellow;
+			}
+			.mediumInteraction{
+			background-color:orange;
+			}
+			.highInteraction{
+			background-color:red;
+			}
+		</style>
+		<div  style="width:100%;">
+			<div sclass="panelHeadTop panelHead">
+			</div>
+			<div id="rxAlertMsgDiv">
+			<box forEach="${allergyAlerts}">
+			<label value="${each.relatedDrugName}" style="font-weight:bold"/>
+			<custom-attributes allergyAlert="${each}" />
+			<span>
+				<html>
+					<![CDATA[
+						<ul>
+							<li>${each.alertMessage}</li>
+						</ul>
+					]]>
+				</html>
+				<attribute name="onCreate">
+				if (allergyAlert.getRating() == 2) self.getParent().setSclass("lowInteraction");
+				if (allergyAlert.getRating() == 3) self.getParent().setSclass("mediumInteraction");
+				if (allergyAlert.getRating() == 4) self.getParent().setSclass("highInteraction");
+							</attribute>
+			</span>
+			</box>
+			<separator orient="horizontal" bar="true" width="100%"/>
+			<box forEach="${patientRxAlerts}" sclass="" width="100%">
+			<label value="${each.relatedDrugName}" style="font-weight:bold"/>
+			<custom-attributes patientRxAlert="${each}" />
+			<span width="100%">
+				<html>
+					<![CDATA[
+						<ul class="rxAlertCont">
+							<li class="rxAlert">${each.alertMessage}</li>
+						</ul>
+					]]>
+				</html>
+			<separator orient="horizontal" bar="true" width="100%"/>
+			<attribute name="onCreate">
+				if (patientRxAlert.getRating() == 2) self.getParent().setSclass("lowInteraction");
+				if (patientRxAlert.getRating() == 3) self.getParent().setSclass("mediumInteraction");
+				if (patientRxAlert.getRating() == 4) self.getParent().setSclass("highInteraction");
+							</attribute>
+			</span>
+			</box>
+			</div>
+			<hbox>
+			<label value="Do You Want To Add?"></label>
+			<radiogroup>
+			<radio label="Yes">
+			<attribute name="onCheck">
+			addBtn.setVisible(true);
+			overruleSection.setVisible(true);
+			</attribute>
+			</radio>
+			<radio label="No">
+			<attribute name="onCheck">
+			alertWindow.detach();
+			</attribute>
+			</radio>
+			</radiogroup>
+			</hbox>
+		<div id="overruleSection" visible="false">
+		<h:table>
+		<h:tr>
+		<h:td>
+		<label value="Overrule Message" style="font-weight:bold;padding:0 0 4px" />
+		<label value="*" style="color:red;font-weight:bold"/>
+		</h:td>
+		</h:tr>
+		<h:tr>
+		<h:td>
+		<textbox value="@{patientRx.reasonForOverriding,save-when='addBtn.onClick'}" rows="2" cols="100" style="border:1px solid #A8A8A8" constraint="no empty:Message Required"/>
+		</h:td>
+		</h:tr>
+		</h:table>	
+		</div>
+		</div>
+		<separator height="10px"/>
+		<div sclass="panelFoot">
+			<button id="addBtn" sclass="btn submit" label="Add" visible="false">
+			<attribute name="onClick">
+			for(Iterator iter=interactionAlerts.iterator();iter.hasNext();){
+				PatientRxAlert alert = (PatientRxAlert)iter.next();
+				immunizationSection.addPatientRxAlert(alert);
+				patientImmunization.addAlert(alert);
+			}
+			immunizationSection.addPatientImmunization(patientImmunization);
+			patientSoapNoteController.saveSoapSection();
+			alertWindow.detach();
+			</attribute>
+			</button>
+			<button sclass="btn submit" label="Cancel" forward="onClick=onCancel" />
+		</div>
+	</window>
+</zk>

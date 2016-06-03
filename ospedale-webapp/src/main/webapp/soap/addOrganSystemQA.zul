@@ -1,0 +1,65 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addOrganSystemQaWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	List organSystems = commonCrudService.getAll(com.nzion.domain.emr.OrganSystem.class);
+	List soapModules = commonCrudService.getAll(com.nzion.domain.emr.SoapModule.class);
+]]>
+	</zscript>
+	<window id="addOrganSystemQaWindow" style="border: 5px solid #2d2d2d" width="100%">
+		<style>.z-combobox-inp{ width:320px !important; }</style>
+		<div sclass="panelFoot">
+			<button label="Save" id="Save" onClick="addOrganSystemQaWindow.detach();" />
+			<button label="Cancel" forward="onClick=onCancel" />
+		</div>
+		<panel title="Add OrganSystemQA">
+			<panelchildren style="padding:10px">
+				<div sclass="panelCont">
+					<div>
+						<label value="OrganSystem" />
+						<label value="*" style="color:red" />
+						<combobox id="organSystemQACombo" model="@{organSystems}">
+							<comboitem self="@{each='organSystem'}" value="@{organSystem}" label="@{organSystem.desc}" />
+						</combobox>
+					</div>
+					<div></div>
+					<div>
+						<label value="Module" />
+						<combobox id="soapModuleCombo" model="@{soapModules}">
+							<comboitem self="@{each='soapModule'}" value="@{soapModule}" label="@{soapModule.moduleName}" />
+						</combobox>
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+		<h:table width="100%" height="75%">
+			<h:tr>
+				<h:td width="50%" height="90%" style="vertical-align:top;">
+					<panel title="Questions" width="100%" height="90%" collapsible="false">
+						<panelchildren>
+							<paging id="questionPaging" pageSize="10" />
+							<listbox id="organSystemQuestionListBox" paginal="${questionPaging}"
+								onSelect="organSystemQuestionAnswerListBox.setVisible(true)">
+							</listbox>
+						</panelchildren>
+					</panel>
+				</h:td>
+				<h:td width="50%" height="90%" style="vertical-align:top;">
+					<panel title="Answers" width="100%" height="90%" collapsible="false">
+						<panelchildren>
+							<paging id="answerPaging" pageSize="10" />
+							<listbox id="organSystemQuestionAnswerListBox" checkmark="true" multiple="true" mold="paging"
+								paginal="${answerPaging}">
+								<listitem>
+									<listcell />
+								</listitem>
+							</listbox>
+						</panelchildren>
+					</panel>
+				</h:td>
+			</h:tr>
+		</h:table>
+	</window>
+</zk>

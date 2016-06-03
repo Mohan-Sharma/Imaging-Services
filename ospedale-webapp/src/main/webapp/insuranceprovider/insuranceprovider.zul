@@ -1,0 +1,99 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./InsuranceProvider"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript><![CDATA[
+	import com.nzion.util.UtilValidator;
+	com.nzion.zkoss.composer.InsuranceProviderComposer insuranceProviderComposer = new com.nzion.zkoss.composer.InsuranceProviderComposer();
+	com.nzion.zkoss.ext.EntityDropdownRenderer entityDropdownRenderer = new com.nzion.zkoss.ext.EntityDropdownRenderer(
+			"classDescription");
+	com.nzion.zkoss.ext.EntityDropdownRenderer insuranceGroupDropdownRenderer = new com.nzion.zkoss.ext.EntityDropdownRenderer(
+			"groupName");
+	com.nzion.zkoss.composer.emr.StateRenderer stateRenderer = new com.nzion.zkoss.composer.emr.StateRenderer();
+]]></zscript>
+ 
+	<window id="InsuranceProvider" apply="${insuranceProviderComposer}"  width="70%"
+		 closable="true" mode="modal">
+	  <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Insurance</h:small>
+                 <button type="button" zclass="close" onClick="InsuranceProvider.detach();">×</button>
+            </h:h1>
+        </div>
+	<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span2">
+                <label value="Insurance Name" mold="required"></label>
+						<textbox id="insuranceProviderName" cols="35" constraint="no empty"
+							value="@{vo.insuranceProvider.insuranceProviderName,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" maxlength="30" />
+                </div>
+                <div zclass="span2">
+                <label value="Insurance Code" mold="required"></label>
+						<textbox id="insuranceCode" cols="10" constraint="no empty"
+							value="@{vo.insuranceProvider.accountNumber,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" maxlength="5" />
+                </div>
+                <div zclass="span2">
+                <label value="Contact Person"></label>
+						<textbox id="contactPerson"
+							value="@{vo.insuranceProvider.contactPerson,save-when='Save.onClick'}" sclass="span12" maxlength="30" />
+                </div>
+          </div>
+    
+			<div zclass="row-fluid">
+                <div zclass="span3">
+               <label value="Address1" style="text-align:right" id="lbladdress1" mold="required"/>
+						<textbox  value="@{vo.insuranceProvider.contacts.postalAddress.address1,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"  constraint="no empty" id="address1"/>
+                </div>
+                
+                <div zclass="span3">
+               <label value="Address2" style="text-align:right;" id="lbladdress2" />
+						<textbox  value="@{vo.insuranceProvider.contacts.postalAddress.address2,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" id="address2"/>
+
+                </div>
+          </div>
+          
+          <div zclass="row-fluid">
+                <div zclass="span2">
+               <label value="Country"  id="lblcountry" />
+						<textbox value="@{vo.insuranceProvider.contacts.postalAddress.countryGeo,save-when='Save.onClick'}" sclass="span12" id="country" />
+                </div>
+                <div zclass="span2">
+               <label value="State"  id="lblstate" mold="required"/>
+							<enumeration id="state" enumType="STATE" itemRenderer="${stateRenderer}" onChange="com.nzion.util.UtilDisplay.validateOnlyAlphabets(self)"
+							value="@{vo.insuranceProvider.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick'}" constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" />
+                </div>
+                <div zclass="span2">
+               <label value="City"  id="lblcity" mold="required"/>
+						<textbox value="@{vo.insuranceProvider.contacts.postalAddress.city,save-when='Save.onClick'}" id="city"
+							maxlength="20" onChange="com.nzion.util.UtilDisplay.validateOnlyAlphabetsAndWhiteSpaces(self)" constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                </div>
+                </div>
+                 <div zclass="row-fluid">
+                  <div zclass="span2">
+           <label value="Postal code" style="text-align:right" id="lblpostalCode" mold="required"/>
+						<textbox value="@{vo.insuranceProvider.contacts.postalAddress.postalCode,save-when='Save.onClick'}"
+							id="postalCode" maxlength="10"  onChange="com.nzion.util.UtilDisplay.validateOnlyDigits(self)" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" />
+                </div>
+                <div zclass="span2">
+              <label value="e-mail" />
+						<email id="emailAddr" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" value="@{vo.insuranceProvider.contacts.email,save-when='Save.onClick'}"/>
+                </div>
+                <div zclass="span2">
+                <label value="Office No" mold="required"/>
+						<phonebox value="@{vo.insuranceProvider.contacts.officePhone,save-when='Save.onClick'}" cols="10"
+							maxlength="15" constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" />
+							</div>
+							 <div zclass="span2">
+               <label value="Fax"
+							style="width: 3em;float: left;text-align: right;margin-right: 0.5em;display: block" />
+						<phonebox value="@{vo.insuranceProvider.contacts.faxNumber,save-when='Save.onClick'}" sclass="span12" cols="10" />
+				</div>
+                </div>
+		
+			 </div>		
+			
+		<div sclass="panelFoot">
+			<button label="Save" id="Save" zclass="btn-success btn"/>
+			<button label="Cancel" forward="onClick=onCancel" sclass="btn" onClick='if(InsuranceProvider.getParent() != null) InsuranceProvider.getParent().getFellowIfAny("insuranceProviderEdit").detach()'/>
+		</div>
+	</window>
+</zk>

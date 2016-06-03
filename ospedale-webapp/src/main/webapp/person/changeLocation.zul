@@ -1,0 +1,36 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./changeLocation"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<window id="changeLocation" style="border:5px solid #018CB7;background:none repeat-y scroll 0 0 #018CB7;padding-top:6px;padding-bottom:6px" border="normal" mode="modal" closable="true" >
+<div style="width:350px;height:300px">
+	<zscript><![CDATA[
+		com.nzion.domain.UserLogin userLogin = com.nzion.util.Infrastructure.getUserLogin();
+		 Set locations = userLogin.getLocations();
+		 List locationsList = new ArrayList(locations);
+	  	 Collections.sort(locationsList);
+		]]></zscript> 
+		<separator/>
+		<div style="padding:12px" zclass="page-header titled-well">
+            <h:h1 style="margin-top:2px">
+                <button  type="button" zclass="close" onClick="changeLocation.detach();">Close</button>
+                </h:h1>
+                </div>
+<hlayout spacing="10px">
+	<div style="float:left;width:100%">
+		<label value="SELECTED LOCATION : ${userLocation}" style="font-size:14px;font-weight:bold;color: #FF8000" />
+	</div>
+</hlayout>
+  <div>
+  	<n:h2 class="fl blueHeader">Change Your Location</n:h2>
+  </div>
+  <separator/>
+  	<listbox  onSelect='loc = self.getSelectedItem().getValue();session.setAttribute("_location",loc);com.nzion.util.Infrastructure.setSelectedLocation(loc);
+						Executions.sendRedirect(null);'>
+	<listhead style="background:none repeat-x scroll 0 0 #018CB7;" >
+			<listheader label="Location List" />
+	</listhead>
+			<listitem forEach="${locationsList}" value="${each}" label="${each.name}" />
+	</listbox>
+</div>
+</window>
+</zk>

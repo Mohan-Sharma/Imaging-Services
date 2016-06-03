@@ -1,0 +1,45 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./refillRequestWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	import com.nzion.domain.drug.RefillRequestNewCrop;
+	List refillRequestNewCrops = refillRequestService.getStatusBasedRefillRequestNewCropForLoggedInUser(com.nzion.util.Infrastructure.getUserLogin());
+	com.nzion.zkoss.composer.RefillRequestController controller = new com.nzion.zkoss.composer.RefillRequestController();
+	</zscript>
+	<window self="@{define(content)}"  closable="true"  id="refillRequestWin" height="98%" apply="${controller}"><!--	
+		<attribute name="onRestore">
+		   refillRequest.setVisible(true);
+		   patientSearchRes.setVisible(false);
+		</attribute>
+		--><panel id="refillRequestPanelForFrontDesk">
+			<panelchildren>
+				<button label="New Request" >
+					<attribute name="onClick">
+					patientSearchRes.setSrc("/portlets/refill-request-patient-search.zul");
+					refillRequestPanelForFrontDesk.setVisible(false);
+					searchPanel.setVisible(true);
+					Events.postEvent("onClick",refillRequestWin.getParent().getParent().getPreviousSibling().getFirstChild(),null);
+					</attribute>
+				</button>
+				<separator/>
+				
+				<listbox id="refillRequestNewCropListBox" model="@{refillRequestNewCrops,load-after='self.onReloadRequest'}" itemRenderer="${controller.listitemRenderer}">
+			         	<listhead>
+			         		<listheader label="Patient"/>
+			         		<listheader label="Drug"/>
+			         		<listheader label="Status"/>
+			         		<listheader label="Refills Requested"/>
+			         		<listheader label="Action"/>
+			         	</listhead>
+			        </listbox>
+			        </panelchildren>		
+		</panel>
+		<panel id="searchPanel">
+			<panelchildren>
+				<include id="patientSearchRes" />
+			</panelchildren>
+		</panel>
+	</window>		
+</zk>

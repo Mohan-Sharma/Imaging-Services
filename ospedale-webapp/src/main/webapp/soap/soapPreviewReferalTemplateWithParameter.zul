@@ -1,0 +1,13 @@
+<?page title="Referal Template"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	Long scheduleId =  new Long(Executions.getCurrent().getParameter("scheduleId"));
+	com.nzion.domain.Schedule schedule = commonCrudService.getById(com.nzion.domain.Schedule.class, scheduleId);
+	Long referralId = new Long(Executions.getCurrent().getParameter("referralId"));
+]]>
+	</zscript>
+	<include src='/soap/soapPreviewReferralTemplate.zul' referralId="${referralId}" rlt="${schedule.person.referalLetterTemplate}" person="${schedule.person}"/>
+</zk>

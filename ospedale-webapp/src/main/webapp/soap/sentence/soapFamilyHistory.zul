@@ -1,0 +1,48 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+		import com.nzion.zkoss.composer.SoapSentenceComposer;
+		import com.nzion.domain.emr.soap.FamilyHistorySection;
+		
+		SoapSentenceComposer sentenceComposer = (SoapSentenceComposer)arg.get("controller");
+		FamilyHistorySection familyHxSection = (FamilyHistorySection)sentenceComposer.getSoapNoteController().getSoapSection(FamilyHistorySection.class,false);
+		sentenceComposer.setSelectedSection(familyHxSection);
+	</zscript>
+<div style="margin-left:10px" id="familyHx">
+		<n:h2>${familyHxSection.soapModule.moduleDescription}</n:h2>
+		<n:br/>
+		<n:h4>
+			<label value="Patient's family history is not available." if="${empty familyHxSection.familyIllnesses}"/>
+		</n:h4>
+		<n:table width="100%" border="0px" cellspacing="10px" cellpadding="10px" if="${not empty familyHxSection.familyIllnesses}">
+		<n:thead>
+			<n:tr style="text-align:left">
+				<n:th>Illness</n:th>
+				<n:th>Relationship Type</n:th>
+				<n:th>Member Name</n:th>
+				<n:th>Status</n:th>
+				<n:th>Health Status</n:th>
+				<n:th>Age</n:th>
+				<n:th>Onset</n:th>
+			</n:tr>
+		</n:thead>
+		<n:tr forEach="${familyHxSection.familyIllnesses}">
+				<n:td><label value="${each.icd.code}"/> <space width="5px"></space> <label value="${each.icd.description}"/></n:td>
+				<n:td><label value="${each.name}"/></n:td>
+				<n:td><label value="${each.member}"/></n:td>
+				<n:td><label value="${each.status}"/></n:td>
+				<n:td><label value="${each.healthStatus}"/></n:td>
+				<n:td><label value="${each.age}"/></n:td>
+				<n:td><label value="${display:fd(each.approximateDate)}"/></n:td>
+		</n:tr>
+		</n:table><!--
+		<label value="Comments" style="font-size:12px;font-weight:bold;" if="${rosSection.sectionComments!=null}"/>
+		<textbox value="@{rosSection.sectionComments}" style="border:none" cols="100" multiline="true" if="${rosSection.sectionComments!=null}"/>
+		<n:br/>-->
+</div>
+	
+
+</zk>

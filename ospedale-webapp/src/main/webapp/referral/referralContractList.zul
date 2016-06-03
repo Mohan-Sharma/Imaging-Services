@@ -1,0 +1,117 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk>
+<window id="referralContractList" apply="org.zkoss.bind.BindComposer"
+        viewModel="@id('vm') @init('com.nzion.zkoss.composer.ReferralContractListViewModel')" >
+
+	<!--Initiated Referral Contract List hidden -->
+	<!--<panel>
+	 <caption label="Initiated Referral Contract List"/>
+	<panelchildren>
+
+	<vlayout spacing="20px">
+		<button label="New Referral Contract" sclass=".btn-group .btn:first-child" style="margin-top:20px;">
+			<attribute name="onClick">
+				Executions.createComponents("/referral/referralContract.zul", null,com.nzion.util.UtilMisc.toMap("entity",null));
+			</attribute>
+		</button>
+		<div style="overflow: auto;" height="250px">
+        		<listbox multiple="true" id="initiatedRefContractListBox" oddRowSclass="z-listbox-odd" tooltiptext="Double click to Edit"
+        		 	model="@bind(vm.initiatedReferralContractList)">
+        				<listhead sizable="true">
+                            <listheader label="Care Provider Name"/>
+                            <listheader label="First Name"/>
+        					<listheader label="Last Name"/>
+        					<listheader label="Contract Date"/>
+        					<listheader label="Expiry Date"/>
+        					<listheader label="Status"/>
+                            <listheader label="Afya Registered"/>
+                            <listheader label="Action"/>
+        				</listhead>
+        			<template name="model" var="iniRefCon">
+							<listitem value="@bind(iniRefCon)">
+							<attribute name="onDoubleClick">
+							if("IN-PROGRESS".equals(self.getValue().getContractStatus())){
+								Executions.createComponents("/referral/referralContract.zul", null,com.nzion.util.UtilMisc.toMap("entity",self.getValue()));
+							}else{
+								com.nzion.util.UtilMessagesAndPopups.showError("Once Submitted , You can not edit ");
+							}
+							</attribute>
+								<listcell label="@bind(iniRefCon.referral.clinicName)"/>
+								<listcell label="@bind(iniRefCon.referral.firstName)"/>
+								<listcell label="@bind(iniRefCon.referral.lastName)"/>
+								<listcell label="@bind(iniRefCon.contractDate) @converter('formatedDate', format='dd/MM/yyyy')"/>
+								<listcell label="@bind(iniRefCon.expiryDate) @converter('formatedDate', format='dd/MM/yyyy')"/>
+								<listcell label="@bind(iniRefCon.contractStatusNewLabel)"/>
+								<listcell label="@bind(iniRefCon.referral.afyaRegisteredYesNo)"/>
+								<listcell>
+								<button label="View">
+										<attribute name="onClick">
+											Executions.getCurrent().sendRedirect("/referral/referralContractPrint.zul?contractId=" +
+											self.getParent().getParent().getValue().getId(),"_blank");
+										</attribute>
+								</button>
+								</listcell>
+							</listitem>
+					</template>
+        		</listbox>
+        </div>
+	</vlayout>
+	</panelchildren>
+	</panel>-->
+
+	<panel>
+    	 <caption label="Received Referral Contract List"/>
+    <panelchildren>
+		<div style="margin-top:20px;overflow: auto;" height="250px">
+			<listbox multiple="true" id="requestedRefContractListBox" oddRowSclass="z-listbox-odd"
+		 		model="@bind(vm.requestedReferralContractList)">
+					<listhead sizable="true">
+                    <listheader label="Care Provider Name"/>
+                    <listheader label="First Name"/>
+					<listheader label="Last Name"/>
+					<listheader label="Contract Date"/>
+					<listheader label="Expiry Date"/>
+					<listheader label="Status"/>
+                    <listheader label="Afya Registered"/>
+                    <listheader label="Action"/>
+					</listhead>
+				<template name="model" var="reqRefCon">
+					<listitem value="@bind(reqRefCon)">
+						<listcell label="@bind(reqRefCon.referral.clinicName)"/>
+						<listcell label="@bind(reqRefCon.referral.firstName)"/>
+						<listcell label="@bind(reqRefCon.referral.lastName)"/>
+						<listcell label="@bind(reqRefCon.contractDate) @converter('formatedDate', format='dd/MM/yyyy')"/>
+						<listcell label="@bind(reqRefCon.expiryDate) @converter('formatedDate', format='dd/MM/yyyy')"/>
+
+                        <listcell label="@bind(reqRefCon.contractStatusNewLabel)"/>
+						<listcell label="@bind(reqRefCon.referral.afyaRegisteredYesNo)"/>
+						<listcell>
+							<button label="Accept">
+								<attribute name="onClick">
+									vm.approve(self.getParent().getParent().getValue());
+								</attribute>
+							</button>
+							<button label="Reject">
+								<attribute name="onClick">
+									vm.rejected(self.getParent().getParent().getValue());
+								</attribute>
+							</button>
+
+							<button label="View">
+								<attribute name="onClick">
+									Executions.getCurrent().sendRedirect("/referral/referralContractPrint.zul?contractId=" +
+                                    self.getParent().getParent().getValue().getId(),"_blank");
+
+                                  //  vm.view(self.getParent().getParent().getValue());
+								</attribute>
+							</button>
+
+						</listcell>
+					</listitem>
+				</template>
+			</listbox>
+			</div>
+	</panelchildren>
+	</panel>
+</window>
+</zk>

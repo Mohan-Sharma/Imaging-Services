@@ -1,0 +1,12 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./obrViewWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		setPageTitle("OBR", "");
+</zscript>
+	<window id="obrViewWindow">
+	<screen width="100%" listtitle="List of OBRs"  addmodepopup="false" hideaddbtn="true"
+	entityclass="com.nzion.domain.emr.lab.OBRSegment" fields="requisitionNumber,testId"  hidedeletebtn="true"/>
+	</window>
+</zk>

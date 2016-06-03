@@ -1,0 +1,109 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./plEdit"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	import com.nzion.service.common.CommonCrudService;
+	import com.nzion.domain.emr.soap.PatientIcd;
+	import com.nzion.zkoss.composer.ProblemListSectionComposer;
+	import com.nzion.util.Infrastructure;
+	
+	CommonCrudService commonCrudService = Infrastructure.getSpringBean("commonCrudService");
+	PatientIcd patientIcd=arg.get("patientIcd");
+	com.nzion.zkoss.composer.PatientSoapNoteController controller = desktop.getAttribute("controller");
+	com.nzion.domain.emr.soap.ProblemListSection problemListSection = controller.getSoapSection(com.nzion.domain.emr.soap.ProblemListSection.class);
+</zscript>
+<window title="Problem List" closable="true" id="plEdit"  width="35%" >
+	<div style="border:1px solid black" >
+		<div style="border:0px" >
+			<vlayout spacing="20px" sclass="inputform">
+			<div align="center">
+				<hlayout spacing="7px">
+					<radiogroup style="padding-left:100px;">
+						<radio label="Coded" checked="true"
+							onCheck="uncodedProblemListBox.clearErrorMessage();codedSection.setVisible(true);unCodedSection.setVisible(false)">
+						</radio>
+						<radio label="Uncoded"
+							onCheck='unCodedSection.setVisible(true);codedSection.setVisible(false);uncodedProblemListBox.setConstraint("no empty")'>
+							<attribute name="onCreate">
+					<![CDATA[
+						if (patientIcd != null && patientIcd.getId() != null
+								&& com.nzion.util.UtilValidator.isNotEmpty(patientIcd.getDescription())) {
+							self.setChecked(true);
+							Events.postEvent("onCheck", self, null);
+						}
+					 ]]>
+				</attribute>
+						</radio>
+					</radiogroup>
+				</hlayout>
+				</div>
+				<div class="container-fluid">
+		       <div zclass="row-fluid">
+                 <div zclass="span10" id="codedSection">
+					<label value="Coded Problem" mold="required" sclass="formLabel"/>
+					<icdlookup id="icdLookupTextValue"  sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" value="${patientIcd.icdElement.description}">
+						<attribute name="onChange">
+						com.nzion.domain.emr.IcdElement icd = (com.nzion.domain.emr.IcdElement) event.getOrigin().getData();
+						patientIcd.setIcdElement(icd);
+						</attribute>
+					</icdlookup>
+				</div>
+				</div>
+				 <div zclass="row-fluid">
+				  <div zclass="span2">
+					<label value="Onset Date" sclass="formLabel"/>
+					<datebox sclass="span12"
+						value="@{patientIcd.onSetDate,save-when='addBtn.onClick'}" />
+						</div>
+						</div>
+						 <div zclass="row-fluid">
+				  <div zclass="span2">
+					<label value="Severity" sclass="formLabel"/>
+					<enumeration sclass="span12" enumType="ILLNESS_SEVERITY"
+						selectedItem="@{patientIcd.severity,save-when='addBtn.onClick'}" />
+						</div>
+						</div>
+						 <div zclass="row-fluid">
+				 <div zclass="span2">
+					<label value="Status" mold="required" sclass="formLabel"/>
+					<enumeration sclass="span12" enumType="PROBLEM_STATUS_CODE"
+						selectedItem="@{patientIcd.status,save-when='addBtn.onClick'}"
+						constraint="no empty" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" >
+					</enumeration>
+					</div>
+					</div>
+					 <div zclass="row-fluid">
+				 <div zclass="span2">
+					<label value="Resolved Date:" visible="false" sclass="formLabel"/>
+					<datebox sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" id="resolvedDatebox" value="@{patientIcd.resolutionDate,save-when='addBtn.onClick'}"
+						visible="false" />
+				</div>
+				</div>
+				 <div zclass="row-fluid">
+				 <div zclass="span6" id="unCodedSection"  visible="false">
+					<label value="Uncoded Problem" mold="required" sclass="formLabel"/>
+					<textbox sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" id="uncodedProblemListBox" value="@{patientIcd.description,save-when='addBtn.onClick'}" cols="50"
+						rows="3" />
+				</div>
+				</div>
+				</div>
+				<div sclass="panelFoot">
+					<button label="Add" zclass="btn-success btn" id="addBtn" onClick='doClick();'/>
+				</div>
+			</vlayout>
+		</div>
+	</div>
+	<zscript>
+		void doClick(){
+			if(patientIcd.getId()==null){
+				patientIcd.setProblemListSection(problemListSection);
+				patientIcd.setPatient(controller.getPatient());
+				patientIcd.setSoapNote(controller.getSoapNote());
+			}
+			commonCrudService.save(patientIcd);
+			Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null);plEdit.detach();
+		}
+	</zscript>
+</window>
+</zk>

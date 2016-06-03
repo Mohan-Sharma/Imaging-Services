@@ -1,0 +1,241 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./questionsetupWin"?>
+<zk xmlns:w="http://www.zkoss.org/2005/zk/client">
+
+	<zscript>
+	import com.nzion.domain.emr.Question;
+	import com.nzion.domain.emr.SoapModule;
+	import com.nzion.domain.emr.QATemplate;
+	import com.nzion.domain.emr.OrganSystem;
+	import com.nzion.service.common.CommonCrudService;
+	import com.nzion.enums.AnswerType;
+	import com.nzion.domain.emr.Answer;
+	import com.nzion.zkoss.composer.QASetupComposer;
+	QASetupComposer qaSetupComposer = referencedQASetupComposer;
+	org.zkoss.zul.Listbox questionBox = questionsListbox;
+	boolean organQuestion = displayOrganSystems;
+	CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	Question question = qaSetupComposer.getSelectedQuestion();
+</zscript>
+
+	<style>.hideClass{ }</style>
+
+	<div sclass="posRel" style="border:0px" id="questionsetupWin">
+		<div sclass="slideHandle" id="slideHandle">
+			<attribute w:name="onClick">
+				var slideHandle = jQuery('#'+this.uuid);
+				slideHandle.parent().closest('.soapNoteContR').toggleClass('CCRCollapse');
+				slideHandle.toggleClass('SHCollapse');
+				slideHandle.parent().find('div.panelCont').toggleClass('hidePanelCont');
+				slideHandle.parent().find('div.panelFoot').toggleClass('hidePanelCont');
+				slideHandle.parent().find('button').toggleClass('hidePanelCont'); 
+				var obj = slideHandle.parent().parent().parent().parent().find('.z-listbox-header'); 
+				obj.css('width','auto');
+			</attribute>
+		</div>
+		<div style="display:block;" sclass="CCDet CCDetCur">
+			<div if="${not empty question}">
+				<div sclass="panelFoot" style="top:100px">
+					<button label="Save" id="saveBtn" zclass="btn btn-success">
+						<attribute name="onClick">
+	qaSetupComposer.saveQuestion();
+	Events.postEvent("onReload", questionBox, null);
+</attribute>
+					</button>
+				</div>
+				<div sclass="panelContInp">
+					<div style="width:98%">
+						<label sclass="leftTopName" >Question Name</label>
+						<textbox rows="2" cols="90" value="@{question.desc,save-when='saveBtn.onClick'}"></textbox>
+					</div>
+					<div>
+						<label sclass="leftTopName" >Gender</label>
+						<enumeration id="gender" enumType="QUESTION_GENDER" selectedItem="@{question.gender}"
+							value="Both" />
+					</div>
+				</div>
+				<div sclass="panelContInp">
+					<div style="width:98%">
+						<label value="Answer Type" sclass="leftTopName" ></label>
+						<div>
+							<radiogroup>
+								<radio label="Free Text" selected="true">
+									<attribute name="onCheck">
+	if (self.isChecked()) {
+		qaSetupComposer.setAnswerType(AnswerType.FREE_TEXT);
+		answerlistDiv.setVisible(false);
+		multipleAnswersDiv.setVisible(false);
+		yesNoAnswersDiv.setVisible(false);
+	}
+</attribute>
+									<attribute name="onCreate">
+									<![CDATA[
+	if (AnswerType.FREE_TEXT.equals(question.getAnswerType())) {
+		self.setSelected(true);
+		answerlistDiv.setVisible(false);
+		multipleAnswersDiv.setVisible(false);
+		yesNoAnswersDiv.setVisible(false);
+			qaSetupComposer.setAnswerType(AnswerType.FREE_TEXT);
+	}
+	]]>
+</attribute>
+								</radio>
+								<radio label="Single Choice" value="@{AnswerType.SINGLE_CHOICE}" id="singleChoice" visible="false">
+									<attribute name="onCheck">
+	if (self.isChecked()) {
+		qaSetupComposer.setAnswerType(AnswerType.SINGLE_CHOICE);
+		answerlistDiv.setVisible(true);
+		multipleAnswersDiv.setVisible(false);
+		yesNoAnswersDiv.setVisible(false);
+		Events.postEvent("onReload",answerlist, null);
+	}
+</attribute>
+									<attribute name="onCreate">
+	if (AnswerType.SINGLE_CHOICE.equals(question.getAnswerType())) {
+		self.setSelected(true);
+		answerlistDiv.setVisible(true);
+		multipleAnswersDiv.setVisible(false);
+		yesNoAnswersDiv.setVisible(false);
+		Events.postEvent("onReload",answerlist, null);
+	}
+</attribute>
+								</radio>
+								<radio label="Multiple Choice" value="@{AnswerType.MULTIPLE_CHOICE}"
+									id="multipleChoice" visible="false">
+									<attribute name="onCheck">
+	if (self.isChecked()) {
+		qaSetupComposer.setAnswerType(AnswerType.MULTIPLE_CHOICE);
+		answerlistDiv.setVisible(false);
+		multipleAnswersDiv.setVisible(true);
+		yesNoAnswersDiv.setVisible(false);
+		Events.postEvent("onReload", multipleAnswersList, null);
+	}
+</attribute>
+									<attribute name="onCreate">
+	if (AnswerType.MULTIPLE_CHOICE.equals(question.getAnswerType())) {
+		self.setSelected(true);
+		answerlistDiv.setVisible(false);
+		multipleAnswersDiv.setVisible(true);
+		yesNoAnswersDiv.setVisible(false);
+		Events.postEvent("onReload", multipleAnswersList, null);
+	}
+</attribute>
+								</radio>
+								<radio label="Yes/No" value="@{AnswerType.YES_NO}" visible="false">
+									<attribute name="onCheck">
+	if (self.isChecked()) {
+		qaSetupComposer.setAnswerType(AnswerType.YES_NO);
+		answerlistDiv.setVisible(false);
+		multipleAnswersDiv.setVisible(false);
+		yesNoAnswersDiv.setVisible(true);
+		Events.postEvent("onReload", yesNoAnswersList, null);
+	}
+</attribute>
+									<attribute name="onCreate">
+	if (AnswerType.YES_NO.equals(question.getAnswerType())) {
+		self.setSelected(true);
+		answerlistDiv.setVisible(false);
+		multipleAnswersDiv.setVisible(false);
+		yesNoAnswersDiv.setVisible(true);
+		Events.postEvent("onReload", yesNoAnswersList, null);
+	}
+</attribute>
+								</radio>
+							</radiogroup>
+						</div>
+					</div>
+					<div style="width:98%" id="answerlistDiv">
+						<span sclass="linkBtn linkBtnOn">
+							<a sclass="addBtn" id="addBtn" label="Add">
+								<attribute name="onClick">
+	if (question.getAnswers() == null) {
+		question.setAnswers(new HashSet());
+	}
+	question.addAnswer(new Answer());
+</attribute>
+							</a>
+							<span />
+						</span>
+						<listbox model="@{qaSetupComposer.answers,load-after='addBtn.onClick,singleChoice.onCheck'}"
+							id="answerlist">
+							<listhead>
+								<listheader label="Answer" width="33%"></listheader>
+								<listheader label="Sentence" width="52%"></listheader>
+								<listheader label="Action" width="15%"/>
+							</listhead>
+							<listitem self="@{each='singleChoice'}" value="@{singleChoice}">
+								<listcell>
+									<textbox value="@{singleChoice.name}"></textbox>
+								</listcell>
+								<listcell>
+									<textbox value="@{singleChoice.sentence}" cols="20"
+										rows="2">
+									</textbox>
+								</listcell>
+								<listcell>
+									<a class="delBtn" onClick="qaSetupComposer.removeAnswer((Listitem)self.getParent().getParent())">Delete</a>
+								</listcell>
+							</listitem>
+						</listbox>
+					</div>
+					<div id="multipleAnswersDiv" visible="false" style="width:98%">
+						<div sclass="panelCont">
+							<div width="97%">
+								<label value="Sentence" />
+								<textbox rows="2" cols="40" value="@{question.sentence,save-when='saveBtn.onClick'}"></textbox>
+							</div>
+						</div>
+						<span sclass="linkBtn linkBtnOn">
+							<a sclass="addBtn" id="multipleAddBtn" label="Add">
+								<attribute name="onClick">
+	if (question.getAnswers() == null) {
+		question.setAnswers(new HashSet());
+	}
+	question.addAnswer(new Answer());
+</attribute>
+							</a>
+							<span />
+						</span>
+						<listbox model="@{qaSetupComposer.answers,load-after='multipleAddBtn.onClick,self.onReload'}"
+							id="multipleAnswersList">
+							<listhead>
+								<listheader label="Answer"></listheader>
+								<listheader label="Sentence" width="52%"></listheader>
+								<listheader label="Action" width="15%"/>
+							</listhead>
+							<listitem self="@{each='multiChoice'}" value="@{multiChoice}">
+								<listcell>
+									<textbox value="@{multiChoice.name}"></textbox>
+								</listcell>
+								<listcell>
+									<textbox value="@{multiChoice.sentence}" cols="20"
+										rows="2"></textbox>
+								</listcell>
+								<listcell>
+									<a class="delBtn" onClick="qaSetupComposer.removeAnswer((Listitem)self.getParent().getParent())">Delete</a>
+								</listcell>
+							</listitem>
+						</listbox>
+					</div>
+
+					<div id="yesNoAnswersDiv" visible="false" style="width:98%">
+						<listbox model="@{qaSetupComposer.answers,load-after='self.onReload'}" id="yesNoAnswersList">
+							<listhead>
+								<listheader label="Answer"></listheader>
+							</listhead>
+							<listitem self="@{each='yesNoChoice'}"
+								value="@{yesNoChoice}">
+								<listcell>
+									<label value="@{yesNoChoice.name}" sclass="leftTopName" style="width:75px;"/>
+									<textbox rows="2" cols="40"
+										value="@{yesNoChoice.sentence,save-when='saveBtn.onClick'}">
+									</textbox>
+								</listcell>
+							</listitem>
+						</listbox>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</zk>

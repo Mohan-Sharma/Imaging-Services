@@ -1,0 +1,12 @@
+<?page title="Patient" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./contractListWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk>
+<zscript>
+	setPageTitle("Contract Price", "");
+</zscript>
+	<window id="contractListWindow" self="@{define(content)}">
+		<screen width="100%" listtitle="Contract List" addpage="addEditContractPrice" entityclass="com.nzion.domain.billing.Contract"  addmodepopup="true"
+			fields="name,contractType,effectivePeriod.fromDate,effectivePeriod.thruDate" labels="Name,Type,From Date,Thru Date" hideactivation="true" hidedeletebtn="true" />
+	</window>
+</zk>

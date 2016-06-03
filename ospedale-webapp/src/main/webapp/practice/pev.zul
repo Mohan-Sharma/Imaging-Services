@@ -1,0 +1,29 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" 	xmlns:w="http://www.zkoss.org/2005/zk/client">
+<window id="pndWindow">
+	<zscript>
+	import com.nzion.domain.base.FieldRestriction;
+	import com.nzion.domain.Patient;
+	com.nzion.service.common.CommonCrudService service = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	List restrictions = commonCrudRepository.findByEquality(FieldRestriction.class, new String[] { "entityName", "restrictionType"}, 
+					new Object[] {com.nzion.domain.Patient.class.getSimpleName(), FieldRestriction.RESTRICTION_TYPE.MANDATORY});
+	</zscript>
+	<panel title="Patient Entry Validations">
+		<panelchildren>
+			<listbox>
+				<listitem forEach="${restrictions}">
+					<listcell label="${each.displayName}" />
+					<listcell label="Mandatory" value="${each}">
+						<checkbox checked="${'true' eq each.value}" onCheck="self.getParent().getValue().setValue(String.valueOf(self.isChecked()));" />
+					</listcell>
+				</listitem>
+			</listbox>
+	</panelchildren>
+	</panel>
+	<separator></separator>
+	<div align="center">
+	<button label="Save" onClick="service.save(restrictions);com.nzion.util.UtilMessagesAndPopups.showSuccess();" />
+	</div>
+</window>
+</zk>

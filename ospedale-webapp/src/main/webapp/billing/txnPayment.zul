@@ -1,0 +1,50 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./txnPaymentWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+	xmlns:h="http://www.w3.org/1999/xhtml">
+	<zscript>
+	com.nzion.zkoss.composer.BillingController controller = (com.nzion.zkoss.composer.BillingController) arg.get("controller");
+	controller.setSelectedPaymentMethod(null);
+	controller.setReceivedAmount(null);		
+</zscript>
+	<window id="txnPaymentWindow" mode="modal" width="50%" closable="true" title="Bill Payment">
+		<div sclass="panelCont" height="40px">
+			<div>
+				<div>
+					<label value="Payment Mode" />
+					<label value="*" style="color:red" />
+				</div>
+				<enumeration enumType="PAYMENT_MODE" selectedItem="@{controller.selectedPaymentMethod,save-when='addButton.onClick'}"
+					constraint="no empty:Payment Mode Require"/>
+			</div>
+			<div>
+				<div>
+					<label value="Amount" />
+					<label value="*" style="color:red" />
+				</div>
+				<decimalbox value="@{controller.receivedAmount,save-when='addButton.onClick'}" constraint="no negative,no empty"/>
+			</div>
+		</div>
+		<div sclass="panelFoot">
+			<button id="addButton" label="Add" onClick="controller.addTxnPaymentItem()" />
+		</div>
+		<listbox model="@{controller.txnPayments,load-after='addButton.onClick'}">
+			<listhead>
+				<listheader label="Payment Mode" />
+				<listheader label="Amount" />
+				<listheader label="Action" />
+			</listhead>
+			<listitem self="@{each='mode'}" value="@{mode}">
+				<listcell label="@{mode.paymentMethod.description}" />
+				<listcell label="@{mode.amount.price}" />
+				<listcell>
+					<button label="Remove"
+						onClick="controller.getTxnItems().remove(self.getParent().getParent().getValue());self.getParent().getParent().detach()" />
+				</listcell>
+			</listitem>
+		</listbox>
+		<div sclass="panelFoot">
+			<button label="Print" onClick="controller.saveTxnPayment()"/>
+		</div>
+	</window>
+</zk>

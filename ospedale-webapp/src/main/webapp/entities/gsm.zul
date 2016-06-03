@@ -1,0 +1,139 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./gsmWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript><![CDATA[
+import com.nzion.zkoss.ext.EntityDropdownRenderer;
+import com.nzion.zkoss.ext.CombinedFieldsLabelFormatter;
+EntityDropdownRenderer drugStrengthDropdownRenderer = new EntityDropdownRenderer();
+]]></zscript>
+
+<window id="gsmWin">
+<style>
+.z-bandbox .z-bandbox-btn {
+	background-image:url("/ecosmos/zkau/web/a6408e3c/zul/img/button/combobtn.gif");
+}
+</style>
+	<zscript><![CDATA[
+	import com.nzion.domain.drug.*;
+	com.nzion.zkoss.ext.EntityDropdownRenderer dropdownRenderer = new com.nzion.zkoss.ext.EntityDropdownRenderer("description");
+	List drugs;
+	List selectedDrugs;
+	]]></zscript>
+	
+	<panel title="Advanced Search" id="panel">
+		<panelchildren>
+			<radiogroup  id="advancedSearchRadioBtn">
+				<div>
+					<radio label="Contraindications" style="padding:10px" id="contraindication" onCheck='selectDiv(contraindicationsDiv,contraIndicationSuggestBox);' selected="true"/>
+					<radio label="Indications" style="padding:10px" id="indication" onCheck='selectDiv(indicationsDiv,drugIndicationSuggestBox);'/>
+					<radio label="Interactions" style="padding:10px" id="interaction" onCheck='selectDiv(interactionsDiv,drugInteractionSuggestBox);'/>
+					<radio label="Classification" style="padding:10px" id="classification" onCheck='selectDiv(classificationDiv,drugClassificationSuggestBox);'/>
+					<radio label="Adverse Reactions" style="padding:10px" id="adverseReaction" onCheck='selectDiv(adversereactionsDiv,drugAdverseReactionSuggestBox);'/>
+				</div>
+			</radiogroup>
+			<space height="10px;"/>
+			<hbox>
+				<div id="contraindicationsDiv" visible="true" onSearchClick='drugs=drugService.getDrugsByContraindications(selectedObject);'>
+					<label value="Contraindications" width="200px;"/>
+					<suggest onLookedUp="lookupChanged(self.getValue(), DrugContraindication.class)" id="contraIndicationSuggestBox"
+					entity="com.nzion.domain.drug.DrugContraindication" searchcolumns="code" displaycolumns="code" requiredcolumn="code"/>
+				</div>
+				<div id="indicationsDiv" visible="false" onSearchClick='drugs=drugService.getDrugsByIndications(selectedObject);' >
+					<label value="Indications" width="50px;"/>
+					<suggest onLookedUp="lookupChanged(self.value, DrugIndication.class)" id="drugIndicationSuggestBox"
+					entity="com.nzion.domain.drug.DrugIndication" searchcolumns="code" displaycolumns="code" requiredcolumn="code"/>
+				</div>
+				<div id="interactionsDiv" visible="false" onSearchClick='drugs=drugService.getDrugsByOtherInteractions(selectedObject);' >
+					<label value="Interactions" width="50px;"/>
+					<suggest onLookedUp="lookupChanged(self.value, DrugDrugInteraction.class)" id="drugInteractionSuggestBox"
+					entity="com.nzion.domain.drug.DrugDrugInteraction" searchcolumns="code" displaycolumns="code" requiredcolumn="code"/>
+				</div>
+				<div id="classificationDiv" visible="false" onSearchClick='drugs=drugService.getDrugsByClassification(selectedObject);'>
+					<label value="Classification" width="50px;"/>
+					<suggest onLookedUp="lookupChanged(self.value, DrugClassification.class)" id="drugClassificationSuggestBox"
+					entity="com.nzion.domain.drug.DrugClassification" searchcolumns="code" displaycolumns="code" requiredcolumn="code"/>
+				</div>
+				<div id="adversereactionsDiv" visible="false" onSearchClick='drugs=drugService.getDrugsByAdverseReactions(selectedObject);'>
+					<label value="Adverse Reactions" width="50px;"/>
+					<suggest onLookedUp="lookupChanged(self.value, DrugAdverseReaction.class)" id="drugAdverseReactionSuggestBox"
+					entity="com.nzion.domain.drug.DrugAdverseReaction" searchcolumns="code" displaycolumns="code" requiredcolumn="code"/>
+				</div>
+				<div height="100%" style="vertical-align:baseline;">
+				<n:br/>
+				<button label="Search" onClick='Events.postEvent("onSearchClick",selectedDiv,null)' id="searchBtn"/>
+				</div>
+			</hbox>
+			<div sclass="panelHeadTop pagination">
+					<div sclass="fl">
+						<a href="#" label="List of Drugs" style="color:#333333;font:11px/13px normal Tahoma,Geneva,sans-serif;padding:5px 3px 4px 5px;border-width:1px 1px 0;" />
+					</div>
+					<div style="width:250px;float:right">
+						<paging detailed="true" id="paginal" pageSize="10" pageIncrement="1" />
+					</div>
+			</div>	
+		
+<listbox  width="100%" id="drugInformationGrid"
+model="@{drugs, load-after='searchBtn.onClick, self.onReloadRequest'}" mold="paging"  paginal="${paginal}">
+<listhead>
+	<listheader label="Trade Name"/>
+	<listheader label="Generic Name"/>
+	
+</listhead>
+	<listitem self="@{each='drug'}" value="@{drug}">
+		<attribute name="onDoubleClick">
+			Window w = Executions.createComponents("/entities/addDrug.zul",gsm,com.nzion.util.UtilMisc.toMap("entity", self.getValue()));
+			w.addForward("onDetach", drugInformationGrid, "onReloadRequest");
+		</attribute>
+	
+	<listcell>
+		<label value="@{drug.tradeName}" />
+	</listcell>
+	<listcell>
+		<label value="@{drug.genericName}" />
+	</listcell>
+	</listitem>
+</listbox>
+<!--<listbox multiple="true"  width="100%" id="drugDisplayGrid" model="@{selectedDrugs, load-after='drugInformationGrid.onSelect,self.onReloadRequest'}" visible="false">
+<listhead>
+	<listheader label="Drug Name"/>
+	<listheader label="Form"/>
+</listhead>
+<listitem self="@{each='selectedDrug'}" value="@{selectedDrug}">
+	<listcell>
+		<label value="@{selectedDrug.tradeName}" />
+	</listcell>
+	<listcell>
+		<label value="@{selectedDrug.dosageForm}" />
+	</listcell>
+</listitem>
+</listbox>
+		--></panelchildren>
+	</panel>
+		
+	<zscript>
+	Div selectedDiv = contraindicationsDiv;
+
+	Object selectedObject=null;
+	
+	void selectDiv(Div div,Component suggestionBox){
+		selectedDiv.setVisible(false);
+		div.setVisible(true);
+		selectedDiv = div;
+		selectedObject = drugs = selectedDrugs = null;
+		((com.nzion.view.component.AutoSuggestionBox)suggestionBox).setValue(null);
+		Events.postEvent("onReloadRequest",drugInformationGrid,null);
+//		Events.postEvent("onReloadRequest",drugDisplayGrid,null);
+	}
+	
+	void lookupChanged(String code, Class klass){
+		selectedObject = commonCrudService.getByUniqueValue(klass, "code", code);
+		if(selectedObject != null)
+			panel.setTitle(selectedObject == null ? "Advanced Search" : "Advanced Search / " + selectedObject.getDescription());
+	}
+	
+	//  onSelect="selectedDrugs=com.nzion.util.ViewUtil.getSelectedItems(self);drugDisplayGrid.setVisible(selectedDrugs.size() > 0);" 
+	</zscript>
+	</window>	
+</zk>

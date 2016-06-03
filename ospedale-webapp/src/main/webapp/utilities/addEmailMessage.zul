@@ -1,0 +1,58 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./createEmailMsg"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import java.util.regex.Pattern;
+	import com.nzion.service.common.CommonCrudService;
+	import com.nzion.util.Infrastructure;
+	import com.nzion.domain.EmailMessageContent;
+	import com.nzion.enums.EmailContentType;
+	EmailMessageContent emailMsg = arg.get("entity");
+	if (emailMsg == null)
+		emailMsg = new EmailMessageContent();
+	String windowTitle = emailMsg.getId() != null?"Edit":"Create";
+	EmailContentType[] contentTypes = EmailContentType.values();
+]]>
+	</zscript>
+
+	<window id="createEmailMsg" title="${windowTitle} Messages" mode="modal" width="60%" position="center,top"
+		closable="true" height="40%">
+		<style>
+			table .z-label { font: 11px normal Tahoma, Geneva, sans-serif; vertical-align: middle; color: #333;
+			padding:0 0 4px; font-weight:bold; }
+		</style>
+			<div sclass="panelCont" height="130px">
+				<div sclass="col2">
+					<div>
+					<label value="Content Type"/>
+					<label value="*" style="color:red"/>
+					</div>
+					<combobox model="@{contentTypes}" selectedItem="@{emailMsg.contentType,save-when='saveButton.onClick'}" constraint="no empty:Content Type Required">
+						<comboitem self="@{each='contentType'}" label="@{contentType}" value="@{contentType}"/>
+					</combobox>
+				</div>
+				<div width="80%">
+				<div>
+				<label value="Message Body" />
+				<label value="*" style="color:red"/>
+				</div>
+				<textbox cols="100" rows="5" value="@{emailMsg.messageBody,save-when='saveButton.onClick'}" height="60px" constraint="no empty:Message Body Required"/>
+				</div>
+			</div>
+		<div sclass="panelFoot">
+			<button label="Save" id="saveButton">
+				<attribute name="onClick">
+					CommonCrudService commonCrudService = Infrastructure.getSpringBean("commonCrudService");
+					try{
+					commonCrudService.save(emailMsg);
+					com.nzion.util.UtilMessagesAndPopups.showSuccess();
+					createEmailMsg.detach();
+					}catch(Exception e){
+					com.nzion.util.ViewUtil.disPlayUniqueErrorMessage(e,"Message already defined for Content Type '"+emailMsg.getContentType().toString()+"'.");
+					}
+				</attribute>
+			</button>
+			<button label="Cancel" onClick='createEmailMsg.detach()'/>
+		</div>
+	</window>
+</zk>

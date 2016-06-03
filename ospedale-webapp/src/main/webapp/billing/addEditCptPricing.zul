@@ -1,0 +1,67 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./cptPriceWindow"?>
+<?component name="cptlookup" macro-uri="/utilities/cptlookup.zul" inline="false"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<zscript><![CDATA[
+     com.nzion.domain.billing.CptPrice cptPrice = arg.get("entity"); 
+     com.nzion.domain.billing.Contract contract = arg.get("contract");    
+     
+     List cptPList = arg.get("cptPList");
+ 	com.nzion.service.common.CommonCrudService service = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+     if(cptPrice == null){
+ 		 com.nzion.domain.screen.BillingDisplayConfig billingDisplayConfig = service.getByPractice(com.nzion.domain.screen.BillingDisplayConfig.class);
+    	 cptPrice = new com.nzion.domain.billing.CptPrice();
+    	 cptPrice.getPrice().setCurrency(billingDisplayConfig.getCurrency());
+    	 cptPrice.getAllowedPrice().setCurrency(billingDisplayConfig.getCurrency());
+    	 cptPrice.getStandardPrice().setCurrency(billingDisplayConfig.getCurrency());
+     }
+	]]></zscript>
+<window id="cptPriceWindow" mode="modal" closable="true" title="Procedures Price" width="70%"  position="center" >
+			<panel>
+				<panelchildren>
+					<div style="width:65%;margin:auto;">
+					<vlayout spacing="20px" sclass="inputform">
+						<hlayout spacing="10px">
+							<label value="Procedures" sclass="formLabel"/>
+							<cptlookup onChange="cptPrice.setCpt((com.nzion.domain.emr.Cpt)event.getOrigin().getData())" cpt="${cptPrice.cpt}" id="cptlookupbox"/>
+						</hlayout>
+						<hlayout spacing="10px">
+							<label value="Actual Price" mold="required" sclass="formLabel"/> 
+							<hbox>
+							<decimalbox value="@{cptPrice.price.amount}" constraint="no empty" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+							<label value="@{cptPrice.price.currency.code}"/>
+							</hbox>
+						</hlayout>
+						<hlayout spacing="10px">
+							<label value="Allowed Price" sclass="formLabel"/> 
+							<hbox>
+							<decimalbox value="@{cptPrice.allowedPrice.amount}"/>
+							<label value="@{cptPrice.allowedPrice.currency.code}"/>
+							</hbox>
+						</hlayout>
+					</vlayout>
+					</div>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot">					
+			<button label="Save" id="Save" zclass="btn-success btn">
+				<attribute name="onClick">
+				   
+					if(cptPrice.getCpt() == null){
+						com.nzion.util.UtilMessagesAndPopups.showError("Add Procedures");
+						return;
+					}
+					 cptPrice.setContract(contract);
+					if(contract.getId()!=null){	
+					 commonCrudService.save(cptPrice);
+					}
+					if(cptPList != null)
+						cptPList.add(cptPrice);
+					com.nzion.util.UtilMessagesAndPopups.showSuccess();
+					cptPriceWindow.detach();	
+				</attribute>
+			</button>
+			<button  label="Cancel" id="Cancel" forward="onClick=onCancel"/>
+		</div>
+</window>
+</zk>

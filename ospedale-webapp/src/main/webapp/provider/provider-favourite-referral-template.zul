@@ -1,0 +1,30 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./favouriteReferralTemplateWindow"?>
+<zk>
+	<zscript>
+	<![CDATA[
+	import com.nzion.domain.emr.ReferalLetterTemplate;
+	List referralTemplates = commonCrudService.getAll(ReferalLetterTemplate.class);
+	ReferalLetterTemplate referalLetterTemplate;
+	com.nzion.zkoss.composer.PersonProfileController profileController = desktop.getAttribute("profileController");
+	com.nzion.domain.Provider provider =  commonCrudService.getById(com.nzion.domain.Provider.class,((com.nzion.domain.Provider)profileController.getPerson()).getId());
+]]>
+	</zscript>
+	<window id="favouriteReferralTemplateWindow">
+		<div sclass="panelFoot">
+			<button label="Save" onClick="commonCrudService.save(provider);com.nzion.util.UtilMessagesAndPopups.showSuccess();"/>
+		</div>
+		<panel title="Referral Template">
+			<panelchildren>
+				<listbox model="@{referralTemplates}" checkmark="true" selectedItem="@{provider.referalLetterTemplate}">
+					<listhead>
+						<listheader label="Template Name" />
+					</listhead>
+					<listitem self="@{each='template'}">
+						<listcell label="@{template.templateName}" />
+					</listitem>
+				</listbox>
+			</panelchildren>
+		</panel>
+	</window>
+</zk>

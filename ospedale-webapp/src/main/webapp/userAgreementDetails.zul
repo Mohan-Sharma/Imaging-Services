@@ -1,0 +1,52 @@
+<?page title="Nzion - Health Care" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./userAgreementDetails"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+	Long practiceId = new Long(param.get("practiceId")[0]);
+	com.nzion.domain.Practice practice = commonCrudService.getById(com.nzion.domain.Practice.class,practiceId);
+	com.nzion.domain.PracticeUserAgreement agreement = practiceService.getTermsAndConditionsForPractice(practice);
+</zscript>
+<div sclass="wrapper" id="userAgreementDetails">
+	<zscript>
+	</zscript>
+	<div sclass="top">
+		<n:div class="logoCont">
+			<n:a href="/" class="logo" title="HMIS"></n:a>
+		</n:div>
+		<div sclass="loggedIn">
+		</div>
+	</div>
+	<div sclass="pgTtl" style="background:white;">
+		<n:h2 class="practices fl">
+			<span>
+				<label id="pagetitle" style="font-size:14px;color:#008872;line-height:30px;font-weight:bold" />
+			</span>
+		</n:h2>
+	</div>
+	<space/>
+	<div sclass="tabs clr" self="@{define(menuContent)}">
+		<tabbox id="mainTabBox">
+			<tabs zclass="e-tabs">
+			</tabs>
+		</tabbox>
+	</div>
+	<div sclass="pgTtl">
+		<label value="Terms And Conditions" style="font-size: 14px; color: rgb(0, 136, 114); line-height: 30px; font-weight: bold;margin-left:30px;"/>
+	</div>
+	<div sclass="mid" style="margin-left:20px;margin-right:20px;background:white;" height="520px">
+		<div self="@{insert(content)}" align="center">
+		<textbox rows="45" cols="10" width="1000px;" value="@{agreement.termsAndConditions}" readonly="true" height="400px" style="overflow:auto;"/>
+		</div>
+		
+	</div>
+	<div sclass="footer">
+		<div sclass="cBox">
+			<div sclass="copyrights">Copyrights EasyHMIS. All rights reserved.</div>
+			<div sclass="fr" />
+		</div>
+	</div>
+	</div>
+</zk>

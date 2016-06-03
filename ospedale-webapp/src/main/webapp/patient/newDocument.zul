@@ -1,0 +1,73 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./newDocument"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+
+	<zscript>
+	import com.nzion.zkoss.composer.FileBasedFolderComposer;;
+	import com.nzion.domain.File;
+	FileBasedFolderComposer folderComposer = (FileBasedFolderComposer) arg.get("folderComposer");
+	Listbox fileListbox = arg.get("fileListbox");
+	File document = new File();
+	
+</zscript>
+	<window  closable="true" mode="modal" id="newDocument" width="50%">
+	<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                  <h:small>New Document</h:small>
+                  <button type="button" zclass="close" onClick="newDocument.detach();">×</button>
+            </h:h1>
+         </div>
+			<div class="container-fluid">
+		       <div zclass="row-fluid">
+                 <div zclass="span5">
+						<label value="File Name:" mold="required"/>
+						<textbox readonly="true" value="@{document.fileName,load-after='uploadBtn.onUpload',save-when='createButton.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"  constraint="no empty:Title Required" />
+						</div>
+						</div>
+						 <div zclass="row-fluid">
+						 <div zclass="span2">
+						<fileupload label="Browse" id="uploadBtn">
+							<attribute name="onUpload">
+								org.zkoss.util.media.Media media = ((UploadEvent) event).getMedia();
+								document.setFileType(media.getContentType());
+								if (media.isBinary()){
+									document.setInputStream(media.getStreamData());
+								}else{
+									document.setInputStream(new java.io.ByteArrayInputStream(media.getStringData().getBytes("UTF-8")));
+								}
+								document.setFileName(media.getName());
+							</attribute>
+						</fileupload>
+						</div>
+						</div>
+						
+				   <div zclass="row-fluid">
+					  <div zclass="span2">
+						<label value="Document Type" mold="required"/>
+						<combobox selectedItem="@{document.documentType,save-when='createButton.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty">
+							<comboitem label="Lab Results" value="LAB_RESULTS" />
+							<comboitem label="Referrals" value="REFERRALS"/>
+							<comboitem label="Others" value="OTHERS"/>
+						</combobox>
+						</div>
+						</div>
+						 <div zclass="row-fluid">
+						 <div zclass="span5">
+						<label value="Description:" />
+						<textbox rows="2" cols="50" value="@{document.description,save-when='createButton.onClick'}" sclass="span12" />
+						</div>
+						</div>
+						</div>
+						
+					<div sclass="panelFoot">
+						<button id="createButton" label="Create" zclass="btn-success btn" >
+						<attribute name="onClick">
+						folderComposer.createDocument(document);
+						newDocument.detach();
+						</attribute>
+						</button>
+						<button label="Cancel" onClick="newDocument.detach();"/>
+					</div>
+	</window>
+</zk>

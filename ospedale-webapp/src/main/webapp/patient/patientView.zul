@@ -1,0 +1,644 @@
+<?page id = "patientViewPage"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientView"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?xel-method prefix="enum" name="getEnum"
+        class="com.nzion.util.EnumerationUtil"
+        signature="BindingListModel getEnum(java.lang.String)"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+
+    <?xel-method prefix="enum" name="getEnum"
+            class="com.nzion.util.EnumerationUtil"
+            signature="BindingListModel getEnum(java.lang.String)"?>
+
+    <zscript><![CDATA[
+	import com.nzion.service.common.*;
+	import com.nzion.domain.Enumeration;
+	import com.nzion.util.UtilValidator;
+	import com.nzion.domain.Patient;
+	import com.nzion.zkoss.ext.Navigation;
+	import com.nzion.enums.CommunicationPreference;
+	import com.nzion.util.RestServiceConsumer;
+	com.nzion.service.UserLoginService userLoginService = com.nzion.util.Infrastructure.getSpringBean("userLoginService");
+	com.nzion.service.PatientService patientService = com.nzion.util.Infrastructure.getSpringBean("patientService");
+	com.nzion.zkoss.composer.emr.StateRenderer stateRenderer = new com.nzion.zkoss.composer.emr.StateRenderer();
+	Patient patient = Executions.getCurrent().getArg().get("entity");
+	com.nzion.zkoss.composer.PatientViewComposer viewComposer = new com.nzion.zkoss.composer.PatientViewComposer();
+	viewComposer.setId(patient.getId());
+	com.nzion.zkoss.ext.EntityDropdownRenderer entityDropdownRenderer = new com.nzion.zkoss.ext.EntityDropdownRenderer("classDescription");
+	setPageTitle("Account No", patient.getAccountNumber());
+	CommunicationPreference[]  commPrefList = CommunicationPreference.values();
+	boolean checkForUserLoginEligibility(){
+	com.nzion.service.UserLoginService userLoginService = com.nzion.util.Infrastructure.getSpringBean("userLoginService");
+	return !userLoginService.hasPatientHavingUserLogin(patient) && UtilValidator.isNotEmpty(patient.getContacts().getEmail());
+	viewComposer.setEventMessage("patient record updated");
+	}
+	boolean isPatientInsurance = "INSURANCE".equals(patient.getPatientType()) ? true : false;
+	boolean isPatientCoporate = "CORPORATE".equals(patient.getPatientType()) ? true : false;
+	boolean hasCivilId = true;
+	boolean hasPassport = false;
+	if("PASSPORT".equals(patient.getSelectionType())) {
+	     hasCivilId = false;
+         hasPassport = true;
+	}
+	List allCities = RestServiceConsumer.getAllCities();
+	List allNationality = RestServiceConsumer.getAllNationality();
+]]>
+    </zscript>
+    <window id="patientView" apply="${viewComposer}" style="margin-top:0px;" width="99%">
+        <zscript><![CDATA[
+			boolean b = patient.getDateOfDeath() == null ? true : false;
+		]]></zscript>
+        <div style="overflow:hidden;">
+            <div sclass="mid" width="99%">
+                <h:table border="0" cellspacing="0" cellpadding="0" width="99%" class="showpayCost">
+                    <h:tr>
+                        <h:td class="ws_top_left">
+                            <html><![CDATA[&nbsp;]]></html>
+                        </h:td>
+                        <h:td class="ws_top_x">
+                            <html><![CDATA[&nbsp;]]></html>
+                        </h:td>
+                        <h:td class="ws_top_right">
+                            <html><![CDATA[&nbsp;]]></html>
+                        </h:td>
+                    </h:tr>
+                    <h:tr>
+                        <h:td class="ws_left_y">
+                            <space />
+                        </h:td>
+                        <h:td valign="top" class="ws_middle" style="padding-left: 10px;">
+                            <h:table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <h:tr>
+                                    <h:td>
+
+                                        <span class="label">Account # :</span>
+										<span sclass="value">
+											<label
+                                                    value="@{viewComposer.patient.accountNumber,save-when='updatePatient.onClick'}">
+                                            </label>
+										</span>
+                                        <span class="div">|</span>
+                                        <span class="label">Name:</span>
+										<span sclass="value">
+											<name object="@{viewComposer.patient}" />
+										</span>
+
+                                    </h:td>
+                                </h:tr>
+                            </h:table>
+                        </h:td>
+                        <h:td class="ws_right_y"><![CDATA[]]></h:td>
+                    </h:tr>
+                    <h:tr>
+                        <h:td class="ws_bottom_left">
+                            <html><![CDATA[&nbsp;]]></html>
+                        </h:td>
+                        <h:td class="ws_bottom_x">
+                            <html><![CDATA[&nbsp;]]></html>
+                        </h:td>
+                        <h:td class="ws_bottom_right">
+                            <html><![CDATA[&nbsp;]]></html>
+                        </h:td>
+                    </h:tr>
+                </h:table>
+                <tabbox>
+                    <tabs>
+                        <tab label="Personal Details"></tab>
+                        <!-- <tab label="Family Members">
+                            <attribute name="onClick">
+                    <![CDATA[
+    Map args = new HashMap();
+    args.put("patientId", viewComposer.getPatient().getId());
+    args.put("displayArea", patientFamilyMemberArea);
+    args.put("editable", false);
+    args.put("patient", viewComposer.getPatient());
+    patientFamilyMemberArea.getChildren().clear();
+    Component comp = Executions.getCurrent().createComponents(
+            "/patient/patient-family-member-list.zul", patientFamilyMemberArea,
+            args);
+]]>
+                </attribute>
+                        </tab> -->
+                        <tab label="Documents" id="documents">
+                            <attribute name="onClick">
+                                <![CDATA[
+	Map args = new HashMap();
+	args.put("patient", patient);
+	args.put("displayArea", docsArea);
+	args.put("editable", false);
+	docsArea.getChildren().clear();
+	Executions.getCurrent().createComponents("/patient/documents.zul",
+			docsArea, args);
+]]>
+                            </attribute>
+                        </tab>
+                        <tab label="Other Details">
+                            <attribute name="onClick">
+
+                                otherDetailArea.getChildren().clear();
+                                Executions.createComponents("/patient/patientOtherDetail.zul",
+                                otherDetailArea, com.nzion.util.UtilMisc
+                                .toMap("patient", patient));
+                            </attribute>
+                        </tab>
+
+                        <tab label="Insurance" if="${isPatientInsurance}">
+                            <attribute name="onClick">
+                                patientInsuranceTabpanel.getChildren().clear();
+                                Executions.createComponents("/patient/patientInsuranceList.zul",patientInsuranceTabpanel, com.nzion.util.UtilMisc
+                                .toMap("patient", patient));
+                            </attribute>
+                        </tab>
+
+                        <tab label="Corporate" if="${isPatientCoporate}">
+                            <attribute name="onClick">
+                                patientCorporateTabpanel.getChildren().clear();
+                                Executions.createComponents("/patient/patientCorporateList.zul",patientCorporateTabpanel, com.nzion.util.UtilMisc
+                                .toMap("patient", patient));
+                            </attribute>
+                        </tab>
+
+                    </tabs>
+
+                    <tabpanels width="100%">
+                        <tabpanel>
+                            <!--<div sclass="panelFoot">
+                                <button id="updatePatientTop" zclass="btn-success btn" label="Save" forward='updatePatient.onClick'/>
+                            </div>-->
+                            <div class="container-fluid">
+                                <div zclass="row-fluid">
+                                    <div zclass="span2" style="margin-left:500px;">
+                                        <vbox>
+                                            <h:div align="center" style="margin:4px">
+                                                <image id="frontImage" width="150px" height="120px" hover="@{viewComposer.patient,converter='com.nzion.view.component.GenderImageConverter'}"/>
+                                                <button label="Upload Picture" upload="true">
+                                                    <attribute name="onUpload">
+                                                        org.zkoss.util.media.Media media = event.getMedia();
+                                                        if (media instanceof org.zkoss.image.Image) {
+                                                        org.zkoss.zul.Image image = new org.zkoss.zul.Image();
+                                                        image.setContent((org.zkoss.image.Image) media);
+                                                        frontImage.setContent((org.zkoss.image.Image) media);
+                                                        com.nzion.domain.DataResource fsrc = new com.nzion.domain.DataResource();
+                                                        fsrc.setResource(org.hibernate.Hibernate.createBlob(media.getByteData()));
+                                                        viewComposer.getPatient().setProfilePicture(fsrc);
+                                                        } else {
+                                                        Messagebox.show("Not an image: " + media, "Error", Messagebox.OK,
+                                                        Messagebox.ERROR);
+                                                        break; //not to show too many errors
+                                                        }
+                                                    </attribute>
+                                                </button>
+                                            </h:div>
+                                        </vbox>
+                                        <a sclass="delBtn" label="Remove Your Picture" id="newBtn">
+                                            <attribute name="onClick">
+                                                frontImage.setSrc(null);
+                                                frontImage.invalidate();
+                                                viewComposer.getPatient().setProfilePicture(null);
+                                            </attribute>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div zclass="row-fluid">
+                                <!--    <div zclass="span3">
+                                        <label value="Civil ID" style="text-align:right;" id="lblCivilId" />
+                                        <textbox value="@{viewComposer.patient.civilId}" id="civilId" width="200px;" readonly="true"/>
+                                    </div>
+                                    <div zclass="span4" style="margin-left: 0px;">
+                                        <label value="Afya ID" id="lblAfyaId"/>
+                                        <textbox value="@{viewComposer.patient.afyaId,save-when='updatePatient.onClick'}" id="afyaId" width="300px" readonly="true"/>
+                                    </div>   -->
+
+                                <div zclass="span2">
+                                     <separator></separator><separator></separator><separator></separator>
+                                     <combobox sclass="span12" id="selectionType" readonly="true"
+                                          selectedItem="@{viewComposer.patient.selectionType,save-when='updatePatient.onClick',load-after='civilId.onChange'}" >
+                                            <comboitem label="Civil Id" value="CIVIL_ID"  id="civilIdComboBox"/>
+                                            <comboitem label="Passport / Visa" value="PASSPORT" />
+                                            <attribute name="onChange">
+                                                if("PASSPORT".equals(self.getSelectedItem().getValue())){
+                                                civilDiv.setVisible(false);
+                                                passVisaDiv.setVisible(true);
+                                                expiryDateDiv.setVisible(true);
+                                                }
+                                                if("CIVIL_ID".equals(self.getSelectedItem().getValue())){
+                                                civilDiv.setVisible(true);
+                                                passVisaDiv.setVisible(false);
+                                                expiryDateDiv.setVisible(false);
+                                                }
+                                            </attribute>
+                                     </combobox>
+                                </div>
+                                <div id="civilDiv" zclass="span2" visible="${hasCivilId}">
+                                     <label value="Civil Id" id="lblCivilId" />
+                                     <textbox id="civilId" value="@{viewComposer.patient.civilId,save-when='updatePatient.onClick'}" sclass="span12" constraint="/^(\s*|[0-9]{12,12})$/ : Required 12 digits">
+                                        <attribute name="onChange">
+                                        <![CDATA[
+                                            String civilId = self.getValue();
+                                            com.nzion.dto.CivilUserDto civilDto =  com.nzion.util.RestServiceConsumer.fetchUserByCivilId(civilId);
+                                            civilDto.setPropertiesToPatient(viewComposer.getPatient());
+                                            List genders = gender.getItems();
+                                            for(Comboitem item : genders){
+                                            Enumeration enumeration = item.getValue();
+                                            if(enumeration.getDescription().equals(civilDto.getGender())) {
+                                               viewComposer.getPatient().setGender(enumeration);
+                                            }
+                                            }
+                                         ]]>
+                                        </attribute>
+                                     </textbox>
+                                </div>
+                                <div id="passVisaDiv" zclass="span2" visible="${hasPassport}">
+                                     <label value="Passport / Visa" id="lblpassportId" />
+                                     <textbox value="@{viewComposer.patient.passport,save-when='updatePatient.onClick',load-after='civilId.onChange'}" sclass="span12" id="passport" maxlength="50"/>
+                                </div>
+                                <div id="expiryDateDiv" zclass="span2"  visible="${hasPassport}">
+                                     <label value="Expiry Date" id="lblexpiryDate"/>
+                                     <datebox value="@{viewComposer.patient.expiryDate,save-when='updatePatient.onClick',load-after='civilId.onChange'}" sclass="span12" id="expiryDate"/>
+                                </div>
+                                 <div zclass="span2">
+                                     <label value="Afya ID" id="lblAfyaId"/>
+                                     <textbox value="@{viewComposer.patient.afyaId,save-when='updatePatient.onClick', load-after='updatePatient.onClick'}"
+                                            id="afyaId" readonly="true" maxlength="50" sclass="span12"/>
+                                 </div>
+
+                                </div>
+                                <div zclass="row-fluid">
+                                    <div zclass="span2">
+                                        <label value="Title"  />
+                                        <combobox sclass="span12"
+                                                  selectedItem="@{viewComposer.patient.salutation,save-when='updatePatient.onClick',load-after='civilId.onChange'}" readonly="true">
+                                            <attribute name="onCreate">
+                                                <![CDATA[
+                                                    populateGenderBySalutation(self.getValue());
+                                                ]]>
+                                            </attribute>
+                                            <attribute name="onBlur">
+                                                <![CDATA[
+                                                    populateGenderBySalutation(self.getValue());
+                                                ]]>
+                                            </attribute>
+                                            <comboitem label="Ms" value="Ms" />
+                                            <comboitem label="Miss" value="Miss" />
+                                            <comboitem label="Mr" value="Mr" />
+                                            <comboitem label="Mrs" value="Mrs" />
+                                            <comboitem label="Dr" value="Dr" />
+                                            <comboitem label="Sr" value="Sr" />
+                                            <comboitem label="Sra" value="Sra" />
+                                        </combobox>
+                                    </div>
+                                    <zscript>
+                                        void populateGenderBySalutation(String value){
+                                             if(value.equals("Mr") || value.equals("Sr"))
+                                                gender.setValue("Male");
+                                             if(value.equals("Ms") || value.equals("Miss") || value.equals("Mrs") || value.equals("Sra"))
+                                                 gender.setValue("Female");
+                                             if(value.equals("Dr"))
+                                                 gender.setValue(" ");
+                                        }
+                                    </zscript>
+                                    <div zclass="span2">
+                                        <label value="First Name"
+                                               id="lblfirstName" mold="required" />
+                                        <textbox
+                                                value="@{viewComposer.patient.firstName,save-when='updatePatient.onClick',load-after='civilId.onChange'}" id="firstName" maxlength="50"
+                                                constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" onChange="com.nzion.util.UtilDisplay.validateOnlyAlphabetsAndWhiteSpaces(self)" />
+                                    </div>
+                                    <div zclass="span2">
+                                        <label value="Middle Name" id="lbllastName"  />
+                                        <textbox
+                                                value="@{viewComposer.patient.middleName,save-when='updatePatient.onClick',load-after='civilId.onChange'}" id="middleName" maxlength="50"
+                                                sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" onChange="if(UtilValidator.isNotEmpty(self.getValue()))com.nzion.util.UtilDisplay.validateOnlyAlphabetsAndWhiteSpaces(self)" />
+                                    </div>
+                                    <div zclass="span2">
+                                        <label value="Last Name"
+                                               id="lblThirdName" mold="required" />
+                                        <textbox
+                                                value="@{viewComposer.patient.lastName,save-when='updatePatient.onClick',load-after='civilId.onChange'}" id="lastName" maxlength="50"
+                                                constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" onChange="com.nzion.util.UtilDisplay.validateOnlyAlphabetsAndWhiteSpaces(self)" />
+                                    </div>
+                               <!--     <div zclass="span2">
+                                        <label value="Fourth Name" id="lblFourthName"  />
+                                        <textbox
+                                                value="@{viewComposer.patient.endMostName,save-when='updatePatient.onClick'}" id="endMosttName" maxlength="50"
+                                                sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" onChange="if(UtilValidator.isNotEmpty(self.getValue()))com.nzion.util.UtilDisplay.validateOnlyAlphabetsAndWhiteSpaces(self)" />
+                                    </div>  -->
+                                     <div zclass="span2">
+                                        <label value="File Num"/>
+                                        <textbox value="@{viewComposer.patient.fileNo,save-when='updatePatient.onClick',load-after='civilId.onChange'}" sclass="span12" />
+                                     </div>
+                                </div>
+                                <div zclass="row-fluid">
+                                     <div zclass="span2">
+                                        <label value="Nationality" id="lblnationality" />
+                                        <combobox sclass="span12" id="nationality" selectedItem="@{viewComposer.patient.nationality,save-when='updatePatient.onClick', load-after='civilId.onChange'}"
+                                                 w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" readonly="true" >
+                                           <attribute name="onCreate">
+                                               if(viewComposer.patient.nationality == null){
+                                                 self.setValue("Kuwaiti");
+                                               }
+                                           </attribute>
+                                           <comboitem forEach="${allNationality}" value="${each.nationality}" label="${each.nationality}"></comboitem>
+                                        </combobox>
+                                    </div>
+                                    <div zclass="span2">
+                                        <label value="Gender" id="lblgender" mold="required"/>
+                                        <enumeration id="gender" enumType="GENDER"  sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+                                                     constraint="no empty" selectedItem="@{viewComposer.patient.gender,save-when='updatePatient.onClick',load-after='civilId.onChange'}" />
+                                    </div>
+                                    <div zclass="span2">
+                                        <label value="Marital Status" />
+                                        <enumeration id="maritalstatus" enumType="MARITAL_STATUS" sclass="span12"
+                                                     selectedItem="@{viewComposer.patient.maritalStatus,save-when='updatePatient.onClick',load-after='civilId.onChange'}" />
+                                    </div>
+                                    <div zclass="span2">
+                                        <label value="Date Of Birth"  mold="required" id="lbldob" />
+                                        <datebox sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+                                                 value="@{viewComposer.patient.dateOfBirth,save-when='updatePatient.onClick',load-after='civilId.onChange'}" id="dob"
+                                                 constraint="no empty,no future">
+                                            <attribute name="onBlur">
+                                                if (dob.getValue() != null) {
+                                                String ageValue = com.nzion.util.UtilDateTime.calculateAge(dob.getValue(),viewComposer.getPatient().getDateOfDeath() != null ? viewComposer.getPatient().getDateOfDeath() : null);
+                                                age.setValue(ageValue);
+                                                }
+                                            </attribute>
+                                        </datebox>
+                                    </div>
+                                    <div zclass="span2">
+                                        <label value="Age" />
+                                        <label  value="@{viewComposer.patient.age,load-after='updatePatient.onClick',load-after='civilId.onChange'}" id="age" sclass="span12" />
+                                    </div>
+
+                                    <!-- <div zclass="span2">
+                                     <label value="Exclude In Report?" />
+                                       <checkbox sclass="span12"  label="No" checked="@{viewComposer.patient.exempted}">
+                                           <attribute name="onCreate">
+                                             if (viewComposer.getPatient().getExempted())
+                                              self.setLabel("Yes");
+                                           </attribute>
+                                           <attribute name="onCheck">
+                                                 if (self.isChecked()) {
+                                                 self.setLabel("Yes");
+                                                 exemptedReasonSection.setVisible(true);
+                                                 exemptedReasonComboBox.setConstraint("no empty:Exclude Reason Required");
+                                                     } else {
+                                                   self.setLabel("No");
+                                                   exemptedReasonSection.setVisible(false);
+                                                      }
+
+                                               </attribute>
+                                       </checkbox>
+                                   </div> -->
+                                 <!--   <div zclass="span2">
+                                        <hbox  style="margin-top:20px">
+                                            <label value="Send SMS" />
+                                            <checkbox checked="@{viewComposer.patient.sendSms,oad-after='updatePatient.onClick'}" />
+                                        </hbox>
+                                    </div>  -->
+
+
+
+                                </div>
+                           <!--     <div zclass="row-fluid">
+                                    <div zclass="span2">
+                                        <label value="Patient Type"/>
+                                        <radiogroup sclass="span12" width="300px" selectedItem="@{viewComposer.patient.patientType,save-when='updatePatient.onClick'}">
+                                            <radio label="CASH PAYING" value="CASH PAYING"/>
+                                            <radio label="INSURANCE" style="margin-left: 20px;" value="INSURANCE"/>
+                                            <radio label="CORPORATE" style="margin-left: 20px;" value="CORPORATE"/>
+                                        </radiogroup>
+                                    </div>
+                                </div>  -->
+                                <div zclass="row-fluid">
+
+                              <!--      <div zclass="span2">
+                                        <label value="Religion" id="lblreligion" />
+                                        <enumeration id="religion" enumType="RELIGION" readonly="true" sclass="span12"
+                                                     selectedItem="@{viewComposer.patient.religion,save-when='updatePatient.onClick'}" />
+                                    </div>  -->
+
+                                </div>
+                                <!--<div zclass="row-fluid">
+                                    <div zclass="span2">
+                                        <label value="Occupation" id="lbloccupation" />
+                                        <enumeration enumType="OCCUPATION" sclass="span12"
+                                                     selectedItem="@{viewComposer.patient.occupation,save-when='updatePatient.onClick'}" />
+                                    </div>
+                                    <div zclass="span2">
+                                        <label value="Employment Status" />
+                                        <combobox id="empStatus" model="${enum:getEnum('EMPLOYMENT_STATUS')}" sclass="span12"
+                                                  readonly="true" selectedItem="@{viewComposer.patient.employeeStatus,save-when='updatePatient.onClick'}" />
+                                    </div>
+                                    <div zclass="span2">
+                                        <label value="Preferred Language" />
+                                        <combobox id="preferredLanguage" model="${enum:getEnum('LANGUAGE')}" sclass="span12"
+                                                  readonly="true" selectedItem="@{viewComposer.patient.language,save-when='updatePatient.onClick'}" />
+                                    </div>
+                                </div>-->
+
+                                <div zclass="row-fluid">
+                                    <div zclass="span2">
+                                        <label value="Email" />
+                                        <email id="emailBox"
+                                               value="@{viewComposer.patient.contacts.email,save-when='updatePatient.onClick',load-after='civilId.onChange'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" >
+                                            <attribute name="onChange">
+
+                                                if(UtilValidator.isEmpty(emailBox.getValue())){
+                                                communicationPreferenceCombobox.setDisabled(true);
+                                                viewComposer.getPatient().setRemainderPreference(null);
+                                                }
+                                                else{
+                                                communicationPreferenceCombobox.setDisabled(false);
+                                                viewComposer.getPatient().setRemainderPreference(CommunicationPreference.PATIENT_PORTAL);
+                                                }
+                                                Events.postEvent("onReload",communicationPreferenceCombobox,null);
+                                            </attribute>
+                                        </email>
+                                    </div>
+                                    <div zclass="span2" visible="false">
+                                        <label value="Communication Preference" />
+                                        <combobox  model="@{commPrefList,load-after='self.onReload'}" id="communicationPreferenceCombobox" sclass="span12"
+                                                   selectedItem="@{viewComposer.patient.remainderPreference,save-when='updatePatient.onClick'}" readonly="true">
+                                            <comboitem self="@{each='preference'}" label="@{preference}" value="@{preference}"/>
+                                            <attribute name="onSelect">
+                                                <![CDATA[
+													emailBox.clearErrorMessage();
+													if("Mail".equalsIgnoreCase(self.getSelectedItem().getValue().toString()) && UtilValidator.isEmpty(emailBox.getValue()))
+														throw new WrongValueException(emailBox,"Email Required");
+													if("SMS".equalsIgnoreCase(self.getSelectedItem().getValue().toString() )){
+														mobPhone.setConstraint("no empty:Mobile phone Is mandatory");
+														return;
+													}
+												]]>
+                                            </attribute>
+                                            <attribute name="onCreate">
+                                                self.setDisabled(viewComposer.getPatient().getRemainderPreference()==null?true:false);
+                                            </attribute>
+                                        </combobox>
+                                    </div>
+
+                                    <div zclass="span2">
+                                        <label value="Mobile phone" mold="required" />
+                                        <hbox>
+                                        <textbox sclass="span12" constraint="no empty" value="@{viewComposer.patient.contacts.isdCode,save-when='updatePatient.onClick',load-after='civilId.onChange'}" style="height: 23px;width: 50px;" />
+                                        <textbox maxlength="8" style="margin-left:0px;" sclass="span12" id="mobPhone" constraint="no empty" value="@{viewComposer.patient.contacts.mobileNumber,save-when='updatePatient.onClick',load-after='civilId.onChange'}" />
+                                        </hbox>
+                                    </div>
+                                    <div zclass="span2">
+                                        <label value="Home phone" />
+                                        <phonebox
+                                                value="@{viewComposer.patient.contacts.homePhone,save-when='updatePatient.onClick',load-after='civilId.onChange'}"  sclass="span12" />
+                                    </div>
+                            <!--    </div>
+                                <div zclass="row-fluid">   -->
+                                    <div zclass="span2">
+                                        <label value="Office phone" />
+                                        <phonebox sclass="span12"
+                                                  value="@{viewComposer.patient.contacts.officePhone,save-when='updatePatient.onClick',load-after='civilId.onChange'}" />
+                                    </div>
+                                    <div zclass="span2">
+                                        <label value="Preferred Language" />
+                                    <!--    <combobox id="preferredLanguage" model="${enum:getEnum('LANGUAGE')}" sclass="span12"
+                                                  readonly="true" selectedItem="@{viewComposer.patient.language,save-when='updatePatient.onClick'}" />  -->
+                                            <enumeration id="preferredLanguage" enumType="LANGUAGE" selectedItem="@{viewComposer.patient.language,save-when='updatePatient.onClick'}" sclass="span12" />
+                                    </div>
+
+
+                                 <!--   <div zclass="span2">
+                                        <label value="Fax number" />
+                                        <phonebox sclass="span12"
+                                                  value="@{viewComposer.patient.contacts.faxNumber,save-when='updatePatient.onClick'}" />
+                                    </div> -->
+
+                                </div>
+
+
+
+                                <div zclass="row-fluid">
+                                    <div zclass="span3">
+                                        <label value="Address1"  id="lbladdress1"/>
+                                        <textbox maxlength="50" rows="2" cols="50" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+                                                 value="@{viewComposer.patient.contacts.postalAddress.address1,save-when='updatePatient.onClick',load-after='civilId.onChange'}"
+                                                 id="address1" />
+                                    </div>
+                                    <div zclass="span3">
+                                        <label value="Address2"  id="lbladdress2" />
+                                        <textbox maxlength="50" rows="2" cols="50" sclass="span12"
+                                                 value="@{viewComposer.patient.contacts.postalAddress.address2,save-when='updatePatient.onClick',load-after='civilId.onChange'}"
+                                                 id="address2" />
+                                    </div>
+                                     <div zclass="span2">
+                                            <label value="City" id="lblcity" />
+                                          <!--  <textbox value="@{viewComposer.patient.contacts.postalAddress.city,save-when='updatePatient.onClick'}" id="city" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+                                                    maxlength="50" onChange="com.nzion.util.UtilDisplay.validateNonDigits(self)"  />  -->
+
+                                            <combobox sclass="span12" id="city" selectedItem="@{viewComposer.patient.contacts.postalAddress.city,save-when='updatePatient.onClick', load-after='civilId.onChange'}"
+                                                      w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+                                                <attribute name="onBlur">
+                                                    <![CDATA[
+                                                        populateStateCountry(self.getValue());
+                                                    ]]>
+                                                </attribute>
+                                               <comboitem forEach="${allCities}" value="${each.city}" label="${each.city}"></comboitem>
+                                            </combobox>
+                                     </div>
+                                     <div zclass="span2">
+                                            <label value="Postal code"  id="lblpostalCode" />
+                                            <zipcodebox sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+                                                  value="@{viewComposer.patient.contacts.postalAddress.postalCode,save-when='updatePatient.onClick',load-after='civilId.onChange'}"  id="postalCode" />
+                                     </div>
+                                </div>
+                                <div zclass="row-fluid">
+
+                                    <div zclass="span2">
+                                        <label value="Governorate"  id="lblstate" />
+                                     <!--   <enumeration id="state" enumType="STATE" itemRenderer="${stateRenderer}"
+                                                     value="@{viewComposer.patient.contacts.postalAddress.stateProvinceGeo,save-when='updatePatient.onClick'}"
+                                                     sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+                                                />  -->
+                                         <textbox  value="@{viewComposer.patient.contacts.postalAddress.stateProvinceGeo,save-when='updatePatient.onClick',load-after='civilId.onChange'}" id="state" sclass="span12" readonly="true"/>
+                                    </div>
+                                    <div zclass="span2">
+                                        <label value="Country" id="lblCountry"/>
+                                        <textbox value="@{viewComposer.patient.contacts.postalAddress.countryGeo,save-when='updatePatient.onClick',load-after='civilId.onChange'}" id="country" sclass="span12" readonly="true" />
+                                    </div>
+
+                                    <div zclass="span2">
+                                        <label value="Patient Type" mold="required"/>
+                                        <combobox sclass="span12"  selectedItem="@{viewComposer.patient.patientType,save-when='updatePatient.onClick', load-after='civilId.onChange'}" id="patientType" readonly="true"
+                                           constraint="no empty" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" >
+                                            <comboitem label="CASH PAYING" value="CASH PAYING" id="cashComboItem"/>
+                                           <!-- <comboitem label="INSURANCE" style="margin-left: 20px;" value="INSURANCE"/>
+                                            <comboitem label="CORPORATE" style="margin-left: 20px;" value="CORPORATE"/>-->
+                                        <!--    <attribute name="onCreate">
+                                            alert(viewComposer.getPatient().getPatientType());
+                                            </attribute>  -->
+                                        </combobox>
+                                    </div>
+
+                                    <div zclass="span2">
+                                        <label value="Notification Required" mold="required"/>
+                                        <combobox sclass="span12" readonly="true" id="patientNotification"
+                                                  selectedItem="@{viewComposer.patient.notificationRequired,save-when='updatePatient.onClick',load-after='civilId.onChange'}"
+                                                  w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+                                            <comboitem label="YES" value="YES"/>
+                                            <comboitem label="NO" value="NO"/>
+                                        </combobox>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <zscript>
+                                void populateStateCountry(String city){
+                                if(city != null){
+                                Map stateCountry = RestServiceConsumer.getStateCountryBasedOnCity(city);
+                                if(!stateCountry.isEmpty()){
+                                if(stateCountry.get("country") != null)
+                                country.setValue((String)stateCountry.get("country"));
+                                if(stateCountry.get("state") != null)
+                                state.setValue((String)stateCountry.get("state"));
+                                }
+                                }
+                                }
+
+                            </zscript>
+
+                            <div sclass="panelFoot">
+                                <button id="updatePatient" label="Save" zclass="btn-success btn">
+                                    <attribute name="onClick">
+                                        <![CDATA[
+                                            if(patientType.getSelectedItem() == null) {
+                                                patientType.setSelectedItem(cashComboItem);
+                                            }
+                                            if(selectionType.getSelectedItem() == null){
+                                                selectionType.setSelectedItem(civilIdComboBox);
+                                            }
+
+                                           if("PASSPORT".equals(selectionType.getSelectedItem().getValue()))
+											    viewComposer.getPatient().setCivilId("");
+									    	else if("CIVIL_ID".equals(selectionType.getSelectedItem().getValue())){
+										      viewComposer.getPatient().setPassport("");
+										     viewComposer.getPatient().setExpiryDate(null);
+									    	}
+                                            viewComposer.updatePatient(event);
+                                        ]]>
+
+                                    </attribute>
+                                </button>
+                            </div>
+                            <separator height="32px" />
+                        </tabpanel>
+                        <!--<tabpanel id="notesArea" width="100%" />
+                        -->
+                        <tabpanel id="docsArea" width="100%" />
+                        <tabpanel id="otherDetailArea" />
+                        <tabpanel id="patientInsuranceTabpanel" if="${isPatientInsurance}"/>
+                        <tabpanel id="patientCorporateTabpanel" if="${isPatientCoporate}"/>
+                    </tabpanels>
+                </tabbox>
+            </div>
+        </div>
+    </window>
+</zk>

@@ -1,0 +1,10 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		setPageTitle("Drug Dosage", "");
+	</zscript>
+	<window>
+		<screen width="100%" pagetitle="Drug Dosage" listtitle="List of Drug Dosages" addpage="addDrugStrength" entityclass="com.nzion.domain.emr.drug.DrugStrength" hidedeletebtn="true"
+			fields="strength,unit,description" labels="Strength,Unit,Description" addmodepopup="true" />
+	</window>
+</zk>

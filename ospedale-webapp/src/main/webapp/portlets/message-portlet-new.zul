@@ -1,0 +1,100 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./messagePortletNew"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	import com.nzion.domain.messaging.*;
+	import com.nzion.view.RolesValueObject;
+	Message message = new Message();
+	RolesValueObject rolesVo = new RolesValueObject(message.getAuthorization());
+	</zscript>
+	<style>
+	.datebox{
+	 width:100px;
+	}
+	</style>
+<window id="messagePortletNew">
+<div sclass="panelTop">
+	<radiogroup>
+		<radio label="Messages" checked="true" onCheck='fromDate.setVisible(false);thruDate.setVisible(false);message.setTask(false)'/>
+		<radio label="Tasks" onCheck='fromDate.setVisible(true);thruDate.setVisible(true);message.setTask(true)'/>
+	</radiogroup>
+	<checkbox checked="@{message.urgent}" label="Mark As Urgent"/>
+</div>
+	<div style="margin:10px">
+	<h:table cellspacing="50px;">
+	<h:tr>
+		<h:td style="margin:5px;"> <label value="To Group"/></h:td>
+		<h:td>
+		<div >
+		<hbox>
+			<checkbox label=" Admin" checked="@{rolesVo.admin}" />
+			<!-- <checkbox label=" Office Manager" checked="@{rolesVo.officeManager}" /> -->
+			<checkbox label=" Doctor" checked="@{rolesVo.provider}" />
+			<!-- <checkbox label=" Medical Assistant" checked="@{rolesVo.medicalAssistant}" /> -->
+			<checkbox label=" Nurse" checked="@{rolesVo.nurse}" />
+			<checkbox label=" Technician" checked="@{rolesVo.technician}" />
+			<!-- <checkbox label=" Billing" checked="@{rolesVo.billing}" /> -->
+			<checkbox label=" Reception" checked="@{rolesVo.reception}" />
+			<checkbox label=" OMS" checked="@{rolesVo.orderManagement}" />
+			<checkbox label=" House Keeping" checked="@{rolesVo.houseKeeping}" />
+			<!-- <checkbox label=" Case Manager"	checked="@{rolesVo.caseManager}" />
+			<checkbox label=" Patient" checked="@{rolesVo.patient}" /> -->
+		</hbox>				
+		</div>
+		</h:td>
+	</h:tr>
+	<h:tr>
+		<h:td>To Person</h:td>
+		<h:td>
+		<hbox style="width:50%;margin:5px;">
+		<textbox id="textBoxToPerson" readonly="true"/> 
+		<span id="lookUpBtn" sclass="linkBtn linkBtnOn">
+				<a sclass="lookupBtn">
+					<attribute name="onClick">
+						Executions.createComponents("/portlets/message-portlet-person-lookup.zul",null,com.nzion.util.UtilMisc.toMap("textBoxMessage",textBoxToPerson,"message",message));
+					</attribute>
+					Lookup
+				</a><span/></span>
+			</hbox>	
+		</h:td>
+	</h:tr>
+	
+	<h:tr>
+		<h:td>Message</h:td>
+		<h:td><textbox id="textBoxMessage" rows="4" cols="100" value="@{message.messageText}" style="margin:5px;"/> </h:td>
+	</h:tr>
+	<h:tr id="fromDate" visible="false">	
+		<h:td>From Date</h:td>
+		<h:td><div width="100px"><datebox value="@{message.fromDate}" style="margin:5px;"/></div></h:td>
+	</h:tr>
+	<separator/>
+	<h:tr id="thruDate" visible="false">	
+		<h:td>Thru Date</h:td>
+		<h:td><div width="100px"><datebox value="@{message.thruDate}" style="margin:5px;"/></div></h:td>
+	</h:tr>
+	<separator/>
+	<h:tr>
+		<h:td>
+			<space/>
+		</h:td>
+		<h:td>
+			<div style="margin-left:5px">
+				<button label="Send">
+					<attribute name="onClick">
+						message.setSentOn(com.nzion.util.UtilDateTime.nowDate());
+			    		message.setSentBy(com.nzion.util.Infrastructure.getUserLogin().getPerson());
+						commonCrudService.save(message);
+						message = new Message();
+						com.nzion.util.UtilMessagesAndPopups.showSuccess();
+						Events.postEvent("onMaximize",messagePortletNew.getParent().getParent().getParent(),null);
+					</attribute>
+				</button>
+				</div>
+		</h:td>
+	</h:tr>
+	</h:table>
+	</div>
+	</window>	
+</zk>

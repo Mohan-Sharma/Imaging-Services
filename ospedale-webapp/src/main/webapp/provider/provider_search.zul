@@ -1,0 +1,133 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./providerSearch"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		String searchColumn = "firstName";
+		List providerList = null;
+		Textbox providerLookupTxt = arg.get("providerLookupTxt");
+	</zscript>
+	<window id="providerSearch" width="50%" title="Provider Lookup ( Double Click to Select )" closable="true" mode="modal" >
+		<style>
+			td .z-label{
+				font-weight:normal;
+			}
+		</style>
+		<div zclass="container-fluid">
+				<div zclass="row-fluid">
+					<div zclass="span6">
+						<label value="Look For:"></label>
+						<textbox cols="50" id="searchText" sclass="span12" />
+					</div>
+					<div zclass="span6">
+						<label value="Search In:" />
+						<combobox sclass="span12" id="searchFields"	onSelect="searchColumn=(String)self.getSelectedItem().getValue();" selectedItem="@{searchColumn}">
+							<comboitem value="firstName" label="First Name" />
+							<comboitem value="lastName" label="Last Name" />
+							<comboitem value="accountNumber" label="Provider Code" />
+							<comboitem value="contacts.officePhone" label="Office phone" />
+							<comboitem value="contacts.homePhone" label="Home phone" />
+							<comboitem value="contacts.mobileNumber" label="Mobile Number" />
+							<comboitem value="contacts.email" label="Email" />
+							<comboitem value="specialities" label="Specialities" />
+						</combobox>
+					</div>
+				</div>
+				<div  align="center">
+				<button label="Search" zclass="btn btn-primary" id="searchBtn" onClick="providerList = providerService.searchProvider(searchColumn, searchText.getValue());"/>
+			</div>
+			<grid model="@{providerList, load-after='searchBtn.onClick'}" width="100%" id="providersListbox">
+				<rows>
+					<row self="@{each='provider'}" value="@{provider}" height="60px">
+					<attribute name="onDoubleClick">
+						com.nzion.domain.Provider p = self.getValue();
+						providerLookupTxt.setValue(com.nzion.util.ViewUtil.getFormattedName(p));
+						Events.postEvent("onChange", providerLookupTxt, p);
+						providerSearch.detach();
+					</attribute>
+					<hbox height="60px">
+						<image width="60px" height="60px" hover="@{provider,converter='com.nzion.view.component.GenderImageConverter'}" />
+							<h:table width="100%" border="5px">
+								<h:tr>
+									<h:td width="30%S">
+										<h:table>
+											<h:tr>
+												<h:td>
+													<name object="@{provider}" />
+												</h:td>
+											</h:tr>
+											<h:tr>
+												<h:td width="100px">
+													<label value="@{provider.gender}" />
+												</h:td>
+											</h:tr>
+											<h:tr>
+												<h:td>
+													<label value="NPI:"/>
+													<label value="@{provider.detail.npiNumber}" />
+												</h:td>
+											</h:tr>
+											<h:tr>	
+												<h:td>
+													<label value="DEA Number:" />
+													<label value="@{provider.detail.deaNumber}" />
+												</h:td>
+											</h:tr>
+										</h:table>
+									</h:td>
+									<h:td  width="30%">
+										<label value="@{provider.contacts.postalAddress}" />
+									</h:td>
+									<h:td align="right" width="20%">
+										<h:table width="100%">
+											<h:tr>
+												<h:td>
+													<image src="../images/email.png" width="10px" height="10px"></image>
+													<space />
+												</h:td>
+												<h:td>
+													<label value="@{provider.contacts.email}" />
+												</h:td>
+											</h:tr>
+											<h:tr>
+												<h:td>
+													<image src="../images/mobile.png" width="10px" height="10px">
+													</image>
+													<space />
+												</h:td>
+												<h:td>
+													<label value="@{provider.contacts.mobileNumber}" />
+												</h:td>
+											</h:tr>
+											<h:tr>
+												<h:td>
+													<image src="../images/contact.png" width="10px" height="10px">
+													</image>
+													<space />
+												</h:td>
+												<h:td>
+													<label value="@{provider.contacts.officePhone}" />
+												</h:td>
+											</h:tr>
+										</h:table>
+									</h:td>
+									<h:td width="20%">
+										<label value="Specialities" style="font-weight:bold"/>
+										<grid model="@{provider.specialities}">
+											<rows>
+												<row self="@{each='speciality'}">
+													<label value="@{speciality.description}"></label>
+												</row>
+											</rows>
+										</grid>
+									</h:td>
+								</h:tr>
+							</h:table>
+						</hbox>
+					</row>
+				</rows>
+			</grid>
+		</div>
+	</window>
+</zk>

@@ -1,0 +1,64 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./personDrugWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?component name="toolbar" macro-uri="/toolbar.zul"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window  id="personDrugWin">
+	<zscript>
+	com.nzion.zkoss.composer.PersonProfileController profileController = desktop.getAttribute("profileController");
+	List personDrugs = profileController.getPersonFavourites(com.nzion.domain.person.PersonDrug.class);
+	</zscript>
+	<div sclass="panelTop">
+		<button label="Save" onClick="profileController.saveFavourites(personDrugs)"/>
+	</div>
+	<panel title="Person Favourite Drugs" id="drugPanel" 
+	onAddClick='profileController.favouriteAddClicked(personDrugWin,personFavouriteDrugDisplayGrid,personDrugs,"/person/add-person-drug.zul")'
+	onDeleteClick="profileController.deleteFavourites(personFavouriteDrugDisplayGrid,personDrugs);">
+		<attribute name="onSearchClick">
+			personDrugs=personService.searchPersonFavouriteDrugs((String)event.getData(),person);		
+		</attribute>
+		<panelchildren>
+		<toolbar listenercomponent="${drugPanel}" hidecancel="true"/>
+				<listbox multiple="true" id="personFavouriteDrugDisplayGrid" checkmark="true" mold="paging" pageSize="10" pagingPosition="top"
+ 					model="@{personDrugs,load-after='drugPanel.onSearchClick, self.onReloadRequest'}">
+				<listhead>
+					<listheader label="Drug Name"/>
+					<listheader label="Dosage"/>
+					<listheader label="Qty"/>
+					<listheader label="Qty Qualifier"/>
+					<listheader label="Form"/>
+					<listheader label="Route"/>
+					<listheader label="Direction"/>
+					<listheader label="Special Instructions"/>
+				</listhead>
+					<listitem self="@{each='personDrug'}" value="@{personDrug}" >
+					<listcell>
+						<label value="@{personDrug.drug.tradeName}" />
+					</listcell>
+					<listcell>
+						<label value="@{personDrug.strength}" width="100px"/>			
+					</listcell>
+					<listcell>
+						<label value="@{personDrug.quantity.description}" width="100px"/>			
+					</listcell>
+					<listcell>
+						<label value="@{personDrug.quantityQualifier.description}" width="100px"/>			
+					</listcell>
+					<listcell>
+						<label value="@{personDrug.drugDosageForm.description}"  width="100px"/>			
+					</listcell>
+					<listcell>
+						<label value="@{personDrug.drugDosageRoute}"  width="100px"/>			
+					</listcell>
+					<listcell>
+						<label value="@{personDrug.drugDirection.description}"  width="100px"/>			
+					</listcell>
+					<listcell>
+						<label value="@{personDrug.specialInstruction}"  />
+					</listcell>
+					</listitem>
+				</listbox>
+			</panelchildren>
+		</panel>
+</window>
+</zk>

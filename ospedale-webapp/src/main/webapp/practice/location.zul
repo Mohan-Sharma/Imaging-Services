@@ -1,0 +1,134 @@
+<?page title="Location Management" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./LocationMangt"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?xel-method prefix="enum" name="getEnum"
+        class="com.nzion.util.EnumerationUtil"
+        signature="BindingListModel getEnum(java.lang.String)"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+    <zscript>
+        import com.nzion.domain.Enumeration;
+        import com.nzion.domain.Location;
+        Location location = arg.get("entity");
+        location = location == null ? new Location() : location;
+
+        com.nzion.zkoss.composer.emr.StateRenderer stateRenderer = new com.nzion.zkoss.composer.emr.StateRenderer();
+
+        //setPageTitle("Locations", " / " + (location == null ? "New" : location.getLocationCode()));
+        setPageTitle("Locations", "");
+    </zscript>
+
+    <window width="70%" id="LocationMangt" mode="modal" closable="true">
+        <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Location</h:small>
+                <button type="button" zclass="close" onClick="LocationMangt.detach();">×</button>
+            </h:h1>
+
+        </div>
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span2">
+                    <label value="Location Code"/>
+                    <textbox value="@{location.locationCode,save-when='Save.onClick'}" sclass="span12"
+                             onBlur="if(com.nzion.util.UtilValidator.isNotEmpty(self.getValue())) com.nzion.util.UtilDisplay.validateOnlyAlphaNumericAndWhiteSpaces(self);"/>
+                </div>
+                <div zclass="span5">
+                    <label value="Name" mold="required"></label>
+                    <textbox cols="40" value="@{location.name,save-when='Save.onClick'}"
+                             constraint="no empty" maxlength="255" sclass="span12"
+                             w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+                    </textbox>
+                </div>
+                <div zclass="span2">
+                    <label value="Location Type"/>
+                    <enumeration enumType="LOCATION_TYPE"
+                                 selectedItem="@{location.locationType,save-when='Save.onClick'}"/>
+                </div>
+
+            </div>
+
+            <div zclass="row-fluid">
+                <div zclass="span2">
+                    <label value="Pharmacy Number" mold="required"/>
+                    <phonebox value="@{location.pharmacyContactNumber,save-when='Save.onClick'}"
+                              constraint="no empty" sclass="span12"
+                              w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Office phone" mold="required"/>
+                    <phonebox value="@{location.contacts.officePhone,save-when='Save.onClick'}"
+                              constraint="no empty" sclass="span12"
+                              w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                </div>
+                
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span2">
+                    <label value="Fax" mold="required"/>
+                    <phonebox id="faxNumber" value="@{location.contacts.faxNumber,save-when='Save.onClick'}"
+                              constraint="no empty" sclass="span12"
+                              w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                </div>
+                <div zclass="span4">
+                    <label value="e-mail"/>
+                    <email value="@{location.contacts.email,save-when='Save.onClick'}" sclass="span12"
+                           w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span4">
+                    <label value="Address1" id="lbladdress1" mold="required"/>
+                    <textbox value="@{location.contacts.postalAddress.address1,save-when='Save.onClick'}"
+                             id="address1" constraint="no empty" maxlength="50" sclass="span12"
+                             w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+
+                </div>
+                <div zclass="span3">
+                    <label value="Address2" id="lbladdress2"/>
+                    <textbox value="@{location.contacts.postalAddress.address2,save-when='Save.onClick'}"
+                             id="address2" sclass="span12"/>
+
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span2">
+                    <label value="City" id="lblcity" mold="required"/>
+                    <textbox value="@{location.contacts.postalAddress.city,save-when='Save.onClick'}" id="city"
+                             sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+                             constraint="no empty" maxlength="50"
+                             onBlur="com.nzion.util.UtilDisplay.validateNonDigits(self)"/>
+
+                </div>
+                <div zclass="span2">
+                    <label value="Postal code" id="lblpostalCode" mold="required"/>
+                    <zipcodebox value="@{location.contacts.postalAddress.postalCode,save-when='Save.onClick'}"
+                                sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+                                id="postalCode" onBlur="com.nzion.util.UtilDisplay.validateFiveDigits(self)"
+                                constraint="no empty"/>
+                </div>
+                <div zclass="span2">
+                    <label value="State" id="lblstate" mold="required"/>
+                    <enumeration id="state" enumType="STATE" itemRenderer="${stateRenderer}"
+                                 value="@{location.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick'}"
+                                 sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+                                 constraint="no empty"/>
+                </div>
+            </div>
+            <div style="margin-top:5px" sclass="panelFoot">
+                <button label="Save" id="Save" visible="true" zclass="btn-success btn">
+                    <attribute name="onClick">
+                        try{
+                        commonCrudService.save(location);
+                        }catch(org.springframework.dao.DataIntegrityViolationException e){
+                        throw new RuntimeException("Location code " + location.getLocationCode() + " already exists.",
+                        e);
+                        }
+                        LocationMangt.detach();
+                    </attribute>
+                </button>
+                <button label="Close" onClick='LocationMangt.detach()' sclass="btn"></button>
+            </div>
+        </div>
+    </window>
+</zk>

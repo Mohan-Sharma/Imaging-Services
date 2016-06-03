@@ -1,0 +1,228 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./labCollectionReportWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	
+	<zscript>
+		<![CDATA[
+		import com.nzion.service.common.CommonCrudService;
+		import com.nzion.util.Infrastructure;
+		import com.nzion.domain.Referral;
+		import com.nzion.domain.Provider;
+
+		import com.nzion.util.UtilValidator;
+        com.nzion.zkoss.composer.emr.BillingSearchController billingSearchController = new com.nzion.zkoss.composer.emr.BillingSearchController(); 
+		com.nzion.service.billing.BillingService billingService=com.nzion.util.Infrastructure.getSpringBean("billingService");
+		
+		com.nzion.zkoss.composer.emr.CollectionReportController collectionReportController=new com.nzion.zkoss.composer.emr.CollectionReportController();
+		com.nzion.service.common.CommonCrudService commonCrudService = Infrastructure.getSpringBean("commonCrudService");
+		
+		List collectionList;
+		
+		Map invoiceItemsGroup;
+		List listMap;
+		
+		List chargeTypeList= new ArrayList();
+		chargeTypeList.add(com.nzion.domain.billing.AcctgTransTypeEnum.OPD);
+		chargeTypeList.add(com.nzion.domain.billing.AcctgTransTypeEnum.IPD);
+		Object labChargeType=null;
+		
+		List doctors= commonCrudService.getAll(com.nzion.domain.Provider.class);
+		List referrals = commonCrudService.getAll(com.nzion.domain.Referral.class);
+		Object doctor=null;
+		Object referral=null;
+		
+		List labCollectionList;
+		]]>
+		</zscript>
+	
+
+<window id="labCollectionReportWindow" apply="${billingSearchController}">
+<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Lab Report</h:small>
+            </h:h1>
+         </div>
+   <div style="margin-left:10px;">     
+   <div class="container-fluid" >
+       <div zclass="row-fluid">
+       
+       <div zclass="span2">
+				<label value="From Date"  />
+				<datebox id="fromDate"   value="@{billingSearchController.billingSearchVO.fromDate}" sclass="span12"/>
+		</div>
+		<div zclass="span2" style="margin-left:80px;">
+				<label value="To Date"  />
+				<datebox id="thruDate" value="@{billingSearchController.billingSearchVO.thruDate}" sclass="span12"/>
+		</div>
+		
+		<div zclass="span2" style="margin-left:80px;">
+				<label value="By Doctor"  />
+				<combobox id="doctorCombo" sclass="span12">
+				<attribute name="onSelect">
+				<![CDATA[
+				if(self.getSelectedItem()!=null && self.getSelectedItem().getValue() instanceof Provider)
+					doctor= (Provider)self.getSelectedItem().getValue();
+				else if(self.getSelectedItem()!=null && self.getSelectedItem().getValue() instanceof String)
+					doctor= (String)self.getSelectedItem().getValue();
+				else 
+					doctor=null;
+				]]>							
+              </attribute>
+				<comboitem></comboitem>	
+				<comboitem label="All" value="All"></comboitem>
+					<comboitem  forEach="${doctors}"  value="${each}" label="${each}"/>
+			</combobox>
+		</div>
+		
+		
+		<div zclass="span2" style="margin-left:80px;">
+				<label value="By Referral"  />
+				<combobox id="referralCombo" sclass="span12">
+				<attribute name="onSelect">
+				<![CDATA[
+				if(self.getSelectedItem()!=null && self.getSelectedItem().getValue() instanceof Referral)
+					referral= (Referral)self.getSelectedItem().getValue();
+				else if(self.getSelectedItem()!=null && self.getSelectedItem().getValue() instanceof String)
+					referral= (String)self.getSelectedItem().getValue();
+				else
+					referral=null;
+				]]>							
+              </attribute>
+              <comboitem></comboitem>	
+			<comboitem label="All" value="All"></comboitem>
+			<comboitem  forEach="${referrals}"  value="${each}" label="${each}"/>
+			</combobox>
+		</div>
+		<div zclass="span2" style="margin-left:80px;">
+				<label value="Charge Type"  />
+                 <label value="*"  style="font-weight: bold;color: red"/>
+				<combobox id="chargeTypeCombo" sclass="span12">
+				<attribute name="onSelect">
+				<![CDATA[
+				if(self.getSelectedItem()!=null && self.getSelectedItem().getValue() instanceof com.nzion.domain.billing.AcctgTransTypeEnum)
+					labChargeType= (com.nzion.domain.billing.AcctgTransTypeEnum)self.getSelectedItem().getValue();
+				if(self.getSelectedItem()!=null && self.getSelectedItem().getValue() instanceof String)
+					labChargeType= (String)self.getSelectedItem().getValue();
+				]]>							
+              </attribute>
+			<comboitem label="All" value="All"></comboitem>
+			<comboitem  forEach="${chargeTypeList}"  value="${each}" label="${each}"/>
+			</combobox>
+		</div>
+		
+		
+		
+       </div>
+    </div>
+    </div>
+    <div align="center" sclass="panelFoot"  >
+					<button label="Search" id="searchButton" zclass="btn-primary btn"  >
+						<attribute name="onClick">
+						<![CDATA[
+							if (labChargeType == null){
+									com.nzion.util.UtilMessagesAndPopups.showError("Please Provide Charge Type");
+									return;
+							}
+							if(UtilValidator.isNotEmpty(doctor) && UtilValidator.isNotEmpty(referral)){
+								com.nzion.util.UtilMessagesAndPopups.showError("Please Provide Either Doctor or Referral");
+								return;
+							}
+							searchResults.setVisible(true) ; 
+					       	labCollectionList=collectionReportController.getLabCollectionReportList(labChargeType,fromDate.getValue(),thruDate.getValue(),doctor,referral);
+							groupByLabCollectionReport.setVisible(true);
+					
+
+								]]>
+						</attribute>
+					</button>
+					<button label="Clear" id="clearButton" zclass="btn-primary btn"  style="margin-left:60px;">
+						<attribute name="onClick">
+						<![CDATA[
+								fromDate.setValue(null);fromDate=null;
+								thruDate.setValue(null);thruDate=null;
+								doctorCombo.setValue(null);doctor=null;
+								referralCombo.setValue(null);referral=null;
+								chargeTypeCombo.setValue(null);labChargeType=null;
+
+								]]>
+						</attribute>
+					</button>
+					
+					
+	</div>
+			<separator></separator>
+		<space height="5px" />
+		<hlayout width="100%" style="text-align:center;background-color:grey" id="searchResultsSplitter" visible="true">
+			<image src="/images/collapse-content.png" style="text-align:center">
+				<attribute w:name="onClick">
+					jq(this.$f('searchForm')).slideToggle(1000);
+				</attribute>
+				<attribute name="onClick">
+					if(self.getSrc().contains("expand")){
+						self.setSrc("/images/collapse-content.png");
+					}
+					else if(self.getSrc().contains("collapse")){
+						self.setSrc("/images/expand-content.png");
+					}
+				</attribute>
+			</image>
+		</hlayout>
+		<space height="5px" />
+		<panel visible="false" id="searchResults" title="Search Results" width="100%">
+ 	   <caption height="15px">
+        <div style="float:right">
+					<span sclass="linkBtn linkBtnOn" style="margin:-3px 13px;">
+					<a tooltiptext="Export" label="Export" sclass="reminderBtn">
+                        <attribute name="onClick">
+                            collectionReportController.exportLabReport(fromDate.getValue(),thruDate.getValue(),labChargeType,doctor,referral);
+ 					 </attribute>
+                    </a>
+					</span>
+        </div>
+    </caption>
+
+		<panelchildren>
+        <div height="500px" style="overflow:auto" id="searchResultDiv">
+    	
+    	 <grid id="groupByLabCollectionReport" model="@{labCollectionList,load-after='searchButton.onClick'}">
+                <columns>
+                    <column width="40px"></column>
+                    <column label="Name"></column>
+                    <column label="Count"/>
+                    <column label="Item Amount"/>
+                </columns>
+                <rows>
+                    <row self="@{each='collectionReportList'}" value="@{collectionReportList}">
+                        <label value="@{collectionReportList.description}" style="font-weight:bold"/>
+                        <label value="@{collectionReportList.count}" style="font-weight:bold"/>
+                        <label value="@{collectionReportList.amount}" style="font-weight:bold"/>
+                        <detail open="true">
+                            <listbox id="collectionReportItemList"
+                                     model="@{collectionReportList.collectionReportItemDto}">
+                                <listitem self="@{each='itemList'}" value="@{itemList}">
+                                    <listcell>
+                                        <label value="@{itemList.description}"/>
+                                    </listcell>
+                                    <listcell>
+                                        <label value="@{itemList.count}"/>
+                                    </listcell>
+                                    <listcell>
+                                        <label value="@{itemList.amount}"/>
+                                    </listcell>
+                                </listitem>
+
+                            </listbox>
+                        </detail>
+                    </row>
+                </rows>
+              </grid>
+              
+                      
+    	</div>
+    	</panelchildren>
+    	</panel>
+    	
+    
+</window>
+</zk>

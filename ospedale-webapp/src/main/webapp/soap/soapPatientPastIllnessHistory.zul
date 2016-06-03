@@ -1,0 +1,109 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapPatientPastIllnessHistoryWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+		import com.nzion.zkoss.composer.ProblemListSectionComposer;
+		import com.nzion.domain.emr.soap.PatientIcd;
+		PatientIcd pastIllnessHistory = new PatientIcd();
+		ProblemListSectionComposer problemListComposer = new ProblemListSectionComposer();
+	</zscript>
+	<window id="soapPatientPastIllnessHistoryWindow" apply="${problemListComposer}">
+	<script type="text/javascript">
+		function showDelButton(comp){
+			jQuery('#'+comp.uuid).find('img').fadeIn('slow');
+		}
+		function hideDelButton(comp){
+			jQuery('#'+comp.uuid).find("img").fadeOut(15);
+		}
+	</script>
+	<span sclass="linkBtn linkBtnOn">
+			<a  id="addBtn1" sclass="addBtn" label="New"
+				onClick="pastIllnessHistory=new PatientIcd();refreshInclude();" disabled="${patientSoapNoteController.readonly}"/>
+			<span />
+		</span>
+	<div sclass="chiefComp soapNoteCont curSOAP ui-resizable" style="position:relative;">
+		<h:table width="100%" cellpadding="0px" cellspacing="0px" style="border:0px">
+				<h:tr>
+					<h:td class="soapNoteContL" onClick="expandRHS(this.id)">
+					<vbox>
+						<panel title="Problem List" collapsible="false">
+							<panelchildren>
+							<checkbox label="No Known Illness History" checked="@{problemListComposer.pastHxSection.noKnownIlnessHistory}" id="noKnownIllnessHistoryChkBox">
+							<attribute name="onCheck">
+								pastIllnessInclude.invalidate();
+							</attribute>
+							</checkbox>
+							<!-- Active contains records added to current section irrespective of status and previous soap note's diagnosis section's records and all previous past histories's active and chronic records -->
+							<!-- Resolved contains records from all records other than active and chronic from all past visits excluding current one -->
+							<radiogroup id="statusRadioGrp" >
+								<radio label="Active" value="Active" checked="true" id="activeRadio">
+									<attribute name="onCheck">
+										if(self.isChecked()){
+											illnessListBox.setModel(new BindingListModelSet(problemListComposer.getPastHxSection().getPatientIcds(),false));
+										}
+									</attribute>
+								</radio>
+								<radio label="Resolved" value="InActive"  id="inactiveRadio">
+									<attribute name="onCheck">
+										if(self.isChecked()){
+											illnessListBox.setModel(new BindingListModelSet(problemListComposer.getAllPastNonActiveIllness(problemListComposer.getMainCtl().getPatient(),null),false));
+										}
+									</attribute>
+								</radio>
+							</radiogroup>
+								<div height="290px" style="overflow:auto">	
+								<listbox id="illnessListBox" style="overflow:auto" 
+									model="@{problemListComposer.pastHxSection.patientPastIllnessHistories,load-after='self.onReloadRequest'}">
+									<listhead>
+										<listheader label="Name" />
+										<listheader label="Occured On" />
+										<listheader label="Severity" />
+										<listheader label="Certainity" />
+										<listheader label="Status" />
+									</listhead>
+									<listitem self="@{each='patientPastIllnessHistory'}"
+										value="@{patientPastIllnessHistory}" 
+											onClick="pastIllnessHistory=(PatientIcd)self.getValue();refreshInclude();">
+										<listcell>
+											<label value="@{patientPastIllnessHistory.icd.code}"/>
+											<label value="-"/>
+											<label value="@{patientPastIllnessHistory.icd.description}"/>
+										</listcell>
+										<listcell>
+											<datebox sclass="dateboxclass" buttonVisible="false" disabled="true"
+												readonly="true" value="@{patientPastIllnessHistory.onSetDate}" />
+										</listcell>
+										<listcell label="@{patientPastIllnessHistory.severity}" />
+										<listcell label="@{patientPastIllnessHistory.certainity}" />
+										<listcell label="@{patientPastIllnessHistory.status}" />
+									</listitem>
+								</listbox>
+								</div>
+							</panelchildren>
+						</panel>
+						<div sclass="panelFoot">
+						<button  label="Save" onClick="problemListComposer.getMainCtl().saveSoapSection();" disabled="${patientSoapNoteController.readonly}"/>
+						</div>
+					</vbox>
+					</h:td>
+				<h:td class="soapNoteContR">
+					<include id="pastIllnessInclude" src="/soap/addPatientPastIllness.zul" problemListComposer="${problemListComposer}"
+						pastHistorySection="${problemListComposer.pastHxSection}" pastIllnessHistory="${pastIllnessHistory}" checkbox="${noKnownIllnessHistoryChkBox}" activeRadio="${activeRadio}"/>
+				</h:td>
+			</h:tr>
+		</h:table>
+		<zscript>
+	<![CDATA[
+	         
+	         void refreshInclude(){
+	     		pastIllnessInclude.setDynamicProperty("pastIllnessHistory", pastIllnessHistory);
+	     		pastIllnessInclude.setDynamicProperty("pastHistorySection",
+	     				problemListComposer.getPastHxSection());
+	        	pastIllnessInclude.invalidate();
+	         }
+	]]>
+	</zscript>
+	</div>
+	</window>
+</zk>

@@ -1,0 +1,54 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./personLookup"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<window mode="modal" id="personLookup" closable="true" title="Persons" width="60%">
+<zscript>
+<![CDATA[
+	import com.nzion.util.Constants;
+	import com.nzion.domain.Provider;
+	import com.nzion.domain.messaging.*;
+	import com.nzion.domain.*;
+		
+	org.zkoss.zul.Textbox component = arg.get("textBoxMessage");
+	Message message = (Message)arg.get("message");
+	org.zkoss.zul.Textbox providerLookupTxt = arg.get("personLookupTxt");
+	char[] ALPHABETS = Constants.ALPHABETS;
+	char[] DIGITS = Constants.DIGITS;
+	java.util.Collection masterData=componentRepository.getMasterDataStartingWith(com.nzion.domain.Person.class,"A","firstName");
+	]]>
+</zscript>
+	<div sclass="panelTop">
+		<button label="Close" forward="onClick=onCancel"/>
+	</div>
+		<vbox>
+			<hbox><toolbarbutton forEach="${ALPHABETS}" label="${each}" width="15px;"
+				onClick='masterData=componentRepository.getMasterDataStartingWith(com.nzion.domain.Person.class,self.label,"firstName");Events.postEvent("onReloadRequest",masterDataDisplayGrid,null)'/></hbox>
+			<hbox width="100%" widths="60%, 40%">
+				<div width="100%"> 
+				<toolbarbutton forEach="${DIGITS}" label="${each}" width="15px;"
+				onClick='masterData=componentRepository.getMasterDataStartingWith(com.nzion.domain.Person.class,self.label,"firstName");Events.postEvent("onReloadRequest",masterDataDisplayGrid,null)'/>
+				</div>
+			</hbox>
+		</vbox>	
+			<listbox model="@{masterData,load-after='self.onReloadRequest'}" id="masterDataDisplayGrid"  rows="10"> 
+			<attribute name="onSelect">
+			<![CDATA[
+			Person person = com.nzion.util.ViewUtil.getSelectedItem(self);
+    		component.setValue(component.getValue()+com.nzion.util.ViewUtil.getFormattedName(person)+";");
+			if(providerLookupTxt!=null){
+			providerLookupTxt.setValue(com.nzion.util.ViewUtil.getFormattedName(person));
+			Events.postEvent("onChange", providerLookupTxt, p);
+			}
+    		message.getPersons().add(person);
+    		personLookup.detach();
+    		]]>
+			</attribute>
+				<listitem self="@{each='person'}" value="@{person}">
+					<listcell label="@{person.firstName}"/>
+					<listcell label="@{person.lastName}"/>
+				</listitem>
+			</listbox>
+</window>
+</zk>

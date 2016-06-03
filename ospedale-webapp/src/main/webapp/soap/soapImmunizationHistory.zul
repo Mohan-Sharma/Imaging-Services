@@ -1,0 +1,93 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./immunizationWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<window id="familyHistorySectionDiv" width="100%">
+<zscript><![CDATA[
+	import com.nzion.zkoss.composer.PatientSoapNoteController;
+	import com.nzion.domain.emr.soap.ImmunizationSection;
+	PatientSoapNoteController controller = arg.get("controller");
+	ImmunizationSection section =controller.getSoapSection(ImmunizationSection.class);
+//	Collection pastFamilyIllnesses=controller.getFamilyIllnesses();
+	Collection  recentImmunizations=section.getImmunizations();
+//	pastFamilyIllnesses.removeAll(recentFamilyIllnesses);
+	
+	public void removeListItem(Component removeBtn){
+	section.getImmunizations().remove(((Listitem)removeBtn.getParent().getParent()).getValue());
+	Events.postEvent("onReloadRequest", immunizationsDisplayGrid, null);
+	}
+	]]></zscript>
+
+	<panel title="Family History">
+	<panelchildren>
+			<button  label="Add">
+				<attribute name="onClick">
+					Window w = Executions.createComponents("/soap/soap-patient-immunization.zul",immunizationWin,com.nzion.util.UtilMisc.toMap("controller", controller,"section",section,"recentImmunizations",recentImmunizations));
+					w.addForward("onDetach",immunizationsDisplayGrid,"onReloadRequest");
+				</attribute>
+			</button>
+			<listbox model="@{pastImmunizations}" style="border:0px" oddRowSclass="whiteBackground"> 
+				<listhead>
+					<listheader label="Date"/>
+					<listheader label="Immunization"/>
+					<listheader label="Location"/>
+					<listheader label="Doctor Name"/>
+					<listheader label="Confidential"/>
+					<listheader label="Drug"/>
+					<listheader label="Manufactured"/>
+					<listheader label="Diagnosis"/>
+					<listheader label="Procedures"/>
+				</listhead>
+				<listitem self="@{each='immunization'}" value="@{immunization}">
+					<listcell>
+						<label value="@{immunization}"  />
+					</listcell>
+					<listcell>
+						<label value="@{immunization}"  />
+					</listcell>
+					<listcell>
+						<label value="@{immunization}"  />
+					</listcell>
+					<listcell>
+						<label value="@{immunization}"  />
+					</listcell>
+					<listcell>
+					</listcell>
+				</listitem>
+			</listbox>
+			<listbox model="@{recentImmunizations,load-after='self.onReloadRequest'}" id="immunizationsDisplayGrid" style="border:0px" oddRowSclass="whiteBackground"> 
+				<listhead>
+					<listheader label="Immunization"/>
+					<listheader label="Status"/>
+					<listheader label="Action"/>
+				</listhead>
+				<listitem self="@{each='immunization'}" value="@{immunization}">
+					<listcell>
+						<label value="@{immunization}"  />
+					</listcell>
+					<listcell>
+					</listcell>
+					<listcell>
+					</listcell>
+					<listcell>
+						<button  label="X" onClick="removeListItem(self);" />
+					</listcell>
+				</listitem>
+			</listbox>
+		</panelchildren>	
+	</panel>
+		<hbox>
+			<button  label="Save" onClick="controller.saveSoapSection();" />
+			<space width="15px"/>		
+			<div sclass="chkBox">
+				<checkbox checked="@{section.confidential}" label="Confidential"/>
+			</div>
+		</hbox>
+</window>
+</zk>
+
+
+
+
+
+

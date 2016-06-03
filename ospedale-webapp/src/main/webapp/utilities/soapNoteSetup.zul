@@ -1,0 +1,46 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<zk>
+<window border="none" title="Encounter Note Setup" id="soapqasetup">
+	<zscript>
+		import com.nzion.service.common.CommonCrudService;
+		import com.nzion.domain.emr.SoapModule;
+		com.nzion.repository.common.CommonCrudRepository commonCrudRepository=com.nzion.util.Infrastructure.getSpringBean("commonCrudRepository");
+		SoapModule soapModule = new SoapModule();
+		soapModule.setSoapModuleType(com.nzion.enums.SoapModuleType.QA);
+		List soapModules = commonCrudRepository.simulateExampleSearch(new String[]{"soapModuleType"},soapModule);
+		setPageTitle("Encounter Note Setup", "");
+	</zscript>
+	<tabbox id="tabbox">
+		<tabs>
+			<tab forEach="${soapModules}" label="${each.moduleName}">
+				<custom-attributes tabValue="${each}"/>
+				<attribute name="onClick">
+					SoapModule selectedSoapModule = (SoapModule)self.getAttribute("tabValue");
+					Component tabPanel = soapqasetup.getFellow(selectedSoapModule.getModuleName(),true);
+					for(SoapModule each:soapModules){
+						Component comp = soapqasetup.getFellow(each.getModuleName(),true);
+						comp.getChildren().clear();
+					}
+					Map m =new HashMap();
+					m.put("selectedSoapModule",selectedSoapModule);
+					if("Physical Examination".equals(selectedSoapModule.getModuleName())){
+						m.put("displayOrganSystems",Boolean.TRUE);
+					}else{
+						m.put("displayOrganSystems",Boolean.FALSE);
+					}
+					Executions.createComponents("/utilities/organqasetup.zul",tabPanel,m);
+					
+				</attribute>
+			</tab>
+		</tabs>
+		<tabpanels>
+		 <tabpanel  forEach="${soapModules}" id="${each.moduleName}">
+		 </tabpanel>
+		</tabpanels>
+	</tabbox>
+	<zscript>
+	if(tabbox.getSelectedTab() != null)
+		Events.postEvent("onClick",tabbox.getSelectedTab(),null);
+	</zscript>
+</window>
+</zk>

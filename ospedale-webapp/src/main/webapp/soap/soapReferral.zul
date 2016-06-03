@@ -1,0 +1,99 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapReferralPanel"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	<![CDATA[
+	import com.nzion.domain.emr.soap.*;
+	import com.nzion.zkoss.composer.SoapReferalComposer;
+	SoapReferalComposer soapReferalComposer = new SoapReferalComposer();
+	]]>
+	</zscript>
+	<panel title="SOAP Referral" id="soapReferralPanel" apply="${soapReferalComposer}">
+		<panelchildren>
+			<zscript>
+				com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+				boolean allChkBox = soapReferalComposer.getReferralSection().getSoapReferral().getModules().size() ==(soapReferalComposer.getSoapNoteController().getModules().size() - 1); 
+			</zscript>
+			<div style="margin:10px">
+			<div style="margin:10px">
+				<div>
+					<label value="Referral"/>
+					<label value="*" zclass="labelReq"/>
+				</div>
+				<div>	
+					<combobox model="@{soapReferalComposer.referrals}" selectedItem="@{soapReferalComposer.soapReferral.referral,save-when='saveBtn.onClick'}" 
+					constraint="no empty" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+						<comboitem self="@{each='referral'}" value="@{referral}" label="@{referral.firstName}" />
+					</combobox>
+				</div>
+			</div>
+			<div style="margin:10px">
+				<div>
+					<label value="Referral Notes"/>
+				</div>
+				<div width="70%">
+					<textbox value="@{soapReferalComposer.soapReferral.notes,save-when='saveBtn.onClick'}"  rows="3" cols="50"/>
+				</div>
+			</div>
+			<div width="98%" style="margin:10px">
+			<vbox>
+				<hlayout>
+					<label style="font-weight:bold" value="Select Modules"/>
+					<label value="*" zclass="labelReq"/>
+				</hlayout>
+				<checkbox  w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" label="All" checked="${allChkBox}">
+					<attribute name="onCheck">
+					for(Component component : firstSetHbox.getChildren()){
+						Checkbox checkbox = ((Checkbox)((Component)component.getChildren().get(0)).getFirstChild()); 
+						if(checkbox != null){
+						checkbox.setChecked(self.isChecked());
+						Events.postEvent("onCheck",checkbox,null);
+						}
+					}
+					for(Component component : secondSetHbox.getChildren()){
+						Checkbox checkbox = ((Checkbox)((Component)component.getChildren().get(0)).getFirstChild());
+						if(checkbox != null){
+						checkbox.setChecked(self.isChecked());
+						Events.postEvent("onCheck",checkbox,null);
+						}
+					}
+					</attribute>
+				</checkbox>
+				</vbox>
+				
+				<hlayout id="firstSetHbox" >
+					<div forEach="${soapReferalComposer.firstSet}" >
+					<custom-attributes value="${each}"/>
+						<hlayout spacing="10px;">
+							<checkbox  label="${each.moduleName}" id="${each.moduleName}"  if="${'Referral' ne each.moduleName}"
+							onCheck='soapReferalComposer.addOrRemoveSoapModule(self.isChecked(),(com.nzion.domain.emr.SoapModule)self.getParent().getParent().getAttribute("value"));'
+							onCreate='self.setChecked(soapReferalComposer.getSoapReferral().getModules().contains(self.getParent().getParent().getAttribute("value")))' style="margin-bottom:5px;"/>
+						</hlayout>
+					</div>
+				</hlayout>	
+				<hlayout id="secondSetHbox" >
+					<div forEach="${soapReferalComposer.secondSet}" >
+					<custom-attributes value="${each}"/>
+						<hlayout spacing="10px;">
+							<checkbox if="${'Referral' ne each.moduleName}" label="${each.moduleName}" id="${each.moduleName}"
+							onCheck='soapReferalComposer.addOrRemoveSoapModule(self.isChecked(),(com.nzion.domain.emr.SoapModule)self.getParent().getParent().getAttribute("value"));'
+							onCreate='self.setChecked(soapReferalComposer.getSoapReferral().getModules().contains(self.getParent().getParent().getAttribute("value")))' style="margin-bottom:5px;"/>
+						</hlayout>
+					</div>
+				</hlayout>
+			</div>	
+		</div>
+		<div sclass="panelFoot">
+			<button disabled="${soapReferalComposer.soapNoteController.readonly}" id="saveBtn" label="Save" zclass="btn btn-success">
+				<attribute name="onClick">
+					soapReferalComposer.save();
+					previewBtn.setVisible(com.nzion.util.UtilValidator.isNotEmpty(soapReferalComposer.getReferralSection().getSoapReferral().getModules()));
+				</attribute>
+			</button>
+			<button  label="Preview" visible="${!(empty soapReferalComposer.referralSection.soapReferral.modules)}"  
+			id="previewBtn" onClick='Executions.getCurrent().sendRedirect("/soap/soapNotePreviewFull.zhtml?scheduleId=" +soapReferalComposer.getSoapNoteController().getSchedule().getId() 
+			+"&amp;soapReferralId="+soapReferalComposer.getSoapReferral().getId()+"&amp;pageName=referralPreview","_referalPreview")'/>
+		</div>
+		</panelchildren>
+	</panel>
+</zk>

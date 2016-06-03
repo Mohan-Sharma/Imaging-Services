@@ -1,0 +1,60 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./cptLookUp"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window mode="modal" id="cptLookUp" closable="true" title="Search Cpt" width="60%" position="center,top">
+	<zscript>
+	com.nzion.domain.emr.soap.PatientPastOperationHistory patientPastOperationHistory = arg.get("pastOperationHistory");
+	List plainCpts;
+	Textbox cptLookupTextBox = arg.get("cptLookupTextBox");
+	Set associatedCpts = arg.get("associatedCpts");
+	Listbox cptListbox = arg.get("cptListbox");
+	Div cptSection = arg.get("cptSection");
+	Set cpts = new HashSet();
+	void addCpts(){
+		for(Listitem li : cptDisplayGrid.getSelectedItems()){
+			cpts.add(li.getValue());
+			associatedCpts.add(li.getValue());
+		}
+		patientPastOperationHistory.setCpts(cpts);
+		cptLookupTextBox.setValue(patientPastOperationHistory.getCptCodes());
+		cptLookupTextBox.setTooltiptext(patientPastOperationHistory.getCptDescription());
+		cptSection.setVisible(true);
+		Events.postEvent("onReloadRequest",cptListbox,null);
+		cptLookUp.detach();
+	}
+	void getPatientCpts(){
+		if(cpttxt.getValue().isEmpty())
+			throw new WrongValueException(cpttxt,"enter atleast 3 characters");
+		plainCpts=componentRepository.getMasterDataStartingWith(com.nzion.domain.emr.Cpt.class,cpttxt.getValue(),"description");
+	}
+	</zscript>
+		<div sclass="panelTop">
+			<button  label="Add" id="addBtn" onClick="addCpts();" />
+			<button  label="Cancel" forward="onClick=onCancel" />
+		</div>
+		<panel>
+			<panelchildren>
+				<hbox>
+					<label value="Procedures Description" />
+					<textbox id="cpttxt" />
+					<button  label="Search" id="searchBtn" onClick="getPatientCpts();" />
+				</hbox>
+				<listbox model="@{plainCpts,load-after='self.onReloadRequest,searchBtn.onClick'}" id="cptDisplayGrid"
+					rows="10" checkmark="true" multiple="true">
+					<listhead>
+						<listheader label="Procedures Code" />
+						<listheader label="Procedures Description" />
+					</listhead>
+					<listitem self="@{each='cpt'}" value="@{cpt}">
+						<listcell>
+							<label value="@{cpt.cpt.id}" />
+						</listcell>
+						<listcell>
+							<label value="@{cpt.cpt.description}" />
+						</listcell>
+					</listitem>
+				</listbox>
+			</panelchildren>
+		</panel>
+	</window>
+</zk>

@@ -1,0 +1,44 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<window>
+	<zscript>
+	<![CDATA[
+		setPageTitle("Patient Education Resourcesss", "");
+		
+		class PatientEducationRenderer implements ListitemRenderer{
+			PatientEducationRenderer(){
+			}
+			public void render(Listitem arg0, Object arg1) throws Exception {
+			com.nzion.domain.docmgmt.PatientEducation education = (com.nzion.domain.docmgmt.PatientEducation)arg1;
+			arg0.setValue(education);
+			Listcell documentDescriptionListCell = new Listcell();
+			documentDescriptionListCell.setLabel(education.getDocumentDescription());
+			documentDescriptionListCell.setParent(arg0);
+			Listcell materialCategoryListCell = new Listcell();
+			materialCategoryListCell.setLabel(education.getMaterialCategory().toString());
+			materialCategoryListCell.setParent(arg0);
+			Listcell genderListCell = new Listcell();
+			genderListCell.setLabel(education.getGender().getDescription());
+			genderListCell.setParent(arg0);
+			Listcell ageFromListCell = new Listcell();
+			ageFromListCell.setValue(education.getFromRange() == 0 ? "" : education.getFromRange());
+			ageFromListCell.setParent(arg0);
+			Listcell toAgeListCell = new Listcell();
+			toAgeListCell.setValue(education.getToRange() == 0 ? "" : education.getToRange());
+			toAgeListCell.setParent(arg0);
+			Listcell activeListCell =  new Listcell();
+			Image image = new Image(education.isActive() ? "/images/tick.png" : "/images/cross.png");
+			image.setParent(activeListCell);
+			activeListCell.setParent(arg0);
+			}
+		}
+		
+		PatientEducationRenderer educationRenderer = new PatientEducationRenderer();
+		]]>	
+	</zscript>
+		<screen width="100%" pagetitle="Patient Education Resource" listtitle="Patient Education Resources" addpage="addEditPatientEducation" addmodepopup="true"
+			entityclass="com.nzion.domain.docmgmt.PatientEducation" fields="documentDescription,materialCategory,gender.description,fromRange,toRange" 
+			labels="Document Description,Material Category,Gender,Age From,Age To" hidedeletebtn="true" 
+			listitemrenderer="${educationRenderer}"/>
+	</window>
+</zk>

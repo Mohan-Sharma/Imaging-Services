@@ -1,0 +1,15 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk>
+	<zscript>
+	List patientEducationDocumentsToBeDeactivated = arg.get("selectedDocuments");
+	com.nzion.zkoss.composer.PatientEducationController educationController = arg.get("patientEducationController");
+	</zscript>
+	<window id="patientEducationDocumentdeactivationReasonWindow" width="30%" mode="modal" closable="true" title="Enter reason for deactivation">
+		<textbox id="deactivationReasonTxtBox" rows="7" width="97%" style="margin: 5px;"/>
+		<div sclass="panelTop" >					
+			<button label="Deactivate" 
+				onClick="educationController.deActivateClicked(deactivationReasonTxtBox.getValue(),patientEducationDocumentsToBeDeactivated);patientEducationDocumentdeactivationReasonWindow.detach();"/>
+			<button label="Cancel" onClick="patientEducationDocumentdeactivationReasonWindow.detach()"/>
+		</div>
+	</window>
+</zk>

@@ -1,0 +1,83 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./createRefferal"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		com.nzion.zkoss.composer.EntityController entityRefferalController = new com.nzion.zkoss.composer.EntityController();
+	</zscript>
+	<window id="createRefferal" title="Create Reffering Physician" border="normal" self="@{define(content)}" apply="${entityRefferalController}">
+		<vbox>
+			<groupbox>
+				<caption label="Refferal Details" />
+				<space height="10"></space>
+				<hbox>
+					<vbox>
+						<label value="Refferal Code"
+							style="text-align:right;" />
+						<textbox value="@{vo.refferal.accountNumber,load-after='Save.onClick}" id="accountNumber" readonly="true" />
+					</vbox>
+					<vbox>
+						<label value="First Name"
+							style="text-align:right;" id="lblfirstName" />
+						<textbox
+							value="@{vo.refferal.firstName,save-when='Save.onClick'}" id="firstName" focus="true"/>
+					</vbox>
+					<vbox>
+						<label value="Middle Name"
+							style="text-align:right;" id="lblmiddleName" />
+						<textbox
+							value="@{vo.refferal.middleName,save-when='Save.onClick'}" id="middleName" />
+					</vbox>
+					<vbox>
+						<label value="Last Name"
+							style="text-align:right;" id="lbllastName" />
+						<textbox
+							value="@{vo.refferal.lastName,save-when='Save.onClick'}" id="lastName" />
+					</vbox>
+					<vbox>
+						<label value="Date of Birth"
+							style="text-align:right;" id="lbldateofBirth" />
+						<textbox
+							value="@{vo.refferal.dateOfBirth,save-when='Save.onClick'}" id="dateofBirth" constraint="no future"/>
+					</vbox>
+					<vbox>
+						<label value="Gender"
+							style="text-align:right;" id="lblgender" />
+						<textbox
+							value="@{vo.refferal.gender,save-when='Save.onClick'}" id="gender" />
+					</vbox>
+				</hbox>
+				<space height="10"></space>
+				<postalAddress id="refferalAddress"></postalAddress>
+				<groupbox>
+					<caption>
+						Primary Contacts
+					</caption>
+					<workPhone id="refferalWorkPhone" />
+					<space height="5"></space>
+					<fax id="refferalFaxNumber" />
+					<mobile id="refferalMobileNumber" />
+				</groupbox>
+				<groupbox>
+					<caption>Email Address and Code Activation</caption>
+					<hbox>
+						<email id="refferalEmail" />
+						<label value="This code is active"></label>
+						<checkbox checked="@{vo.refferal.active,save-when='Save.onClick'}"></checkbox>							
+					</hbox>
+				</groupbox>
+			<textbox id="display" value="" visible="false"></textbox>
+			</groupbox>
+			<groupbox id="buttonGroupBox">
+				<button label="Save" id="Save" onClick="setEntity()" />
+				<button label="Close"  id="Close"  onClick="" />
+		</groupbox>
+		</vbox>
+		<zscript><![CDATA[
+		public void setEntity(){
+		entityRefferalController.getEntityViewObject().setEntity(entityRefferalController.getEntityViewObject().getRefferal());
+		display.setValue(firstName.getValue());  
+		}
+		]]></zscript>
+	</window>
+</zk>

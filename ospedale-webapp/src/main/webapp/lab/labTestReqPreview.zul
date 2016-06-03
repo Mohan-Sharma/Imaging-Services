@@ -1,0 +1,156 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?page title="Lab Test Request Preview"?>
+<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<style>
+	tr{
+    height: 30px;
+	margin:1px;
+	}
+	
+	th{
+		    background-color: grey;
+    color: #FFFFFF;
+	}
+	.labInfo{
+	}
+	
+	.obrClass{
+		border:1px solid black;
+		text-align:left
+	}
+	
+	.providerInfo{
+		 margin-top: -71px;
+	}
+	
+	.patientInfo{
+	}
+	
+	.mshInfo{
+	text-align:top;
+	}
+	</style>
+	<panel id="fullSoapNotePreview" style="margin:15px">
+	<panelchildren>
+		<zscript>
+		<![CDATA[
+		       import com.nzion.util.Infrastructure;
+		       import com.nzion.domain.Person;
+		       import com.nzion.domain.Patient;		       
+    com.nzion.service.common.CommonCrudService commonCrudService = Infrastructure.getSpringBean("commonCrudService");
+   	
+    String reqId = param.get("labOrderReqId") != null ? param.get("labOrderReqId")[0] : null;
+	Long labOrderReqId =  Long.valueOf(reqId);
+
+	com.nzion.domain.emr.lab.LabOrderRequest labOrderReq = commonCrudService.getById(com.nzion.domain.emr.lab.LabOrderRequest.class,labOrderReqId);
+	
+	com.nzion.domain.Patient  patient =   labOrderReq.getPatient();
+	com.nzion.domain.emr.soap.PatientLabOrder patientLabOrder= new  com.nzion.domain.emr.soap.PatientLabOrder();		
+	boolean showLink = false;
+	com.nzion.domain.Provider provider =  labOrderReq.getProvider();   	
+    String pageName = Executions.getCurrent().getParameter("pageName");
+    com.nzion.domain.Location location = com.nzion.util.Infrastructure.getSelectedLocation();
+    com.nzion.domain.Practice practice=com.nzion.util.Infrastructure.getPractice();
+	]]>
+</zscript>
+		<button label="Print" >
+			<attribute name="onClick">
+			<![CDATA[
+com.nzion.service.common.impl.ApplicationEvents.postEvent(com.nzion.enums.EventType.CLINICAL,patient,Infrastructure.getUserLogin(),"printed the Lab Tests Ordered");
+Clients.print();
+]]>
+			</attribute>
+		</button>
+		<div id="container">
+			<div align="center">
+				<include src="/lab/labPrintBanner.zul" width="100%" height="100%" if="${!(empty pageName)}" />
+			</div>
+			<div style="margin-left:10px">
+				<n:h2>Lab Tests Ordered</n:h2>
+				<n:br />
+				<n:br />
+			</div>
+		 </div>
+	     <div>
+	     		<panel>
+				<panelchildren>
+					<div forEach="${labOrderReq.patientLabOrders}" width="100%">
+					<n:table width="100%">
+						<n:tr>
+							<n:td colspan="4">
+								<label value="${each.labTestPanel.panelName}" style="font-weight:bold" />
+							</n:td>
+						</n:tr>
+						<n:tr>
+							<n:td>
+								<n:table class="obrClass" width="100%">
+									<n:tr>
+										<n:th width="10%" >Test Panel Name</n:th>
+										<n:th width="15%" >Start Date</n:th>
+										<n:th width="30%" >Reason For Test</n:th>
+										<n:th width="30%" >comments</n:th>
+									</n:tr>
+									<n:tr style="border:1px">
+										<n:td width="10%">
+											<label value="${each.labTestPanel.panelName}"/>
+										</n:td>
+										<n:td width="15%">
+											<label value="${display:fd(each.startDate)}"/>
+										</n:td>
+										<n:td width="30%">
+											<label value="${each.reasonForTest}"/>
+										</n:td>
+										<n:td width="30%">
+											<label value="${each.testNotes}"/>
+										</n:td>
+									</n:tr>
+								</n:table>
+							</n:td>
+						</n:tr>
+						<n:tr>
+							<n:td></n:td>
+						</n:tr>
+						<n:tr style="border:1px solid black;">
+							<n:td>
+							<n:table width="100%">
+								<n:tr style="border:1px solid black;text-align:left">
+										<n:th width="20%" >Test Name</n:th>
+										<n:th width="20%" >Reference</n:th>
+										<n:th width="10%" >Unit</n:th>
+										<n:th width="10%" >Standard Amount</n:th>
+								</n:tr>
+								<n:tr forEach="${each.labTestPanel.labTests}" style="border:1px solid black">
+											<n:td width="20%">
+												<label  value="${each.testName}"/>
+											</n:td>
+											<n:td width="15%">
+												<label  value="${each.referenceRange}"/>
+											</n:td>
+											<n:td width="8%">
+												<label value="${each.unit}"/>
+											</n:td>
+											<n:td width="7%">
+												<label value="${each.standardAmount}"/>
+											</n:td>
+								</n:tr>
+							</n:table>
+							</n:td>
+						</n:tr>
+						<n:tr>
+							<n:td colspan="4">
+								<space></space>
+							</n:td>
+						</n:tr>
+						</n:table>
+					</div>
+					<div sclass="panelFoot" />
+				</panelchildren>
+			</panel>
+	     
+	     </div>
+	     </panelchildren>
+	</panel>
+</zk>

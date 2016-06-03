@@ -1,0 +1,609 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./viewPatient"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+    <?xel-method prefix="d" name="format" class="com.nzion.util.UtilDateTime" signature="java.lang.String format(java.util.Date)"?>
+    <zscript>
+        <![CDATA[
+	import com.nzion.domain.*;
+	import com.nzion.view.EncounterSearchValueObject;
+	import com.nzion.domain.billing.Invoice;
+	import com.nzion.zkoss.composer.EncounterController;
+	import com.nzion.zkoss.composer.emr.BillingSearchController;
+	import com.nzion.report.search.view.BillingSearchVO;
+	import com.nzion.domain.messaging.*;
+	import com.nzion.view.RolesValueObject;
+	
+	com.nzion.domain.Patient patient = null;
+	com.nzion.repository.common.CommonCrudRepository commonCrudRepository = com.nzion.util.Infrastructure.getSpringBean("commonCrudRepository");
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	
+	boolean showEdit = true;
+	if (param.get("patientId") != null) {
+		patient = commonCrudService.getById(com.nzion.domain.Patient.class,
+				new Long((String) param.get("patientId")[0]));
+	} else {
+		patient = ((Patient) arg.get("entity"));
+		if (patient == null) {
+			if (Roles.hasRole(Roles.PATIENT)) {
+				patient = commonCrudService.getById(
+						com.nzion.domain.Patient.class,
+						com.nzion.util.Infrastructure.getLoggedInPerson()
+								.getId());
+				showEdit = false;
+			} else if (Roles.hasRole(Roles.EMERGENCY_ACCESS)) {
+				patient = com.nzion.util.Infrastructure.getUserLogin()
+						.getPatient();
+				showEdit = false;
+			}
+		}
+	}
+	setPageTitle("Account No", patient.getAccountNumber());
+	com.nzion.service.PatientService patientService = com.nzion.util.Infrastructure.getSpringBean("patientService");
+	boolean hasEmergencyData = false;
+	//List policies = patientService.getPoliciesForPatientId(patient.getId());
+	//List schedules = scheduleService.getSchedulesForPatient(patient, true, false);
+	//List labResults = new ArrayList();
+	List labResults = labService.getLabResultFor(patient,null,null,null);
+	// List patientAdmList=commonCrudRepository.findByEquality(com.nzion.domain.inpatient.PatientAdmission.class,new String[]{"patient"}, new Object[]{patient});
+	
+	
+	boolean showSummarySheetButton = true;
+	boolean requestButtonDisabled = false;
+	boolean requestButtonVisible = false;
+	boolean downLoadLinkVisible = false;
+	List patientRemainders = patientService.getPatientRemainders(patient);
+	
+	Message message = new Message();
+	RolesValueObject rolesVo = new RolesValueObject(message.getAuthorization());
+	
+	String patientId = patient.getId().toString();
+	
+//	com.nzion.zkoss.composer.XIComposer xiComposer = new com.nzion.zkoss.composer.XIComposer();
+	//xiComposer.setPatient(patient);
+]]>
+    </zscript>
+    <style>
+        .basic-form table tr .label, .basic-form table tr .group-label { font-weight: bold !important; padding-right:
+        1.5em; text-align: right; width:27%;padding:5px; }
+        .basic-form table td .z-label{ font-weight:normal; }
+        .formCont ul li{ list-style: none outside none; background: none repeat scroll 0 0 transparent; border-left:
+        0.1em solid #5F9FCF; float: right; font-size: 1em; font-weight: bold; padding: 0.1em 0.5em 0.2em; }
+    </style>
+    <separator></separator><separator></separator>
+    <div sclass="mid" id="viewPatient">
+        <attribute name="onCreate">
+            com.nzion.service.common.impl.ApplicationEvents.postEvent(com.nzion.enums.EventType.PATIENT_RECORD,patient,com.nzion.util.Infrastructure.getUserLogin(),"patient record viewed");
+        </attribute>
+        <hbox>
+            <div id="editBtnDiv">
+                <a id="addBtn" style="margin:20px;" label="Edit">
+                    <attribute name="onClick">
+                        Map m = new HashMap();
+                        m.put("entity", patient);
+                        Executions.createComponents("/patient/patientView.zul", (Component) desktopScope.get("contentArea"), m);
+                        viewPatient.detach();
+                    </attribute>
+                </a> |
+                <a id="userLoginBtn" style="margin:20px;" label="User Login">
+                    <attribute name="onClick">
+                        Map m = new HashMap();
+                        m.put("entity", patient);
+                        Executions.createComponents("/patient/patientUserLogin.zul", null, m);
+                        //viewPatient.detach();
+                    </attribute>
+                </a> |
+                <a  style="margin:20px;" label="Print ID Card">
+                    <attribute name="onClick">
+                        Executions.getCurrent().sendRedirect("/patient/printPatientIdCard.zul?patientId="+patient.getId(),"_clinicalRecords");
+                    </attribute>
+                </a> |
+                <a id="summarySheetButton" style="margin:20px;" label="Summary Sheet" if="${showSummarySheetButton}">
+                    <attribute name="onClick">
+                        Executions.getCurrent().sendRedirect("/soap/faceSheet.zul?patientId="+patient.getId(),"_clinicalRecords");
+                    </attribute>
+                </a>
+            </div>
+
+        </hbox>
+		<span sclass="linkBtn linkBtnOn" visible="${requestButtonVisible}">
+			    <a label="New Request" sclass="addBtn"  id="newBtn" disabled="${requestButtonDisabled}">
+                    <attribute name="onClick">
+                        Window window = (Window)Executions.createComponents("/patient/patientHealthRecordRequest.zul",null,com.nzion.util.UtilMisc.toMap("patient",patient,"newBtn",self,"downLoadLink",downLoadLink));
+                    </attribute>
+                </a>
+			<span />
+		</span>
+        <space/>
+        <!--<a label="Download Report" visible="${downLoadLinkVisible}" id="downLoadLink"
+        onClick='xiComposer.exportSoapNoteAsCDCFile(patient,null);' />
+--><!-- 		Executions.createComponents("/utilities/ccdExportDetails.zul",null,com.nzion.util.UtilMisc.toMap("xiComposer",xiComposer)); -->
+        <h:br />
+        <h:table width="100%" cellspacing="15px" cellpadding="10px">
+            <h:tr>
+                <h:td width="48%" style="vertical-align:top !important;">
+                    <panel closable="false" width="100%" border="normal">
+                        <caption label="Personal Information"></caption>
+                        <panelchildren>
+                            <div sclass="basic-form formCont">
+                                <h:table width="100%">
+                                    <h:tr>
+                                        <h:td style="vertical-align:top;width:80%">
+                                            <h:table width="100%">
+                                                <h:tr>
+                                                    <h:td class="label">Civil ID:</h:td>
+                                                    <h:td>
+                                                        <label value="${patient.civilId}"></label>
+                                                    </h:td>
+                                                </h:tr>
+                                                <h:tr>
+                                                    <h:td class="label">Afya ID:</h:td>
+                                                    <h:td>
+                                                        <label value="${patient.afyaId}"></label>
+                                                    </h:td>
+                                                </h:tr>
+                                                <h:tr>
+                                                    <h:td class="label">First Name:</h:td>
+                                                    <h:td>
+                                                        <label value="${patient.firstName}"></label>
+                                                    </h:td>
+                                                </h:tr>
+                                                <h:tr>
+                                                    <h:td class="label">Second Name:</h:td>
+                                                    <h:td>
+                                                        <label value="${patient.middleName}"></label>
+                                                    </h:td>
+                                                </h:tr>
+                                                <h:tr>
+                                                    <h:td class="label">Third Name:</h:td>
+                                                    <h:td>
+                                                        <label value="${patient.lastName}"></label>
+                                                    </h:td>
+                                                </h:tr>
+                                                <h:tr>
+                                                    <h:td class="label">Fourth Name:</h:td>
+                                                    <h:td>
+                                                        <label value="${patient.endMostName}"></label>
+                                                    </h:td>
+                                                </h:tr>
+                                                <h:tr>
+                                                    <h:td class="label">Gender:</h:td>
+                                                    <h:td>
+                                                        <label value="${patient.gender}"></label>
+                                                    </h:td>
+                                                </h:tr>
+                                                <h:tr>
+                                                    <h:td class="label">Date of Birth:</h:td>
+                                                    <h:td>
+                                                        <label value="${patient.dateOfBirth}"></label>
+                                                    </h:td>
+                                                </h:tr>
+                                                <h:tr>
+                                                    <h:td class="label">Patient Type:</h:td>
+                                                    <h:td>
+                                                        <label value="${patient.patientType}"></label>
+                                                    </h:td>
+                                                </h:tr>
+                                            </h:table>
+                                        </h:td>
+                                        <h:td style="vertical-align:top;width:20%">
+                                            <image id="patientImage" sclass="patImg" width="100px" height="70px"
+                                                   hover="@{patient,converter='com.nzion.view.component.GenderImageConverter'}" style="display:block" />
+                                        </h:td>
+                                    </h:tr>
+                                </h:table>
+                            </div>
+
+                        </panelchildren>
+                    </panel>
+                </h:td>
+                <h:td width="48%" rowspan="2" style="vertical-align:top !important;">
+                    <tabbox mold="accordion-lite">
+                        <tabs align="start">
+                            <!-- <tab label="Reminders" selected="true"></tab> -->
+                            <tab label="Demographics"></tab>
+                            <tab label="Emergency Contact" if="${hasEmergencyData}" />
+                            <!-- <tab label="Insurance Plans"></tab> -->
+                            <tab label="Appointments" />
+                            <tab label="Billing Report" >
+                                <attribute name="onClick">
+
+                                    if (billingReportTabPanel.getChildren() != null)
+                                    billingReportTabPanel.getChildren().clear();
+                                    com.nzion.report.search.view.BillingSearchVO bvo = new com.nzion.report.search.view.BillingSearchVO();
+                                    bvo.setPatient(patient);
+                                    BillingSearchController billingSearchController=new BillingSearchController();
+                                    billingSearchController.setBillingSearchVO(bvo);
+                                    List invoiceList=commonCrudRepository.findByEquality(com.nzion.domain.billing.Invoice.class,new String[]{"patient"}, new Object[]{patient});
+                                    Include inc = new Include();
+                                    inc.setSrc("/report/reportBilling.zul");
+                                    inc.setDynamicProperty("invoiceList", invoiceList);
+                                    inc.setDynamicProperty("billingSearchController", billingSearchController);
+                                    inc.setDynamicProperty("showResults", billingSearchController);
+                                    inc.setVisible(true);
+                                    billingReportTabPanel.getChildren().add(inc);
+                                </attribute>
+                            </tab>
+                            <!-- <tab label="Encounters">
+                                <attribute name="onClick">
+                                    if (encounterTabPanel.getChildren() != null)
+                                    encounterTabPanel.getChildren().clear();
+                                    com.nzion.view.EncounterSearchValueObject svo = new EncounterSearchValueObject();
+                                    svo.setPatient(patient);
+                                    EncounterController encounterController = new EncounterController();
+                                    encounterController.setShowPanelTitle(false);
+                                    encounterController.setEncounterSearchValueObject(svo);
+                                    List encounters = encounterController.serachEncounter();
+                                    Include inc = new Include();
+                                    inc.setSrc("/patient/encounters.zul");
+                                    inc.setDynamicProperty("encounters", encounters);
+                                    inc.setDynamicProperty("encounterController", encounterController);
+                                    inc.setDynamicProperty("showResults", encounterController);
+                                    inc.setVisible(true);
+                                    encounterTabPanel.getChildren().add(inc);
+                                </attribute>
+                            </tab>  -->
+                            <tab label="Lab Results" />
+                            <tab label="Request New Appoinment" />
+                            <!--<tab label="Patient Balance" id="patientBalance" apply="org.zkoss.bind.BindComposer"
+                                 viewModel="@id('patientAdvanceAmountController') @init('com.nzion.zkoss.composer.emr.PatientAdvanceAmountController',arg1=patientId)">
+                                <attribute name="onClick">
+                                    if (advanceAmount.getChildren() != null)
+                                    advanceAmount.getChildren().clear();
+                                    Include inc = new Include();
+                                    inc.setSrc("/patient/patientAdvanceAccount.zul");
+                                    inc.setDynamicProperty("controller", patientAdvanceAmountController);
+                                    inc.setVisible(true);
+                                    advanceAmount.getChildren().add(inc);
+                                </attribute>
+
+                            </tab>-->
+                        </tabs>
+                        <tabpanels>
+                            <!-- <tabpanel style="overflow:auto;height:170px">
+                            <div forEach="${patientRemainders}">
+                                <h:h4>${each.remainderText}</h:h4>
+                            </div>
+                            </tabpanel> -->
+                            <tabpanel style="overflow:auto;height:90px">
+                                <div sclass="basic-form formCont">
+                                    <h:table width="100%" border="0px">
+                                        <!-- <h:tr>
+                                            <h:td class="label">Race:</h:td>
+                                            <h:td>
+                                                <label value="${patient.race}"></label>
+                                            </h:td>
+                                        </h:tr> -->
+                                        <h:tr>
+                                            <h:td class="label">Religion:</h:td>
+                                            <h:td>
+                                                <label value="${patient.religion}"></label>
+                                            </h:td>
+                                        </h:tr>
+                                        <h:tr>
+                                            <h:td class="label">Occupation:</h:td>
+                                            <h:td>
+                                                <label value="${patient.occupation}"></label>
+                                            </h:td>
+                                        </h:tr>
+                                        <!-- <h:tr>
+                                            <h:td class="label">Ethnicity:</h:td>
+                                            <h:td>
+                                                <label value="${patient.ethnicity}"></label>
+                                            </h:td>
+                                        </h:tr>
+                                        <h:tr>
+                                            <h:td class="label">SocioEconomic:</h:td>
+                                            <h:td>
+                                                <label value="${patient.socioEconomic}"></label>
+                                            </h:td>
+                                        </h:tr> -->
+                                        <h:tr>
+                                            <h:td class="label">Preferred Language:</h:td>
+                                            <h:td>
+                                                <label value="${patient.language}"></label>
+                                            </h:td>
+                                        </h:tr>
+                                    </h:table>
+                                </div>
+                            </tabpanel>
+                            <tabpanel sclass="formCont" style="overflow:auto;height:170px" if="${hasEmergencyData}">
+                                <div sclass="basic-form formCont">
+                                    <h:table width="100%">
+                                        <h:tr>
+                                            <h:td class="label">Address1:</h:td>
+                                            <h:td colspan="5">
+                                                <label value="${emergencyAddress.postalAddressFields.address1}"></label>
+                                            </h:td>
+                                        </h:tr>
+                                        <h:tr>
+                                            <h:td class="label">Address2:</h:td>
+                                            <h:td colspan="5">
+                                                <label value="${emergencyAddress.postalAddressFields.address2}"></label>
+                                            </h:td>
+                                        </h:tr>
+                                        <h:tr>
+                                            <h:td class="label">City:</h:td>
+                                            <h:td>
+                                                <label value="${emergencyAddress.postalAddressFields.city}"></label>
+                                            </h:td>
+                                            <h:td class="label">State:</h:td>
+                                            <h:td>
+                                                <label
+                                                        value="${emergencyAddress.postalAddressFields.stateProvinceGeo}">
+                                                </label>
+                                            </h:td>
+                                        </h:tr>
+                                        <h:tr>
+                                            <h:td class="label">Country:</h:td>
+                                            <h:td>
+                                                <label value="${emergencyAddress.postalAddressFields.countryGeo}"></label>
+                                            </h:td>
+                                        </h:tr>
+                                    </h:table>
+                                </div>
+                            </tabpanel>
+                            <!-- <tabpanel style="overflow:auto;height:170px">
+                                <div sclass="basic-form formCont" forEach="${policies}">
+                                    <h:table width="100%">
+                                        <h:tr>
+                                            <h:td class="label">Insurance Type:</h:td>
+                                            <h:td colspan="5">
+                                                <label value="${each.insuranceType}"></label>
+                                            </h:td>
+                                        </h:tr>
+                                        <h:tr>
+                                            <h:td class="label">Policy Name:</h:td>
+                                            <h:td>
+                                                <label value="${each.policyName}"></label>
+                                            </h:td>
+                                            <h:td class="label">Policy Number:</h:td>
+                                            <h:td colspan="3">
+                                                <label value="${each.policyNumber}"></label>
+                                            </h:td>
+                                        </h:tr>
+                                        <h:tr>
+                                            <h:td class="label">Insurance Provider:</h:td>
+                                            <h:td>
+                                                <label value="${each.insuranceProvider.insuranceProviderName}"></label>
+                                            </h:td>
+                                        </h:tr>
+                                        <h:tr>
+                                            <h:td class="label">Relationship:</h:td>
+                                            <h:td>
+                                                <label value="${each.relationship}"></label>
+                                            </h:td>
+                                            <h:td class="label">From Date:</h:td>
+                                            <h:td>
+                                                <label value="${d:format(each.historicalModel.fromDate)}"></label>
+                                            </h:td>
+                                            <h:td class="label">Thru Date</h:td>
+                                            <h:td>
+                                                <label value="${d:format(each.historicalModel.thruDate)}"
+                                                    multiline="true">
+                                                </label>
+                                            </h:td>
+                                        </h:tr>
+                                    </h:table>
+                                </div>
+                            </tabpanel> -->
+                            <!--<tabpanel style="overflow:auto;height:170px">
+                                <radiogroup>
+                                    <radio label="Past" onCreate="self.setChecked(true)">
+                                        <attribute name="onCheck">
+                                            schedules = scheduleService.getSchedulesForPatient(patient, true, false);
+                                            scheduleListbox.setModel(new BindingListModelList(schedules, false));
+                                            Events.postEvent("onRloadRequest", scheduleListbox, null);
+                                        </attribute>
+                                    </radio>
+                                    <radio label="Current">
+                                        <attribute name="onCheck">
+                                            <![CDATA[
+											schedules = scheduleService.getSchedulesForPatient(patient, false, true);
+											scheduleListbox.setModel(new BindingListModelList(schedules, false));
+											Events.postEvent("onRloadRequest", scheduleListbox, null);
+										]]>
+                                        </attribute>
+                                    </radio>
+                                </radiogroup>
+                                <listbox id="scheduleListbox" model="@{schedules,load-after='self.onReloadRequest'}">
+                                    <listhead>
+                                        <listheader label="Scheduled Date" />
+                                        <listheader label="Scheduled With" />
+                                        <listheader label="Schedule Status" />
+                                        <listheader label="Location" />
+                                    </listhead>
+                                    <listitem self="@{each='schedule'}" value="@{schedule}">
+                                        <listcell label="@{schedule.startDate,converter='com.nzion.view.component.DateConverter'}" />
+                                        <listcell>
+                                            <name object="@{schedule.person}" />
+                                        </listcell>
+                                        <listcell label="@{schedule.status.description}" />
+                                        <listcell label="@{schedule.location.name}" />
+                                        <attribute name="onDoubleClick">
+                                            <![CDATA[
+											if (showEdit) {
+												String scheduleId = self.getValue().getId().toString();
+												Schedule schedule = commonCrudService.getById(Schedule.class, new Long(
+														scheduleId));
+												if (Schedule.STATUS.EXAMINING.equals(schedule.getStatus())
+														|| Schedule.STATUS.SOAPSIGNEDOUT.equals(schedule.getStatus())
+														|| Schedule.STATUS.CHECKEDOUT.equals(schedule.getStatus()))
+													Executions.getCurrent().sendRedirect(
+															"/soap/soapnote.zul?scheduleId=" + scheduleId, "_soapNote");
+											}
+										]]>
+                                        </attribute>
+                                    </listitem>
+                                </listbox>
+                            </tabpanel>-->
+                            <tabpanel></tabpanel>
+                            <tabpanel style="overflow:auto;height:170px" id="billingReportTabPanel">
+
+                            </tabpanel>
+
+                            <tabpanel id="labRequestTabPanel" style="overflow:auto;height:170px;">
+                                <listbox model="@{labResults}" style="overflow:auto;height:100%;">
+                                    <listhead>
+                                        <listheader label="Test Name" />
+                                        <listheader label="Observation Value" />
+                                        <listheader label="Reference Range" />
+                                        <listheader label="Ordered By" />
+                                        <listheader label="Ordered On" />
+                                    </listhead>
+                                    <listitem self="@{each='resultVo'}" value="@{resultVo}">
+                                        <listcell label="@{resultVo.obxName}" />
+                                        <listcell>
+                                            <label value="@{resultVo.observationValue}"/>
+                                            <label value="@{resultVo.units}"/>
+                                        </listcell>
+                                        <listcell>
+                                            <label value="@{resultVo.referenceRange}"/>
+                                        </listcell>
+                                        <listcell>
+                                            <name object="@{resultVo.soapNote.provider}" />
+                                        </listcell>
+                                        <listcell label="@{resultVo.soapNote.date}" />
+                                        <attribute name="onDoubleClick">
+                                            com.nzion.domain.emr.lab.OBXSegment tmpObxSegment  = ((Listitem)self).getValue();
+                                            if(tmpObxSegment.isExternalTest()){
+                                            com.nzion.util.UtilMessagesAndPopups.showError("No More Details For Externally Conducted Lab Test Results");
+                                            return;
+                                            }
+                                            if(tmpObxSegment.getObrSegment().getPatientLabOrder() != null){
+                                            com.nzion.domain.emr.lab.LabOrderRequest  labOrderReq = tmpObxSegment.getObrSegment().getPatientLabOrder().getLabOrderRequest();
+                                            Executions.getCurrent().sendRedirect(
+                                            "/lab/viewLabResult.zul?resultId="+ self.getParent().getValue(), "_labResult");
+                                            }
+                                        </attribute>
+                                    </listitem>
+                                </listbox>
+                            </tabpanel>
+
+                            <!-- <tabpanel style="overflow:auto;height:170px" id="encounterTabPanel">
+
+                            </tabpanel> -->
+
+                            <!-- <tabpanel style="overflow:auto;height:170px" id="requestAppoinment">
+
+                                <h:table cellspacing="60px;">
+                                    <h:tr>
+                                        <h:td>To Doctor</h:td>
+                                        <h:td>
+                                            <hbox style="width:60%;margin:5px;">
+                                                <textbox id="textBoxToPerson" readonly="true"/>
+										<span id="lookUpBtn" sclass="linkBtn linkBtnOn" style="margin-right:-17px">
+											<a sclass="lookupBtn" >
+                                                <attribute name="onClick">
+                                                    Executions.createComponents("/portlets/message-portlet-provider-lookup.zul",null,com.nzion.util.UtilMisc.toMap("textBoxMessage",textBoxToPerson,"message",message));
+                                                </attribute>
+                                                Lookup
+                                            </a>
+											<span/>
+										</span>
+                                            </hbox>
+                                        </h:td>
+                                    </h:tr>
+
+                                    <h:tr>
+                                        <h:td>Message</h:td>
+                                        <h:td><textbox id="textBoxMessage" rows="2" cols="70" value="@{message.messageText}" style="margin:5px;"/> </h:td>
+                                    </h:tr>
+                                    <separator/>
+                                    <h:tr>
+                                        <h:td>
+                                            <space/>
+                                        </h:td>
+                                        <h:td>
+                                            <div style="margin-left:5px">
+                                                <button label="Send">
+                                                    <attribute name="onClick">
+                                                        message.setTask(false);
+                                                        message.setUrgent(false);
+                                                        rolesVo.setReception(true);
+                                                        message.setSentOn(com.nzion.util.UtilDateTime.nowDate());
+                                                        message.setSentBy(com.nzion.util.Infrastructure.getUserLogin().getPerson());
+                                                        commonCrudService.save(message);
+                                                        message = new Message();
+                                                        com.nzion.util.UtilMessagesAndPopups.showSuccess();
+                                                    </attribute>
+                                                </button>
+                                            </div>
+                                        </h:td>
+                                    </h:tr>
+                                </h:table>
+
+                            </tabpanel>
+
+                            <tabpanel style="overflow:auto;height:170px" id="advanceAmount">
+
+                            </tabpanel>   -->
+                        </tabpanels>
+                    </tabbox>
+                </h:td>
+            </h:tr>
+            <h:tr>
+                <h:td style="vertical-align:top !important;">
+                    <panel closable="false" width="100%" border="normal" collapsible="false">
+                        <caption label="Contact Information"></caption>
+                        <panelchildren>
+                            <div sclass="basic-form formCont">
+                                <h:table width="100%">
+                                    <h:tr>
+                                        <h:td class="label">Address1:</h:td>
+                                        <h:td colspan="6">
+                                            <label value="${patient.contacts.postalAddress.address1}"></label>
+                                        </h:td>
+                                    </h:tr>
+                                    <h:tr>
+                                        <h:td class="label">Address2:</h:td>
+                                        <h:td colspan="6">
+                                            <label value="${patient.contacts.postalAddress.address2}"></label>
+                                        </h:td>
+                                    </h:tr>
+                                    <h:tr>
+                                        <h:td class="label">City:</h:td>
+                                        <h:td>
+                                            <label value="${patient.contacts.postalAddress.city}"></label>
+                                        </h:td>
+                                        <h:td class="label">State:</h:td>
+                                        <h:td>
+                                            <label value="${patient.contacts.postalAddress.stateProvinceGeo}"></label>
+                                        </h:td>
+                                    </h:tr>
+                                    <h:tr>
+                                        <h:td class="label">Home phone:</h:td>
+                                        <h:td colspan="6">
+                                            <label value="${patient.contacts.homePhone}"></label>
+                                        </h:td>
+                                    </h:tr>
+                                    <h:tr>
+                                        <h:td class="label">Office phone:</h:td>
+                                        <h:td>
+                                            <label value="${patient.contacts.officePhone}"></label>
+                                        </h:td>
+                                        <h:td class="label">Office Ext:</h:td>
+                                        <h:td colspan="3">
+                                            <label value="${patient.contacts.officeExt}"></label>
+                                        </h:td>
+                                    </h:tr>
+                                    <h:tr>
+                                        <h:td class="label">Mobile phone:</h:td>
+                                        <h:td colspan="6">
+                                            <label value="${patient.contacts.mobileNumber}"></label>
+                                        </h:td>
+                                    </h:tr>
+                                </h:table>
+                            </div>
+                        </panelchildren>
+                    </panel>
+                </h:td>
+            </h:tr>
+        </h:table>
+    </div>
+
+    <zscript>
+        if (!showEdit)
+        editBtnDiv.setVisible(false);
+    </zscript>
+</zk>

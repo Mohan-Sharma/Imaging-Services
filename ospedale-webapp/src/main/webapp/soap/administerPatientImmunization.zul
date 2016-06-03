@@ -1,0 +1,102 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./administerImmunizationWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+<![CDATA[
+	import com.nzion.domain.emr.Immunization;
+	import com.nzion.domain.emr.soap.*;
+	import com.nzion.zkoss.composer.SoapRxComposer;
+	Immunization immunization = (Immunization) arg.get("immunization");
+	com.nzion.zkoss.composer.PatientSoapNoteController patientSoapNoteController = arg.get("patientSoapNoteController");
+	PatientImmunization patientImmunization = arg.get("patientImmunization");
+	Panel immunizationRegisterSectionPanel = arg.get("immunizationRegisterSectionPanel");
+	ImmunizationSection immunizationSoapSection = arg.get("immunizationSoapSection");
+	SoapRxComposer rxComposer = new SoapRxComposer();
+
+]]>
+</zscript>
+	<window id="administerImmunizationWindow">
+	<div sclass="panelCont" height="230px" style="border-width:0px" id="drugDetailSectionDiv">
+		<div width="50%">
+			<label value="Drug" />
+			<hbox style="border:0px">
+			<textbox id="drugBox" readonly="true" value="@{patientImmunization.drug.tradeName}"/>
+			<separator/>
+			<span id="lookUpBtn" sclass="linkBtn linkBtnOn">
+			<a sclass="lookupBtn">
+				<attribute name="onClick">
+						Map m = new HashMap();
+						m.put("patientImmunization",patientImmunization);
+						m.put("drugBox",drugBox);
+						Executions.createComponents("/soap/drugLookup.zul",drugDetailSectionDiv,m);
+					</attribute>
+				Lookup
+			</a>
+			<span/>
+			</span>
+			</hbox>
+			</div>
+			<div width="85%">
+					<label value="Dose" />
+					<combobox id="dosage"
+						model="@{patientImmunization.drug.strengths,load-after='drugDetailSectionDiv.onLookedUp'}"
+						selectedItem="@{patientImmunization.dose,load-after='drugDetailSectionDiv.onLookedUp'}" />
+			</div>
+			<div sclass="col2">
+					<label value="Route" />
+					<combobox id="route"
+								model="@{patientImmunization.drug.routes,load-after='drugDetailSectionDiv.onLookedUp'}"
+								value="@{patientImmunization.route,load-after='drugDetailSectionDiv.onLookedUp'}" />
+			</div>
+			<div sclass="col2">
+					<label value="Date Given" />
+					<datebox value="@{patientImmunization.given}" />
+			</div>
+			<div sclass="col2">
+					<label value="Expiry" />
+					<datebox value="@{patientImmunization.expiry}" />
+			</div><!--
+			<div sclass="col2">
+					<label value="Procedures" />
+					<suggest onLookedUp="patientImmunization.setCpt(self.getResult())" 
+						entity="com.nzion.domain.emr.Cpt" searchcolumns="description" displaycolumns="description" requiredcolumn="description"/>
+			</div>
+			--><div sclass="col2">
+					<label value="Site" />
+					<suggest onLookedUp="patientImmunization.setSite(self.getResult().getDescription());" 
+						entity="com.nzion.domain.drug.Site" searchcolumns="description" displaycolumns="description" requiredcolumn="description"/>
+			</div><!--
+			<div sclass="col2">
+				<vbox>
+					<label value="Diagnosis" />
+					<suggest onLookedUp="patientImmunization.setIcd(self.getResult())" 
+						entity="com.nzion.domain.emr.IcdElement" searchcolumns="description" displaycolumns="description" requiredcolumn="description"/>
+				</vbox>		
+			</div>
+			--><div sclass="col2">
+					<label value="Lot#" />
+					<textbox value="@{patientImmunization.lotNumber}" />
+			</div>
+			<div sclass="col2">
+					<label value="Manufacturer" />
+					<textbox value="@{patientImmunization.manufactuer}" />
+			</div>
+	</div>
+	<hbox>
+						<button label="Save" style="margin-left:10px;">
+							<attribute name="onClick">
+//						Set messages= soapNoteService.checkPatientAllergyToDrug((com.nzion.domain.drug.Drug)patientImmunization.getDrug(),patientSoapNoteController.getPatient());
+//						List driginteractions = soapNoteService.getAllRelatedDrugOtherInteraction(patientImmunization.getDrug(),patientSoapNoteController.getPatient());
+//						if(com.nzion.util.UtilValidator.isNotEmpty(messages) || com.nzion.util.UtilValidator.isNotEmpty(soapNoteService.getAllRelatedDrugOtherInteraction(patientImmunization.getDrug(),patientSoapNoteController.getPatient()))){
+//						Executions.createComponents("/soap/immunizationAlert.zul",null,com.nzion.util.UtilMisc.toMap("messages",messages,"drugInteractions"));
+//						}
+							immunizationSoapSection.addPatientImmunization(patientImmunization);
+							patientSoapNoteController.saveSoapSection();
+							</attribute>
+						</button>
+						<button label="Cancel"
+							onClick="immunizationRegisterSectionPanel.setVisible(false);administerImmunizationWindow.detach()" />
+	</hbox>						
+	</window>
+</zk>

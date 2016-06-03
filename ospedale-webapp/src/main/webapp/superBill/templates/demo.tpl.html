@@ -1,0 +1,248 @@
+<div class="container-fluid">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="panel-title">
+                Patient
+                <button type="button" class="btn btn-danger pull-right" ng-if="selectedPatient.show" ng-click="resetSelectedPatient()"><span class="glyphicon glyphicon-refresh" style="padding-right: 3px"></span>Reset</button>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div id="alert-box"></div>
+            <div class="row" ng-if="selectedPatient.show">
+                <table class="table table-striped table-bordered ">
+                    <tbody>
+                    <tr>
+                        <td style="width: 2%"><img src="../images/tick-mark.png"/></td>
+                        <td style="width: 5%"><span>{{selectedPatient.patientDetails.mrnNumber}}</span></td>
+                        <td style="width: 10%">
+                            <img src="{{selectedPatient.patientDetails.image}}" style="height:40px;width: 40px" ng-if="selectedPatient.patientDetails.image"/>
+                            <img src="../images/blank-human.gif" style="height:40px;width: 40px" ng-if="!selectedPatient.patientDetails.image"/>
+                        </td>
+                        <td style="width: 28%"><span>{{selectedPatient.patientDetails.firstName}}</span>&nbsp;&nbsp;<span>{{selectedPatient.patientDetails.lastName}}</span></td>
+                        <td style="width: 25%"><span>{{selectedPatient.patientDetails.mobileNumber}}</span></td>
+                        <td style="width: 15%"><span>{{getGenderDescription(selectedPatient.patientDetails.genderId)}}</span></td>
+                        <td style="width: 15%"><span>{{selectedPatient.patientDetails.age}}</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <form  name="patient" ng-if="!selectedPatient.show">
+                <div class="row no-margin">
+                    <div class="col-md-3 ">
+                        <div class="form-group">
+                            <label>MRN</label>
+                            <input type="text" class="form-control"  placeholder="MRN" ng-model="user.mrnNumber">
+                        </div>
+                    </div>
+                    <div class="col-md-3 ">
+                        <div class="form-group">
+                            <label >Title</label>
+                            <select class="form-control" ng-model="user.personalTitle">
+                                <option value="Mr">Mr</option>
+                                <option value="Ms">Ms</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3 ">
+                        <div class="form-group">
+                            <label >First Name<span style="color: red">*</span></label>
+                            <input type="text" class="form-control"  placeholder="First Name" ng-model="user.firstName" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3 ">
+                        <div class="form-group">
+                            <label >Last Name</label>
+                            <input type="text" class="form-control"  placeholder="Last Name" ng-model="user.lastName">
+                        </div>
+                    </div>
+                </div>
+                <div class="row no-margin" style="padding-bottom: 15px">
+                    <div class="col-md-3 ">
+                        <label >Mobile Number</label>
+                        <input type="text" class="form-control"  placeholder="Mobile Number" ng-model="user.mobileNumber" ng-pattern="/^[0-9]{10}$|^[0-9]{12}$/" maxlength="12">
+                    </div>
+                    <div class="col-md-3 ">
+                        <label>Gender<span style="color: red">*</span></label>
+                        <select class="form-control" ng-model="user.genderId" ng-options="gender.id as gender.description for gender in genderList" required>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 ">
+                        <label >Age<span style="color: red">*</span></label>
+                        <input type="text" class="form-control"  placeholder="Age" ng-model="user.age" required ng-pattern="/^[0-9]{1,3}$/" maxlength="3">
+                    </div>
+                    <div class="col-md-3 ">
+                        <button type="button" class="btn btn-primary" ng-click="addPatient(user)" ng-disabled="patient.$invalid">
+                            <span class="glyphicon glyphicon-user" style="padding-right: 5px" ></span>Add Patient
+                        </button>
+                        <button type="button" class="btn btn-warning" ng-click="searchPatient(user)">
+                            <span class="glyphicon glyphicon-search" style="padding-right: 5px"></span>Search
+                        </button>
+                        <br>
+                        <span style="font-style: italic;font-size: 10px;font-weight: bold"><span style="color: red;font-size: 14px">*</span>&nbsp;indicates mandatory fields.</span>
+                    </div>
+                </div>
+            </form>
+            <div class="row" ng-if="!selectedPatient.show " ng-show="showSearch">
+                <div style="padding-right: 17px;width: 100%;overflow: auto">
+                    <table class="table table-striped table-bordered" style="margin: 0">
+                        <thead>
+                        <tr class="table-head-width">
+                            <td style="width: 5%">
+                                <span>MRN</span>
+                            </td>
+                            <td style="width: 10%">
+                                <span>Picture</span>
+                            </td>
+                            <td style="width: 30%">
+                                <span>Name</span>
+                            </td>
+                            <td style="width: 25%">
+                                <span>Mobile</span>
+                            </td>
+                            <td style="width: 15%">
+                                <span>Gender</span>
+                            </td>
+                            <td style="width: 15%">
+                                <span>Age</span>
+                            </td>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div style="width: 100%;overflow-y: scroll;max-height: 200px" when-scrolled='searchMorePatients()'>
+                    <table class="table table-striped table-bordered">
+                        <tbody>
+                        <tr ng-repeat="pat in patients" ng-click="selectPatient(pat)" style="cursor: pointer">
+                            <td style="width: 5%"><span>{{pat.mrnNumber}}</span></td>
+                            <td style="width: 10%">
+                                <img src="{{pat.image}}" style="height:40px;width: 40px" ng-if="pat.image"/>
+                                <img src="../images/blank-human.gif" style="height:40px;width: 40px" ng-if="!pat.image"/></td>
+                            <td style="width: 30%"><span>{{pat.firstName}}</span>&nbsp;&nbsp;<span>{{pat.lastName}}</span></td>
+                            <td style="width: 25%"><span>{{pat.mobileNumber}}</span></td>
+                            <td style="width: 15%"><span>{{getGenderDescription(pat.genderId)}}</span></td>
+                            <td style="width: 15%"><span>{{pat.age}}</span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <progressbar class="progress-striped active" value="100" type="warning" ng-show="showProgressBar"><span class="glyphicon glyphicon-refresh" style="padding-right: 10px"></span>Loading please wait...</progressbar>
+                </div>
+            </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <progressbar></progressbar>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4" ng-include="'../superBill/templates/labTests.tpl.html'">
+                    </div>
+                    <div class="col-md-4" ng-include="'../superBill/templates/casualityAndRadiology.tpl.html'">
+                    </div>
+                    <div class="col-md-4" ng-include="'../superBill/templates/doctor.tpl.html'">
+                    </div>
+                </div>
+                <!--<div class="row">
+                    <div class="col-md-12">
+                        <div class="well well-sm pull-right">
+                            <h5>Total : {{total}}</h5>
+                        </div>
+                    </div>
+                </div>-->
+                <div class="row">
+                    <div class="col-md-12" style="padding-left: 205px">
+                        <button class="btn btn-sm btn-success" ng-click="showTotalBill()" ng-disabled="isTotalBillDisabled()"><span class="glyphicon glyphicon-eye-open" style="padding-right: 5px"></span>View Bill</button>
+                        <kbd style="display: inline-block;font-weight: bolder;padding: 5px;font-size: 100%"><span style="font-weight: bold">Total : <span class="WebRupee">&#x20B9;</span>&nbsp;{{total}}</span></kbd>
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+<style>
+    .form-control-custom {
+        border: 2px solid #FF9900;
+        border-top: none;
+        border-right: none;
+        border-left: none;
+        height: 19px;
+        padding: 1px 5px;
+        display: inline-block;
+        width: 70%;
+        font-size: 12px;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        border-radius: 3px;
+    }
+    .form-control-custom:focus{
+        outline: 0;
+    }
+    .list-group-item-custom{
+        padding-top: 1px;
+        padding-bottom: 1px;
+    }
+
+    .drop-down{
+        z-index: 1000;
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        background-color: whitesmoke;
+        border: 1px solid #5d5958;
+        border-top: none;
+        right: 16px;
+        top:43px;
+        -webkit-border-bottom-right-radius: 4px;
+        -webkit-border-bottom-left-radius: 4px;
+        -moz-border-radius-bottomright: 4px;
+        -moz-border-radius-bottomleft: 4px;
+        border-bottom-right-radius: 4px;
+        border-bottom-left-radius: 4px;
+
+    }
+    .white-mask{
+        background: #fff;
+        width: 159px;
+        height: 10px;
+        position: absolute;
+        z-index: 1000000;
+        right: 0;
+        top: -5px;
+        opacity: .9;
+    }
+    .bill{
+        float: right;
+        z-index: 1000;
+        border: 1px solid #5d5958;
+        border-bottom:none;
+        -webkit-border-top-left-radius: 4px;
+        -webkit-border-top-right-radius: 4px;
+        -moz-border-radius-topleft: 4px;
+        -moz-border-radius-topright: 4px;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        width: 92px;
+        height: 42px;
+        position: relative;
+        top: -10px;
+        right: -15px;
+        border-bottom-left-radius: 0px;
+        border-bottom-right-radius: 0px;
+    }
+    .transparent{
+        /*background: transparent\7;*/
+        background: none repeat scroll 0 0 rgba(0, 0, 0, 0.74);
+        filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#4c000000, endColorstr=#4c000000);
+        width: 95.5%;
+        z-index: 1050;
+        border-radius: 9px;
+    }
+    .no-margin .col-md-3 .form-group label{
+        margin-bottom: 0px;
+    }
+    .no-margin .col-md-3 .form-group{
+        margin-bottom: 5px;
+    }
+
+
+</style>

@@ -1,0 +1,62 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addSoapNoteSetupWin"?>
+<?component name="enumeration" class="com.nzion.view.component.EnumerationDropdown"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript><![CDATA[
+import com.nzion.domain.SoapNoteType;
+import com.nzion.service.common.CommonCrudService;;
+
+SoapNoteType soapNoteType = arg.get("entity");
+if(soapNoteType == null)
+	soapNoteType = new SoapNoteType();
+com.nzion.domain.SlotType.CHARGETYPE[] typesArrays = com.nzion.domain.SlotType.CHARGETYPE.values();
+List typesList= Arrays.asList(typesArrays);
+]]></zscript>
+<window closable="true" id="addSoapNoteSetupWin" mode="modal" width="40%" position="center,top" >
+	 <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Visit Type</h:small>
+                 <button type="button" zclass="close" onClick="addSoapNoteSetupWin.detach();">×</button>
+            </h:h1>
+        </div>
+	<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span4">
+						<label value="Name" mold="required" />
+						<textbox id = "soapNote" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" value="@{soapNoteType.name,save-when='Save.onClick'}" constraint="no empty"/>
+					</div>
+					</div>
+			<div zclass="row-fluid">
+                <div zclass="span4">
+						<label value="Charge Type" mold="required" />
+						<combobox model="@{typesList}" selectedItem="@{soapNoteType.chargeType,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" readonly="true">
+								<comboitem self="@{each='vt'}" label="@{vt.description}" value="@{vt}"/>
+							</combobox>
+					</div>
+					</div>
+					 <div zclass="row-fluid">
+				      <div zclass="span6">
+						<label value="Description"></label> 
+						<textbox rows="2" cols="50" id = "soapNoteDescription" sclass="span12"  value="@{soapNoteType.description,save-when='Save.onClick'}"/>
+					</div>
+				  </div>
+				  
+				  <div zclass="row-fluid">
+				      <div zclass="span6">
+						<label value="Default Price"></label> 
+						<decimalbox  id = "soapNoteDefaultPrice" sclass="span12"  value="@{soapNoteType.defaultPrice,save-when='Save.onClick'}"/>
+					</div>
+					</div>
+		</div>	
+	<div sclass="panelFoot">
+		<button label="Save" id="Save" zclass="btn-success btn">
+			<attribute name="onClick">
+			commonCrudService.save(soapNoteType);
+			addSoapNoteSetupWin.detach();
+			</attribute>
+		</button>
+		<button label="Cancel" forward="onClick=onCancel"/>
+	</div>
+	</window>
+</zk>

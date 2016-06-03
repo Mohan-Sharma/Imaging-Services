@@ -1,0 +1,103 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<?xel-method prefix="c" name="s" class="com.nzion.util.UtilDisplay"  signature="String clobToString(java.sql.Clob)"?>
+<zscript>
+	com.nzion.domain.drug.Drug drug = arg.get("drugValue");
+</zscript>
+<window id="monographWindow">
+		<panel >
+		<zscript><![CDATA[
+			   if(drug != null){
+				   monographWindow.doModal();
+			   	   monographWindow.setClosable(true);	
+			   	   monographWindow.setWidth("65%");
+			   	   monographWindow.setHeight("80%");
+				   monographWindow.setTitle("Monograph for " +  drug.getTradeName());
+			   }
+		    drug = drug == null ? d : drug; 
+	       drug = commonCrudService.getById(com.nzion.domain.drug.Drug.class, drug.getId());            
+	       com.nzion.domain.drug.DrugMonographs drugMonographs=drug.getDrugGroup().getMonographs();
+		]]></zscript>
+			<panelchildren>
+			<hbox align="center" style="margin: 10px;">
+				<a href="#description">Description</a> | 
+				<a href="#indication">Indication/Dosage</a> | 
+				<a href="#patientEducation">Patient Education</a> | 
+				<a href="#administration">Administration</a> | 
+				<a href="#interactions">Interactions</a> | 
+				<a href="#adverseReactions">Adverse Reactions</a> | 
+				<a href="#ingredients">Ingredients</a> | 
+				<a href="#contraindications">Contraindications/Precautions</a>
+			</hbox>
+			<n:a name="description"><n:hr/></n:a>
+			<html>
+				${c:s(drugMonographs.descriptionMonograph)}
+			</html>
+			<n:hr/>
+			<html>
+				${c:s(drugMonographs.kineticsMonograph)}
+			</html>
+			<n:hr/>
+			<html>
+				${c:s(drugMonographs.mechanismMonograph)}
+			</html>
+			<n:a name="indication">Indication/Dosage<n:hr/></n:a>
+			<html>
+				${c:s(drugMonographs.indicationMonograph)}
+			</html>
+			<n:a name="patientEducation">Patient Education<n:hr/></n:a>
+			<html>
+				${drugMonographs.administration}
+			</html>
+			<n:hr/>
+			<html>
+				${drugMonographs.contraindication}
+			</html>
+			<n:hr/>
+			<html>
+				${drugMonographs.description}
+			</html>
+			<n:hr/>
+			<html>
+				${drugMonographs.interaction}
+			</html>
+			<n:hr/>
+			<html>
+				${drugMonographs.missed}
+			</html>
+			<n:hr/>
+			<html>
+				${drugMonographs.monitor}
+			</html>
+			<n:hr/>
+			<html>
+				${drugMonographs.sideEffects}
+			</html>
+			<n:hr/>
+			<html>
+				${drugMonographs.storage}
+			</html>
+			<n:a name="administration">Administration<n:hr/></n:a>
+			<html>
+				${c:s(drugMonographs.administrationMonograph)}
+			</html>
+			<n:a name="interactions">Interactions<n:hr/></n:a>
+			<html>
+				${c:s(drugMonographs.interactionMonograph)}
+			</html>
+			<n:a name="adverseReactions">Adverse Reactions<n:hr/></n:a>
+			<html>
+				${c:s(drugMonographs.administrationMonograph)}
+			</html>
+			<n:a name="ingredients">Ingredients<n:hr/></n:a>
+			<html>
+				${c:s(drugMonographs.ingredientsMonograph)}
+			</html>
+			<n:a name="contraindications">Contraindications/Precautions<n:hr/></n:a>
+			<html>
+				${c:s(drugMonographs.precautionsMonograph)}
+			</html>
+			</panelchildren>
+		</panel>
+</window>
+	</zk>

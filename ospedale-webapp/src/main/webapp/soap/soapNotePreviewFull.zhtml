@@ -1,0 +1,524 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./container"?>
+<html xmlns:x="http://www.zkoss.org/2005/zul" xmlns:zk="http://www.zkoss.org/2005/zk">
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<?xel-method prefix="displayName" name="fn" class="com.nzion.util.ViewUtil" signature="String getFormattedName(java.lang.Object)"?>
+	<?xel-method prefix="dayInterval" name="di" class="com.nzion.util.UtilDateTime" signature="int getIntervalInDays(java.util.Date,java.util.Date)"?>
+	<style>
+		.printBody{
+			font: 12px "Lucida Grande", Verdana, Arial, sans-serif;
+			color: #333333;
+		}
+	</style>
+	<body class="printBody">	
+		<zk:zscript>
+		<![CDATA[
+	import com.nzion.enums.*;
+	import com.nzion.domain.*;
+	import com.nzion.domain.person.*;
+	import com.nzion.domain.emr.*;
+	import com.nzion.domain.emr.soap.*;
+	import com.nzion.zkoss.composer.*;
+	import com.nzion.util.Infrastructure;
+	import com.nzion.domain.emr.ReferalLetterTemplate;
+	import com.nzion.service.SoapNoteService;
+	import com.nzion.domain.emr.soap.vitalsign.VitalSignReading;
+
+	SoapNoteService soapNoteService = Infrastructure.getSpringBean("soapNoteService");
+	com.nzion.service.common.CommonCrudService commonCrudService = Infrastructure.getSpringBean("commonCrudService");
+	String scheduleId = param.get("scheduleId") != null ? param	.get("scheduleId")[0] : null;
+	Set referralModules = null;
+	if(Executions.getCurrent().getParameter("soapReferralId") != null){
+		Long soapReferralId = new Long(Executions.getCurrent().getParameter("soapReferralId"));
+		SoapReferral soapReferral = commonCrudService.getById(SoapReferral.class,Long.valueOf(soapReferralId));
+		referralModules = soapReferral.getModules() ;
+	}
+	PatientSoapNoteController patientSoapNoteController = null;
+	patientSoapNoteController = new PatientSoapNoteController(scheduleId);
+	PatientSoapNote soapNote = patientSoapNoteController.getSoapNote();
+		
+	List patientSoapNoteModules =  patientSoapNoteController.getModules();
+	List moduleNames = new ArrayList();
+
+	if(referralModules == null){
+		for(SoapModule soapModule : patientSoapNoteModules)
+			moduleNames.add(soapModule.getModuleName());
+	}else{
+		for(SoapModule module : referralModules)
+			moduleNames.add(module.getModuleName());
+	}
+		
+	ChiefComplainSection section =(ChiefComplainSection)soapNoteService.getSoapSection(soapNote,ChiefComplainSection.class);
+	Set complaints = section.getPatientChiefComplaints();
+	RosSection rosSectionSentence = null;
+	if(moduleNames.contains(RosSection.MODULE_NAME))
+		rosSectionSentence = (RosSection)soapNoteService.getSoapSection(soapNote,RosSection.class);
+	DiagnosisSection diagnosisSection = null;
+	if(moduleNames.contains(DiagnosisSection.MODULE_NAME))
+		diagnosisSection = (DiagnosisSection)soapNoteService.getSoapSection(soapNote,DiagnosisSection.class);
+	ExaminationSection	examSection = null;
+	if(moduleNames.contains(ExaminationSection.MODULE_NAME))
+		examSection = (ExaminationSection)soapNoteService.getSoapSection(soapNote,ExaminationSection.class);
+	RxSection rxSection = null;
+	if(moduleNames.contains(RxSection.MODULE_NAME))
+		rxSection = (RxSection)soapNoteService.getSoapSection(soapNote,RxSection.class);
+	RecommendationSection recommendationSection = null;
+	if(moduleNames.contains(RecommendationSection.MODULE_NAME)){
+	 recommendationSection = (RecommendationSection)soapNoteService.getSoapSection(soapNote,RecommendationSection.class);
+	SOAPPlan patientEducationPlan = recommendationSection.retrieveSoapPlanAnyWay("PatientEducation");
+	SOAPPlan bmiPlan = recommendationSection.retrieveSoapPlanAnyWay(RecommendationSection.BMI_PLAN);
+	SOAPPlan tobaccoCessationPlan = recommendationSection.retrieveSoapPlanAnyWay(RecommendationSection.TOBACCO_PLAN);
+	}
+	String pageName = Executions.getCurrent().getParameter("pageName");
+	Long scheduleIdLong = new Long(param.get("scheduleId")[0]);
+	com.nzion.domain.Schedule schedule = commonCrudService.getById(com.nzion.domain.Schedule.class, scheduleIdLong);
+	com.nzion.domain.Patient patient = schedule.getPatient();
+	com.nzion.domain.Provider provider = (com.nzion.domain.Provider) schedule.getPerson();
+	com.nzion.domain.Location location = schedule.getLocation();
+	com.nzion.domain.Practice practice=com.nzion.util.Infrastructure.getPractice();
+	List soapAddendums = soapNoteService.getAddendumsFor(soapNote);
+	boolean showPrintButton = false;
+	Person person = Infrastructure.getLoggedInPerson();
+   	boolean providerLoggedIn = com.nzion.util.Infrastructure.getLoggedInPerson().equals(soapNote.getProvider()) && !Schedule.STATUS.SOAPSIGNEDOUT.equals(patientSoapNoteController.getSchedule().getStatus());
+	boolean soapSignedOut = Schedule.STATUS.SOAPSIGNEDOUT.equals(soapNote.getSchedule().getStatus());
+	if(person instanceof Patient)
+		showPrintButton = true;
+	if(com.nzion.util.UtilValidator.isNotEmpty(pageName))
+		showPrintButton = true;
+	Date signedOutDate = soapNote.getSchedule().getSignedOutTime();
+	String dateInAMPM = com.nzion.util.UtilDateTime.format(signedOutDate,signedOutDate);
+	boolean editable=(arg.get("editable")!=null);
+	
+//	if(com.nzion.util.UtilValidator.isNotEmpty(referralModules)){
+//		for(SoapModule soapModule : referralModules)
+//			moduleNames.add(soapModule.getModuleName());
+//	}
+	Date date = new Date();
+	]]>
+</zk:zscript>
+		<x:button label="Print" if="${showPrintButton}">
+			<attribute zk:name="onClick">
+			<![CDATA[
+	if (person instanceof Patient) {
+		soapNote.setPrintedByPatient(true);
+		soapNote.setPrintedByPatientOn(new Date());
+	} else if (person instanceof Provider) {
+		soapNote.setPrintedByProvider(true);
+		soapNote.setPrintedByProviderOn(new Date());
+	}
+	soapNoteService.saveSoapNote(soapNote);
+	self.setVisible(false);
+	Clients.print();
+]]>
+			</attribute>
+		</x:button>
+		
+		<div id="referralpreviewDetailsDiv" if="${'referralPreview' eq pageName &amp;&amp; not empty moduleNames}">
+		<zk:zscript>
+				<![CDATA[
+		FamilyHistorySection familyHxSection = null;
+		SocialHistorySection socialHistorySection = null;
+		PastHistorySection pastHxSection = null;
+		ProblemListSection problemListSection = null;
+		MedicationHistorySection medHxSection = null;
+		AllergySection allergySection = null;
+		BirthHistorySection birthHxSection = null;
+		VitalSignSection vitalSignSection = null;
+		ImmunizationSection immunizationSection = null;		
+		LabOrderSection labOrderSection = null;	
+		ReferralSection refferalSection = null;
+		ImageSection imageSection = null;
+		PreAdmissionSection preAdmissionSection = null;
+		List allOtherSoapSections = commonCrudService.findByEquality(OtherSoapNoteSection.class,new String[]{"soapNote"},new java.lang.Object[]{soapNote});
+		List eligibleOtherSoapSections = new ArrayList();
+		for(OtherSoapNoteSection otherSoapNoteSection : allOtherSoapSections){
+			if(referralModules.contains(otherSoapNoteSection.getSoapModule()))
+				eligibleOtherSoapSections.add(otherSoapNoteSection);
+		}
+		boolean noproblems = false;
+		boolean noKnownProblems = false;
+		List administeredImmunizations = new ArrayList();
+		List vitalSignReadings = null;
+		VitalSignReading reading = null;
+		if(moduleNames.contains(ImageSection.MODULE_NAME))
+			imageSection = (ImageSection)soapNoteService.getSoapSection(soapNote,ImageSection.class);
+		if(moduleNames.contains(FamilyHistorySection.MODULE_NAME))
+			familyHxSection = (FamilyHistorySection)soapNoteService.getSoapSection(soapNote,FamilyHistorySection.class); 
+		if(moduleNames.contains(SocialHistorySection.MODULE_NAME))	
+			socialHistorySection = (SocialHistorySection)soapNoteService.getSoapSection(soapNote,SocialHistorySection.class);
+		if(moduleNames.contains(PastHistorySection.MODULE_NAME))	
+			pastHxSection = (PastHistorySection)soapNoteService.getSoapSection(soapNote,PastHistorySection.class);
+		if(moduleNames.contains(ProblemListSection.MODULE_NAME)){
+			problemListSection = (ProblemListSection)soapNoteService.getSoapSection(soapNote,ProblemListSection.class);
+			noproblems = problemListSection.getNoKnownProblem()==null&&problemListSection.getPatientIcds().size()==0;
+			noKnownProblems = problemListSection.getNoKnownProblem()!=null && problemListSection.getNoKnownProblem().booleanValue();
+			}
+		if(moduleNames.contains(MedicationHistorySection.MODULE_NAME))	
+			medHxSection = (MedicationHistorySection)soapNoteService.getSoapSection(soapNote,MedicationHistorySection.class);
+		if(moduleNames.contains(AllergySection.MODULE_NAME))	
+			allergySection = (AllergySection)soapNoteService.getSoapSection(soapNote,AllergySection.class);
+		if(moduleNames.contains(BirthHistorySection.MODULE_NAME))
+			birthHxSection = (BirthHistorySection)soapNoteService.getSoapSection(soapNote,BirthHistorySection.class);
+		if(moduleNames.contains(VitalSignSection.MODULE_NAME)){
+			vitalSignSection = (VitalSignSection)soapNoteService.getSoapSection(soapNote,VitalSignSection.class);
+			vitalSignReadings = vitalSignSection.getReadings(); 
+	
+			boolean noVitalSignReadings = true;
+			if(vitalSignReadings.size()>0){
+				noVitalSignReadings=false;
+				reading=vitalSignReadings.get(vitalSignReadings.size() -1);
+			}
+		}
+		if(moduleNames.contains(ImmunizationSection.MODULE_NAME)){	
+			immunizationSection = (ImmunizationSection) soapNoteService.getSoapSection(soapNote,ImmunizationSection.class);
+			Set immunizations = immunizationSection.getImmunizations();
+			for (com.nzion.domain.emr.soap.PatientImmunization patientImmunization : immunizations) {
+				if ("ADMINISTERED".equalsIgnoreCase(patientImmunization.getStatus()))
+				administeredImmunizations.add(patientImmunization);
+			}
+		}	
+		if(moduleNames.contains(LabOrderSection.MODULE_NAME))
+			labOrderSection = (LabOrderSection) soapNoteService.getSoapSection(soapNote,LabOrderSection.class);
+		if("referralPreview".equals(pageName))	
+			refferalSection = (ReferralSection)soapNoteService.getSoapSection(soapNote,ReferralSection.class);
+		if(moduleNames.contains(PreAdmissionSection.MODULE_NAME))
+			preAdmissionSection = (PreAdmissionSection)soapNoteService.getSoapSection(soapNote,PreAdmissionSection.class);
+		boolean hpiModule = moduleNames.contains("HPI"); 
+		boolean rosModule = moduleNames.contains(RosSection.MODULE_NAME);
+		boolean diagnosisModule  = moduleNames.contains(DiagnosisSection.MODULE_NAME);
+		boolean recommendationModule = moduleNames.contains(RecommendationSection.MODULE_NAME);
+		boolean examinationModule = moduleNames.contains(ExaminationSection.MODULE_NAME);
+		boolean prescriptionModule = moduleNames.contains(RxSection.MODULE_NAME);
+		Practice practice = Infrastructure.getPractice();
+		]]>
+		</zk:zscript>		
+		</div>
+	
+	<div id="container" style="background:white;margin:4px;">
+			<div align="center">
+			<div width="98%">
+			<table align="center">
+			<tr>
+				<td align="center"><strong style="font-size:20px">${practice.practiceName}</strong></td>
+			</tr>
+			<tr>
+				<td>
+				<strong style="font-size:15px;margin-right:2px;padding:10px">${location.contacts.postalAddress.address1}</strong>
+				<strong style="font-size:15px;margin-right:2px;padding:10px">${location.contacts.postalAddress.address2}</strong>
+				<strong style="font-size:15px;margin-right:2px;padding:10px">${location.contacts.postalAddress.city},</strong>
+				<strong style="font-size:15px;margin-right:2px;padding:10px">${location.contacts.postalAddress.stateProvinceGeo}</strong>
+				<strong style="font-size:15px;margin-right:2px;padding:10px">${location.contacts.postalAddress.postalCode}</strong>						
+				</td>
+				</tr>
+				<tr>
+				<td>
+				<strong style="font-size:15px;margin-right:2px;padding:10px">Tel :${location.contacts.officePhone}</strong>
+				<strong style="font-size:15px;padding:10px">Fax :${location.contacts.faxNumber}</strong>
+				</td>
+			</tr>
+			</table>
+			</div>			
+		   <div width="98%" style=" border:1px #333 solid;">
+			<table align="center" width="98%" cellpadding="2">
+			<tr>
+				<td style="text-align:left;width:10%;font-size:15px" colspan="3"><strong>Doctor Name : <span style="margin-top:2px"> <label style="font-weight:bold;">${displayName:fn(provider)}</label> </span></strong></td>
+				
+			</tr>
+			<div if="${!(empty soapNote.provider.regdNo)}">
+			<tr >
+			<td  style="text-align:left;width:10%;font-size:15px" colspan="3"><strong>Regd No : <span style="margin-top:2px"> <label style="font-weight:bold;">${soapNote.provider.regdNo}</label> </span></strong></td>
+			</tr>	
+			</div>		
+			</table>			
+			<br/>
+			<table width="98%" cellpadding="2">
+			<tr>
+				<td style="font-size:15px">
+				<strong>Patient: </strong> 
+				<span style="margin-top:2px"> <label style="font-weight:bold;">${displayName:fn(patient)},</label> </span>
+				${patientSoapNoteController.patientAge},${patient.gender}.
+				</td>
+			</tr>
+			</table>
+			</div> 
+			
+			<br/>
+			<div width="98%" style=" border:1px #333 solid;" if="${refferalSection != null}">
+			<table width="98%" cellpadding="2" if="${refferalSection != null}">
+				<tr>
+					<td style="font-size:15px"><strong>Referred To :</strong>${displayName:fn(refferalSection.soapReferral.referral)}</td>
+				</tr>
+				<tr>
+					<td style="font-size:15px">
+					<strong>Address: </strong>	${refferalSection.soapReferral.referral.contacts.postalAddress.address1}
+						${refferalSection.soapReferral.referral.contacts.postalAddress.address2}
+						${refferalSection.soapReferral.referral.contacts.postalAddress.city},
+						${refferalSection.soapReferral.referral.contacts.postalAddress.stateProvinceGeo}
+						${refferalSection.soapReferral.referral.contacts.postalAddress.postalCode}						
+						${refferalSection.soapReferral.referral.contacts.officePhone}
+					</td>
+				</tr>
+				<tr if="${!(empty refferalSection.soapReferral.notes)}">
+					<td style="font-size:15px"><strong>Referral Notes : </strong>${refferalSection.soapReferral.notes}</td>
+				</tr>
+			</table>
+			</div>
+			</div>
+			<br/>
+			<div style="margin-left:10px" if="${'referralPreview' eq pageName}">
+				<label style="font-size:15px"><strong>Patient Medication Details as on ${display:fd(date)} </strong></label>
+				<br/>
+			<label>_______________________________________________________________________________________________________________________________________________________________________</label>
+			</div>	 
+			<div style=" border:1px #333 solid;margin:4px;">
+			<div style="margin-left:10px;margin-top:6px">
+				<label style="font-size:13px"><b>Chief Complaints:</b>${section.sentence}</label>
+			</div>
+			<br/>
+			<div style="margin-left:10px" if="${hpiModule || 'referralPreview' ne pageName}">
+				<label style="font-size:13px"><b>History of Present Illness</b></label>
+			<table width="100%" border="0px" if="${not empty complaints}">
+				<tr forEach="${complaints}">
+						<td><label>${each.chiefComplaint}</label></td>
+					<tr>	
+						<td><label>${each.sentence}</label></td>
+					</tr>	
+				</tr>
+			</table>
+			</div>
+			<br/>
+			<div style="margin-left:10px;" id="familyHx" if="${familyHxSection != null &amp;&amp; !(empty familyHxSection.familyIllnesses)}">
+				<label style="font-size:13px"><b>${familyHxSection.soapModule.moduleDescription}</b></label>
+				<table width="100%" border="0px">
+				<tr forEach="${familyHxSection.familyIllnesses}">
+						<td>Patient's ${each.member}<label if="${!(empty each.name)}">,${each.name} </label> 
+						<label if="${!(empty each.age)}"> aged ${each.age}</label> is having/had illness ${each.icd.code}${each.icd.description}
+						 <label if="${each.approximateDate != null}"> from ${display:fd(each.approximateDate)}</label> 
+						 <label if="${each.status != null}"> who is ${each.status}</label> 
+						 <label if="${each.healthStatus != null}"> and who's health status is ${each.healthStatus}.</label> </td>
+				</tr>
+				</table>
+			</div>
+			<br/>
+			<div style="margin-left:10px;" id="socialHx" 
+			if="${socialHistorySection != null &amp;&amp; socialHistorySection.patientSocialHistory != null &amp;&amp; 
+			!(empty socialHistorySection.patientSocialHistory.sentence) }">
+				<label style="font-size:13px"><b>${socialHistorySection.soapModule.moduleDescription}</b></label>
+			<br/>
+			<label style="font-weight:normal">${socialHistorySection.patientSocialHistory.sentence}</label>
+				<label>Comments:</label>
+				<label>${socialHistorySection.patientSocialHistory.comments}</label>
+			</div>
+			<br/>
+			
+			<div style="margin-left:10px;" if="${pastHxSection != null}">
+			<div if="${not empty pastHxSection.patientPastOperationHitories}">
+				<label style="font-size:13px"><b>Past Surgeries</b></label>
+			<table width="100%" border="0px">
+			<tr forEach="${pastHxSection.patientPastOperationHitories}">
+				<td>Procedures 
+					<div forEach="${each.cpts}">
+					<label>${each.id}</label><label>${each.description}</label>
+					</div>
+				were performed on patient <label if="${!(empty each.operatedBy)}"> by  ${each.operatedBy} </label>
+				<label if="${each.occuranceDate != null}"> on ${display:fd(each.occuranceDate)}</label>
+				<label if="${!(empty each.locationName)}"> in ${each.locationName}</label>	
+				</td>
+			</tr>
+			</table>
+			</div>
+			<br/>
+			<div if="${!(empty pastHxSection.patientPastTreatmentHistories)}">
+				<label style="font-size:13px"><b>Past Treatments</b></label>
+				<table width="100%" border="0px">
+				<tr forEach="${pastHxSection.patientPastTreatmentHistories}">
+					<td>Patient was admitted on ${display:fd(each.admissionDate)} as ${each.admissionType} 
+						<label if="${!(empty each.hospitalName)}"> in hospital ${each.hospitalName}</label> 
+						<label if="${!(empty each.admissionReason)}"> due to ${each.admissionReason}.</label>
+					</td>
+				</tr>
+				</table>
+			</div>
+			<br/>
+			</div>
+			<div style="margin-left:10px;" if="${problemListSection != null &amp;&amp; !(empty problemListSection.patientIcds)}">
+				<label style="font-size:13px"><b>${problemListSection.soapModule.moduleDescription}</b></label>
+			<label if="${noKnownProblems}">No Known problems as per Patient statement.</label>
+			<table width="100%" border="0px" if="${not empty problemListSection.patientIcds}">
+				<tr forEach="${problemListSection.patientIcds}">
+						<td>				
+						<div if="${not empty each.icdElement}">
+							<label unless="${each.status.enumCode eq 413322009}">${each.icdElement.ccsLabel} with Status ${each.status} and onset date ${display:fd(each.onSetDate)}</label>
+							<label if="${each.status.enumCode eq 413322009}">
+							${each.icdElement.ccsLabel} with Status ${each.status}, onset date ${display:fd(each.onSetDate)} and resolved on ${display:fd(each.resolutionDate)}
+							</label>
+						</div>
+						</td>
+						<td>
+						<div if="${empty each.icdElement}">
+							<label unless="${each.status.enumCode eq 413322009}">${each.description} with Status ${each.status} and onset date ${display:fd(each.onSetDate)}</label>
+							<label if="${each.status.enumCode eq 413322009}">
+							${each.description} with Status ${each.status}, onset date ${display:fd(each.onSetDate)} and resolved on ${display:fd(each.resolutionDate)}
+							</label>
+						</div>
+						</td>
+				</tr>
+				</table>
+			<br />
+		</div>
+		<div style="margin-left:10px;" if="${medHxSection != null &amp;&amp; !(empty medHxSection.patientRxs)}">
+				<label style="font-size:13px"><b>${medHxSection.soapModule.moduleDescription}</b></label>
+			<br/>
+			<span forEach="${medHxSection.patientRxs}">
+				<b>${each.drug.tradeName} ${each.drug.genericName}</b>(${each.drugStrength}) ${each.drugDosageRoute} ${each.quantity} ${each.quantityQualifier} ${each.drugDirection}, 
+			 <label if="${each.startDate != null &amp;&amp; each.endDate!= null}">for ${dayInterval:di(each.startDate,each.endDate)} days</label>, 
+			 <br/></span>
+		</div>
+		<br/>
+		<div style="margin-left:10px;" if="${allergySection != null &amp;&amp; !(empty allergySection.patientAllergies)}">
+				<label style="font-size:13px"><b>${allergySection.soapModule.moduleDescription}</b></label>
+		<div>
+			Patient has reported to have 
+				<span forEach="${allergySection.patientAllergies}">
+					<b>${each.allergy}</b><label if="${!(empty each.allergyType)}"> - ${each.allergyType}</label><label if="${!(empty each.reactionName)}"> - ${each.reactionName}</label><label if="${!(empty each.severity)}"> - ${each.severity} </label>    
+				</span>
+		</div>
+		</div>
+		<div style="margin-left:10px;" if="${rosSectionSentence != null &amp;&amp; !(empty rosSectionSentence.patientRosQAs) &amp;&amp;(rosModule || 'referralPreview' ne pageName)}">
+		<br/>
+			<label style="font-size:13px"><b>${rosSectionSentence.soapModule.moduleDescription}</b></label>
+		<div>
+		All organ systems were found Normal apart from 	<span forEach="${rosSectionSentence.patientRosQAs}">
+				<label if='${each.normal eq "ABNORMAL"}' style="padding-right:5px">${each.organSystem.desc} ${each.freeText}</label>
+				</span>
+		</div>		
+		<label style="font-size:12px;font-weight:bold;" if="${rosSectionSentence.sectionComments!=null}">Comments</label>
+		<label if="${rosSectionSentence.sectionComments!=null}">${rosSectionSentence.sectionComments}</label>
+		</div>
+		<br/>
+		<div style="margin-left:10px;" id="BirthHx" if="${birthHxSection != null &amp;&amp; birthHxSection.patientBirthHistory!= null}">
+			<label style="font-size:13px"><b>${birthHxSection.soapModule.moduleDescription}</b></label>
+		<p>
+		<label if="${not empty birthHxSection.patientBirthHistory.sentence}">${birthHxSection.patientBirthHistory.sentence}</label>
+		<br/>
+		<label if="${birthHxSection.patientBirthHistory.comments!=null}">Comments:${birthHxSection.patientBirthHistory.comments}</label>
+		</p>
+		<br/>
+		</div>
+		<div if="${vitalSignSection != null &amp;&amp; reading!= null}">
+			<div style="margin-left:10px" id="vitalSign" unless="${noVitalSignReadings}">
+				<label style="font-size:13px"><b>${vitalSignSection.soapModule.moduleDescription}</b></label>
+				 Temperature: ${reading.temperature}, Blood Pressure: ${reading.bloodPressure}, Pulse: ${reading.pulse}, Respiration: ${reading.respiration}
+			</div>
+		<br/>
+		</div>
+		<div style="margin-left:10px;" if="${(examinationModule ||'referralPreview' ne pageName) &amp;&amp; (examSection != null) &amp;&amp;(not empty examSection.patientExaminationQAs)}">
+			<label style="font-size:13px"><b>${examSection.soapModule.moduleDescription}</b></label>
+		<div>
+				All organ systems were found Normal during Physical Examination apart from 	<span forEach="${examSection.patientExaminationQAs}">
+				<label if='${each.normal eq "ABNORMAL"}' style="padding-right:5px">${each.organSystem.desc} ${each.freeText}</label>
+				</span>
+			<label style="font-size:12px;" if="${examSection.examinationNote!=null}" >Comments:</label>
+			<label if="${examSection.examinationNote!=null}">${examSection.examinationNote}</label>
+			<br />
+		</div>
+		</div>
+		<div style="margin-left:10px" if="${immunizationSection != null &amp;&amp; !(empty administeredImmunizations)}">
+			<label style="font-size:13px"><b>${immunizationSection.soapModule.moduleDescription}</b></label>
+		<div style="margin-left:10px" unless="${empty administeredImmunizations}">
+			Patient was administered 
+			<span forEach="${administeredImmunizations}">
+				<b>${each.immunization.fullVaccineName}</b> ${each.route}, 
+			</span>
+			on this visit. 
+		</div>
+		</div>
+		<br/>
+		<div style="margin-left:10px;" 
+		if="${diagnosisSection != null &amp;&amp; (!(empty diagnosisSection.icds) || !(empty diagnosisSection.cpts)) &amp;&amp; (diagnosisModule || 'referralPreview' ne pageName)}">
+			<label style="font-size:13px"><b>${diagnosisSection.soapModule.moduleDescription}</b></label>
+		<div if="${diagnosisSection.icds != null &amp;&amp; !(empty diagnosisSection.icds)}">
+		Patient was diagnosed with <label forEach="${diagnosisSection.icds}" style="font-weight:bold;padding-right:5px">${each.icdElement.description}, </label>
+		<br/>
+		</div>
+		<div if="${diagnosisSection.cpts != null &amp;&amp; !(empty diagnosisSection.cpts)}">
+			Procedures performed on the Patient in this encounter  <label forEach="${diagnosisSection.cpts}">${each.cpt.description}</label>
+		</div>
+		<label style="font-size:13px" if="${diagnosisSection.soapNote.patient.dateOfDeath != null}"><b>Patient Death Details</b></label><br/>
+			<label if="${diagnosisSection.soapNote.patient.dateOfDeath != null }">Patient died on ${display:fd(diagnosisSection.soapNote.patient.dateOfDeath)}</label>
+			<br/>		
+			<label if="${!(empty diagnosisSection.soapNote.patient.causeOfDeath)}">Cause of death  ${diagnosisSection.soapNote.patient.causeOfDeath}</label>		
+			<br/>		
+			<label if="${!(empty diagnosisSection.soapNote.patient.placeOfDeath)}">Place of death ${diagnosisSection.soapNote.patient.palceOfDeath}</label>		
+		
+		</div>
+		<div if="${labOrderSection != null}">
+		<div style="margin-left:10px" if="${not empty labOrderSection.labOrder}">
+		<br/>
+			<label style="font-size:13px"><b>Lab Tests/X-Rays/Radiology</b></label>
+				Patient needs to 
+				<span forEach="${labOrderSection.labOrder}"><b>${each.testName} </b>,  </span>
+				 and show me reports in next visit.<br/>
+		</div>
+		</div>
+		<br/>
+		<div style="margin-left:10px" if="${rxSection != null &amp;&amp; !(empty rxSection.patientRxs) &amp;&amp; (prescriptionModule || 'referralPreview' ne pageName)}">
+			<label style="font-size:13px"><b>${rxSection.soapModule.moduleDescription}</b></label>
+		<div>
+			<span forEach="${rxSection.patientRxs}">
+				<b>${each.drug.tradeName}</b>(${each.drugStrength}) ${each.drugDosageRoute} ${each.quantity} ${each.quantityQualifier} ${each.drugDirection}, 
+			</span> <br/>
+			Patient is advised to take above Medications as prescribed.
+		</div>
+		</div>
+		<br/>
+		<div if="${imageSection != null &amp;&amp; !(empty imageSection.files)}">
+			<x:include src="/soap/sentence/soapImageSectionSentence.zul" patientSoapNoteController="${patientSoapNoteController}"/>
+		</div>	
+		<br/>
+		<div style="margin-left:10px" if="${preAdmissionSection != null &amp;&amp; !(empty preAdmissionSection.sentence)}">
+			<label style="font-size:13px"><b>${preAdmissionSection.soapModule.moduleDescription}</b></label>
+		<br />
+			${preAdmissionSection.sentence}
+		</div>
+		<br/>
+		
+		<div style="margin-left:10px;" if="${recommendationSection != null &amp;&amp; !(empty recommendationSection.recommendedNotes) &amp;&amp; (recommendationModule || 'referralPreview' ne pageName)}">
+			<label style="font-size:13px"><b>Recommendation</b></label>
+				${recommendationSection.recommendedNotes}
+		</div>
+		<br/>
+		<div style="margin-left:10px" forEach="${eligibleOtherSoapSections}" if="${!(empty eligibleOtherSoapSections)}">
+		<x:vlayout>
+			<label style="font-size:13px"><b>${each.soapModule.moduleDescription}</b></label>
+			<label>${each.sentence}</label>
+		</x:vlayout>
+		</div>
+	 </div>
+	</div>
+			<br/> 
+			
+			<div style="margin-left:10px"  if="${providerLoggedIn}">
+				<center><b><label style="font-size:15px">Notes in Progress</label></b></center>
+			</div>	
+			<div style="margin-left:10px" if="${soapSignedOut}">
+				<center><b><label style="font-size:15px">Notes finalized by ${displayName:fn(provider)} on ${dateInAMPM}</label></b></center>
+			</div>
+			<br/>
+			
+			<div style="margin-left:10px;float:left" if="${soapSignedOut}">
+				<!-- <span> <b><label style="font-size:15px">Signed On ${display:fd(signedOutDate)}</label> </b></span> -->
+			</div>
+			<div style="margin-left:10px; margin-right:12px; float:right" ><b>
+				<label>_________________________________________________</label>
+				<br/>
+				<label style="font-size:15px">${displayName:fn(provider)}</label>
+				</b>
+				<br/>
+					<div if="${!(empty soapNote.provider.regdNo)}">
+				<label  style="font-size:15px">Regd No:${soapNote.provider.regdNo}</label>
+				</div>
+			</div>	
+			
+			</body>
+</html>

@@ -1,0 +1,13 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./exportSoapNoteWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	com.nzion.domain.ElectronicCopyOfHealthRecordRequest healthRecordRequest = arg.get("requestRecord");
+	</zscript>
+	<window title="Request Reason" mode="modal" position="center" width="30%" id="exportSoapNoteWindow" closable="true" height="22%">
+	<div self="@{insert(content)}" align="center">
+		<textbox rows="4" cols="10" value="@{healthRecordRequest.requestReason}" readonly="true" style="border:none;overflow:auto"/>
+	</div>
+	</window>
+</zk>

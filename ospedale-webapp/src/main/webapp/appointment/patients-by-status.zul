@@ -1,0 +1,27 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+	List schedules = arg.get("schedules");
+</zscript>
+<listbox width="100%" rows="5">
+	<listhead>
+		<listheader label="MRN" style="font-weight:bold" width="130px"/>
+		<listheader label="Patient Name" style="font-weight:bold" />
+		<listheader label="Doctor Name" style="font-weight:bold"/>
+		<listheader label="Appointment Date" style="font-weight:bold" width="130px"/>
+		<listheader label="Appointment Time" style="font-weight:bold" width="130px"/>
+		<listheader label="In Time" style="font-weight:bold" width="100px"/> 
+		<listheader label="Out Time" style="font-weight:bold" width="100px"/> 
+	</listhead>
+	<listitem forEach="${schedules}">
+		<listcell><label value="${each.patient.accountNumber}" /></listcell>	
+		<listcell><name object="${each.patient}" /></listcell>	
+		<listcell><name object="${each.provider}" /></listcell>	
+		<listcell><datebox value="${each.startDate}" readonly="true" buttonVisible="false" /></listcell>	
+		<listcell><timebox value="${each.startTime}" readonly="true" buttonVisible="false" /></listcell>	
+		<listcell><timebox value="${each.signedInTime}" readonly="true" buttonVisible="false" format="hh:mm a"/></listcell>	
+		<listcell><timebox value="${each.signedOutTime}" readonly="true" buttonVisible="false" format="hh:mm a"/></listcell>	
+	</listitem>
+</listbox>
+</zk>

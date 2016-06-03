@@ -1,0 +1,51 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./labOrderPortletWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	com.nzion.service.emr.lab.LabService labService =  com.nzion.util.Infrastructure.getSpringBean("labService");
+	List labTestResults = labService.getLabResultForReviewByProvider((com.nzion.domain.Provider)com.nzion.util.Infrastructure.getUserLogin().getPerson());
+	com.nzion.domain.emr.lab.OBRSegment obrSegment = new com.nzion.domain.emr.lab.OBRSegment();
+</zscript>
+	<window id="labOrderPortletWindow">
+	  <div zclass="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span3">
+		   					<label value="Patient"  sclass="name"/>
+								<patientlookup onChange="obrSegment.setPatient((com.nzion.domain.Patient)event.getOrigin().getData())" />
+								</div>
+							 </div>
+						</div>	 
+		   			<div sclass="panelFoot" align="center">
+						<button label="Search" zclass="btn-primary btn" id="searchBtn" onClick='
+						labTestResults =
+						labService.getLabResultForReviewByProviderOrPatient((com.nzion.domain.Provider)com.nzion.util.Infrastructure.getUserLogin().getPerson(), obrSegment.getPatient()); 
+						'/>
+				   </div>
+				   <separator></separator>
+	   <div height="330px" width="100%">
+			<grid id="labTestResultsGrid" model="@{labTestResults,load-after='self.onReloadRequest,searchBtn.onClick'}" mold="paging" pageSize="8">
+				<columns>
+					<column label="Patient Name"/>
+					<column label="Lab Test /Profile Name"/>
+                    <column label="Test Performed Date"/>
+					<column label="Action"/>
+		        </columns>
+				<rows>
+					<row self="@{each='obr'}" value="@{obr}">
+						<name object="@{obr.patient}"/>
+						<label value="@{obr.labTestPanel.panelName}"/>
+                        <label value="@{obr.observationDateTime,converter='com.nzion.view.component.DateConverter'}"/>
+						<div id="requestDisSec" >
+								<a label="Detail"> <attribute name="onClick"> 
+								       com.nzion.domain.emr.lab.OBRSegment   tmpObrSegment   = ((Row)self.getParent().getParent()).getValue();
+								       if(tmpObrSegment != null){
+								       	 Executions.getCurrent().sendRedirect("/lab/viewLabResult.zul?obrSegmentId=" + tmpObrSegment.getId()+"&amp;pageName=Resultview", "_resultview");
+								       }
+								   </attribute> </a>
+						 </div>	
+					</row>
+				</rows>
+			</grid>
+  		</div>
+	</window>
+</zk>

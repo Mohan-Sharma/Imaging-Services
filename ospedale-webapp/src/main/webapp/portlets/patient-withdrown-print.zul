@@ -1,0 +1,321 @@
+<?page title="Afya Lab" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientWithdrawViewWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+
+    <zscript>
+        import com.nzion.domain.PatientWithDraw;
+        import java.util.Date;
+        import com.nzion.service.common.CommonCrudService;
+        String ageGender = null;
+        PatientWithDraw patientWithdraw = arg.get("patientWithdraw");
+        String patientWithdrawId = null;
+        if(patientWithdraw == null){
+            patientWithdrawId = Executions.getCurrent().getParameter("patientWithdrawId");
+            patientWithdraw = commonCrudService.getById(PatientWithDraw.class,Long.valueOf(patientWithdrawId));
+        }
+
+        if(patientWithdraw != null){
+            String g = patientWithdraw.getPatient().getGender().getDescription();
+            Date d = patientWithdraw.getPatient().getDateOfBirth();
+            String age = com.nzion.util.UtilDateTime.calculateAge(d,new Date());
+            ageGender = age+" / "+g;
+        }
+
+        com.nzion.domain.Practice practice = com.nzion.util.Infrastructure.getPractice();
+        com.nzion.domain.Location location = com.nzion.util.Infrastructure.getSelectedLocation();
+        com.nzion.domain.UserLogin userLogin = com.nzion.util.Infrastructure.getUserLogin();
+        String userName = com.nzion.util.ViewUtil.getFormattedName(userLogin.getPerson());
+        com.nzion.domain.Patient patient = patientWithdraw.getPatient();
+        boolean isLogoWithAdd = com.nzion.util.Infrastructure.getPractice().isLogoWithAddress();
+        boolean isLogoWithoutAdd = !isLogoWithAdd;
+    </zscript>
+
+    <style>
+        .personDet{
+        border: 1px solid #333;
+        align:center;
+        margin : 2px 0px 0px 0px;
+        }
+
+        .personDet td{
+        padding:0px;
+        }
+        .break {
+        page-break-after: always;
+        }
+
+        @media print {
+        #footerDiv {
+        position: fixed;
+        bottom: 0;
+        }
+
+        #body {
+        margin: x x y x;
+        ( y should reflect the height of the footer );
+        }
+        }
+    </style>
+
+    <window id="patientWithdrawViewWin">
+        <attribute name="onCreate">
+            Clients.print();
+        </attribute>
+
+        <n:div style="width:95%;horizontal-align:center;margin:20px 10px 5px 30px;">
+            <div if="${isLogoWithAdd}">
+                <n:table style="align:center;width:100%">
+                    <n:tr>
+                        <n:td style="cellspacing:0px;cellpadding:0px">
+                            <image id="logoImage1"  width="800px" height="200px" style="margin-left:5px">
+                                <attribute name="onCreate">
+                                    String logoUrl = com.nzion.util.Infrastructure.getPractice().getImageUrl().replaceFirst("/","");
+                                    java.io.FileInputStream fileInputStream = new java.io.FileInputStream(logoUrl);
+                                    org.zkoss.image.AImage aImage = new org.zkoss.image.AImage(logoUrl,fileInputStream);
+                                    self.setContent(aImage);
+                                    self.setVisible(true);
+                                </attribute>
+                            </image>
+                        </n:td>
+                    </n:tr>
+
+                </n:table>
+            </div>
+
+
+            <div if="${isLogoWithoutAdd}">
+                <n:table style="align:center;width:100%">
+                    <n:tr>
+                        <n:td width="17%" style="cellspacing:0px;cellpadding:0px">
+                            <image id="logoImage" style="margin-left:5px">
+                                <attribute name="onCreate">
+                                    String logoUrl = com.nzion.util.Infrastructure.getPractice().getImageUrl().replaceFirst("/","");
+                                    java.io.FileInputStream fileInputStream = new java.io.FileInputStream(logoUrl);
+                                    org.zkoss.image.AImage aImage = new org.zkoss.image.AImage(logoUrl,fileInputStream);
+                                    self.setContent(aImage);
+                                    self.setVisible(true);
+                                </attribute>
+                            </image>
+                        </n:td>
+
+                        <n:td width="75%" style="cellspacing:0px;cellpadding:0px;">
+                            <n:table style="align:center;width:50%;height:75px">
+                                <n:tr>
+                                    <n:td>
+                                        <label value="${practice.practiceName}" style="font-size:13px;font-weight:bold;font-family:Calibri;margin-right:2px"/>
+                                    </n:td>
+                                </n:tr>
+                                <n:tr>
+                                    <n:td>
+                                        <label value="${location.contacts.postalAddress.city}"  style="font-size:12px;font-weight:normal;font-family:Calibri;margin-right:2px"/>
+                                    </n:td>
+                                </n:tr>
+
+                                <n:tr>
+                                    <n:td>
+                                        <label value="${location.contacts.postalAddress.address1},${location.contacts.postalAddress.address2}" style="font-size:12px;font-weight:normal;font-family:Calibri;margin-right:2px"/>
+                                    </n:td>
+                                </n:tr>
+
+
+                                <n:tr>
+                                    <n:td>
+                                        <label value="${location.contacts.postalAddress.postalCode}, ${location.contacts.postalAddress.stateProvinceGeo},${location.contacts.postalAddress.countryGeo}"
+                                               style="font-size:12px;font-weight:normal;font-family:Calibri;margin-right:2px"/>
+                                    </n:td>
+                                </n:tr>
+
+                                <n:tr>
+                                    <n:td>
+                                        <label value="Tel : ${location.contacts.officePhone}, Email : ${location.contacts.email}"
+                                               style="font-size:12px;font-weight:normal;font-family:Calibri;margin-right:2px" />
+                                    </n:td>
+                                </n:tr>
+
+                            </n:table>
+                        </n:td>
+                    </n:tr>
+
+                </n:table>
+            </div>
+        </n:div>
+
+        <n:div class="clr" style="width:95%;horizontal-align:center;margin:20px 0px 0px 30px;margin-top:0px;margin-bottom:15px;">
+            <n:table class="personDet" style="align:center;width:95%; border-color:#C0C0C0" border="1px">
+                <n:tr>
+                    <n:td>
+                    </n:td>
+                    <n:td>
+                    </n:td>
+                </n:tr>
+            </n:table>
+        </n:div>
+
+        <n:div style="width:95%;text-align:center;">
+            <div align="center">
+                <label style="font-size:17px;font-weight:bold;font-family:Calibri;" value="Patient Refund">
+                </label>
+            </div>
+        </n:div>
+
+        <n:div style="width:95%;horizontal-align:center;margin:20px 0px 0px 30px;margin-top:0px" class="clr">
+            <n:table class="personDet" style="align:center;width:95%;border-color:#C0C0C0" border="1px">
+                <n:tr>
+                    <n:td style="border-color:#C0C0C0">
+                        <div class="z-hlayout" style="width:100%;">
+                            <div style="width:25%" class="z-hlayout-inner" align="left">
+                                <label value="Afya Id" style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px"/>
+                            </div>
+                            <div style="width:5%" class="z-hlayout-inner" align="center">
+                                <label value=" : " style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px">
+                                </label>
+                            </div>
+                            <div style="width:70%" class="z-hlayout-inner" align="left">
+                                <label value="@{patient.afyaId}" style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+                            </div>
+                        </div>
+                        <div class="z-hlayout" style="width:100%;">
+                            <div style="width:25%" class="z-hlayout-inner" align="left">
+                                <label value="Civil Id" style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px"/>
+                            </div>
+                            <div style="width:5%" class="z-hlayout-inner" align="center">
+                                <label value=" : " style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px">
+                                </label>
+                            </div>
+                            <div style="width:70%" class="z-hlayout-inner" align="left">
+                                <label value="@{patient.civilId}" style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+                            </div>
+                        </div>
+                        <div class="z-hlayout" style="width:100%;">
+                            <div style="width:25%" class="z-hlayout-inner" align="left">
+                                <label value="Patient Name" style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px"/>
+                            </div>
+                            <div style="width:5%" class="z-hlayout-inner" align="center">
+                                <label value=" : " style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px">
+                                </label>
+                            </div>
+                            <div style="width:70%" class="z-hlayout-inner" align="left">
+                                <name value="@{patient}" style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+                            </div>
+                        </div>
+
+                        <div class="z-hlayout" style="width:100%;">
+                            <div style="width:25%" class="z-hlayout-inner" align="left">
+                                <label value="Patient Type"  style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px"/>
+                            </div>
+                            <div style="width:5%" class="z-hlayout-inner" align="center">
+                                <label value=":"  style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px"/>
+                            </div>
+                            <div style="width:70%" class="z-hlayout-inner" align="left">
+                                <label value="@{patient.patientType}"  style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+                            </div>
+                        </div>
+                        <div class="z-hlayout" style="width:100%;">
+                            <div style="width:25%" class="z-hlayout-inner" align="left">
+                                <label value="Age/Gender"  style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px"/>
+                            </div>
+                            <div style="width:5%" class="z-hlayout-inner" align="center">
+                                <label value=":"  style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px"/>
+                            </div>
+                             <div style="width:70%" class="z-hlayout-inner" align="left">
+                                 <label value="@{ageGender}"  style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+                             </div>
+                        </div>
+
+                    </n:td>
+
+                    <n:td style="width:48%;border-color:#C0C0C0">
+
+                        <div class="z-hlayout" style="width:100%;">
+                            <div style="width:25%" class="z-hlayout-inner" align="left">
+                                <label value="Refund Date" style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px"/>
+                            </div>
+                            <div style="width:5%" class="z-hlayout-inner" align="center">
+                                <label value=" : " style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px"/>
+                            </div>
+                             <div style="width:70%" class="z-hlayout-inner" align="left">
+                                 <name value="@{patientWithdraw.withdrawDate,converter='com.nzion.view.component.DateConverter'}" style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+                             </div>
+                        </div>
+                        <div class="z-hlayout" style="width:100%;">
+                            <div style="width:25%" class="z-hlayout-inner" align="left">
+                                <label value="Refund Id" style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px"/>
+                            </div>
+                            <div style="width:5%" class="z-hlayout-inner" align="center">
+                                <label value=" : " style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px"/>
+                            </div>
+                             <div style="width:70%" class="z-hlayout-inner" align="left">
+                                 <name value="@{patientWithdraw.id}" style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+                             </div>
+                        </div>
+
+                    </n:td>
+                </n:tr>
+
+            </n:table>
+        </n:div>
+
+        <separator/> <separator/>
+
+        <div>
+        <n:div style="text-align:left;width:90%;">
+            <div align="left">
+                <label value="Payment Details:" style="font-size:12px;font-weight:bold;font-family:Calibri;margin: 20px 0px 0px 30px"/>
+            </div>
+
+            <n:table class="personDet"  style="align:center;width:100%;margin-left:30px " align="center" border="1px">
+                <n:tr>
+                    <n:th align="center">
+                        Payment Type/Mode
+                    </n:th>
+                    <n:th align="center">
+                        Cheque/CC - Auth. Number
+                    </n:th>
+                    <n:th align="center">
+                        Date
+                    </n:th>
+                    <n:th align="center">
+                        Bank / Card Details
+                    </n:th>
+                    <n:th align="center">
+                        Amount
+                    </n:th>
+                </n:tr>
+
+                <n:tr>
+                    <n:td style="width:20%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
+                        <label value="${patientWithdraw.withdrawMode}"/>
+                    </n:td>
+                    <n:td style="width:20%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center"> </n:td>
+                    <n:td  style="width:20%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
+                        <label value="@{patientWithdraw.withdrawDate,converter='com.nzion.view.component.DateConverter'}"/>
+                    </n:td>
+                    <n:td style="min-width:200px;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center"> </n:td>
+                    <n:td style="min-width:200px;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
+                        <label value="${patientWithdraw.withdrawAmount}"/>
+                        <label value="KD" style="align:right"/>
+                    </n:td>
+                </n:tr>
+
+            </n:table>
+        </n:div>
+
+        </div>
+
+        <separator/><separator/>
+        <div>
+
+            <n:div style="text-align:left;width:90%;">
+                <div align="right">
+                    <label value="User:" style="font-size:12px;font-weight:bold;font-family:Calibri;"/>
+                    <label value="${userName}"/>
+                </div>
+            </n:div>
+
+        </div>
+
+    </window>
+</zk>            

@@ -1,0 +1,38 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window closable="true"  title="Signature" border="normal" width="300px" height="125px" mode="modal"">
+		<zscript>
+	com.nzion.domain.Provider provider = Executions.getCurrent().getArg().get("provider");
+</zscript>
+		<div id="frontImageDiv"  width="300px" height="50px" style="border:1px solid grey">
+			<image id="frontImage" border="1px"/>
+			<zscript><![CDATA[
+if (provider.getSignatureImage() != null) {
+	java.sql.Blob signature = provider.getSignatureImage().getResource();
+	org.zkoss.image.AImage aImage = new org.zkoss.image.AImage("Front Image", signature.getBinaryStream());
+	frontImage.setContent(aImage);
+}
+]]>
+</zscript>
+		</div>
+		<button label="Signature" upload="true">
+			<attribute name="onUpload">
+{
+	org.zkoss.util.media.Media media = event.getMedia();
+	if (media instanceof org.zkoss.image.Image) {
+		org.zkoss.zul.Image image = new org.zkoss.zul.Image();
+		image.setContent(media);
+		frontImage.setContent(media);
+		com.nzion.domain.DataResource fsrc = new com.nzion.domain.DataResource();
+		fsrc.setResource(org.hibernate.Hibernate.createBlob(media.getByteData()));
+		provider.setSignatureImage(fsrc);
+	} else {
+		Messagebox.show("Not an image: " + media, "Error", Messagebox.OK, Messagebox.ERROR);
+		break; 
+	}
+}
+</attribute>
+		</button>
+	</window>
+</zk>

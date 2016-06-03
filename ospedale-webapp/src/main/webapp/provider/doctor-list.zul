@@ -1,0 +1,149 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./searchResultsDiv"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<?xel-method prefix="d" name="format"  class="com.nzion.util.UtilDateTime"  signature="java.lang.String format(java.util.Date)"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.w3.org/1999/xhtml">
+	<zscript>
+	import com.nzion.util.UtilValidator;
+	import com.nzion.domain.Provider;
+	import com.nzion.zkoss.ext.Navigation;
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	com.nzion.repository.common.CommonCrudRepository commonCrudRepository = com.nzion.util.Infrastructure.getSpringBean("commonCrudRepository");
+	List providerList = new ArrayList();
+	 com.nzion.domain.Provider provider = new com.nzion.domain.Provider();
+	 List specialities = commonCrudService.getAll(com.nzion.domain.Speciality.class);
+	 List allLocations = commonCrudService.getAll(com.nzion.domain.Location.class);
+	 com.nzion.service.common.EnumerationService enumerationService=com.nzion.util.Infrastructure.getSpringBean("enumerationService");
+	List enumerationGender=enumerationService.getRelevantEnumerationsByType("GENDER");
+	</zscript>
+	<style>
+	#patSearchRes {
+	overflow:hidden;
+	width:100%;
+	}
+	.panelCont label, .panelCont input, .panelCont select {
+	display:inline;
+	}
+	.z-combobox-rounded-inp, .z-bandbox-rounded-inp, .z-datebox-rounded-inp, .z-timebox-rounded-inp, .z-spinner-rounded-inp, .z-doublespinner-rounded-inp, .z-combobox-inp, .z-bandbox-inp, .z-datebox-inp, .z-timebox-inp, .z-spinner-inp, .z-doublespinner-inp{
+	width:135px;
+	}
+	</style>
+	<div zclass="boxStyle" style="overflow:auto;height:100%" id="searchResultsDiv">
+		   <div zclass="customLeftBox">
+		   	<vbox align="center"> 		 
+		   	   <div style="text-align:left;padding-top:3px;padding-left:21px">	     	    
+   			    <div style="width:200px;text-align:center;"><label zclass="whiteHeading" value="${c:l('searchCond')}"/></div>   			  
+					<div >
+					    <div>
+							<label value="First Name" zclass="whiteSubHeading"/>
+							</div>
+						 <textbox id="firstName"  style="text-align:left;background-color:#fff;width:150px;" />
+				    </div>
+					<div >
+					    <div >
+							<label value="Last Name" zclass="whiteSubHeading"/>	
+							</div>			
+							<textbox id="lastName"  style="text-align:left;background-color:#fff;width:150px;" />
+					   
+				   	 </div>
+				    <div >	
+				  			 <div>
+						<label value="Location" style="width:175px;text-align:left"  zclass="whiteSubHeading"/></div>
+						<combobox model="@{allLocations}" id="location" style="width:175px;text-align:left;background:#fff">
+							<comboitem self="@{each='location'}"   height="20px"  value="@{location}" label="@{location.name}"/>
+						</combobox>
+					</div>
+					<div >
+					     <div >
+							<label value="Gender" zclass="whiteSubHeading"/>	
+							</div>
+							<!-- <enumeration id="gender" enumType="GENDER" style="text-align:left;background:#fff" selectedItem="@{provider.gender}"/>  -->
+							<combobox id="gender" model="@{enumerationGender}" selectedItem="@{provider.gender}" style="width:175px;text-align:left;background:#fff"> </combobox>
+				   </div>
+					<div >
+					 	 <div >
+							 <label value="Speciality" zclass="whiteSubHeading"/>	
+							 </div>
+						<div style="overflow:auto; -moz-box-shadow: 0 2px 6px 0 rgba(147, 147, 202, 0.4) inset;border:1px solid #86A4BE" height="150px"  width="175px" >		
+							<listbox model="@{specialities}" maxlength="50"  multiple="true"  checkmark="true" id="specialityListbox" 
+										selectedItem="@{provider.specialities, converter=com.nzion.view.component.MultipleListitemBindingConverter}">
+									<listitem self="@{each}" value="@{each}" label="@{each.description}"/>
+							</listbox>
+				    	</div>
+				    </div>
+					
+				     <div id="patSearchRes" align="center" >
+				    	<separator></separator>
+						<hlayout >						  
+						   <span class="linkBtn linkBtnOn">
+						      <a  label="Search" id="search">
+						      	<attribute name="onClick"><![CDATA[
+								com.nzion.domain.Enumeration selectedGender = gender.getSelectedItem() == null ? null : gender.getSelectedItem().getValue();
+								com.nzion.domain.Location  selectedLocation = location.getSelectedItem() == null ? null : location.getSelectedItem().getValue();
+								if(UtilValidator.isEmpty(firstName.getValue()) && UtilValidator.isEmpty(lastName.getValue()) && selectedGender == null && UtilValidator.isEmpty(provider.getSpecialities()) && selectedLocation == null)
+					      	 		Messagebox.show("Please Provide Any Of The One Search Criteria","Warning",1,null);
+						      	 else{
+								providerList = providerService.searchProviderBy(firstName.getValue(),lastName.getValue(),selectedGender,provider.getSpecialities(),selectedLocation);
+								searchPaging.setVisible(providerList.size()>0);
+								lblNoRecFound.setVisible(providerList == null || providerList.size() == 0);
+						      	 }
+								]]></attribute>	
+						      </a>
+						      <span/>
+						      </span>
+						      </hlayout>
+						     <separator></separator>
+					 </div>
+				</div>
+			</vbox>		
+		</div>
+		<!--Left Search  Panel ends-->
+		<div style="width:81%;vertical-align:top;float:left;">  
+		<div style="width:100%;vertical-align:top;">		
+			<panel title="Doctor Search Result" id="searchPanel" style="width:100%;vertical-align:top;">
+				<panelchildren>	
+					<div  style="overflow:auto;vertical-align:top;" width="100%">
+						<paging id="searchPaging" visible="false" pageSize="4" detailed="true" pageIncrement="1"/>	
+						<grid id="providerSearchDisplayGrid"  mold="paging" paginal="${searchPaging}" model="@{providerList, load-after='search.onClick'}" style="border:none;" width="100%">
+							<columns>
+							<column label="${c:l('doctor')}" width="25%"/>
+							<column label="${c:l('gender')}" width="25%"/>
+							<column label="${c:l('specialities')}" width="25%"/>
+							<column label="${c:l('contacts')}" width="25%"/>
+							</columns>
+							<rows>
+							<row self="@{each='provider'}" value="@{provider}" context="contextMenu" forward="onDoubleClick=onPatientSelect">
+								<div  style="margin-left:10px;">
+									<name object="@{provider}"/>
+								</div>
+								<div  align="left">
+									<label value="@{provider.gender}" />
+								</div>
+								<div  align="left">
+									<label value="@{provider.specialities}" />
+								</div>
+								<div>
+									<label value="${c:l('officePhone')}:"  />
+								 	<label value="@{provider.contacts.officePhone}" />
+								 	<h:br/>
+									<label value="${c:l('email')}:" />
+								 	<label value="@{provider.contacts.email}" />
+								 	<h:br/>
+									<label value="${c:l('drn')}:" />
+								 	<label value="@{provider.detail.npiNumber}"/>
+								</div>
+							</row>
+							</rows>
+						</grid>
+					</div>	
+				</panelchildren>
+			</panel>
+		</div>
+		</div>  
+		<div visible="false" id="lblNoRecFound">
+			<label value="No records available"/>
+	    </div>
+  </div>
+</zk>

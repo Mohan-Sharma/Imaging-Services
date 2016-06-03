@@ -1,0 +1,43 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	com.nzion.service.SoapNoteService soapNoteService = com.nzion.util.Infrastructure.getSpringBean("soapNoteService");
+	com.nzion.zkoss.composer.SoapImmunizationComposer soapImmunizationComposer = arg.get("soapImmunizationComposer");
+	com.nzion.domain.emr.soap.ImmunizationSection immunizationSoapSection = arg.get("immunizationSoapSection");
+	List allImmunizations = soapNoteService.getAllSoapRecordsExcludingCurrentSection(soapImmunizationComposer.getPatient(),immunizationSoapSection,com.nzion.domain.emr.soap.PatientImmunization.class);
+	</zscript>
+	<window id="soapImmunizationHistory" closable="true" title="Vaccines Historical View" border="normal">
+		<div style="width:99%;">
+			 <div sclass="dataTables_scrollBody" style="width:98%; margin:auto;overflow:auto;">
+				<n:table id="histImmunizationListBox" cellpadding="0" cellspacing="0" border="0" class="display" >
+					<n:thead>
+						<n:tr>
+							<n:th>Vaccine Name</n:th>
+							<n:th>Administered On</n:th>
+							<n:th>Administered Amount</n:th>
+							<n:th>Administered Units</n:th>
+						</n:tr>
+					</n:thead>
+					<n:tbody>
+						<n:tr forEach="${immunizations}">
+							<n:td>${each.immunization.shortDescription} - ${each.immunization.fullVaccineName}</n:td>											
+							<n:td>${each.administeredOn}</n:td>
+							<n:td>${each.administeredAmount}</n:td>
+							<n:td>${each.administeredUnits}</n:td>	
+						</n:tr>
+					</n:tbody>
+				</n:table>
+				</div>
+		</div>
+		<script type="text/javascript">
+			zk.afterMount(function() { 
+				jq("#histImmunizationListBox").dataTable({
+				"bJQueryUI": true,
+				"sPaginationType": "full_numbers", 
+				"aoColumns":
+							[null, null,null,{ "bSortable": false,"sType": "html"} ] 
+						}); 
+			});
+		</script>
+	</window>
+</zk>

@@ -1,0 +1,148 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/soapnotetemplate.zul"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./viewLabQuestResultWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+    <?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+    <?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+    <zscript>
+        <![CDATA[
+		import com.nzion.zkoss.composer.emr.lab.LabTestResultController;
+		import com.nzion.domain.Party.PartyType;
+		import com.nzion.domain.emr.lab.LabOrderRequest;
+		import com.nzion.domain.emr.lab.OBRSegment;
+		LabTestResultController labTestResultController = new LabTestResultController();
+		com.nzion.domain.Person loggedInPerson = com.nzion.util.Infrastructure.getLoggedInPerson();
+		String reqId = param.get("obrSegmentId") != null ? param.get("obrSegmentId")[0] : null;
+		OBRSegment obrSegment = commonCrudService.getById(OBRSegment.class,Long.valueOf(reqId));
+		
+		com.nzion.domain.Patient  concernedPatient =   obrSegment.getPatient();
+		com.nzion.domain.emr.soap.PatientLabOrder patientLabOrder= new  com.nzion.domain.emr.soap.PatientLabOrder();
+			
+		String messageForAppointment = "Book an appointment for" + " " + ""  + " " + "having AccountNumber" + " "+ "";
+		String messageForSendLabResult = "Send lab result of " + " " + "" + " " + "having AccountNumber" + " "	+ "";
+		boolean showLink = false;
+		boolean isReviewed = false;
+		com.nzion.domain.Provider provider =  obrSegment.getProvider();
+		if(provider != null )
+     		if(((loggedInPerson instanceof com.nzion.domain.Provider) && ((com.nzion.domain.Provider)loggedInPerson).equals(provider)))
+     			showLink = true;
+	]]>
+    </zscript>
+    <window id="viewLabQuestResultWindow" self="@{define(content)}">
+        <div sclass="container-fluid">
+            <div style="padding:5px" zclass="page-header titled-well">
+                <h:h1>
+                    <h:small>Lab Report (for Review)</h:small>
+                </h:h1>
+            </div>
+            <div sclass="pull-left">
+                <h:dl class="dl-horizontal">
+                    <h:dt>MRN :</h:dt>
+                    <h:dd>
+                        <label value="@{concernedPatient.accountNumber}"/>
+                    </h:dd>
+                </h:dl>
+                <h:dl class="dl-horizontal">
+                    <h:dt>Patient Name :</h:dt>
+                    <h:dd>
+                        <name object="@{concernedPatient}"/>
+                    </h:dd>
+                </h:dl>
+                <h:dl class="dl-horizontal">
+                    <h:dt>Gender :</h:dt>
+                    <h:dd>
+                        <label value="@{concernedPatient.gender}"/>
+                    </h:dd>
+                </h:dl>
+                <h:dl class="dl-horizontal">
+                    <h:dt>Age :</h:dt>
+                    <h:dd>
+                        <label value="@{concernedPatient.age}"/>
+                    </h:dd>
+                </h:dl>
+            </div>
+            <div sclass="pull-right">
+                <h:dl class="dl-horizontal">
+                    <h:dt>Visit No :</h:dt>
+                    <h:dd>
+                        <label value="@{obrSegment.patientSoapNote.id}"/>
+                    </h:dd>
+                </h:dl>
+                <!-- <h:dl class="dl-horizontal">
+                    <h:dt>Received On :</h:dt>
+                    <h:dd>
+                        <label value="@{obrSegment.receivedOn}"/>
+                    </h:dd>
+                </h:dl> -->
+                <h:dl class="dl-horizontal">
+                    <h:dt>Observation On :</h:dt>
+                    <h:dd>
+                        <label value="@{obrSegment.observationDateTime}"/>
+                    </h:dd>
+                </h:dl>
+                <h:dl class="dl-horizontal">
+                    <h:dt>Result Type:</h:dt>
+                    <h:dd>
+                        <label value="FINAL"/>
+                    </h:dd>
+                </h:dl>
+            </div>
+
+            <div zclass="page-header" style="text-align:center;border-width:0px" width="100%">
+                    <h:h4>${obrSegment.labTestPanel.labCategory.name}</h:h4>
+            </div>
+
+
+            <n:table width="100%" class="table table-bordered">
+                <n:thead>
+                    <n:tr colspan="">
+                        <h:h5>${obrSegment.labTestPanel.panelName}</h:h5>
+                    </n:tr>
+                <n:tr>
+                    <n:th width="20%">Test Name</n:th>
+                    <n:th width="20%">Value</n:th>
+                    <n:th width="20%">Reference</n:th>
+                    <n:th width="10%">Unit</n:th>
+                </n:tr>
+                </n:thead>
+                <n:tr forEach="${obrSegment.observations}">
+                                <n:td width="20%">
+                                    <label value="${each.obxName}"/>
+                                </n:td>
+                                <n:td width="20%">
+                                    <label value="${each.observationValue}"/>
+                                </n:td>
+                                <n:td width="20%">
+                                    <label value="${each.referenceRange}"/>
+                                </n:td>
+                                <n:td width="10%">
+                                    <label value="${each.units}"/>
+                                </n:td>
+                </n:tr>
+            </n:table>
+            <div sclass="panelContInp">
+                <div sclass="col2">
+                    <label value="Doctor Comment"/>
+                    <textbox rows="2" value="@{obrSegment.providerComment}" width="40%" id="doctor"/>
+                </div>
+                <div sclass="chkDiv">
+                    <hlayout style="margin-top:15px">
+                        <label value="Mark As Reviewed"  if="${!obrSegment.reviewedByProvider}" visible="${showLink}">
+                        </label>
+                        <checkbox style="margin-top:19px" checked="@{obrSegment.reviewedByProvider}" if="${!obrSegment.reviewedByProvider}"
+                                  visible="${showLink}">
+                        </checkbox>
+                    </hlayout>
+                </div>
+            </div>
+            <div sclass="panelFoot">
+                <button label="Reviewed" >
+                    <attribute name="onClick">
+                        commonCrudService.save(obrSegment);
+                    </attribute>
+                </button>
+            </div>
+        </div>
+    </window>
+</zk>

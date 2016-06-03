@@ -1,0 +1,7 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/soapnotetemplate.zul"?>
+<zk>
+<window  height="100%" self="@{define(content)}">
+	<include src="/patient/emergency"  />
+	</window>
+</zk>

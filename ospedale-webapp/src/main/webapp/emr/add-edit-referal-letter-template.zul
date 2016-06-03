@@ -1,0 +1,79 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./referalLetterTemplateWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import com.nzion.domain.emr.ReferalLetterTemplate;
+	ReferalLetterTemplate letter = (ReferalLetterTemplate) Executions
+			.getCurrent().getArg().get("entity");
+	letter = letter == null ? new ReferalLetterTemplate() : letter;
+	List letters = commonCrudService.getAll(ReferalLetterTemplate.class);
+	List referalTypes = Arrays.asList(ReferalLetterTemplate.ReferalType
+			.values());
+	List allModules = commonCrudService
+			.getAll(com.nzion.domain.emr.SoapModule.class);
+	List selectedModules = new ArrayList();
+	selectedModules.addAll(letter.getModules());
+]]></zscript>
+	<window id="referalLetterTemplateWindow" width="60%" position="center" closable="true" mode="modal" height="100%"
+		title="Referral Letter">
+		<div width="97%" style="padding:5px">
+			<panel title="Referral Letter">
+				<panelchildren>
+					<div sclass="panelCont">
+						<div>
+							<label value="Template Name"></label>
+							<span zclass="labelReq">
+											<html><![CDATA[*]]></html>
+							</span>
+							<textbox value="@{letter.templateName}" id="name" />
+						</div>
+						<div>
+							<label value="Salutation" />
+							<textbox value="@{letter.salutation}" />
+						</div>
+						<div>
+							<label value="Introductory Note"></label>
+							<textbox value="@{letter.introductoryNote}" rows="2" />
+						</div>
+					</div>
+				</panelchildren>
+			</panel>
+			<div sclass="panelFoot" />
+			<separator/>
+			
+			<panel title="Letter Body Details">
+				<panelchildren>
+					<shuttle displayfield="moduleName" source="${allModules}" target="${selectedModules}" />
+					<space height="5px" />
+					<div sclass="panelCont">
+					<div  sclass="col2">
+						<label value="End Note" />
+						<textbox value="@{letter.endNote}" rows="2"/>
+					</div>
+					<div sclass="col2">
+						<label value="Complimentary Close" />
+						<textbox value="@{letter.complimentaryClose}" rows="2" />
+					</div>
+					</div>
+				</panelchildren>
+			</panel>
+			<div sclass="panelFoot" />
+			<separator/>
+			<div sclass="panelFoot">
+				<button label="Save" id="saveBtn">
+					<attribute name="onClick">
+	if (com.nzion.util.UtilValidator.isEmpty(name.getValue()))
+		throw new WrongValueException(name, "Can not be empty");
+	letter.setModules(new HashSet(selectedModules));
+	commonCrudService.save(letter);
+	com.nzion.util.UtilMessagesAndPopups.showSuccess();
+	referalLetterTemplateWindow.detach();
+</attribute>
+				</button>
+				<button label="Cancel" 
+          onClick='referalLetterTemplateWindow.detach()' />
+			</div>
+		</div>
+	</window>
+</zk>

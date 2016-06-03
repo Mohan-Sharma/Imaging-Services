@@ -1,0 +1,115 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./messagePortletView"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	import com.nzion.domain.messaging.*;
+	import com.nzion.util.Infrastructure;
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	com.nzion.service.PersonService personService=Infrastructure.getSpringBean("personService");
+	Message message = new Message();
+	com.nzion.domain.Person person = Infrastructure.getLoggedInPerson();
+	long roles =  Infrastructure.getRolesOfLoggedInUser();
+	Set messages = personService.getTodaysMessagesForPerson(person, roles);
+	boolean isRestore = false;
+	</zscript>
+	<window id="messagePortletView" height="100%">
+	<div align="center">
+	<hlayout spacing="20px" sclass="form">
+			<vlayout spacing="10px">
+			<hlayout spacing="6px">
+				<label value="From Date"  class="name"></label>
+					<datebox id="fDate" width="100%">
+					</datebox>
+					</hlayout>
+					</vlayout>
+					<vlayout spacing="10px">
+					<hlayout spacing="6px">
+				<label value="Thru Date" class="name"></label>
+					<datebox id="tDate" width="100%">
+					</datebox>
+					</hlayout>
+					</vlayout>
+					</hlayout>
+					</div>
+					<div align="center" sclass="panelFoot buttonPanel">
+			<hlayout spacing="10px">
+				<button label="Search" id="Search" zclass="btn btn-primary">
+					<attribute name="onClick">
+						<![CDATA[
+							messages = new HashSet(personService.getDateRangeMessage(fDate.getValue(),tDate.getValue()));
+						]]>
+				</attribute>
+				</button>
+			</hlayout>
+		</div>
+		<attribute name="onRestore">
+			isRestore = true;
+			messageSearch.setVisible(true);
+			messageIncludeNew.setVisible(false);
+		</attribute>
+		
+	<panel id="messageSearch" height="99%">
+		<panelchildren>
+			<button label="Current" onClick="messages = personService.getTodaysMessagesForPerson(person, roles);" id="currentBtn"/>
+			<button label="Past" onClick="messages = personService.getPastMessagesForPerson(person, roles);" id="pastBtn"/>
+			<div height="180px" style="overflow:auto;">
+				<listbox id="messageListbox" model="@{messages,load-after='self.onReloadRequest,currentBtn.onClick,pastBtn.onClick,Search.onClick'}" width="99%">
+					<listhead>
+						<listheader label="Message" width="70%"/>
+						<listheader label="Sent By" width="10%"/>
+						<listheader label="Sent On" width="10%"/>
+						<listheader label="Action" width="10%"/>
+					</listhead>
+					<listitem self="@{each='message'}" value="@{message}">
+						<listcell>
+								<image width="10px" height="10px" src="/images/emergencyFlag.jpg" visible="@{message.urgent}" />
+								<image width="10px" height="10px" src="/images/normalFlag.jpg" visible="@{message.notUrgent}" />
+								<label value="@{message.messageText}" tooltiptext="@{message.messageText}"/>
+						</listcell>
+						<listcell>
+							<name object="@{message.sentBy}" />
+						</listcell>
+						<listcell>
+							<label value="@{message.sentOn,converter='com.nzion.view.component.DateConverter'}"/>
+						</listcell>
+						<listcell>
+							<a label="View" id="view">
+								<attribute name="onClick">
+									Message message = (Message)self.getParent().getParent().getValue();
+									Navigation.navigateToModalWindow("/portlets/viewMessagePortlet.zul",com.nzion.util.UtilMisc.toMap("message",message));
+								</attribute>
+							</a>
+							<!-- <a href="#" class="delBtn" >
+								<image src="/images/cross.png" align="left">
+									<attribute name="onClick">
+										messages.remove(self.getParent().getParent().getValue());
+										commonCrudService.delete(self.getParent().getParent().getValue());			
+										Events.postEvent("onReloadRequest",messageListbox,null);					
+									</attribute>
+							</a> -->
+						</listcell>
+					</listitem>
+				</listbox>
+			</div>
+			<separator/>
+			<a href="#patSearchRes" id="patSearch" label="Add" sclass="btn">
+				<n:i class="icon-plus"></n:i>
+				<attribute name="onClick">
+					messageIncludeNew.setSrc("/portlets/message-portlet-new.zul");
+					messageSearch.setVisible(false);
+					messageIncludeNew.setVisible(true);
+					if(isRestore)
+						Events.postEvent("onClick",messagePortletView.getParent().getParent().getPreviousSibling().getFirstChild(),null);
+				</attribute>
+			</a>
+		</panelchildren>
+	</panel>
+	<panel>
+		<panelchildren>
+			<include id="messageIncludeNew"/>
+		</panelchildren>
+	</panel>
+	</window>
+</zk>

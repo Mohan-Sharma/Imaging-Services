@@ -1,0 +1,16 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./winUserLogin"?>
+<?component name="lookup" class="com.nzion.view.component.LookupBox"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import com.nzion.domain.UserLogin;	
+	]]>
+	</zscript>
+
+	<window apply="${securityGroupController}" id="winUserLogin" width="100%">
+		<screen width="100%" listtitle="List of User Logins" addpage="userLoginView" editpage="userLoginView"
+			entityclass="com.nzion.domain.UserLogin" fields="username,person.firstName,active,requirePasswordChange"
+			labels="UserLoginId,Person Id,Active,Password Change Required" hidedeletebtn="true"
+			addmodepopup="false" editmodepopup="false"  containername="contentArea"/>
+	</window>
+</zk>

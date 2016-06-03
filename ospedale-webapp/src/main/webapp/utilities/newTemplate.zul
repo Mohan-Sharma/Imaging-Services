@@ -1,0 +1,78 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./template"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<zscript>
+	import com.nzion.domain.emr.QATemplate;
+	import com.nzion.domain.emr.SoapModule;
+	import com.nzion.service.common.CommonCrudService;
+	import com.nzion.zkoss.composer.QASetupComposer;
+	CommonCrudService commonCrudService=com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	List allTemplates = arg.get("allTemplates");
+	SoapModule soapModule = (SoapModule)arg.get("selectedSoapModule");
+	QASetupComposer qaSetupComposer = (QASetupComposer)arg.get("qaSetupComposer");
+	boolean isNewTemplate = false;
+	QATemplate qaTemplate=qaSetupComposer.getSelectedQATemplate();
+	if(qaTemplate==null){
+	 	qaTemplate=new QATemplate();
+		qaTemplate.setSoapModule(soapModule);
+		if(soapModule.getQaTemplates()==null){
+			soapModule.setQaTemplates(new ArrayList());
+		}
+		qaSetupComposer.setSelectedQATemplate(qaTemplate);
+		isNewTemplate=true;
+	}
+</zscript>
+<window  border="normal" id="template" position="center" closable="true" width="50%">
+	<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Template</h:small>
+                  <button type="button" zclass="close" onClick="template.detach();">×</button>
+            </h:h1>
+         </div>
+			<div class="container-fluid">
+		       <div zclass="row-fluid">
+                 <div zclass="span4">	
+					<label value="Template Name" mold="required" />
+					<textbox id="templateNameTextbox" constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" value="@{qaTemplate.name,save-when='saveButton.onClick'}"/>
+					</div>
+					</div>
+					<div zclass="row-fluid">
+					<div zclass="span4">	
+					<label value="Description" />
+					<textbox rows="2" cols="50" value="@{qaTemplate.description,save-when='saveButton.onClick'}"  sclass="span12" ></textbox>
+					</div>
+					</div>
+					 <div zclass="row-fluid">
+					<div zclass="span4">	
+					<label value="Speciality" mold="required" />
+					<suggest id="specialitySuggestionBox" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" entity="com.nzion.domain.Speciality"
+						onLookedUp="qaTemplate.setSpeciality(self.getResult())" constraint="no empty" 
+						searchcolumns="description,code" displaycolumns="code" requiredcolumn="code" value="@{qaTemplate.speciality.code,save-when='saveButton.onClick'}"/>
+						</div>
+						</div>
+						 <div zclass="row-fluid">
+						<div zclass="span2">	
+					<label value="Active" />
+					<checkbox checked="@{qaTemplate.active}"  />
+					</div>
+						</div>
+						</div>
+	<div sclass="panelFoot">
+		<button label="Save" id="saveButton" zclass="btn-success btn">
+			<attribute name="onClick">
+				if(com.nzion.util.UtilValidator.isEmpty(templateNameTextbox.getValue()))
+				throw new WrongValueException(templateNameTextbox,"Template Name Required");
+				qaSetupComposer.saveQATemplate();
+				if(isNewTemplate)
+				allTemplates.add(qaTemplate);
+				Events.postEvent("onReload",template.getParent(),null);
+				Events.postEvent("onReload",template.getParent().getFellow("allTemplatesBox"),null);
+				template.detach();			
+			</attribute>
+		</button>
+		<button label="Cancel" onClick="template.detach()">
+		</button>
+	</div>
+</window>
+</zk>

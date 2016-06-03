@@ -1,0 +1,462 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/billingtemplate.zul"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./mistxnItemWindow"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+ <?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String formatDateToDatetimeFormat(java.util.Date)"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:h="http://www.w3.org/1999/xhtml">
+    <zscript>
+        <![CDATA[
+    setPageTitle("Patient Bill", null);
+	com.nzion.zkoss.composer.BillingController billingController = new com.nzion.zkoss.composer.BillingController();
+	com.nzion.service.common.CommonCrudService service = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	com.nzion.domain.billing.Contract contract = billingController.getInvoice().getContract();
+	com.nzion.domain.inpatient.PatientAdmission patientAdmission;
+	com.nzion.domain.emr.soap.PatientSoapNote  patientSoapNote;
+	boolean isInsurance = false;	
+	String billedItemType = billingController.getInvoice().getItemType();
+
+     com.nzion.domain.Location location = com.nzion.util.Infrastructure.getSelectedLocation();
+     com.nzion.domain.Practice practice=com.nzion.util.Infrastructure.getPractice();
+    ]]>
+    </zscript>
+    <style>
+       .form-horizontal .control-label{padding-top:0px;font-weight:bold;font-size:+2;}
+       .form-horizontal .control-group{margin-bottom:5px;}
+    </style>
+    <window id="mistxnItemWindow" apply="${billingController}" self="@{define(content)}">
+        <div align="right" style="margin-bottom:10px;margin-right:7.2%">
+            <button label="HTML Print View" id="printBtn" visible="${billingController.paymentReceived}">
+                <attribute name="onClick">
+                    Map map = new HashMap();
+                    session.setAttribute("map",map);
+                    Executions.getCurrent().sendRedirect("/billing/miscellaneousTxnItemPrint.zul?invoiceId=" +
+                    billingController.getInvoice().getId(),"_blank");
+                </attribute>
+            </button>
+        </div>
+        <div align="center">
+				<div width="98%">
+        <n:table align="center">
+						 <n:tr>
+							<n:td align="center">
+								<n:strong style="">${practice.practiceName}</n:strong>
+							</n:td>
+						</n:tr>
+						<n:tr>
+							<n:td>
+								<n:strong style="font-size:12px;margin-right:2px;padding:10px">
+									${location.contacts.postalAddress.address1}
+								</n:strong>
+								<n:strong style="font-size:12px;margin-right:2px;padding:10px">
+									${location.contacts.postalAddress.city}
+								</n:strong>
+								<n:strong style="font-size:12px;margin-right:2px;padding:10px">
+									${location.contacts.postalAddress.stateProvinceGeo}
+								</n:strong>
+							</n:td>
+						</n:tr>
+						<n:tr>
+							<n:td>
+								<n:strong style="font-size:12px;margin-right:2px;padding:10px">
+									Tel : ${location.contacts.officePhone}
+								</n:strong>
+								<n:strong style="font-size:12px;padding:10px">Fax : ${location.contacts.faxNumber}</n:strong>
+							</n:td>
+						</n:tr> 
+						</n:table>
+						</div>
+						</div>
+        <div sclass="container-fluid">
+        
+					
+                <n:h2 class="fl SNHeader">Bill Details</n:h2>
+                <!-- -->
+                <div zclass="span6">
+                    <div zclass="form-horizontal">
+                        <div if="${patientAdmission != null}" sclass="control-group">
+                            <label zclass="control-label" value="IP Number :"/>
+                            <div zclass="controls">
+                                <label value="@{patientAdmission.accountNumber}"/>
+                            </div>
+                        </div>
+                        <div sclass="control-group">
+                            <label zclass="control-label" value="MRN :"/>
+                            <div zclass="controls">
+                                <label value="@{billingController.invoice.patient.accountNumber}"/>
+                            </div>
+                        </div>
+                        <div sclass="control-group">
+                            <label sclass="" class="control-label" value="Patient Name :"/>
+                            <div zclass="controls">
+                                <name object="@{billingController.invoice.patient}"/>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                <div zclass="span4"/>
+                <div zclass="span6">
+                    <div width="100%" zclass="form-horizontal">
+                        <div zclass="control-group">
+                            <label sclass="control-label" value="Bill No#"/>
+                            <div zclass="controls">
+                                <label  value="${billingController.invoice.invoiceNumber}"/>
+                            </div>
+                        </div>
+                        <div if="${isInsurance}" zclass="control-group">
+                            <label sclass="control-label" value="Insurance Provider: "/>
+                            <div zclass="controls">
+                                <label value="${patientAdmission.insuranceProvider.insuranceProviderName}"></label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label sclass="control-label" value="Consultant :"/>
+                            <div zclass="controls">
+                                <name object="@{billingController.invoice.consultant}"/>
+                            </div>
+                        </div>
+
+                        <div if="${patientSoapNote != null}">
+                            <label sclass="control-label" value="Visit Type :"/>
+                            <div zclass="controls">
+                                <label value="@{patientSoapNote.encounterType}"/>
+                            </div>
+                        </div>
+
+                        <div if="${patientSoapNote != null}">
+                            <label sclass="control-label" value="Visit Date :"/>
+                            <div zclass="controls">
+                                <label value="@{patientSoapNote.date,converter='com.nzion.view.component.DateConverter'}"/>
+                            </div>
+                        </div>
+                         <div >
+                            <label sclass="control-label" value="Charge Type :"/>
+                            <div zclass="controls">
+                                <label value="OUTPATIENT"/>
+                               
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+        <div width="100%" sclass="clr chiefComp soapNoteCont curSOAP ui-resizable">
+            <n:br/>
+            <listbox oddRowSclass="false" style="margin-left:20px;">
+                <listhead>
+                    <listheader label="Item"/>
+                    <listheader label="Price"/>
+                    <listheader label="Quantity"/>
+                    <listheader label="Amount"/>
+                </listhead>
+            </listbox>
+            <grid model="@{billingController.quickBillinvoiceItemMap}">
+                <rows>
+                    <row self="@{each='invoiceItems'}" value="@{invoiceItems}">
+                        <label value="@{invoiceItems.key,converter='com.nzion.view.component.InpatientInvoiceItemsKeyConverter'}" style="font-weight:bold"/>
+                        <detail open="true">
+                            <listbox oddRowSclass="false" model="@{invoiceItems.value}">
+                                <listitem self="@{each='invoiceItem'}" value="@{invoiceItem}">
+                                
+                                    <listcell>
+                                        <label value="@{invoiceItem.description}"/>
+                                    </listcell>
+                                    <listcell>
+                                        <hlayout spacing="3px">
+                                            <label value="@{invoiceItem.factor}"/>
+                                          <!--   <label value="@{invoiceItem.factorDescription}"/> -->
+                                        </hlayout>
+                                    </listcell>
+                                    <listcell>
+                                        <hlayout spacing="3px">
+                                            <label value="@{invoiceItem.quantity}"/>
+                                            <label value="@{invoiceItem.quanityDesc}"/>
+                                        </hlayout>
+                                    </listcell>
+                                    <listcell>
+                                        <!-- <decimalbox value="@{invoiceItem.priceValue}"
+                                                    readonly="${billingController.paymentReceived}"
+                                                    tooltiptext="@{invoiceItem,converter='com.nzion.view.component.BillingAmountConverter'}"
+                                                    onChange='Events.postEvent("onReload",amountLabel,null);Events.postEvent("onReload",remaingValueLabel,null);Events.postEvent("onReload",amountToBePaidLabel,null);'
+                                                    constraint="no negative,no empty"/> -->
+                                        <decimalbox value="@{invoiceItem.priceValue}"
+                                                    readonly="true"
+                                                    tooltiptext="@{invoiceItem,converter='com.nzion.view.component.BillingAmountConverter'}"
+                                                    onChange='Events.postEvent("onReload",amountLabel,null);Events.postEvent("onReload",remaingValueLabel,null);Events.postEvent("onReload",amountToBePaidLabel,null);'
+                                                    constraint="no negative,no empty"/>            
+                                        
+                                        <label value="@{invoiceItem.price.currency.code}"></label>
+                                    </listcell>
+                                </listitem>
+                            </listbox>
+                        </detail>
+                    </row>
+                </rows>
+            </grid>
+            <div style="width:81%">
+                <div align="right" sclass="total">
+                    <label value="${c:l('totalAmount')}"/>
+                    <label id="amountLabel"
+                           tooltiptext="@{billingController.invoice,converter='com.nzion.view.component.BillingAmountConverter'}"
+                           value="@{billingController.invoice.totalAmount,load-after='self.onReload'}"
+                           style="font-weight:bold"/>
+                </div>
+            </div>
+            <div sclass="panelFoot">
+                <button label="Save" id="saveBtn"
+                        onClick="billingController.saveInvoice();com.nzion.util.UtilMessagesAndPopups.showSuccess()"
+                        visible="${!billingController.paymentReceived}" zclass="btn btn-success"/>
+                <button label="Receive Payment" id="payBtn"
+                        onClick='paymentSection.setVisible(true);
+										Events.postEvent("onReload",paymentListbox,null);Events.postEvent("onReload",remaingValueLabel,null)'
+                        visible="${!billingController.paymentReceived}"/>
+            </div>
+
+            <div visible="${billingController.paymentReceived}" id="paymentSection">
+                <div sclass="panelCont" height="40px" visible="${!billingController.paymentReceived}">
+                    <div>
+                        <div>
+                            <label value="Payment Mode" mold="required"/>
+                        </div>
+                        <enumeration enumType="PAYMENT_MODE"
+                                     selectedItem="@{billingController.invoicePayment.paymentMethod,save-when='addButton.onClick',load-after='addButton.onClick'}"
+                                     constraint="no empty:Payment Mode Require" id="paymentModeBox">
+                                      <attribute name="onCreate">
+                                      self.setValue("Cash");
+                                       </attribute>
+                            <attribute name="onSelect">
+                                if(self.getSelectedItem() != null)
+                                {
+                                com.nzion.domain.Enumeration tmpPayMode =
+                                self.getSelectedItem().getValue();
+                                if(tmpPayMode.getEnumCode().equals("CASH")){
+                                bankNameDiv.setVisible(false);
+                                transactionNumbDiv.setVisible(false);
+                                chequeOrDDNumbDiv.setVisible(false);
+                                chequeOrDDDateDiv.setVisible(false);
+                                insuranceNameDiv.setVisible(false);
+                                policyNoDiv.setVisible(false);
+                                }
+                                if(tmpPayMode.getEnumCode().equals("DEBIT_CARD")){
+                                bankNameDiv.setVisible(true);
+                                transactionNumbDiv.setVisible(true);
+                                chequeOrDDNumbDiv.setVisible(false);
+                                chequeOrDDDateDiv.setVisible(false);
+                                insuranceNameDiv.setVisible(false);
+                                policyNoDiv.setVisible(false);
+                                }
+                                if(tmpPayMode.getEnumCode().equals("CREDIT_CARD")){
+                                bankNameDiv.setVisible(true);
+                                transactionNumbDiv.setVisible(true);
+                                chequeOrDDNumbDiv.setVisible(false);
+                                chequeOrDDDateDiv.setVisible(false);
+                                insuranceNameDiv.setVisible(false);
+                                policyNoDiv.setVisible(false);
+                                }
+                                if(tmpPayMode.getEnumCode().equals("PERSONAL_CHEQUE")){
+                                bankNameDiv.setVisible(true);
+                                transactionNumbDiv.setVisible(false);
+                                chequeOrDDNumbDiv.setVisible(true);
+                                chequeOrDDDateDiv.setVisible(true);
+                                insuranceNameDiv.setVisible(false);
+                                policyNoDiv.setVisible(false);
+                                }
+                               if(tmpPayMode.getEnumCode().equals("INSURANCE_CARD")){
+                                bankNameDiv.setVisible(false);
+                                insuranceNameDiv.setVisible(true);
+                                policyNoDiv.setVisible(true);
+                                transactionNumbDiv.setVisible(false);
+                                chequeOrDDNumbDiv.setVisible(false);
+                                chequeOrDDDateDiv.setVisible(false);
+                                	                                	
+                                }
+                              }
+                            </attribute>
+                        </enumeration>
+                    </div>
+                    <div>
+                        <div>
+                            <label value="Amount" mold="required"/>
+                        </div>
+                        <decimalbox id="amountInpBox"
+                                    value="@{billingController.invoicePayment.amount.amount,load-after='addButton.onClick',save-when='addButton.onClick'}">
+                                 <attribute name="onCreate">
+                                      self.setValue(billingController.getRemainingAmount());
+                                       </attribute>    
+                                    </decimalbox>
+                    </div>
+                    <div id="bankNameDiv" visible="false">
+                        <div>
+                            <label value="Bank Name" mold="required"/>
+                        </div>
+                        <textbox id="bankNameBox"
+                                 value="@{billingController.invoicePayment.bankName,load-after='addButton.onClick',save-when='addButton.onClick'}"/>
+                    </div>
+                    <div id="transactionNumbDiv" visible="false">
+                        <div>
+                            <label value="Transaction Number" mold="required"/>
+                        </div>
+                        <textbox id="transactionNumbInp"
+                                 value="@{billingController.invoicePayment.transactionNumb,load-after='addButton.onClick',save-when='addButton.onClick'}"/>
+                    </div>
+                    <div id="chequeOrDDNumbDiv" visible="false">
+                        <div>
+                            <label value="Cheque Number" mold="required"/>
+                        </div>
+                        <textbox id="chequeOrDDNumbBox"
+                                 value="@{billingController.invoicePayment.chequeOrDdNo,load-after='addButton.onClick',save-when='addButton.onClick'}"/>
+
+                    </div>
+                    <div id="chequeOrDDDateDiv" visible="false">
+                        <div>
+                            <label value="Cheque Date" mold="required"/>
+                        </div>
+                        <datebox id="chequeOrDDDateBox"
+                                 value="@{billingController.invoicePayment.chequeOrDdDate,load-after='addButton.onClick',save-when='addButton.onClick'}"/>
+                    </div>
+                    
+						<div id="policyNoDiv" visible="false">
+                        <div>
+                            <label value="Policy No" mold="required"/>
+                        </div>
+                        <textbox id="policyNoBox"
+                                 value="@{billingController.invoicePayment.policyNo,load-after='addButton.onClick',save-when='addButton.onClick'}"/>
+                    	</div>
+                    	
+					    <div id="insuranceNameDiv" visible="false">
+                        <div>
+                            <label value="Insurance Name" mold="required"/>
+                        </div>
+                        <textbox id="insuranceNameBox"
+                                 value="@{billingController.invoicePayment.insuranceName,load-after='addButton.onClick',save-when='addButton.onClick'}"/>
+                    	</div>
+						
+				</div>
+                <div style="margin:auto;width:100%" align="center">
+                    <hlayout style="clear:both;width:100%" spacing="20px">
+                        <div style="margin-top:15px;">
+                            <label value="Remaining Amount" style="font-weight:bold;"/>
+                            <label id="remaingValueLabel"
+                                   value="@{billingController.remainingAmount,load-after='self.onReload'}"
+                                   style="font-weight:bold;color:red"/>
+                            <label value="@{billingController.invoice.totalAmount.currency.code}"/>
+                        </div>
+                        <div style="margin-top:15px;" if="${billingController.isWriteOff()}">
+                            (<label value="Discounted Amount" style="font-weight:bold;"/>
+                            <label value="@{billingController.writeOffAmount}"
+                                   style="font-weight:bold;color:red"/>
+                            <label value="@{billingController.invoice.totalAmount.currency.code}"/>)
+                        </div>
+                        <div>
+                            <button id="addButton" label="Add"
+                                    visible="${!billingController.paymentReceived}"
+                                    onClick=' validateAddPayment();'/>
+                        </div>
+                    </hlayout>
+                </div>
+                <listbox id="paymentListbox" height="200px"
+                         model="@{billingController.invoice.invoicePayments,load-after='self.onReload'}">
+                    <listhead>
+                        <listheader label="Payment Date"/>
+                        <listheader label="Payment Mode"/>
+                        <listheader label="Amount"/>
+                        <listheader label="Bank/Insurance Name"/>
+                        <listheader label="Transaction #"/>
+                        <listheader label="Cheque/Policy #"/>
+                        <listheader label="Cheque Date"/>
+                        <listheader label="Action"/>
+                    </listhead>
+                    <listitem self="@{each='invPayment'}" value="@{invPayment}">
+                        <listcell label="@{invPayment.paymentDate,converter='com.nzion.view.component.DateConverter'}"/>
+                        <listcell label="@{invPayment.paymentMethod.description}"/>
+                        <listcell label="@{invPayment.amount.amount}"/>
+                        
+                        <listcell>
+                        <label>
+                        <attribute name="onCreate">
+                        com.nzion.domain.billing.InvoicePayment invoicePayment=self.getParent().getParent().getValue();
+                        if(com.nzion.util.UtilValidator.isNotEmpty(invoicePayment.getBankName()))
+                        	self.setValue(invoicePayment.getBankName());
+                        if(com.nzion.util.UtilValidator.isNotEmpty(invoicePayment.getInsuranceName()))
+                        	self.setValue(invoicePayment.getInsuranceName());
+                        </attribute> 
+                        </label>
+                        </listcell>
+                        
+                        <listcell label="@{invPayment.transactionNumb}"/>
+                        <listcell>
+                        <label>
+                        <attribute name="onCreate">
+                        com.nzion.domain.billing.InvoicePayment invoicePayment=self.getParent().getParent().getValue();
+                        if(com.nzion.util.UtilValidator.isNotEmpty(invoicePayment.getChequeOrDdNo()))
+                        	self.setValue(invoicePayment.getChequeOrDdNo());
+                        if(com.nzion.util.UtilValidator.isNotEmpty(invoicePayment.getPolicyNo()))
+                        	self.setValue(invoicePayment.getPolicyNo());
+                        </attribute> 
+                        </label>
+                        </listcell>
+                                           
+                        <listcell label="@{invPayment.chequeOrDdDate,converter='com.nzion.view.component.DateConverter'}"/>
+                        <listcell>
+                            <button label="Remove" visible="${!billingController.paymentReceived}"
+                                    onClick='billingController.removeTxnPaymentItem(self.getParent().getParent().getValue());self.getParent().getParent().detach();Events.postEvent("onReload",remaingValueLabel,null)'/>
+                        </listcell>
+                    </listitem>
+                </listbox>
+                <div sclass="panelFoot" visible="${billingController.displayWriteOff()}">
+	                <button label="Write-Off" >
+	                <attribute name="onClick">
+	                Executions.createComponents("/billing/writeOff.zul",null,com.nzion.util.UtilMisc.toMap("billingController",billingController));
+	                </attribute>
+	                </button>
+                </div>
+                <div sclass="panelFoot" visible="${!billingController.paymentReceived}">
+                    <button label="Complete Payment" onClick="billingController.receivePayment()"/>
+                </div>
+            </div>
+        </div>
+        <zscript>
+            void validateAddPayment(){
+            if(paymentModeBox.getSelectedItem() == null){
+            com.nzion.util.UtilMessagesAndPopups.displayError("Please select the payment mode");
+            return;
+            }
+
+            if(amountInpBox.getValue() == null){
+            com.nzion.util.UtilMessagesAndPopups.displayError("Please provide the amount");
+            return;
+            }
+
+            com.nzion.domain.Enumeration tmpPayMode = paymentModeBox.getSelectedItem().getValue();
+            if(tmpPayMode.getEnumCode().equals("DEBIT_CARD") || tmpPayMode.getEnumCode().equals("CREDIT_CARD")){
+            if(com.nzion.util.UtilValidator.isEmpty(transactionNumbInp.getValue()) ||
+            com.nzion.util.UtilValidator.isEmpty(bankNameBox.getValue())){
+            com.nzion.util.UtilMessagesAndPopups.displayError("Please provide the Bank name and Transaction number");
+            return;
+            }
+            }
+            if(tmpPayMode.getEnumCode().equals("PERSONAL_CHEQUE")){
+            if((chequeOrDDDateBox.getValue() == null) || com.nzion.util.UtilValidator.isEmpty(bankNameBox.getValue()) ||
+            com.nzion.util.UtilValidator.isEmpty(chequeOrDDNumbBox.getValue())){
+            com.nzion.util.UtilMessagesAndPopups.displayError("Please provide the Bank name, Cheque number and Cheque date");
+            return;
+            }
+            }
+            if(tmpPayMode.getEnumCode().equals("INSURANCE_CARD")){
+            if((com.nzion.util.UtilValidator.isEmpty(insuranceNameBox.getValue()) || com.nzion.util.UtilValidator.isEmpty(policyNoBox.getValue()))){
+            com.nzion.util.UtilMessagesAndPopups.displayError("Please provide the Insurance Name and Policy No");
+            return;
+            }
+            }
+
+            billingController.addTxnPaymentItem();
+            Events.postEvent("onReload",remaingValueLabel,null);
+            Events.postEvent("onReload",paymentListbox,null);
+            }
+
+
+        </zscript>
+        </div>
+    </window>
+</zk>

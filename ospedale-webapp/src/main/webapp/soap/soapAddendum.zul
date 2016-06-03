@@ -1,0 +1,53 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapAddendumWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation" xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<zscript>
+	import com.nzion.zkoss.composer.*;
+	import com.nzion.domain.emr.soap.SoapAddendum;
+	PatientSoapNoteController controller = arg.get("controller");
+	SoapAddendum soapAddendum = new com.nzion.domain.emr.soap.SoapAddendum();
+	soapAddendum.setPerson(com.nzion.util.Infrastructure.getUserLogin().getPerson());
+	soapAddendum.setSoapNote(controller.getSoapNote());
+	List soapAddendums = new ArrayList(); 
+</zscript>
+<window id="soapAddendumWin">
+	<panel title="Addendum">
+	<panelchildren>
+	<div style="margin:20px;">
+	<hbox width="38%">
+	<label value="Select Module" style="font-weight:bold;"/> 
+	<combobox readonly="true" id="comboboxModule" model="@{controller.modules}" selectedItem="@{soapAddendum.soapModule,load-after='save.onClick'}" constraint="no empty">
+	<attribute name="onChange">
+		if(controller.getSoapNote().getId()!=null){
+		commentDiv.setVisible(true);
+		soapAddendums = commonCrudRepository.findByEquality(SoapAddendum.class,new String[]{"soapModule","soapNote"},new Object[]{self.getSelectedItem().getValue(),controller.getSoapNote()});
+		includeComp.setVisible(soapAddendums.size() != 0);
+		includeComp.setDynamicProperty("dParam",soapAddendums);
+		includeComp.invalidate();
+		}
+	</attribute>
+   		<comboitem self="@{each='module'}" label="@{module.moduleName}" value="@{module}" />
+   	</combobox>
+   	</hbox>
+	<include src="/soap/soapAddendumList.zul" id="includeComp" dParam="${soapAddendums}" visible="false"/>
+	<div visible="false" id="commentDiv">
+   	<label value="Comments"/>
+	<textbox value="@{soapAddendum.comments,load-after='save.onClick'}" constraint="no empty" width="100%" rows="5" onBlur="comboboxModule.setValue(soapAddendum.getSoapModule().getModuleName());"/>
+	<button id="save" label="Save" style="margin-top:4px;">
+	<attribute name="onClick">
+		soapAddendum.setAddedOn(new Date());
+		commonCrudService.save(soapAddendum);
+		soapAddendums = commonCrudRepository.findByEquality(SoapAddendum.class,new String[]{"soapModule","soapNote"},new Object[]{soapAddendum.getSoapModule(),controller.getSoapNote()});
+		includeComp.setVisible(soapAddendums.size() != 0);
+		includeComp.setDynamicProperty("dParam",soapAddendums);
+		includeComp.invalidate();
+		comboboxModule.setValue(soapAddendum.getSoapModule().getModuleName());
+		soapAddendum = new SoapAddendum(soapAddendum);
+		</attribute>
+	</button>
+	</div>
+	   </div>
+	</panelchildren>
+	</panel>
+</window>
+</zk>

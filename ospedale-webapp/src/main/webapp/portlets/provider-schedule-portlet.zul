@@ -1,0 +1,134 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./appointmentDoctor"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	import com.nzion.domain.Schedule;
+	import com.nzion.domain.screen.ScheduleConfig;
+	import com.nzion.service.ScheduleService;
+	com.nzion.domain.Person person = com.nzion.util.Infrastructure.getLoggedInPerson();
+	if (person instanceof com.nzion.domain.Provider && ((com.nzion.domain.Provider) person).isProviderAssistant()) {
+		person = ((com.nzion.domain.Provider) person).getReportingProvider();
+	}
+	Schedule.STATUS[] scheduleStatusArr = Schedule.STATUS.values();
+	com.nzion.zkoss.composer.appointment.ScheduleController scheduleController = new com.nzion.zkoss.composer.appointment.ScheduleController();
+	desktop.setAttribute("scheduleController",scheduleController);
+	
+	com.nzion.domain.Location location = (com.nzion.domain.Location) Sessions.getCurrent().getAttribute("_location");
+	ScheduleService scheduleService = com.nzion.util.Infrastructure.getSpringBean("scheduleService");
+	ScheduleConfig screenConfig = scheduleService.getAppointmentDisplayScreen();
+]]>
+	</zscript>
+	
+	<window border="normal" apply="${scheduleController}" id="appointmentDoctor" width="100%" draggable="false"
+		minimizable="false">
+		<style>
+		.apptHeader_0{ width:18%;height:30px}
+	 	.apptHeader_1{ width:15%;height:30px} 
+	 	.apptHeader_2{ width:13%;height:30px}
+	 	.apptHeader_3{ width:18%;height:30px}
+	 	.apptHeader_4{ width:20%;height:30px} 
+		
+	.apptcol1{
+			background: rgb(238,238,238); /* Old browsers */
+			background: -moz-linear-gradient(top,  rgba(238,238,238,1) 0%, rgba(204,204,204,1) 100%); /* FF3.6+ */
+			background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(238,238,238,1)), color-stop(100%,rgba(204,204,204,1))); /* Chrome,Safari4+ */
+			background: -webkit-linear-gradient(top,  rgba(238,238,238,1) 0%,rgba(204,204,204,1) 100%); /* Chrome10+,Safari5.1+ */
+			background: -o-linear-gradient(top,  rgba(238,238,238,1) 0%,rgba(204,204,204,1) 100%); /* Opera 11.10+ */
+			background: -ms-linear-gradient(top,  rgba(238,238,238,1) 0%,rgba(204,204,204,1) 100%); /* IE10+ */
+			background: linear-gradient(top,  rgba(238,238,238,1) 0%,rgba(204,204,204,1) 100%); /* W3C */
+			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 ); /* IE6-9 */
+			float:left;
+			width:48%;
+			border:3px solid #B1CBD5;
+			border-radius:5px 5px 5px 5px;
+			padding:10px;
+	}
+	.form .name{
+		font-weight:bold;
+		text-align:left;
+	}
+	
+	.apptRow{
+		height:30px;
+	}
+	</style>
+	<div>
+	<separator></separator>
+	<separator></separator>
+	<separator></separator>
+		 <div style="float:left;width:100%">
+		    <div style="float:left;width:49%">
+			<hlayout>
+				<label value="Appointment Date"></label>
+				<datebox value="@{scheduleController.selectedDate}" id="appointmentDate"></datebox>
+			</hlayout>
+			</div>
+			<div style="float:right;width:50%;text-align:right;">
+				<toolbar width="90%">
+					<toolbarbutton label="Day" onClick='scheduleController.changeToDayView();' id="dayBtn" />
+					<toolbarbutton label="Week" onClick='scheduleController.changeToWeekView();' id="weekBtn" />
+					<toolbarbutton label="Month" onClick='scheduleController.changeToMonthView();' id="monthBtn" />
+				</toolbar>
+			</div>
+		 </div>
+		 <div width="100%;float:right">
+			
+			<n:br/>
+			<div style="height-min:200px">
+				<hbox style="height:25px; backgro6und: #DCEEF8; border: 1px solid #CCCCCC; border-top:0px;" width="100%"
+					widths="23%,60%,27%">
+					<div width="100%" align="left" style="vertical-align: middle;">
+						<label id="leftDateLabel" style="font-weight: bold;font-size:12px;" />
+					</div>
+					<div width="100%" align="center" style="vertical-align: middle;">
+						<label id="centerDateLabel" style="font-weight: bold;font-size:12px;" />
+					</div>
+					<div width="100%" align="right" style="vertical-align: middle;">
+						<label id="rightDateLabel" style="font-weight: bold;font-size:12px;" />
+					</div>
+				</hbox>
+				<panel>
+					<panelchildren>
+                        <div>
+                            <textbox forEach="${scheduleStatusArr}" width="10.6%" readonly="true" disabled="false"
+                                     value="${each}">
+                                <custom-attributes stat="${each}"/>
+                                <attribute name="onCreate">
+                                    self.setStyle("background:"+screenConfig.getColor(stat));
+                                </attribute>
+                            </textbox>
+                        </div>
+						<div id="schedulesVbox" width="100%" style="min-height:100%;">
+							<attribute name="onSlotSelect">
+								Schedule currentSchedule = event.getData().get("schedule");
+								Window window = (Window)Executions.createComponents("/portlets/patientinfo.zul",null,
+								com.nzion.util.UtilMisc.toMap("patient",currentSchedule.getPatient(),
+									"slotSchedule",currentSchedule,"scheduleController",scheduleController,"sourceComponent",event.getData().get("sourceComponent")));
+								window.setClosable(true);
+								window.setWidth("75%");
+								window.setPosition("parent");
+								window.doModal(); 		
+							</attribute>
+							<attribute name="onStartEncounter">
+								Schedule currentSchedule = (Schedule)event.getData().get("schedule");
+								scheduleController.openSoapNote(currentSchedule);
+							</attribute>
+							<attribute name="onQuickBook">
+								com.nzion.zkoss.composer.appointment.AppointmentListcell apptCell = (com.nzion.zkoss.composer.appointment.AppointmentListcell)event.getData().get("cell");						
+								com.nzion.zkoss.ext.Navigation.navigateToModalWindow("/portlets/quickBook.zul",com.nzion.util.UtilMisc.toMap("scheduleController",scheduleController,"sourceComponent",apptCell));
+								
+							</attribute>
+						</div>
+					</panelchildren>
+				</panel>
+			</div>
+		</div>
+	</div>
+	<popup id="patientDetail" zclass="none"></popup>
+	</window>
+	
+	<zscript>
+		scheduleController.setPerson(person);
+	</zscript>
+</zk>

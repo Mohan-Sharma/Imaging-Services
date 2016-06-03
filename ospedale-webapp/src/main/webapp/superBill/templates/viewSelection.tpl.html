@@ -1,0 +1,71 @@
+<div class="aside" ng-controller="asideTotalController">
+    <div class="aside-dialog">
+        <div class="aside-content">
+            <div class="aside-header">
+                <button type="button" class="close" ng-click="$hide()">×</button>
+                <h4 class="aside-title">Total Bill</h4>
+            </div>
+            <div class="aside-body">
+                <div id="#payment-confirm-alert-window"></div>
+                <div class="shadow" style="padding-bottom: 5px;padding-top: 5px;border-radius: 4px;margin-top: 15px;margin-bottom: 15px" ng-if="totalBillDetails.Doc.items.length>0">
+                    <span class="label label-default">Doctor Consultation</span>
+                    <div  ng-repeat="doc in totalBillDetails.Doc.items" style="padding-left: 25px" class="row">
+                        <div class="col-md-8"><span style="font-weight: bold">{{doc.firstName}}</span></div>
+                        <div class="col-md-4">
+                            <span class=" pull-right" style="min-width: 45px;font-weight: bold">
+                                <span class="WebRupee">&#x20B9;</span><input class="form-control-custom" placeholder="0" ng-model="doc.amount" type="text" ng-change="calculateTotal(totalBillDetails.Doc)">
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="shadow" style="padding-bottom: 5px;padding-top: 5px;border-radius: 4px;margin-top: 15px;margin-bottom: 15px" ng-if="totalBillDetails.Lab.items.length>0">
+                    <span class="label label-default">Lab Tests</span>
+                    <div ng-repeat="lab in totalBillDetails.Lab.items" style="padding-left: 25px" class="row">
+                        <div class="col-md-8"><span style="font-weight: bold">{{lab.panelName}}</span></div>
+                        <div class="col-md-4">
+                            <span class=" pull-right" style="min-width: 45px;font-weight: bold">
+                               <span class="WebRupee">&#x20B9;</span><input class="form-control-custom" placeholder="0" ng-model="lab.amount" type="text" ng-change="calculateTotal(totalBillDetails.Lab)">
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="shadow" style="padding-bottom: 5px;padding-top: 5px;border-radius: 4px;margin-top: 15px;margin-bottom: 15px" ng-if="totalBillDetails.Casuality.items.length>0">
+                    <span class="label label-default">Casualty</span>
+                    <div  ng-repeat="cas in totalBillDetails.Casuality.items" style="padding-left: 25px" class="row">
+                        <div class="col-md-8"><span style="font-weight: bold">{{cas.Type}}</span></div>
+                        <div class="col-md-4">
+                            <span class=" pull-right" style="min-width: 45px;font-weight: bold">
+                                <span class="WebRupee">&#x20B9;</span><input class="form-control-custom" placeholder="0" ng-model="cas.amount" type="text" ng-change="calculateTotal(totalBillDetails.Casuality)">
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="shadow" style="padding-bottom: 5px;padding-top: 5px;border-radius: 4px;margin-top: 15px;margin-bottom: 15px" ng-if="totalBillDetails.Radiology.items.length>0">
+                    <span class="label label-default">Radiology</span>
+                    <div  ng-repeat="rad in totalBillDetails.Radiology.items" style="padding-left: 25px" class="row">
+                        <div class="col-md-8"><span style="font-weight: bold">{{rad.Type}}</span></div>
+                        <div class="col-md-4">
+                            <span class=" pull-right" style="min-width: 45px;font-weight: bold">
+                                <span class="WebRupee">&#x20B9;</span><input class="form-control-custom" placeholder="0" ng-model="rad.amount" type="text" ng-change="calculateTotal(totalBillDetails.Radiology)">
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <kbd style="display: inline-block;font-weight: bolder;padding: 5px;font-size: 100%" class="pull-right">
+                    <span style="font-weight: bold">Total : <span class="WebRupee">&#x20B9;</span>&nbsp;{{totalBillDetails.Total}}</span>
+                </kbd>
+            </div>
+            <div class="aside-footer">
+                <label>Payment Mode : </label>
+                <select class="form-control" style="width: 25%;display: inline" ng-model="paymentMode">
+                    <option value="OPD_CASH">Cash</option>
+                    <option value="OPD_DEBIT_CARD">Debit Card</option>
+                    <option value="OPD_CREDIT_CARD">Credit Card</option>
+                    <option value="OPD_PERSONAL_CHEQUE">Cheque</option>
+                    <option value="OPD_INSURANCE_CARD">Insurance Card</option>
+                </select>
+                <button type="button" class="btn btn-success" ng-click="prepareData()" ng-disabled="hideReceivePayment">Receive payment & Print</button>
+            </div>
+        </div>
+    </div>
+</div>

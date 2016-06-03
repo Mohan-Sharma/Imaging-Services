@@ -1,0 +1,55 @@
+<ul class="list-group">
+    <li class="list-group-item list-group-item-custom" style="background-color: #428bca;color: #ffffff;text-align: center"><span style="font-weight: bold">Casualty</span></li>
+    <li class="list-group-item list-group-item-custom" ng-repeat="casuality in selectedCasualityDetails.items" ng-if="selectedCasualityDetails.items.length>0">
+        <table>
+            <td style="width: 60%;padding-right: 10px"><input  class="form-control" ng-model="casuality.Type" type="text" ng-change="alterRow(selectedCasualityDetails,$index)"></td>
+            <td style="width: 25%"><span class="WebRupee">&#x20B9;</span>
+                <input class="form-control-custom" ng-model="casuality.amount" placeholder="0" type="text" ng-change="alterRow(selectedCasualityDetails,$index)">
+            </td>
+            <td style="width: 10%">
+                <button ng-if="$last" type="button" class="btn btn-primary pull-right" ng-click="casualityItem.show=true">
+                    <span class="glyphicon glyphicon-plus-sign"></span>
+                </button>
+            </td>
+        </table>
+    </li>
+    <li class="list-group-item list-group-item-custom" ng-show="casualityItem.show || selectedCasualityDetails.items.length == 0">
+        <table>
+            <td style="width: 60%;padding-right: 10px"><input  class="form-control" ng-model="casualityItem.Type" type="text"></td>
+            <td style="width: 25%"><span class="WebRupee">&#x20B9;</span>
+                <input class="form-control-custom" ng-model="casualityItem.amount" type="text"></td>
+            <td style="width: 10%">
+                <button  type="button" class="btn btn-primary pull-right" ng-click="addRow(selectedCasualityDetails,casualityItem,'casuality')">
+                    Add
+                </button>
+            </td>
+        </table>
+    </li>
+</ul>
+<ul class="list-group">
+    <li class="list-group-item list-group-item-custom" style="background-color: #428bca;color: #ffffff;text-align: center"><span style="font-weight: bold">Radiology</span></li>
+    <li class="list-group-item list-group-item-custom" ng-repeat="radiology in selectedRadiologyDetails.items" ng-if="selectedRadiologyDetails.items.length>0">
+        <table>
+            <td style="width: 60%;padding-right: 10px"><input  class="form-control" type="text" ng-model="radiology.Type" ng-change="alterRow(selectedRadiologyDetails,$index)"></td>
+            <td style="width: 25%"><span class="WebRupee">&#x20B9;</span>
+                <input class="form-control-custom" placeholder="0" type="text" ng-model="radiology.amount" ng-change="alterRow(selectedRadiologyDetails)">
+            </td>
+            <td style="width: 10%">
+                <button ng-if="$last" type="button" class="btn btn-primary pull-right" ng-click="radiologyItem.show=true">
+                    <span class="glyphicon glyphicon-plus-sign"></span>
+                </button>
+            </td>
+        </table>
+    </li>
+    <li class="list-group-item list-group-item-custom" ng-show="radiologyItem.show || selectedRadiologyDetails.items.length == 0">
+        <table>
+            <td style="width: 60%;padding-right: 10px"><input  class="form-control" ng-model="radiologyItem.Type" type="text"></td>
+            <td style="width: 25%"><span class="WebRupee">&#x20B9;</span><input class="form-control-custom" ng-model="radiologyItem.amount" type="text"></td>
+            <td style="width: 10%">
+                <button  type="button" class="btn btn-primary pull-right" ng-click="addRow(selectedRadiologyDetails,radiologyItem,'radiology')">
+                    Add
+                </button>
+            </td>
+        </table>
+    </li>
+</ul>

@@ -1,0 +1,28 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+
+<zscript>
+	Date date = new Date();
+</zscript>
+	<n:table width="100%" height="100%">
+		<n:tr>
+			<n:td>
+				<vbox>
+						<separator height="75px"/>
+						<label value="_________________________________________________"/>
+						<label style="font-weight:bold;" value="Doctor Signature"/>
+			    </vbox>
+			</n:td>
+			</n:tr>
+			<n:tr>
+			<n:td >
+				<n:div align="left" style="margin-top:20px">
+					<n:strong>Date Generated : ${display:fd(date)}</n:strong>
+				</n:div>
+			</n:td>
+		</n:tr>	
+	</n:table>
+</zk>

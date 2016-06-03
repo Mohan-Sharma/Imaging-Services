@@ -1,0 +1,22 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+
+	<div zclass="form-search"  >
+		<div zclass="input-append">
+			<textbox sclass="search-query" style="height:24px;" id="providerLookupTxt" forward="onChange=onChange" readonly="true"/>
+			<a zclass="lookupbtn" >
+		 <n:i class="icon-search"></n:i>
+				<attribute name="onClick">
+					Executions.createComponents("/provider/provider_search.zul",null,com.nzion.util.UtilMisc.toMap("providerLookupTxt", providerLookupTxt));
+				</attribute>
+				Lookup
+			</a>
+		</div>
+	</div>
+	<zscript>
+	com.nzion.domain.Provider provider = arg.get("value");
+	if(provider != null)
+		providerLookupTxt.setValue(com.nzion.util.ViewUtil.getFormattedName(provider));
+	</zscript>
+</zk>

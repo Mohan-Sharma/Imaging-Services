@@ -1,0 +1,498 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./viewSocialWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<?xel-method prefix="displayName" name="fn" class="com.nzion.util.ViewUtil" signature="String getFormattedName(java.lang.Object)"?>
+	<zscript><![CDATA[
+	import com.nzion.enums.SmokingStatusEnum;
+	com.nzion.service.SoapNoteService soapNoteService  = com.nzion.util.Infrastructure.getSpringBean("soapNoteService");
+	com.nzion.service.UserLoginService userLoginService = com.nzion.util.Infrastructure.getSpringBean("userLoginService");
+	com.nzion.zkoss.composer.PatientSoapNoteController controller = arg.get("controller");
+//	com.nzion.domain.emr.soap.SoapSection previousSocialHistorySection = (com.nzion.domain.emr.soap.SocialHistorySection)soapNoteService.getPreviousSoapSection(controller.getSoapNote(),com.nzion.domain.emr.soap.SocialHistorySection.class);
+	com.nzion.domain.emr.soap.SocialHistorySection socialHistorySection = controller.getSoapSection(com.nzion.domain.emr.soap.SocialHistorySection.class);
+	com.nzion.domain.emr.soap.PatientSocialHistory patientSocialHistory = socialHistorySection.getPatientSocialHistory();
+	com.nzion.domain.emr.soap.SocialHistorySection currentSection = socialHistorySection;
+	com.nzion.domain.emr.soap.PatientSocialHistory preceedingSocialHistory = soapNoteService.getPreviousSectionPatientSocialHistory(socialHistorySection);
+	com.nzion.domain.emr.soap.PatientSocialHistory latestSocialHistory = soapNoteService.getLatestPatientSocialHistory(controller.getPatient());
+	com.nzion.domain.emr.soap.PatientSocialHistory oldestSocialHistory = soapNoteService.getOldestPatientSocialHistory(controller.getPatient());
+	if(patientSocialHistory == null && preceedingSocialHistory != null)
+			patientSocialHistory = preceedingSocialHistory;
+	com.nzion.domain.Person updatedByPerson = null;
+	if(patientSocialHistory != null && com.nzion.util.UtilValidator.isNotEmpty(patientSocialHistory.getUpdatedBy()))
+		updatedByPerson = userLoginService.getUserByUsername(patientSocialHistory.getUpdatedBy()).getPerson();
+	
+	boolean isFemale = "Female".equalsIgnoreCase(controller.getPatient().getGender() == null ? null : controller.getPatient().getGender().getDescription());
+	List smokingStatuses = Arrays.asList(SmokingStatusEnum.values());
+	void setDivVisible(Radio radio, Div div, Boolean b) {
+		if (b == null)
+			return;
+		radio.setSelected(b);
+		div.setVisible(b);
+	}
+	
+	void setSmokingDivVisible() {
+		if (patientSocialHistory.getSmokingStatus() != null
+				&& !(SmokingStatusEnum.NEVER_SMOKER.equals(
+						patientSocialHistory.getSmokingStatus()) || SmokingStatusEnum.UNKNOWN
+						.equals(patientSocialHistory.getSmokingStatus()))) {
+			((Div) viewSocialWindow.getFellow("cigrattesDiv")).setVisible(true);
+		} else {
+			((Div) viewSocialWindow.getFellow("cigrattesDiv")).setVisible(false);
+		}
+	}
+]]></zscript>
+	<window id="viewSocialWindow" height="100%" width="100%">
+		<attribute name="onSaveClick">
+		exerciseTxtBox.invalidate();
+		abnormalWeightLabel.invalidate();
+		cigrattesDiv.invalidate();
+		alcoholBox.invalidate();
+		alcoholicHxBox.invalidate();
+		safetyIssueBox.invalidate();
+		gynecInfoBox.invalidate();
+		exerciseDiv.invalidate();
+		otherInfoDiv.invalidate();
+		</attribute>
+			<panel title="Social History" collapsible="true" border="none" width="100%">
+				<panelchildren style="background-color:#F9F9F9;border:0px;">
+					<vlayout style="margin:10px;" if="${patientSocialHistory!=null &amp;&amp; patientSocialHistory.updatedBy != null &amp;&amp;  patientSocialHistory.updatedTxTimestamp != null}">
+						<hlayout>
+						<label value="Last Updated By"/>
+						<label value="${displayName:fn(updatedByPerson)}"/>
+						</hlayout>
+						<hlayout>
+ 						<label value="Last Updated On"/>
+						<label value="${display:fd(patientSocialHistory.updatedTxTimestamp)}" />
+						</hlayout>
+					</vlayout>	
+					<vlayout>
+					<hlayout style="margin:10px;">
+					<button label="Add/Edit" disabled="${controller.readonly}"
+					onClick='Executions.createComponents("/soap/addEditPatientSocialHistory.zul",viewSocialWindow,
+					com.nzion.util.UtilMisc.toMap("controller",controller,"socialHistorySection",socialHistorySection,"preceedingSocialHistory",preceedingSocialHistory));'/>
+					<button label="History"  id="historyBtn" disabled="${preceedingSocialHistory == null}">
+						<attribute name="onClick">
+						<![CDATA[
+						patientSocialHistory = soapNoteService.getPreviousSectionPatientSocialHistory(socialHistorySection);
+						currentSection = patientSocialHistory.getSoapSection();
+						nxtBtn.setDisabled(patientSocialHistory == null);
+						patientHxInfoDiv.setVisible(!(patientSocialHistory == null));
+						prevBtn.setDisabled(patientSocialHistory == null);
+						currentHx.setDisabled(false);
+						]]>
+						</attribute>
+					</button>
+					</hlayout>
+				<div visible="${patientSocialHistory == null}" align="center" id="noInfoDiv">
+					<label value="No Information Available"/>
+				</div>
+				<hlayout style="margin:10px;">
+				<a label="Previous" id="prevBtn" disabled="true">
+					<attribute name="onClick">
+					<![CDATA[
+					if(nxtBtn.isDisabled())
+						nxtBtn.setDisabled(false);
+					currentSection = soapNoteService.getPreviousSocialHistorySection(currentSection);
+					patientSocialHistory = currentSection.getPatientSocialHistory() == null ? soapNoteService.getPreviousSocialHistorySection(currentSection).getPatientSocialHistory() : currentSection.getPatientSocialHistory();
+					self.setDisabled(patientSocialHistory == null);
+					patientHxInfoDiv.setVisible(patientSocialHistory != null);
+					noInfoDiv.setVisible(patientSocialHistory == null);
+					]]>
+					</attribute>	
+				</a>
+				<space/>
+				<a label="Next"  id="nxtBtn" disabled="true">
+					<attribute name="onClick">
+					<![CDATA[
+					    if(prevBtn.isDisabled())
+					    	prevBtn.setDisabled(false);
+					    currentSection = soapNoteService.getNextSocialHistorySection(currentSection);
+						patientSocialHistory = currentSection.getPatientSocialHistory() == null ? soapNoteService.getNextSocialHistorySection(currentSection).getPatientSocialHistory() : currentSection.getPatientSocialHistory();
+						self.setDisabled(patientSocialHistory == null || currentSection.getId() >= socialHistorySection.getId() || 
+								(socialHistorySection.getPatientSocialHistory()!= null?  socialHistorySection.getPatientSocialHistory().equals(patientSocialHistory) : false));
+						patientHxInfoDiv.setVisible(patientSocialHistory != null && currentSection.getId() < socialHistorySection.getId() && 
+								(socialHistorySection.getPatientSocialHistory()!= null ? !socialHistorySection.getPatientSocialHistory().equals(patientSocialHistory) : true));
+						noInfoDiv.setVisible(patientSocialHistory == null || currentSection.getId() >= socialHistorySection.getId() || 
+								(socialHistorySection.getPatientSocialHistory() != null ? socialHistorySection.getPatientSocialHistory().equals(patientSocialHistory) : false));
+					]]>
+					</attribute>
+				</a>
+				<space/>
+				<a disabled="true" 
+				id="currentHx" label="Return To Social History" 
+				onClick='Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null);'/>
+				</hlayout>
+				</vlayout>
+				<div if="${patientSocialHistory != null}" id="patientHxInfoDiv">
+					<div style="margin:10px">
+					<hlayout spacing="5%">
+						<hlayout spacing="40px">
+							<label value="Terminally Ill" zclass="styled" />
+							<label value="@{patientSocialHistory.terminallyIll,converter='com.nzion.view.component.BooleanToStringConverter',
+							load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" style="vertical-align:baseline"/>
+						</hlayout>
+						<hlayout>
+							<label value="Occupation" zclass="styled" />
+							<label value="@{patientSocialHistory.occupation,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" style="vertical-align:baseline"/>
+						</hlayout>
+						<hlayout>
+							<label value="Marital Status" zclass="styled" />
+							<label value="@{patientSocialHistory.maritalStatus,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" style="vertical-align:baseline"/>
+						</hlayout>
+						<hlayout>
+							<label value="Hobbies" zclass="styled" />
+							<label value="@{patientSocialHistory.hobbies,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" style="vertical-align:baseline"/>
+						</hlayout>
+					</hlayout>
+					<div style="margin-top:10px">
+						<groupbox closable="false">
+							<caption label="Exercise"/>
+								<vlayout style="margin:10px">
+								<hlayout>
+										<label value="Do you Exercise ? " zclass="styled" />
+										<label value="@{patientSocialHistory.exercise,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+										<label value="@{patientSocialHistory.reasonForNotExercising,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"
+										 if="${!(patientSocialHistory.exercise)}" id="exerciseTxtBox"/>
+								</hlayout>
+								<div id="exerciseDiv" if="${patientSocialHistory.exercise}">
+								<hlayout if="${!(empty patientSocialHistory.physicalActivityOne)}">		
+										Activity One <label value="@{patientSocialHistory.physicalActivityOne,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+										Duration <label value="@{patientSocialHistory.activityOneDuration,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+										Frequency <label value="@{patientSocialHistory.activityOneFrequency,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+								<hlayout if="${!(empty patientSocialHistory.physicalActivityTwo)}">		
+										Activity Two<label value="@{patientSocialHistory.physicalActivityTwo,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+										Duration <label value="@{patientSocialHistory.activityTwoDuration,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+										Frequency <label value="@{patientSocialHistory.activityTwoFrequency,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+								<hlayout if="${!(empty patientSocialHistory.otherPhysicalActivity)}">		
+										Other Activities <label value="@{patientSocialHistory.otherPhysicalActivity,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+										Duration <label value="@{patientSocialHistory.otherActivityDuration,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+										Frequency <label value="@{patientSocialHistory.otherActivityFrequency,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>	
+								</div>	
+								<vlayout style="margin-top:10px">
+									<label value="Exercise Comments" zclass="styled"/>
+									<label value="@{patientSocialHistory.exerciseComments,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />
+								</vlayout>
+							</vlayout>	
+						</groupbox>
+					</div>		
+					<div style="margin-top:10px">
+						<groupbox closable="false">
+							<caption label="Diet"/>
+								<vlayout style="margin:10px">
+								<hlayout>
+										<label value="Are you satisfied with your weight ? " zclass="styled" />
+										<label value="@{patientSocialHistory.normalWeight,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+										<label value="@{patientSocialHistory.abnormalWeightReason,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" id="abnormalWeightLabel" if="${!patientSocialHistory.normalWeight}"/>
+								<hlayout>		
+										<label value="Patient Diet" zclass="styled"/>
+										<label value="@{patientSocialHistory.patientDiet,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+									<vlayout style="margin-top:10px">
+										<label value="Diet Comments" zclass="styled"/>
+										<label value="@{patientSocialHistory.dietComments,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+									</vlayout>
+									</vlayout>	
+								</groupbox>
+					</div>		
+					<div style="margin-top:10px">
+						<groupbox closable="false">
+							<caption label="Tobacco,Alcohol and Drug Use"/>
+								<vlayout style="margin:10px">
+								<hlayout>
+								<label value="Do you Smoke ? " zclass="styled" />
+								<label value="@{patientSocialHistory.smokingStatus,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+								<div  sclass="smokingDiv" id="cigrattesDiv" width="100%" visible="false">
+									<vlayout width="100%" onCreate="setSmokingDivVisible()">
+										<hlayout>
+											<label value="Amount of Cigrattes per Day?" zclass="styled"/>
+											<label value="@{patientSocialHistory.cigrattesPerDay,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+										</hlayout>
+										<hlayout>
+											<label value="Duration of Cigratte Smoking?" zclass="styled"/>
+											<label value="@{patientSocialHistory.durationOfSmoking,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />
+										</hlayout>
+										<hlayout>
+											<label value="Stopped Smoking Since?" zclass="styled"/>
+												<label value="@{patientSocialHistory.stoppedSmokingSince,load-after='historyBtn.onClick'}" />
+												<label value="@{patientSocialHistory.smokingTimeUnit,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />
+										</hlayout>
+									</vlayout>
+								</div>
+								</vlayout>
+								<vlayout style="margin:10px">
+								<hlayout>
+										<label value="Do you take Alcohol ? " zclass="styled" />
+										<label value="@{patientSocialHistory.alcohol,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />
+								</hlayout>
+								<hlayout if="${patientSocialHistory.alcohol}" id="alcoholBox">		
+										<label value="@{patientSocialHistory.amountOfAlcohol,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+										<label value="Amount of alcohol per week" zclass="styled"/>
+			  							<label value="@{patientSocialHistory.amountOfAlcoholPerWeek,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+								<hlayout>
+									<label value="Has history of Alcohol ? " zclass="styled" />
+									<label value="@{patientSocialHistory.alcoholicHistory,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />								
+								</hlayout>
+								<hlayout if="${patientSocialHistory.alcoholicHistory}" id="alcoholicHxBox">
+									<label value="Stopped taking Alcohol Since?" zclass="styled"></label>
+									<label value="@{patientSocialHistory.stoppedAlcoholSince,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+									<label value="@{patientSocailHistory.alcoholTimeUnit,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+								</vlayout>
+								<vlayout style="margin:10px">
+									<hlayout>
+										<label value="Have you ever taken drugs ? " zclass="styled" />
+										<label value="@{patientSocialHistory.drugIntake,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />
+									</hlayout>
+									<hlayout>
+										<label value="Have you ever used needle to inject drugs?" zclass="styled"/>										
+										<label value="@{patientSocialHistory.needleToInjectDrugs,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />
+									</hlayout>
+									<vlayout>
+										<label value="Drug Comments" zclass="styled"/>
+										<label value="@{patientSocialHistory.drugComments,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+									</vlayout>
+								</vlayout>
+								</groupbox>
+					`	</div>	
+						<div style="margin-top:10px">
+						<groupbox closable="false">
+							<caption label="Safety Issues"/>
+								<vlayout style="margin:10px" id="safetyIssueBox">
+									<hlayout>
+										<label value="Do you use seat belts consistently? " zclass="styled" />
+										<label value="@{patientSocialHistory.seatBelts,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" if="${patientSocialHistory.seatBelts != null}"/>
+										<label value="Not Applicable" unless="${patientSocialHistory.seatBelts != null}"/>
+									</hlayout>
+									<hlayout>
+										<label value="Do you use a bike helmet? " zclass="styled" />
+										<label value="@{patientSocialHistory.helmets,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" if="${patientSocialHistory.helmets != null}"/>
+										<label value="Not Applicable" unless="${patientSocialHistory.helmets != null}"/>
+									</hlayout>
+									<hlayout>
+										<label value="Is violence at home is a concern for you? " zclass="styled" />
+										<label value="@{patientSocialHistory.violenceAtHome,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" if="${patientSocialHistory.violenceAtHome != null}"/>
+										<label value="Not Applicable" unless="${patientSocialHistory.violenceAtHome != null}"/>
+									</hlayout>
+									<hlayout>
+										<label value="Do you have a gun at home? " zclass="styled" />
+										<label value="@{patientSocialHistory.gunAtHome,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" if="${patientSocialHistory.gunAtHome != null}"/>
+										<label value="Not Applicable" unless="${patientSocialHistory.gunAtHome != null}"/>
+									</hlayout>
+									<hlayout>
+										<label value="Are you afraid of anyone close to you? " zclass="styled" />
+										<label value="@{patientSocialHistory.fear,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" if="${patientSocialHistory.fear != null}"/>
+										<label value="Not Applicable" unless="${patientSocialHistory.fear != null}"/>
+									</hlayout>
+									<hlayout>
+										<label value="Have you ever been hit,slapped,kicked,pushed,shoved or otherwise physcially hurt
+										by your partner or someone close to you? " zclass="styled" />
+										<label value="@{patientSocialHistory.beingHit,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" if="${patientSocialHistory.beingHit != null}"/>
+										<label value="Not Applicable" unless="${patientSocialHistory.beingHit != null}"/>
+									</hlayout>
+									<hlayout>
+										<label value="Has anyone forced you to have sexual activities? " zclass="styled" />
+										<label value="@{patientSocialHistory.forcedSexualActivity,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" if="${patientSocialHistory.forcedSexualActivity != null}"/>
+										<label value="Not Applicable" unless="${patientSocialHistory.forcedSexualActivity != null}"/>
+									</hlayout>
+									<vlayout>
+										<label value="Safety Comments" zclass="styled"/>
+										<label value="@{patientSocialHistory.safetyIssueComments,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+									</vlayout>
+									</vlayout>	
+								</groupbox>
+							</div>		
+						
+					<div style="margin-top:10px">
+						<groupbox closable="false">
+							<caption label="Activities and Trips"/>
+								<hbox widths="40%,40%">
+								<vlayout style="margin:10px">
+									<label value="Daily Activities" zclass="styled" />
+									<label value="@{patientSocialHistory.dailyActivities,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />
+								</vlayout>
+								<vlayout style="margin:10px">
+									<label value="Any recent trips? " zclass="styled" />
+									<label value="@{patientSocialHistory.outsideTripDetails,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</vlayout>
+								</hbox>
+						</groupbox>
+					</div>		
+					<div if="${isFemale}">
+						<groupbox>
+							<caption label="Gynecological Information"/>
+							<vlayout style="margin:10px" id="gynecInfoBox">
+								<hlayout>
+									<label value="Any Children ? " zclass="styled" />
+									<label value="@{patientSocialHistory.anyChildren,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+								<hlayout if="${patientSocialHistory.anyChildren}">
+									<label value="How many?" zclass="styled"/>
+									<label value="@{patientSocialHistory.numberOfChildren,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />	
+								</hlayout>
+								<hlayout>
+									<label value="Any Past Pregnency? " zclass="styled"/>
+									<label value="@{patientSocialHistory.anyPregnancy,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+								<hlayout if="${patientSocialHistory.anyPregnancy}">
+									<label value="How many?" zclass="styled"/>
+									<label value="@{patientSocialHistory.numberOfPregnancy,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />	
+								</hlayout>
+								<hlayout>
+									<label value="Any Past Abortions ?  " zclass="styled"/>
+									<label value="@{patientSocialHistory.anyAbortions,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+								<hlayout if="${patientSocialHistory.anyAbortions}">
+									<label value="How many?" zclass="styled"/>
+									<label value="@{patientSocialHistory.numberOfAbortions,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />	
+								</hlayout>
+								<hlayout>
+									<label value="Any Past Miscarriage ?  " zclass="styled"/>
+									<label value="@{patientSocialHistory.anyMiscarriage,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+								<hlayout if="${patientSocialHistory.anyMiscarriage}">
+									<label value="How many?" zclass="styled"/>
+									<label value="@{patientSocialHistory.numberOfMiscarriage,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />	
+								</hlayout>
+								<hlayout>
+								<label value="Are you lactating? " zclass="styled"/>
+								<label value="@{patientSocialHistory.lactating,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+								<hlayout if="${patientSocialHistory.lifeStyle != null}">
+									<label value="Life Style" zclass="styled" />
+									<label value="@{patientSocialHistory.lifeStyle,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+								<hlayout if="${patientSocialHistory.lastMensturalPeriod != null}">
+									<label value="Last Menstural Period " zclass="styled" />
+									<label value="@{patientSocialHistory.lastMensturalPeriod,converter='com.nzion.view.component.DateConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+								<hlayout if="${patientSocialHistory.ageAtFirstMensturalPeroid != null}">
+									<label value="Age At First Menstural Period " zclass="styled" />
+									<label value="@{patientSocialHistory.ageAtFirstMensturalPeroid,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+								<hlayout if="${patientSocialHistory.noOfMensturalDays != null}">
+										<label value="No of Menstural Days" zclass="styled" />
+										<label value="@{patientSocialHistory.noOfMensturalDays,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />
+								</hlayout>
+								<hlayout>
+										<label value="Frequency" zclass="styled" />
+										<label value="Regular" if="${patientSocialHistory.regularMensturalCycle}"/>
+										<label value="Irregular" if="${!patientSocialHistory.regularMensturalCycle}"/>
+								</hlayout>
+								<hlayout if="${patientSocialHistory.regularMensturalCycle}">
+										<label value="No of Weeks" zclass="styled" />
+										<label value="@{patientSocialHistory.noOfMensturalWeeks,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />
+										<label value="Amount" zclass="styled" />
+										<label value="@{patientSocialHistory.amountOfMensturation,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />
+								</hlayout>
+								<hlayout if="${patientSocialHistory.birthControlMethod != null}">
+										<label value="Method Of Birth Control" zclass="styled" />
+										<label value="@{patientSocialHistory.birthControlMethod,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />
+										<label value="@{patientSocialHistory.otherMethodOfBirthControl,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" if="${'Other' eq  patientSocialHistory.birthControlMethod}"/>
+								</hlayout>
+								<hlayout>
+										<label value="Menopause" zclass="styled"/>
+										<label value="@{patientSocialHistory.isMenoPause,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+								<hlayout>
+										<div if="${patientSocialHistory.noOfPreTermVagDeliveries != null}">
+											<label value="No Of Preterm Vaginal Deliveries" zclass="styled"/>
+											<label value="@{patientSocialHistory.noOfPreTermVagDeliveries,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />
+										</div>
+										<space/>
+										<div if="${patientSocialHistory.noOfFullTermVagDeliveries != null}">
+											<label value="No Of Full term Vaginal Deliveries" zclass="styled"/>
+											<label value="@{patientSocialHistory.noOfFullTermVagDeliveries,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />
+										</div>
+								</hlayout>
+								<hlayout>	
+										<div if="${patientSocialHistory.noOfPreTermCSectDeliveries != null}">	
+											<label value="No Of  Preterm C-Sect Deliviries" zclass="styled"/>
+											<label value="@{patientSocialHistory.noOfPreTermCSectDeliveries,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />
+										</div>
+										<space/>
+										<div if="${patientSocialHistory.noOfFullTermCSectDeliveries != null}">
+											<label value="No Of Full term C-Sect Deliviries" zclass="styled"/>
+											<label value="@{patientSocialHistory.noOfFullTermCSectDeliveries,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />
+										</div>	
+								</hlayout>
+								<hlayout>		
+										<label value="Last Pap Smear" zclass="styled" if="${patientSocialHistory.lastPapSmear != null}" />
+										<label value="@{patientSocialHistory.lastPapSmear,converter='com.nzion.view.component.DateConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" if="${patientSocialHistory.lastPapSmear != null}" />
+										<space/>
+										<label value="Last Mammogram" zclass="styled" if="${patientSocialHistory.lastMammogram != null}"/>
+										<label value="@{patientSocialHistory.lastMammogram,converter='com.nzion.view.component.DateConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" if="${patientSocialHistory.lastMammogram != null}"/>
+								</hlayout>
+								<hlayout if="${!(empty patientSocialHistory.gynecologicalProblems)}">
+										<label value="Problems" zclass="styled" />
+										<label value="@{patientSocialHistory.gynecologicalProblems,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+							</vlayout>
+										</groupbox>
+									</div>
+					<div style="margin-top:10px" id="otherInfoDiv">
+						<groupbox closable="false">
+							<caption label="Other Information"/>
+								<vlayout style="margin:10px">
+								<hlayout if="${patientSocialHistory.ageOfFirstSexualInterCourse != null}">
+									<label value="Age at First Sexual Intercourse" zclass="styled" />
+									<label value="@{patientSocialHistory.ageOfFirstSexualInterCourse,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+								<hlayout if="${patientSocialHistory.noOfSexualPartners != null}">
+									<label value="No Of Sexual Partners " zclass="styled" />
+									<label value="@{patientSocialHistory.noOfSexualPartners,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+								<hlayout>
+									<label value="Did the patient grow up in a strict religious environment? " zclass="styled"/>
+									<label value="@{patientSocialHistory.strictReligiousEnvironment,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+								<hlayout>
+									<label value="Does the patient have particular religious belief and has that changed since childhood,adolesence or adulthood? " zclass="styled"/>
+									<label value="@{patientSocialHistory.religiousBeliefs,converter='com.nzion.view.component.BooleanToStringConverter',load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</hlayout>
+								<hlayout if="${patientSocialHistory.religiousBeliefs}">
+									<label value="Effect of patient's belief on treatment of psychiatric illness or suicide" zclass="styled" />
+									<label value="@{patientSocialHistory.effectOfPatientBelief,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" />
+								</hlayout>
+								<hlayout if="${patientSocialHistory.sexualActivity != null}">
+									<label value="Sexual Activity" zclass="styled" />
+									<label value="@{patientSocialHistory.sexualActivity,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>								
+								</hlayout>
+								<hlayout if="${patientSocialHistory.livingArrangement != null}">
+									<label value="Living Arrangement" zclass="styled" />
+									<label value="@{patientSocialHistory.livingArrangement,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>	
+									<label value="@{patientSocialHistory.otherLivingArrangement,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" if="${'Others' eq  patientSocialHistory.livingArrangement}"/>							
+								</hlayout>
+								<hlayout if="${!(empty patientSocialHistory.stresses)}">
+									<label value="Stresses" zclass="styled" />
+									<label value="@{patientSocialHistory.stresses,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>	
+									<label value="@{patientSocialHistory.otherStress,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}" 
+									if="${patientSocialHistory.otherStress != null}"/>							
+								</hlayout>
+								<hlayout if="${patientSocialHistory.childHood != null}">
+									<label value="ChildHood" zclass="styled" />
+									<label value="@{patientSocialHistory.childHood,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>							
+								</hlayout>
+								<vlayout>
+									<label value="Comments" zclass="styled"/>
+									<label value="@{patientSocialHistory.comments,load-after='historyBtn.onClick,prevBtn.onClick,nxtBtn.onClick'}"/>
+								</vlayout>
+							</vlayout>	
+						</groupbox>
+					</div>		
+					</div>
+					<div sclass="buttonPanel">
+						<button disabled="${controller.readonly}" label="Save" zclass="btn btn-success" onClick="controller.saveSoapSection();"/>
+					</div>
+				</div>
+				</panelchildren>
+			</panel>
+	</window>
+</zk>

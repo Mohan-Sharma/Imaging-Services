@@ -1,0 +1,32 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./personIcdWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window id="personIcdWindow">
+		<zscript>
+			com.nzion.zkoss.composer.PersonProfileController profileController = desktop.getAttribute("profileController");
+			List personIcds = profileController.getPersonFavourites(com.nzion.domain.person.PersonIcd.class);
+		</zscript>
+		<div sclass="panelTop">
+			<button label="Save" onClick="profileController.saveFavourites(personIcds);" />
+		</div>
+		<panel title="Person Diagnosis" id="icdPanel"
+			onAddClick='profileController.favouriteAddClicked(personIcdWindow, personIcdDisplayGrid, personIcds,"/person/add-person-icd.zul")'
+			onDeleteClick="profileController.deleteFavourites(personIcdDisplayGrid, personIcds)">
+			<panelchildren>
+				<toolbar listenercomponent="${icdPanel}" hidecancel="true" hidesearch="true" />
+				<listbox multiple="true" id="personIcdDisplayGrid" checkmark="true" mold="paging" pageSize="10"
+					pagingPosition="top" model="@{personIcds,load-after='self.onReloadRequest'}">
+					<listhead>
+						<listheader label="Diagnosis Code" />
+						<listheader label="Diagnosis Description" />
+					</listhead>
+					<listitem self="@{each='personIcd'}" value="@{personIcd}">
+						<listcell label="@{personIcd.icd.code}"/>
+						<listcell label="@{personIcd.icd.description}"/>
+					</listitem>
+				</listbox>
+			</panelchildren>
+		</panel>
+	</window>
+</zk>

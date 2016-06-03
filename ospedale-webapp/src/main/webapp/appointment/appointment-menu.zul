@@ -1,0 +1,102 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<zscript>
+	import com.nzion.domain.Roles;
+	void slotSelected(Event event) {
+	if (event.isOpen()) scheduleController.setSelectedComponent(event.getReference());
+	}
+	boolean drOrRec = Roles.hasAnyRole(new long[]{Roles.PROVIDER,Roles.RECEPTION, Roles.ADMIN});
+	boolean technician = Roles.hasRole(Roles.TECHNICIAN);
+</zscript>
+		<popup id="patientDetail" zclass="none" style="left:0;top:0;background-color: #F5F5B5;border: 1px solid #DECA7E;z-index:999999;display:none" onOpen="if(((OpenEvent)event).isOpen()) scheduleController.setSelectedComponent(event.getReference());">
+		<vlayout spacing="5px" sclass="tooltip">
+			<hlayout>
+				<label sclass="name" value="Patient Name" />
+				<name sclass="z-label"
+					object="@{scheduleController.selectedPatient, load-after='patientDetail.onOpen'}" />
+			</hlayout>
+			<hlayout>
+				<label sclass="name" value="MRN" />
+				<label zclass="none"
+					value="@{scheduleController.selectedPatient.accountNumber, load-after='patientDetail.onOpen'}" />
+			</hlayout>
+		
+			<hlayout>
+				<label sclass="name" value="Date Of Birth" />
+				<label
+					value="@{scheduleController.selectedPatient.dateOfBirth, load-after='patientDetail.onOpen',converter='com.nzion.view.component.DateConverter'}" />
+			</hlayout>
+			<hlayout>
+				<label sclass="name" value="Email" />
+				<label
+					value="@{scheduleController.selectedPatient.contacts.email, load-after='patientDetail.onOpen'}" />
+			</hlayout>
+			<hlayout>
+				<label sclass="name" value="Mobile Phone" />
+				<label
+					value="@{scheduleController.selectedPatient.contacts.mobileNumber, load-after='patientDetail.onOpen'}" />
+			</hlayout>
+			<hlayout>
+				<label sclass="name" value="Home Phone" />
+				<label
+					value="@{scheduleController.selectedPatient.contacts.homePhone, load-after='patientDetail.onOpen'}" />
+			</hlayout>
+			<hlayout>
+				<label sclass="name" value="Office Phone" />
+				<label
+					value="@{scheduleController.selectedPatient.contacts.officePhone, load-after='patientDetail.onOpen'}" />
+			</hlayout>
+			<hlayout>
+				<label sclass="name" value="Address" />
+				<label	value="@{scheduleController.selectedPatient.contacts.postalAddress, load-after='patientDetail.onOpen'}" />
+			</hlayout>
+		</vlayout>
+	</popup>
+	
+	<menupopup id="blockedContextMenu" onOpen="slotSelected(event);">
+	    <menuitem label="Unblock" onClick="scheduleController.unBlockSlot();" />
+	</menupopup>
+
+	<menupopup id="forceInsertedNotScheduledContextMenu" onOpen="slotSelected(event);">
+	    <menuitem label="Paste" onClick="scheduleController.paste()" />
+	    <menuitem label="Delete Force Insert" onClick='scheduleController.deleteForceInsert();' />
+   	    <menuitem label="Reschedule Here" onClick="scheduleController.reScheduleHere()" />
+	</menupopup>
+
+	<menupopup id="forceInsertedScheduledContextMenu" onOpen="slotSelected(event);">
+	    <menuitem label="Open" onClick='Events.postEvent("onDoubleClick", scheduleController.getSelectedComponent(), null)'/>
+	    <menuitem label="Copy" onClick="scheduleController.copySchedule()" />
+	    <menuitem label="Send to Waiting List" onClick="scheduleController.sendToWaitingList();" />
+	    <menuitem label="Force Insert"  onClick="scheduleController.forceInsert();" />
+	    <menuitem label="Delete Force Insert" onClick='scheduleController.deleteForceInsert();' />
+	    <menuitem label="Cancel" onClick="scheduleController.cancelSchedule();" />
+	    <menuitem label="Open Encounter Note" onClick="scheduleController.openSoapNote()" />
+	    <menuitem label="Record Lab Result" onClick="scheduleController.openLabRecordPage()" if="${technician}"/>
+	</menupopup>
+
+	<menupopup id="signinContextMenu" onOpen="slotSelected(event);">
+	    <menuitem label="Open" onClick='Events.postEvent("onDoubleClick", scheduleController.getSelectedComponent(), null)'/>
+	    <menuitem label="Copy" onClick="scheduleController.copySchedule()" />
+	    <menuitem label="Force Insert"  onClick="scheduleController.forceInsert();" />
+	    <menuitem label="Open Encounter Note" onClick="scheduleController.openSoapNote()" />
+	    <menuitem label="Record Lab Result" onClick="scheduleController.openLabRecordPage()" if="${technician}"/>
+	</menupopup>
+
+	<menupopup id="normalScheduleContextMenu" onOpen="slotSelected(event);">
+	    <menuitem label="Open" onClick='Events.postEvent("onDoubleClick", scheduleController.getSelectedComponent(), null)'/>
+	    <menuitem label="Copy" onClick="scheduleController.copySchedule()" />
+	    <menuitem label="Force Insert" id="forceInsertMenuItem1" onClick="scheduleController.forceInsert();" />
+	    <menuitem label="Send to Waiting List" onClick="scheduleController.sendToWaitingList();" />
+	    <menuitem label="Cancel" onClick="scheduleController.cancelSchedule()" />
+	    <menuitem label="Open Encounter Note" onClick="scheduleController.openSoapNote()" />
+	    <menuitem label="Record Lab Result" onClick="scheduleController.openLabRecordPage()" if="${technician}"/>
+	</menupopup>
+
+	<menupopup id="notScheduledContextMenu" onOpen="slotSelected(event);">
+	    <menuitem label="Open" onClick='Events.postEvent("onDoubleClick", scheduleController.getSelectedComponent(), null)' />
+	    <menuitem label="Block" onClick='Executions.createComponents("/appointment/schedule-block.zul", null, com.nzion.util.UtilMisc.toMap("controller", scheduleController));' />
+	    <menuitem label="Force Insert" id="forceInsertMenuItem2" onClick="scheduleController.forceInsert();" />
+	    <menuitem label="Paste" onClick="scheduleController.paste()" />
+	    <menuitem label="Reschedule Here" onClick="scheduleController.reScheduleHere()" />
+	</menupopup>
+</zk>

@@ -1,0 +1,69 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./printPatientRxWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	com.nzion.service.SoapNoteService soapNoteService = com.nzion.util.Infrastructure.getSpringBean("soapNoteService");
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	Long scheduleId = new Long(param.get("scheduleId")[0]);
+	com.nzion.domain.Schedule schedule = commonCrudService.getById(com.nzion.domain.Schedule.class, scheduleId);
+	com.nzion.domain.Patient patient = schedule.getPatient();
+	com.nzion.domain.Provider provider = (com.nzion.domain.Provider) schedule.getPerson();
+	com.nzion.domain.Location location = schedule.getLocation();
+	com.nzion.domain.Practice practice=com.nzion.util.Infrastructure.getPractice();
+	Date date = new Date();
+	com.nzion.domain.emr.soap.RxSection rxSection = soapNoteService.getSoapSection(scheduleId,
+			com.nzion.domain.emr.soap.RxSection.class);
+	Set patientRxs = rxSection.getPatientRxs();
+	com.nzion.domain.emr.soap.PatientSoapNote patientSoapNote = commonCrudService.findUniqueByEquality(com.nzion.domain.emr.soap.PatientSoapNote.class,new String[]{"schedule"},new Object[]{schedule});
+</zscript>
+	<div id="printPatientRxWin" width="100%" height="100%" style="background: #fff;">
+	
+		<panel width="90%" style="margin:50px">
+		
+			<panelchildren>
+			
+				<n:div align="center">
+					<include src="/soap/soapPrintBanner.zul" width="100%" height="100%" soapnotedate="${patientSoapNote.date}"/>
+				</n:div>
+				<separator />
+				<image src="/images/icon-img-rx.jpg" height="25px" width="25px" />
+				<div forEach="${patientRxs}">
+					<vlayout spacing="10px" style="margin-left:100px">
+						<hlayout spacing="10px">
+							<label value="Drug:" style="font-weight:bold" />
+							<n:u>${each.drugName}  ${each.drugStrength}</n:u> 
+							<n:u>${each.drug.tradeName} </n:u> 
+							
+						</hlayout>
+						<hlayout spacing="10px">
+							<label value="Disp:#" style="font-weight:bold" if="${each.totalSupply ne null}" />
+							<n:u>${each.totalSupply}</n:u>
+							${each.supplyUom}
+						</hlayout>
+						<vlayout>
+							<hlayout spacing="10px">
+								<label value="Sig:" style="font-weight:bold" if="${each.drugQuantity ne null}" />
+								<n:u>${each.drugQuantity} ${each.drugQualifier} ${each.drugFrequency}</n:u>
+							</hlayout>
+							<label value="-------------------------------------------------------------------"/>
+						</vlayout>
+
+					</vlayout>
+				</div>
+				<n:div align="center">
+					<include src="/soap/soapPrintFooter.zul" width="100%" height="100%" />
+				</n:div>
+				<div>
+							<span sclass="linkBtn linkBtnOn">
+									<a id="printBtn" label="Print">
+										 <attribute name="onClick">
+			     Executions.getCurrent().sendRedirect("/soap/printPreviewPatientRxs.zul?scheduleId="+ schedule.getId(),"_blank");		 			   		  	
+    </attribute>
+									</a>
+									<span />
+								</span>
+						</div>
+			</panelchildren>
+		</panel>
+	</div>
+</zk>

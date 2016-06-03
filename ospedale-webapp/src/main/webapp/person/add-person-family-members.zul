@@ -1,0 +1,33 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addFamilyMembersWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window id="addFamilyMembersWin"  mode="modal" position="center,top" width="60%" height="70%"
+	title="Add Family Members" closable="true">
+	<div width="97%" style="padding:5px">
+	<zscript><![CDATA[
+   	com.nzion.zkoss.composer.PersonProfileController profileController = desktop.getAttribute("profileController");
+ 	List list=arg.get("list");
+	List familyMembers = personService.getUnAddedFamilyMembers(profileController.getPerson());
+]]></zscript>
+		<panel title="Family Members" id="familyMembersPanel"
+		onAddClick="profileController.addPersonFavourites(personFamilyMemberDisplayGrid,addFamilyMembersWin,list,com.nzion.domain.person.PersonFamilyMembers.class,com.nzion.domain.emr.FamilyMember.class);"
+		onCancelClick="addFamilyMembersWin.detach();">
+			<panelchildren>
+				<toolbar listenercomponent="${familyMembersPanel}" hidedelete="true" hidesearch="true"/>
+				<listbox multiple="true" checkmark="true" width="100%" id="personFamilyMemberDisplayGrid" 
+					model="@{familyMembers}" rows="10">
+					<listhead>
+						<listheader label="Family Member"/>
+					</listhead>
+					<listitem self="@{each='familyMember'}" value="@{familyMember}">
+						<listcell>
+							<label value="@{familyMember.relationshipName}" />
+						</listcell>
+					</listitem>
+				</listbox>
+			</panelchildren>
+		</panel>
+		</div>
+	</window>
+</zk>

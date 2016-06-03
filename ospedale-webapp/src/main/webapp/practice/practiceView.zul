@@ -1,0 +1,37 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/practiceTemplate.zul"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window self="@{define(applicationContent)}">
+		<tabbox>
+			<tabs>
+				<tab label="Account Information"
+					onClick='loadPage("/practice/practice.zul",practiceView)'
+					selected="true" id="accountInfo" />
+				<tab label="Preferences"
+					onClick='loadPage("/practice/pms.zul",preferenceView)' />
+				<!-- <tab label="Auditing" onClick='loadPage("/configuration/auditConfig.zul",auditingView)'/> -->
+				<!-- 	<tab label="Encounter Security" onClick='loadPage("/soap/soapSecurity.zul",soapSecurityView)'/> --> 
+					<tab label="Messages/Tasks" onClick='loadPage("/portlets/message-portlet-view.zul",messageView)' />
+			</tabs>
+			<tabpanels>
+				<tabpanel id="practiceView"/>
+				<tabpanel id="preferenceView"/>
+			<!--  <tabpanel id="auditingView"/> -->
+				<tabpanel id="soapSecurityView" />
+				<tabpanel id="messageView" />  
+			</tabpanels>
+		</tabbox>
+		<zscript>
+	Events.postEvent("onClick", accountInfo, null);
+	public void loadPage(String pageUri, Component parentComp) {
+		parentComp.getChildren().clear();
+		Executions.getCurrent().createComponents(
+				pageUri,
+				parentComp,
+				com.nzion.util.UtilMisc.toMap("displayArea", parentComp,
+						"listtitle", "Custom Fields"));
+	}
+</zscript>
+	</window>
+</zk>

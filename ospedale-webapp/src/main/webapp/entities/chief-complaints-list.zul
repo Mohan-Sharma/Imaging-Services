@@ -1,0 +1,12 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	setPageTitle("Chief Complaints", "");
+	
+</zscript>
+	<window id="chiefcomplaints">
+		<screen width="100%" pagetitle="chief complaints" listtitle="List of Chief Complaints" addpage="addchiefcomplaints"
+			entityclass="com.nzion.domain.emr.ChiefComplaint" fields="complainName,qaTemplate.name"
+			labels="Complaint Name" addmodepopup="true" hidedeletebtn="true"/>
+	</window>
+</zk>

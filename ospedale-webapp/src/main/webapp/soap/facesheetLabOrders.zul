@@ -1,0 +1,39 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./facesheetWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	com.nzion.zkoss.composer.PatientSoapNoteController patientSoapNoteController = arg.get("patientSoapNoteController");
+	com.nzion.domain.Patient patient = patientSoapNoteController.getPatient();
+	List latestLabResults = soapNoteService.getLatestLabResultsFor(patient, 5);
+</zscript>
+<div id="facesheetWindow" sclass="soapNoteContL col2">
+<panel title="Lab Results" collapsible="true" id="labOrderPanel">
+			<panelchildren>
+				<div sclass="dataTables_scrollBody" style="overflow: auto; height: 125px;">
+					<listbox model="@{latestLabResults}">
+						<listhead>
+							<listheader label="Test Name" />
+							<listheader label="Observation Value" />
+							<listheader label="Status" />
+							<listheader label="Visit Date" />
+						</listhead>
+						<listitem self="@{each='obx'}">
+							<listcell label="@{obx.obxName}" />
+							<listcell>
+								<label value="@{obx.observationValue}" />
+								<label value="@{obx.observationValue}" />
+								<label value="@{obx.units}" />
+							</listcell>
+							<listcell label="@{obx.abnormalFlag}" />
+							<listcell>
+								<label
+									value="@{obx.soapNote.date,converter='com.nzion.view.component.DateConverter'}" />
+							</listcell>
+						</listitem>
+					</listbox>
+				</div>
+			</panelchildren>
+		</panel>
+</div>
+</zk>

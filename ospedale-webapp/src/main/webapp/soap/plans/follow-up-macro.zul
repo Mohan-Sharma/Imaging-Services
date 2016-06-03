@@ -1,0 +1,57 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	com.nzion.domain.emr.soap.SOAPPlan plan = arg.get("plan");
+	if(plan.getFollowUp() == null)
+	plan.setFollowUp(new com.nzion.domain.emr.soap.FollowUp());
+</zscript>
+	<div id="followUpWin" width="200px">
+		<label value="Follow Up" />
+		<n:table cellspacing="10" cellpadding="10">
+			<n:tr>
+			<n:td>
+				<intbox id="followUpDurationIntBox" value="@{plan.followUp.followUpDuration}" maxlength="2" onBlur="plan.getFollowUp().setExpectedDate(plan.generateExpectedDate())"/>
+			</n:td>
+				<n:td>
+				<listbox id="followUpDurationTypeCombobox" selectedItem="@{plan.followUp.followUpDurationType}"
+					mold="select" onSelect="plan.getFollowUp().setExpectedDate(plan.generateExpectedDate());">
+					<listitem/>
+					<listitem label="Days" value="Days" />
+					<listitem label="Weeks" value="Weeks" />
+					<listitem label="Months" value="Months" />
+					<listitem label="Years" value="Years" />
+				</listbox>
+				</n:td>
+				</n:tr>
+				<n:tr>
+				<n:td>
+				<label value="Excepted Date:"/>
+				</n:td>
+				<n:td>
+				<label
+					value="@{plan.followUp.expectedDate,load-after='followUpDurationTypeCombobox.onSelect,followUpDurationIntBox.onBlur',converter=org.zkoss.zkplus.databind.DateFormatConverter}"
+					self="@{format(MM/dd/yyyy)}" id="expectedDateLabel"/>
+				</n:td>	
+				
+			</n:tr>
+			<n:tr>
+				<n:td>Remainder On </n:td>
+				<n:td>
+					<intbox value="@{plan.followUp.alertBefore}" maxlength="2" id="remainderIntBox"/>
+				</n:td>
+				<n:td>
+					<listbox selectedItem="@{plan.followUp.alertDurationType}" mold="select" id="alertDurationTypeListBox">
+						<listitem/>
+						<listitem label="Days" value="Days" />
+						<listitem label="Weeks" value="Weeks" />
+						<listitem label="Months" value="Months" />
+						<listitem label="Years" value="Years" />
+					</listbox>
+					<n:td>
+					Before
+					</n:td>
+				</n:td>
+			</n:tr>
+		</n:table>
+	</div>
+</zk>

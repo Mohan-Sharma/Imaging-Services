@@ -1,0 +1,22 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<window title="CPOE" border="normal" width="100%" height="100%" closable="true" mode="modal">
+	<zscript>
+		import com.nzion.zkoss.composer.PatientSoapNoteController;
+		import https.secure_newcropaccounts_com.v7.webservices.*;
+		import javax.xml.datatype.XMLGregorianCalendar;
+		import javax.xml.datatype.DatatypeFactory;
+		com.nzion.domain.emr.soap.PatientSoapNote  patientSoapNote = (com.nzion.domain.emr.soap.PatientSoapNote)arg.get("patientSoapNote");
+		String section = (String)arg.get("sectionName");
+		Long soapNoteId = patientSoapNote.getId();
+		String url = "medEntryGet.zul?soapNoteId="+soapNoteId+"&amp;sectionName="+section;
+	</zscript>
+	<attribute name="onDetach">
+	<![CDATA[
+	com.nzion.util.NewCorpUtil.updateNewCropData((com.nzion.domain.emr.soap.PatientSoapNote)(patientSoapNote));
+	]]>
+	</attribute>
+	<iframe src="${url}" width="100%" height="100%">
+	</iframe>
+</window>
+</zk>

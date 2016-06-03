@@ -1,0 +1,65 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./specialityLookupWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+		Textbox textBox = arg.get("specializationTxtBox");
+		List specialities = new ArrayList();
+	]]>
+	</zscript>
+	<window id="specialityLookupWindow" mode="modal" width="60%" title="Search Specialities" closable="true">
+		<panel title="Search Speciality By">
+			<panelchildren>
+				<div sclass="panelCont" height="50px">
+					<div sclass="col2">
+						<label value="Code" />
+						<textbox id="codeTextbox" />
+					</div>
+					<div sclass="col2">
+						<label value="Description" />
+						<textbox id="descriptionTextBox" />
+					</div>
+				</div>
+				<div sclass="panelFoot">
+					<button label="Search" id="searchBtn">
+						<attribute name="onClick">
+						<![CDATA[
+							specialities = providerService.searchSpecialitiesBy(codeTextbox.getValue(), descriptionTextBox.getValue());
+							searchLabel.setVisible(com.nzion.util.UtilValidator.isEmpty(specialities));
+						]]>
+						</attribute>
+					</button>
+				</div>
+			</panelchildren>
+		</panel>
+		<panel title="Search Results">
+			<panelchildren>
+				<label id="searchLabel" value="No Record Found" visible="false" />
+				<div sclass="dataTables_scrollBody" height="300px" style="overflow:auto">
+					<listbox model="@{specialities,load-after='self.onReloadRequest,searchBtn.onClick'}" id="specialityDisplayGrid">
+						<listhead>
+							<listheader label="Code" />
+							<listheader label="Description" />
+						</listhead>
+						<listitem self="@{each='speciality'}" value="@{speciality}">
+							<listcell label="@{speciality.code}"/>
+							<listcell label="@{speciality.description}"/>
+							<attribute name="onDoubleClick">
+								com.nzion.domain.Speciality speciality = (com.nzion.domain.Speciality)self.getValue();
+								if(textBox!=null){
+								textBox.setValue(speciality.getDescription());
+								Events.postEvent("onChange", textBox, speciality);
+								specialityLookupWindow.detach();
+								}
+							</attribute>
+						</listitem>
+					</listbox>
+				</div>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot">
+			<button label="Cancel" forward="onClick=onCancel" />
+		</div>
+	</window>
+</zk>

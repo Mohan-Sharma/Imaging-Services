@@ -1,0 +1,94 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./managePracticeEntities"?>
+<?component name="enumeration" class="com.nzion.view.component.EnumerationDropdown"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import com.nzion.zkoss.composer.ManageEntityController;
+	import com.nzion.zkoss.ext.EnumDropdownRenderer;
+	import com.nzion.util.ViewUtil;
+	import com.nzion.util.UtilMessagesAndPopups;;
+	import com.nzion.util.UtilValidator;
+	ManageEntityController manageEntityController = new ManageEntityController();
+	EnumDropdownRenderer enumDropdownRenderer = new EnumDropdownRenderer();
+	com.nzion.domain.Party.PartyType[] personTypes= com.nzion.domain.Party.PartyType.getUiPersons(); 
+	com.nzion.domain.Party.PartyType[] organizationTypes= com.nzion.domain.Party.PartyType.getOrganizationType(); 
+	com.nzion.domain.Party.PartyType partyType;
+	]]>
+	setPageTitle("Manage Entities", "");
+</zscript>
+<style>
+.z-radio{
+ padding:5px;
+}
+</style>
+<window id="managePracticeEntities" apply="${manageEntityController}">
+	<panel title = "Manage Entities">
+			<panelchildren style="padding:10px">
+				<div>
+					<div>
+					<radiogroup id = "entityRadioGroup" style="padding:10px">
+						<radio style="margin:5px" label="Person" checked="true" id="personRadio" onCheck="changeScreen(manageEntityController.PERSON)"/>
+						<radio style="margin:5px" label="Organization"  id="organizationRadio" onCheck="changeScreen(manageEntityController.ORGANIZATION)"/>
+					</radiogroup>
+					</div>
+					<div id = "personVbox" sclass="panelCont" height="20px">
+							<label value = "Person Type"></label>
+							<hbox>
+							<combobox id="personCombo" model="@{personTypes}"  itemRenderer="${enumDropdownRenderer}" selectedItem="@{manageEntityController.partyType}" />
+							<a href="#popup" class="addBtn"  label="New" id="newPerson" onClick="redirect(self)" tooltiptext="New Person"/>
+							</hbox>
+					</div>
+					<div id = "organizationVbox" visible="false">
+						<div sclass="panelCont">
+							<label value="Organization"></label>
+							<hbox>
+							<combobox id="oraganizationCombo" model="@{organizationTypes}"  itemRenderer="${enumDropdownRenderer}" selectedItem="@{manageEntityController.organizationType}"/>
+							<a href="#popup" class="addBtn"  label="New" id="newOrganization" onClick="redirect(self)" tooltiptext="New Organization"/>
+							</hbox>
+						</div>	
+					</div>
+			</div>
+		</panelchildren>
+	</panel>
+	<separator></separator>
+			<screen width="100%" pagetitle="Manage Entities" listtitle="List of Entities" hideaddbtn="true" hidedeletebtn="true" id="partyListBox"
+					fields="accountNumber,name,partyType" listitemrenderer="${manageEntityController.manageEntityRenderer}"
+					entityclass="com.nzion.domain.Party" searchservice = "${manageEntityController.entityService}"
+					labels="MRN,Name,Party Type" rowdblclicklistener="${manageEntityController.entityUpdateListener}" lazy="true"/>
+		<zscript><![CDATA[
+		
+		public void changeScreen(String entityType){
+		boolean isPerson = entityType.equals(manageEntityController.PERSON);
+		manageEntityController.setIsPerson(isPerson);
+		partyType = null;
+		if(entityType.equals("PERSON")){
+			oraganizationCombo.setSelectedItem(null);
+			personVbox.setVisible(true);
+			organizationVbox.setVisible(false);
+		}
+		else if(entityType.equals("ORGANIZATION")){
+			personCombo.setSelectedItem(null);
+			organizationVbox.setVisible(true);
+			personVbox.setVisible(false);
+		}	
+		manageEntityController.setPartyType(partyType);
+		}
+		
+		public void redirect(Component newBtn){		
+		String entityUrl = null;
+		Window window = null;
+		String urlKey = null;
+		partyType = manageEntityController.getPartyType();
+		if(partyType==null)
+			partyType = manageEntityController.getOrganizationType();
+		urlKey = partyType.toString();
+		if(UtilValidator.isEmpty(urlKey )){
+			UtilMessagesAndPopups.showMessage("Choose a Entity to Create and then click New");
+			return;
+		}
+		Executions.getCurrent().createComponents(ViewUtil.getUrlForEntity(urlKey) , null, null);
+		}
+]]></zscript>
+	</window>
+</zk>

@@ -1,0 +1,244 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./PracticeSetup"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+
+	<zscript><![CDATA[
+	import com.nzion.domain.Practice;
+	import com.nzion.util.Infrastructure;
+	import com.nzion.zkoss.composer.PracticeSetupController;
+	import com.nzion.view.PracticeViewObject;
+	import org.zkoss.zkplus.spring.SpringUtil;
+	import com.nzion.domain.Enumeration;
+
+	String confirmPassword = new String();
+	PracticeSetupController pracController = new PracticeSetupController();
+	Practice practice = (Practice) Executions.getCurrent().getArg().get("entity");
+	boolean readonly = false;
+	if (practice != null) {
+		pracController.setPractice(practice);
+	} else {
+		practice = com.nzion.util.Infrastructure.getPractice();
+		if (practice != null) {
+			pracController.setPractice(practice);
+			readonly = true;
+		}
+	}
+	List timeZones = practiceService.getTimeZones();
+	com.nzion.zkoss.ext.EntityDropdownRenderer entityDropdownRenderer = new com.nzion.zkoss.ext.EntityDropdownRenderer("ID");
+	boolean isSuperAdmin = com.nzion.domain.Roles.hasRole(com.nzion.domain.Roles.SUPER_ADMIN);
+	
+	com.nzion.zkoss.composer.emr.StateRenderer stateRenderer = new com.nzion.zkoss.composer.emr.StateRenderer();
+	
+	com.nzion.enums.SUBSCRIPTION_TYPE[] types = com.nzion.enums.SUBSCRIPTION_TYPE.values(); 
+	
+setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
+]]>
+</zscript>
+	
+
+	<window apply="${pracController}" id="PracticeSetup" contentStyle="padding:0px">
+		<zscript>
+		if(pracController.getPracticeViewObject().getUserLogin() != null)
+			confirmPassword = pracController.getPracticeViewObject().getUserLogin().getPassword();
+</zscript>
+    <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Hospital</h:small>
+            </h:h1>
+    </div>
+<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+					 <div zclass="span6">
+						<label value="Hospital Name" mold="required" />
+						<textbox id="practiceName" value="@{vo.practice.practiceName,save-when='Save.onClick'}"
+						constraint="no empty" cols="40" readonly="${!isSuperAdmin}" maxlength="50" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" />
+					</div>
+					</div>
+				
+			
+			 <div zclass="row-fluid">
+		             <div zclass="span2">
+						<label value="Office phone" mold="required" />
+						<phonebox value="@{vo.practice.contacts.officePhone,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" />
+						</div>
+					 <div zclass="span2">
+						<label value="Fax" mold="required" />
+						<phonebox id="faxNumber" value="@{vo.practice.contacts.faxNumber,save-when='Save.onClick'}"
+							constraint="no empty"  sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+					</div>
+					</div>
+					<div zclass="row-fluid">
+		             <div zclass="span2">
+						<label value="Service Tax No"  />
+						<textbox value="@{vo.practice.serviceTaxNumber,save-when='Save.onClick'}"
+							 maxlength="30" sclass="span12"/>
+						</div>
+					 <div zclass="span2">
+						<label value="Pan No"  />
+					<textbox value="@{vo.practice.panNumber,save-when='Save.onClick'}"
+							 maxlength="30" sclass="span12"/>
+					</div>
+					<div zclass="span2">
+						<label value="Drug Licence"  />
+					<textbox value="@{vo.practice.drugLicence,save-when='Save.onClick'}"
+							 maxlength="30" sclass="span12"/>
+					</div>
+					</div>
+					 <div zclass="row-fluid">
+					 <div zclass="span2">
+						<label value="Accr No"  />
+					<textbox value="@{vo.practice.accrNumber,save-when='Save.onClick'}"
+							 maxlength="30" sclass="span12"/>
+					</div>
+					 <div zclass="span2">
+						<label value="Valid From"  />
+					<datebox id="validFrom" format="dd/MM/yyyy" value="@{vo.practice.validFrom,save-when='Save.onClick'}" 
+					 sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+					</div>
+					<div zclass="span2">
+						<label value="Valid To"  />
+					<datebox id="validTo" onChange="dateValidation(validFrom,validTo)" format="dd/MM/yyyy" value="@{vo.practice.validThru,save-when='Save.onClick'}" 
+					 sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+					</div>
+					</div> 
+					 <div zclass="row-fluid">
+					 <div zclass="span3">
+						<label value="Address1" mold="required" style="text-align:right" id="lbladdress1" />
+						<textbox cols="50" rows="2"  value="@{vo.practice.contacts.postalAddress.address1,save-when='Save.onClick,copyContacts.onCheck'}"
+							id="address1" maxlength="30" constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+					</div>
+				    <div zclass="span3">
+						<label value="Address2" style="text-align:right;" id="lbladdress2" />
+						<textbox cols="50" rows="2" value="@{vo.practice.contacts.postalAddress.address2,save-when='Save.onClick,copyContacts.onCheck'}"
+							id="address2" maxlength="30"  sclass="span12" />
+					</div>
+					</div>
+					 <div zclass="row-fluid">
+					 <div zclass="span2">
+						<label value="City" style="text-align:right" mold="required" id="lblcity" />
+						<textbox value="@{vo.practice.contacts.postalAddress.city,save-when='Save.onClick,copyContacts.onCheck'}" id="city"
+							maxlength="20" onChange="com.nzion.util.UtilDisplay.validateNonDigits(self)" constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+					</div>
+				 <div zclass="span2">
+						<label value="State" style="text-align:right" id="lblstate"  mold="required"/>
+						<enumeration id="state" enumType="STATE" itemRenderer="${stateRenderer}"
+							value="@{vo.practice.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick,copyContacts.onCheck'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" />
+					</div>					
+					 <div zclass="span2">
+						<label value="Postal code" style="text-align:right" mold="required" id="lblpostalCode" />
+						<zipcodebox value="@{vo.practice.contacts.postalAddress.postalCode,save-when='Save.onClick,copyContacts.onCheck'}"
+							constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"	id="postalCode" onBlur="com.nzion.util.UtilDisplay.validateFiveDigits(self)"/>
+					</div>
+					</div>
+			<separator></separator>
+			
+			<div style="padding:2px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Admin User Details</h:small>
+            </h:h1>
+            
+            <checkbox label="Same as Practice Address" id="copyContacts">
+						<attribute name="onCheck">
+							if(self.isChecked()){
+								pracController.getPracticeViewObject().getUserLogin().getPerson().setContacts(pracController.getPracticeViewObject().getPractice().getContacts());
+							}else{
+								pracController.getPracticeViewObject().getUserLogin().getPerson().setContacts(null);
+							}
+						</attribute>
+					</checkbox>
+         </div>
+			
+			
+					 <div zclass="row-fluid">
+						 <div zclass="span2">
+								<label value="First Name" mold="required" />
+							<textbox readonly="${readonly}" value="@{vo.userLogin.person.firstName,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" />
+						</div>
+						<div zclass="span2">
+						    <label value="Last Name" mold="required" />
+							<textbox sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"  value="@{vo.userLogin.person.lastName,save-when='Save.onClick'}"  constraint="no empty"/>
+						</div>
+						</div>
+					<div style="clear:both"/>
+					<div zclass="row-fluid">
+						<div zclass="span2">
+								<label value="UserName" mold="required" />
+							<textbox readonly="${readonly}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" value="@{vo.userLogin.username,save-when='Save.onClick'}" constraint="no empty" id="userNameTextBox"/>
+						</div>
+					 <div zclass="span2">
+								<label value="Password" mold="required" />
+							<textbox id="passwordTxtBox" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" value="@{vo.userLogin.password,save-when='Save.onClick'}" type="password" constraint="no empty"/>
+						</div>
+						 <div zclass="span2">
+								<label value="Confirm Password" mold="required"></label>
+							<textbox type="password" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" value="@{confirmPassword,save-when='Save.onClick'}"
+								id="confirmPasswordTextBox" />
+						</div>
+						</div>
+						<div zclass="row-fluid">
+				       <div zclass="span3">
+							<label value="Address1" style="text-align:right" mold="required"  />
+						<textbox cols="50"  rows="2" value="@{vo.userLogin.person.contacts.postalAddress.address1,save-when='Save.onClick',load-after='copyContacts.onCheck'}"
+							 maxlength="30" constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+					</div>
+					 <div zclass="span3">
+						<label value="Address2" style="text-align:right;"  />
+						<textbox cols="50" rows="2" sclass="span12" value="@{vo.userLogin.person.contacts.postalAddress.address2,save-when='Save.onClick',load-after='copyContacts.onCheck'}"
+							maxlength="30" />
+					</div>
+					</div>
+					<div zclass="row-fluid">
+						 <div zclass="span2">
+							<label value="City" style="text-align:right" mold="required"/>
+							<textbox value="@{vo.userLogin.person.contacts.postalAddress.city,save-when='Save.onClick',load-after='copyContacts.onCheck'}" 
+								maxlength="20" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" onChange="com.nzion.util.UtilDisplay.validateNonDigits(self)"  constraint="no empty"/>
+						</div>
+						 <div zclass="span2">
+							<label value="State" mold="required" style="text-align:right" />
+							<enumeration sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"  enumType="STATE" itemRenderer="${stateRenderer}"
+								value="@{vo.userLogin.person.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick',load-after='copyContacts.onCheck'}" constraint="no empty" />
+						</div>
+							 <div zclass="span2">
+							<label value="Postal code" style="text-align:right" mold="required"  />
+							<zipcodebox value="@{vo.userLogin.person.contacts.postalAddress.postalCode,save-when='Save.onClick',load-after='copyContacts.onCheck'}"
+								constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" onBlur="com.nzion.util.UtilDisplay.validateFiveDigits(self)"/>
+					</div>
+					</div>
+					
+			
+		</div>
+		<div sclass="panelFoot" align="center">
+			<button id="Save" label="Save" onClick="savePractice(self);" zclass="btn-success btn" ></button>
+		</div>
+		<zscript><![CDATA[
+public void dateValidation(Datebox validFrom,Datebox validTo) {               
+   if(validFrom.getValue()!=null&& validTo.getValue()!=null)  {      
+if (validTo.getValue().before(validFrom.getValue())){
+	throw new WrongValueException(validTo, "Valid to date should be after valid from date");
+}    
+   }
+}
+
+			public void validatePasswordAndConfirmPassword() {
+			com.nzion.util.UtilDisplay.validateCharacters(passwordTxtBox);
+			if (!confirmPassword.equals(pracController.getPracticeViewObject().getUserLogin().getPassword()))
+				throw new WrongValueException(confirmPasswordTextBox, "Password and confirmation do not match");
+			}
+			
+			
+			public void savePractice(Component comp) {
+			validatePasswordAndConfirmPassword();
+			dateValidation(validFrom ,validTo );
+			try{
+			pracController.savePractice();
+			}catch(Exception e){
+				com.nzion.util.ViewUtil.disPlayUniqueErrorMessage(e,"User Name '"+pracController.getPracticeViewObject().getUserLogin().getUsername()+"' already exists.");
+				
+			}
+			}
+
+		]]>
+		</zscript>
+	</window>
+</zk>

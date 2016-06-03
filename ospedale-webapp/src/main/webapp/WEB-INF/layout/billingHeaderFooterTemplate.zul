@@ -1,0 +1,165 @@
+<?page title="Nzion - Health Care" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./wrapper"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<zscript><![CDATA[
+    com.nzion.domain.UserLogin userLogin = com.nzion.util.Infrastructure.getUserLogin();
+    String passwordExpirationWarningMessage = Executions.getCurrent().getSession().getAttribute("passwordExpirationWarningMessage");
+	com.nzion.service.UserLoginService userLoginService = com.nzion.util.Infrastructure.getSpringBean("userLoginService");
+	com.nzion.domain.Person person = userLogin.getPerson();
+    void setPageTitle(String title, String subTitle) {
+		pagetitle.setValue(title);
+		subpagetitle.setValue(subTitle);
+	}
+    if(userLogin.isLocked())
+    	Executions.createComponents("/lock.zul",null,null);
+	com.nzion.view.RolesValueObject rvo = new com.nzion.view.RolesValueObject(com.nzion.util.Infrastructure.getUserLogin().getAuthorization());
+	String roleName = com.nzion.domain.Roles.getRoleName((Long)Sessions.getCurrent().getAttribute("_role"));
+	String loggedInPersonFormattedName = com.nzion.util.ViewUtil.getFormattedName(userLogin.getPerson());
+	 String schedule = Executions.getCurrent().getParameter("scheduleId");
+]]></zscript>
+	<script type="text/javascript" src="../images/jquery.maskedinput-1.2.2.js"/>
+	<script type="text/javascript" src="../images/ciramed.js"/>
+	<script type="text/javascript" src="../images/jquery.simpletip-1.3.1.js"></script>
+	<style>
+		.location{
+		    margin: 20px;
+    		position: relative;
+		}
+		.location .z-combobox{
+			background-color:red;
+		}
+		
+		.chronic{
+			width:250px;
+			background-color:green;
+			display:block;
+			float:right;
+			height: 24px;
+			text-align: center;
+		}
+		
+		.allergy{
+			width:250px;
+			background-color:orange;
+			display:block;
+			float:right;
+			height: 24px;
+			text-align: center;
+		}
+		
+		.legal {
+			width:250px;
+			background-color:red;
+			display:block;
+			float:right;
+			height: 24px;
+			text-align: center;
+		}
+		
+		.chronic-none{
+			width:250px;
+			display:block;
+			float:right;
+			height: 24px;
+		}
+		
+		.allergy-none{
+			width:250px;
+			display:block;
+			float:right;
+			height: 24px;
+		}
+		
+		.legal-none {
+			width:250px;
+			display:block;
+			float:right;
+			height: 24px;
+		}
+		
+	</style>
+<div id="wrapper" style="min-height: 100%;">
+ <n:div  style="min-height: 100%;">	
+	<n:div id="soapHeader" >
+	    <div style="float:right:width:30%">
+			<span>
+				<label id="pagetitle" style="font-size:14px;color:#fff;font-weight:bold;padding-left:4px;" />
+				<label id="subpagetitle" style="font-size:12px;" />
+			</span>
+		</div>	
+		<div style="float:left; width:90%; text-align:center;" > <label value="${requestScope.message}" id="successMsg" style="font-size:14px;color:#00AA00;font-weight:bold" /> </div>	
+	</n:div>
+
+	<n:div style="margin-top:22px;width:100%;min-height: 87%;" id="soapMiddleCont">
+		<div self="@{insert(content)}" id="center" />
+	</n:div>
+	<n:div id="footer">
+		<div class="content">
+			<n:p>
+				Copyright (c) 2011-13 NthDimenzion Solutions (P) Limited -
+				<n:a href="http://www.nthdimenzion.com" target="_New" accesskey="C"  style="color:#333;font-weight:bold;">www.nthdimenzion.com</n:a>
+			</n:p>
+		</div>
+	</n:div>	
+	<popup id="roleSelectionPopup" width="10%">
+		<listbox>
+			<attribute name="onSelect">
+				Sessions.getCurrent().setAttribute("_role", self.getSelectedItem().getValue());
+				Events.postEvent("onClick", dashBoadrdTab, null);
+			</attribute>
+			<listhead>
+				<listheader label="Choose Role"/>
+			</listhead>
+			<listitem label="ADMIN" if="${rvo.admin}" value="${36028797018963968}"/>		
+			<listitem label="DOCTOR" if="${rvo.provider}" value="${140737488355328}"/>		
+			<listitem label="DOCTOR ASSISTANT" if="${rvo.medicalAssistant}" value="${8796093022208}"/>		
+			<listitem label="NURSE" if="${rvo.nurse}" value="${549755813888}"/>		
+			<listitem label="TECHNICIAN" if="${rvo.technician}" value="${34359738368}"/>		
+			<listitem label="BILLING" if="${rvo.billing}" value="${2147483648}"/>		
+			<listitem label="RECEPTION" if="${rvo.reception}" value="${134217728}"/>		
+		</listbox>
+	</popup>
+	
+	<popup id="emergencyPopup" width="50%">
+		<listbox model="@{impersonatePersons}" id="personListbox" checkmark="true">
+			<listhead>
+				<listheader label="User Name"/>
+				<listheader label="Gender"/>
+				<listheader label="Mobile Number"/>
+				<listheader label="Email"/>
+			</listhead>
+			<listitem self="@{each='person'}" value="@{person}">
+				<listcell>
+					<name object="@{person}"/>
+				</listcell>
+				<listcell label="@{person.gender.description}"/>
+				<listcell label="@{person.contacts.mobileNumber}"/>
+				<listcell label="@{person.contacts.email}"/>
+			</listitem>
+		</listbox>
+		<div sclass="panelFoot">
+			<button label="Switch" onClick="com.nzion.util.ViewUtil.enableImpersonateSetting(personListbox.getSelectedItem()!=null?(com.nzion.domain.Person)personListbox.getSelectedItem().getValue():null);emergencyPopup.close()"/>
+		</div>
+	</popup>
+	<zscript>
+	String successMsgId = successMsg.getUuid();
+	</zscript>	
+	<script type="text/javascript" >
+		function test(){
+			jq(document.getElementById('${successMsgId}')).hide().fadeIn(1);
+			jq(document.getElementById('${successMsgId}')).show().fadeOut(4000);
+		}
+
+        function clearErrorMessage(remainError,boxid){
+            var obj = $(boxid);
+            var p = obj.parent();
+            var f = p.find('.help-inline');
+            if(!remainError){
+                f.remove();
+            }
+        }
+	</script>
+</n:div>
+</div>
+</zk>

@@ -1,0 +1,165 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addPatientEducationWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<zscript>
+	com.nzion.zkoss.composer.PatientEducationController educationController = new com.nzion.zkoss.composer.PatientEducationController();
+</zscript>	
+<window id="addPatientEducationWin" mode="modal" closable="true"  position="center,top" 
+width="75%"  apply="${educationController}" style="overflow:auto" height="99%">
+<zscript>
+	boolean isVisible = educationController.getEducation().getAttachedItems().size() > 0; 	
+	com.nzion.enums.MATERIALCATEGORY[] materialCategories = com.nzion.enums.MATERIALCATEGORY.values();
+	boolean documentListBoxVisible = educationController.getEducation().getPatientEducationDocuments().size() > 0;
+</zscript>
+	<panel title="Patient Education Resource" border="normal" collapsible="false" id="patientEducationPanel" apply="${educationController}"
+	onAddClick='if(categoryCombobox.getSelectedItem() == null) return;educationController.renderSelectedCategory((com.nzion.enums.MATERIALCATEGORY)categoryCombobox.getSelectedItem().getValue());' 
+	onDeleteClick='educationController.getEducation().getAttachedItems().removeAll(com.nzion.util.ViewUtil.getSelectedItems(categoryItemsListBox));'>
+			<panelchildren>
+			<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span6">
+						<label value="Document Description"  mold="required"  />
+						<textbox sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" value="@{educationController.education.documentDescription,save-when='Save.onClick'}" rows="3"  constraint="no empty"/>
+					</div>
+					</div>
+					</div>
+					<space/>
+					<div style="margin-left:10px;">
+					<hbox>
+					<label value="Age" style="color:#333333;font:bold 11px normal Tahoma,Geneva,sans-serif;"/>
+					<space width="28px"/>
+					<radiogroup orient="horizontal">
+						<radio label="All" id="allChkBox" onCheck="rangeComboboxDiv.setVisible(false);">
+							<attribute name="onCreate">
+								<![CDATA[
+							self.setSelected(educationController.getEducation().getFromRange() == 0 && educationController. getEducation().getToRange() == 0);
+								]]>
+							</attribute>
+						</radio>				
+						<radio label="Range" onCheck="rangeComboboxDiv.setVisible(true);">
+							<attribute name="onCreate">
+							<![CDATA[
+							self.setSelected(educationController.getEducation().getFromRange() != 0 || educationController.getEducation().getToRange() != 0);
+							if(self.isSelected())
+								rangeComboboxDiv.setVisible(true);
+							]]>
+							</attribute>
+						</radio>				
+					</radiogroup>
+						<hbox id="rangeComboboxDiv" width="100%" visible="false">
+						<label value="From"/>
+						<intbox value="@{educationController.education.fromRange,save-when='Save.onClick',load-after='allChkBox.onCheck'}" id="fromTxtBox" constraint="no empty" maxlength="2"/>
+						<space/>
+						<label value="To"/>
+						<intbox value="@{educationController.education.toRange,save-when='Save.onClick',load-after='allChkBox.onCheck'}" id="toTxtBox" constraint="no empty" maxlength="2"/>
+						</hbox>
+					</hbox>	
+					</div>
+					<space/>
+					<div style="margin-left:10px;">
+					<label value="Gender"/>
+					<space/>
+						<radiogroup orient="horizontal">
+							<radio label="Both" id="bothRadioBtn" onCheck="educationController.getEducation().setGender(educationController.getBoth());" onCreate='self.setSelected("BOTH".equalsIgnoreCase(educationController.getEducation().getGender().getEnumCode()))'/>
+							<radio label="Male" id="maleRadioBtn" onCheck="educationController.getEducation().setGender(educationController.getMale());" onCreate='self.setSelected("MALE".equalsIgnoreCase(educationController.getEducation().getGender().getEnumCode()))'/>
+							<radio label="Female" id="femaleRadioBtn" onCheck="educationController.getEducation().setGender(educationController.getFemale());" onCreate='self.setSelected("FEMALE".equalsIgnoreCase(educationController.getEducation().getGender().getEnumCode()))'/>
+						</radiogroup>
+					</div>
+					<space/>
+					<toolbar listenercomponent="${patientEducationPanel}" hidecancel="true" hidesearch="true"/>
+					<space/>
+					<hlayout>
+						<vlayout style="margin-left:10px">
+							<hlayout>
+									<label value="Category"/>
+									<label zclass="labelReq" value="*"/>
+							</hlayout>
+								<!-- <combobox model="@{materialCategories}" constraint="no empty" readonly="true" id="categoryCombobox" onChange='self.setDisabled(true)'  disabled="${!(empty educationController.education.id)}" selectedItem="@{educationController.education.materialCategory,save-when='Save.onClick'}">
+									<comboitem self="@{each}" value="@{each}" label="@{each.description}"> </comboitem>
+								</combobox> -->
+							<combobox model="@{materialCategories}" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" readonly="true" id="categoryCombobox" selectedItem="@{educationController.education.materialCategory,save-when='Save.onClick'}"
+									onChange='self.setDisabled(true)'  disabled="${!(empty educationController.education.id)}" /> 
+						</vlayout>
+						<hlayout style="margin-top:15px">
+								<button label="Search" zclass="btn btn-primary" style="vertical-align: top" onClick="educationController.renderSelectedCategory((com.nzion.enums.MATERIALCATEGORY)categoryCombobox.getSelectedItem().getValue());"/>
+								<button label="Clear" style="vertical-align: top" disabled="${!(empty educationController.education.id)}" onClick="educationController.clear();" id="clearBtn"/>
+						</hlayout>
+					</hlayout>
+					<space/>
+					<div  id="addDiv" visible="false">
+					<button label="Add" style="margin-left:10px;" id="addBtn" onClick="educationController.addAttachedItem();"/>
+					<textbox id="categoryInputTxtBox"/>
+					</div>
+					<listbox model="@{educationController.education.attachedItems,load-after='clearBtn.onClick,addBtn.onClick,self.onReloadRequest,patientEducationPanel.onDeleteClick'}" 
+					visible="${isVisible}" multiple="true" checkmark="true" style="margin-left:10px;" id="categoryItemsListBox">
+					<listhead>
+					<listheader label="Code"/>
+					<listheader label="Description"/>
+					</listhead>
+					<listitem self="@{each='attachedItem'}" value="@{attachedItem}">
+						<listcell>
+							<label value="@{attachedItem.code}"/>						
+						</listcell>
+						<listcell>
+							<label value="@{attachedItem.description}"/>						
+						</listcell>
+					</listitem>
+					</listbox>
+					<space/>
+			</panelchildren>
+	</panel>
+	<panel title="Attach Document">
+		<panelchildren style="margin-left:10px;">
+				<separator/>	
+					<vlayout width="30%">	
+					<label value="Language"/>
+					<enumeration enumType="LANGUAGE" readonly="true" id="languageEnumDropDown"/>
+					</vlayout>
+					<separator/>
+					<vlayout>
+					<hlayout>
+					<label value="File Name"/>
+					<label zclass="labelReq" value="*"/>
+					</hlayout>
+					<hlayout>
+					<textbox id="fileNameTxtBox" readonly="true" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"/>
+					<button label="Browse" upload="true" style="vertical-align: middle;">
+						<attribute name="onUpload">
+						educationController.uploadDocument(event);
+						</attribute>
+					</button>
+					<button label="Add Documents" id="addDocumentBtn" style="vertical-align: middle;" onClick="patientEducationocumentsDiv.setVisible(true);educationController.addPatientEducationDocument();"/>
+					</hlayout>
+					</vlayout>
+					<div sclass="gridCont" id="patientEducationocumentsDiv" visible="${documentListBoxVisible}">
+						<div sclass="grid clr">
+							<n:table border="0" cellspacing="0" cellpadding="0" width="100%">
+								<n:thead>
+									<n:tr>
+										<n:td>
+							                <a href="#" class="actvBtn" onClick="educationController.activatePatientEducationDocuments(com.nzion.util.ViewUtil.getSelectedItems(patientEducationDocumentListBox));" id="activeBtn">Activate</a>
+							                <a href="#" class="dactvBtn" onClick="educationController.deactivatePatientEducationDocuments(com.nzion.util.ViewUtil.getSelectedItems(patientEducationDocumentListBox))" id="deactiveBtn">Deactivate</a>
+										</n:td>
+									</n:tr>
+								</n:thead>
+							</n:table>
+						</div>
+					</div>
+					<listbox model="@{educationController.education.patientEducationDocuments,load-after='addDocumentBtn.onClick,self.onReloadRequest,clearBtn.onClick,activeBtn.onClick,deactiveBtn.onClick'}" 
+					id="patientEducationDocumentListBox" visible="${documentListBoxVisible}" multiple="true" checkmark="true" itemRenderer="${educationController.listitemRenderer}">
+					<listhead>
+						<listheader label="File"/>
+						<listheader label="Language"/>
+						<listheader label="Active"/>
+					</listhead>
+					</listbox>
+					<space/>
+		</panelchildren>
+	</panel>
+			<div sclass="panelFoot">
+			<button label="Save" id="Save" zclass="btn-success btn" onClick="educationController.savePatientEducation();"/>
+			<button label="Cancel" forward="onClick=onCancel" sclass="btn"/>
+		</div>
+</window>
+</zk>

@@ -1,0 +1,40 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		<![CDATA[
+			com.nzion.view.component.HomeGridMacroController homeGridMacroController = session.removeAttribute("com.nzion.homegrid.printlist");
+			ListModel model = new SimpleListModel(homeGridMacroController.getAllRelevantData());
+			List all = homeGridMacroController.getAllRelevantData();
+			List splitted = new ArrayList(); 
+			for(int i = 0; i < all.size() ; i+=40){
+				List local = new ArrayList();
+				local.addAll(all.subList(i, i+40 <= all.size() ? i + 40 : all.size()));
+				splitted.add(new SimpleListModel(local));
+			}
+		]]>
+	</zscript>
+	<div align="center" style="background:white;">
+	<window id="printWindow" width="90%" style="background:white;">
+		<space orient="vertical" height="20px"/>
+		<div width="100%" align="center">
+			<hbox width="90%">
+				<button label="Print" onClick="Clients.print();" />
+			</hbox>
+			<space orient="vertical" height="20px"/>
+			<n:div style="page-break-after:always">
+			<listbox width="90%" itemRenderer="${homeGridMacroController.listitemRenderer}" model="${each}" forEach="${splitted}">
+				<listhead>
+					<listheader forEach="${homeGridMacroController.labels}" label="${each}" />
+				</listhead>
+			</listbox>
+			<space orient="vertical" height="20px"/>
+			</n:div>
+			<space orient="vertical" height="20px"/>
+			<hbox width="90%" align="end">
+				<!--<button label="Print" onClick="Clients.print();" />
+			--></hbox>
+		</div>
+	</window>
+	</div>
+</zk>

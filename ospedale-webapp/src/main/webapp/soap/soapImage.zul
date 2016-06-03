@@ -1,0 +1,195 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./imageSectionDiv"?>
+<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	com.nzion.zkoss.composer.ImageSectionComposer imageSectionComposer = new com.nzion.zkoss.composer.ImageSectionComposer();
+	List labTestResults = new ArrayList();
+	com.nzion.service.emr.lab.LabService labService = com.nzion.util.Infrastructure.getSpringBean("labService");
+	</zscript>
+	<style>
+	.form {
+        border: 1px solid #E1E1E1;
+        background: url('../widgets/effects/form_effect/img/bg.png');
+        padding: 20px 20px;
+        -webkit-border-radius:4px;
+        -moz-border-radius:4px;
+        border-radius:4px;
+    }
+    .form .name {
+        display: block;
+        width: 100px;
+        text-align: left;
+    } 
+	</style>
+	<window id="imageSectionDiv" width="100%" apply="${imageSectionComposer}" >
+	
+		<!-- <span sclass="linkBtn linkBtnOn">
+		<a sclass="addBtn" label="New" disabled="${imageSectionComposer.soapNoteController.readonly}" onClick="imageSectionComposer.createNewFile();"/>
+		<span />
+		</span>  -->
+		<panel width="100%" title="Images" >
+			<panelchildren >
+			
+			<zscript>
+			 com.nzion.zkoss.composer.PatientSoapNoteController controller = imageSectionComposer.getSoapNoteController();
+	         labTestResults = labService.getLabResultForPatient(controller.getPatient());
+			</zscript>
+			<n:div class="subTabs" id="tabSection">
+				<n:ul>
+					<n:li>
+					
+					<a id="labResultImageButton" sclass="" w:onClick='javascript:toggleImageLabOrder();' >
+							Image
+						</a>
+						<a id="labResultButton" sclass="" w:onClick='javascript:toggleLabOrder();'   >
+							Lab Image Results
+						</a>
+					</n:li>
+				</n:ul>
+			</n:div>
+			<separator></separator>
+				<separator></separator>
+			
+				<div sclass="form">
+				<vlayout>
+					<hlayout>
+						<label value="Caption" sclass="name" style="color:black" mold="required"/>
+						<textbox id="captionTxtBox" value="@{imageSectionComposer.file.description}" constraint="no empty:Caption can't be empty"/>
+					</hlayout>
+					<hlayout>
+						<label value="Attach File" sclass="name" style="color:black"/>
+						<textbox id="fileNameTxtBox" readonly="true" />
+						<button label="Upload" upload="true"
+							id="uploadBtn">
+							<attribute name="onUpload">
+							if (imageSectionComposer.getFile().getDescription() == null)  {
+								com.nzion.util.UtilMessagesAndPopups.showError("Please Provide The Caption Value");
+									return;
+								}
+								org.zkoss.util.media.Media media = ((UploadEvent) event).getMedia();
+								if (media instanceof org.zkoss.image.Image) {
+								imageSectionComposer.uploadFile(imageSectionComposer.getFile(),media.getName(),media.getContentType(),
+								media.isBinary() ? media.getStreamData() : new java.io.StringBufferInputStream(media.getStringData()));
+								} else {
+								Messagebox.show("Not an image: " + media, "Error", Messagebox.OK, Messagebox.ERROR);
+								break; //not to show too many errors
+							}
+						</attribute>
+						</button>
+					</hlayout>
+				</vlayout>
+				</div>
+				<separator orient="horizontal" />
+				<n:div id="labImageResults">
+				<n:table id="patientImageTable">
+					<n:thead style="text-align:center">
+						<n:tr>
+							<n:th>File Name</n:th>
+							<n:th>Description</n:th>
+							<n:th>Created By</n:th>
+							<n:th>Visit Date</n:th>
+							<n:th>Action</n:th>
+						</n:tr>
+					</n:thead>
+					<n:tbody style="text-align:center">
+						<n:tr forEach="${imageSectionComposer.valueObjects}">
+							<n:td>${each.file.fileName}</n:td>
+							<n:td>${each.file.description}</n:td>
+							<n:td>${each.file.createdBy}</n:td>
+							<n:td>${display:fd(each.visitDate)}</n:td>
+							<n:td>
+							<div>
+							<custom-attributes value="${each}"/>
+								<a class="group" label="View Image | " disabled="${imageSectionComposer.soapNoteController.readonly}"
+								onClick='Executions.createComponents("/soap/viewImage.zul",null,
+								com.nzion.util.UtilMisc.toMap("imageFile",self.getParent().getAttribute("value").getFile()));' />
+								<a label="Remove" disabled="${imageSectionComposer.soapNoteController.readonly}">
+									<attribute name="onClick">
+									imageSectionComposer.removeFile((com.nzion.domain.File)self.getParent().getAttribute("value").getFile());
+									</attribute>
+								</a>
+							</div>
+							</n:td>
+						</n:tr> 
+					</n:tbody>
+				</n:table>
+				</n:div>
+				
+				<n:div id="existingLabImageResults">
+				<n:table id="patientLabImageTable">
+					<n:thead style="text-align:center">
+						<n:tr>
+							<n:th>File Name</n:th>
+							<n:th>Created By</n:th>
+							<n:th>Action</n:th>
+						</n:tr>
+					</n:thead>
+					<n:tbody style="text-align:center">
+						<n:tr forEach="${labTestResults}">
+							<n:td>${each.file.fileName}</n:td>
+							<n:td>${each.file.createdBy}</n:td>
+							<n:td>
+							<div>
+							<custom-attributes value="${each}"/>
+								<a if="${each.file!=null}" class="group" label="View Image | " disabled="${imageSectionComposer.soapNoteController.readonly}"
+								onClick='Executions.createComponents("/soap/viewImage.zul",null,
+								com.nzion.util.UtilMisc.toMap("imageFile",self.getParent().getAttribute("value").getFile()));' />
+								<a label="Remove" if="${each.file!=null}" disabled="${imageSectionComposer.soapNoteController.readonly}">
+									<attribute name="onClick">
+									imageSectionComposer.removeFile((com.nzion.domain.File)self.getParent().getAttribute("value").getFile());
+									</attribute>
+								</a>
+							</div>
+							</n:td>
+						</n:tr> 
+					</n:tbody>
+				</n:table>
+				</n:div>
+			</panelchildren>
+		</panel>
+		<div sclass="buttonPanel">
+			<button label="Save" zclass="btn btn-success" onClick="imageSectionComposer.getSoapNoteController().saveSoapSection();"
+			disabled="${imageSectionComposer.soapNoteController.readonly}" />
+		</div>
+			<script type="text/javascript">
+			zk.afterMount(function() {
+			jq("#patientImageTable").dataTable({ "bJQueryUI": true,
+			"sPaginationType": "full_numbers" }); 
+			});
+		</script>
+		
+		<script type="text/javascript">
+			zk.afterMount(function() {
+			jq("#patientLabImageTable").dataTable({ "bJQueryUI": true,
+			"sPaginationType": "full_numbers" }); 
+			});
+		</script>
+		<script type="text/javascript">
+			zk.afterMount(function() {
+			 $("#labImageResults").show();
+		 $("#existingLabImageResults").hide();
+			});
+		</script>
+		
+		<script type="text/javascript">
+		function toggleLabOrder(){
+		 $("#labImageResults").hide();
+		 $("#existingLabImageResults").show();
+		 
+	   };
+		</script>
+			<script type="text/javascript">
+		function toggleImageLabOrder()
+        {
+		 $("#labImageResults").show();
+		 $("#existingLabImageResults").hide();
+		 
+	   };
+		</script>
+		
+			
+	</window>
+</zk>

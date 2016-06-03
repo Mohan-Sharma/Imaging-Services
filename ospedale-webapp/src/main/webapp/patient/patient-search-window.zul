@@ -1,0 +1,19 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?xel-method prefix="d" name="format"  class="com.nzion.util.UtilDateTime"  signature="java.lang.String format(java.util.Date)"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		Textbox patientLookupTxt = arg.get("patientLookupTxt");
+	</zscript>
+	<window id="patientSearchWindow" width="85%" sclass="modalStyle" title="Patient Lookup ( Double Click to Select )" closable="true" mode="modal">
+		<include src="/patient/patient-search.zul" width="100%">
+			<attribute name="onPatientSelect">
+				com.nzion.domain.Patient p = event.getOrigin().getTarget().getValue();
+				patientLookupTxt.setValue(com.nzion.util.ViewUtil.getFormattedName(p));
+				Events.postEvent("onChange", patientLookupTxt, p);
+				patientSearchWindow.detach();
+			</attribute>
+		</include>
+	</window>
+</zk>

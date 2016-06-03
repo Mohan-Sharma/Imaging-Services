@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?page title="Message" language="xul/html"?>
+<zk xmlns:h="http://www.zkoss.org/2005/zk/native" xmlns:a="http://www.zkoss.org/2005/zk/annotation">
+    <window border="none" width="300pt" closable="true" use="org.zkoss.zul.impl.MessageboxDlg"
+            zclass="popup_container" xmlns:w="http://www.zkoss.org/2005/zk/client">
+
+        <div zclass="modal">
+            <div zclass="modal-header">
+                <button zclass="close" onClick="self.getParent().getParent().getParent().detach();">x</button>
+                <h:h3><html id="title">${arg.title}</html></h:h3>
+            </div>
+            <div zclass="modal-body">
+                <div zclass="alert alert-block">
+                    <h:h4>
+                        <label multiline="true" value="${arg.message}" sclass="word-wrap" width="100%">
+                        </label>
+                    </h:h4>
+                    <!--h:p>
+                             <hlayout style="text-align:center">
+                                 <button id="btn1" identity="${arg.OK}" sclass="z-messagebox-btn"
+                                     use="org.zkoss.zul.impl.MessageboxDlg$Button" if="${!empty arg.OK}" />
+                                 <button identity="${arg.CANCEL}" sclass="z-messagebox-btn"
+                                     use="org.zkoss.zul.impl.MessageboxDlg$Button" if="${!empty arg.CANCEL}" />
+                                 <button identity="${arg.YES}" sclass="z-messagebox-btn"
+                                     use="org.zkoss.zul.impl.MessageboxDlg$Button" if="${!empty arg.YES}" />
+                                 <button identity="${arg.NO}" sclass="z-messagebox-btn"
+                                     use="org.zkoss.zul.impl.MessageboxDlg$Button" if="${!empty arg.NO}" />
+                                 <button identity="${arg.RETRY}" sclass="z-messagebox-btn"
+                                     use="org.zkoss.zul.impl.MessageboxDlg$Button" if="${!empty arg.RETRY}" />
+                                 <button identity="${arg.ABORT}" sclass="z-messagebox-btn"
+                                     use="org.zkoss.zul.impl.MessageboxDlg$Button" if="${!empty arg.ABORT}" />
+                                 <button identity="${arg.IGNORE}" sclass="z-messagebox-btn"
+                                     use="org.zkoss.zul.impl.MessageboxDlg$Button" if="${!empty arg.IGNORE}" />
+                             </hlayout>
+                         </h:p-->
+                </div>
+                <div sclass="panelFoot">
+                <button identity="${arg.YES}" sclass="btn mini-btn"
+                                     use="org.zkoss.zul.impl.MessageboxDlg$Button" if="${!empty arg.YES}" />
+                                 <button identity="${arg.NO}" sclass="btn mini-btn"
+                                     use="org.zkoss.zul.impl.MessageboxDlg$Button" if="${!empty arg.NO}" />
+                                 </div>
+            </div>
+        </div>
+    </window>
+</zk>

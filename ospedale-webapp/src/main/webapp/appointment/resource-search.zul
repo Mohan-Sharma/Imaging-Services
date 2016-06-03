@@ -1,0 +1,68 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./resourceSearch"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		String searchColumn = "firstName";
+		List personList = null;
+		Set locations = com.nzion.util.Infrastructure.getUserLogin().getLocations();
+		Component receiver = arg.get("receiver");
+	</zscript>
+	<window id="resourceSearch" width="60%" title="Resource Lookup" closable="true" mode="modal">
+		<style>td .z-label{ font-weight:normal; }</style>
+		<div sclass="patSearchRes" style="overflow:auto;height:300px;">
+			<h:table width="80%">
+				<h:tr>
+					<h:td width="15%" style="text-align:right">
+						<label value="Look For:"/>
+					</h:td>
+					<h:td width="35%">
+						<textbox cols="50" id="searchText" />
+					</h:td>
+					<h:td width="15%" style="text-align:right">
+						<label value="Search In:" />
+					</h:td>
+					<h:td width="20%">
+						<combobox id="searchFields" onSelect="searchColumn=(String)self.getSelectedItem().getValue();" selectedItem="@{searchColumn}">
+							<comboitem value="firstName" label="First Name" />
+							<comboitem value="lastName" label="Last Name" />
+							<comboitem value="contacts.mobileNumber" label="Mobile Number" />
+							<comboitem value="contacts.email" label="Email" />
+							<comboitem value="specialities" label="Specialities" />
+							<comboitem value="labTest" label="Lab Test Name" />
+						</combobox>
+					</h:td>
+					<h:td width="15%">
+						<button label="Search" id="searchBtn" style="margin-left:10px"
+							onClick="personList = personService.searchSchedulablePerson(searchColumn, searchText.getValue(),locations);" />
+					</h:td>
+				</h:tr>
+			</h:table>
+			<div style="overflow:auto" height="200px">
+				<listbox model="@{personList,load-after='searchBtn.onClick'}">
+					<listhead>
+						<listheader label="Name" />
+						<listheader label="Gender" />
+						<listheader label="Postal Address" />
+						<listheader label="Email" />
+						<listheader label="Mobile Number" />
+					</listhead>
+					<listitem self="@{each='person'}" value="@{person}" >
+						<attribute name="onDoubleClick">
+							Events.postEvent("onChange", receiver, self.getValue());
+							resourceSearch.detach();
+						</attribute>
+						<listcell>
+							<name object="@{person}" />
+						</listcell>
+						<listcell label="@{person.gender}" />
+						<listcell label="@{person.contacts.postalAddress}" />
+						<listcell label="@{person.contacts.email}" />
+						<listcell label="@{person.contacts.mobileNumber}" />
+					</listitem>
+				</listbox>
+			</div>
+		</div>
+	</window>
+</zk>

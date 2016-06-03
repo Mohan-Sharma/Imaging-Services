@@ -1,0 +1,146 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./searchEncounterWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native">
+    <zscript>
+        <![CDATA[
+	setPageTitle("Encounter", null);
+	import com.nzion.domain.Patient;
+	import java.text.DateFormat;
+	com.nzion.zkoss.composer.EncounterController encounterController = new com.nzion.zkoss.composer.EncounterController();
+	java.util.List encounters;
+	String displayDateByName(java.util.Date date) {
+	String strDate = DateFormat.getDateInstance(DateFormat.FULL).format(date);
+	return strDate;
+	}
+]]>
+    </zscript>
+    <window id="searchEncounterWindow" apply="${encounterController}" position="left,top">
+        <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Encounter Search</h:small>
+            </h:h1>
+        </div>
+        <!--   <div sclass="panelHeadTop panelHead">
+           <a href="#" label="Search" zclass="lookupbtn">
+           <n:i class="icon-search"></n:i>
+           </a>
+       </div> -->
+        <separator></separator>
+        <separator></separator>
+        <div zclass="container-fluid">
+            <div zclass="span5" id="personSection">
+                <div zclass="row-fluid">
+                    <div zclass="span3">
+                        <label value="Patient"/>
+                        <div zclass="span12" >
+                            <patientlookup id="patLookupTxt" 
+                                    onChange="encounterController.getEncounterSearchValueObject().setPatient((Patient)((ForwardEvent)event).getOrigin().getData());"></patientlookup>
+                        </div>
+                    </div>
+                </div>
+                <div zclass="row-fluid">
+                    <div zclass="span3">
+                        <label value="Doctor"/>
+                        <div zclass="span12">
+                            <providerlookup id="proLookupTxt" 
+                                    onChange="encounterController.getEncounterSearchValueObject().setProvider((com.nzion.domain.Provider)((ForwardEvent)event).getOrigin().getData())"></providerlookup>
+                        </div>
+                    </div>
+                </div>
+                <div zclass="row-fluid">
+                    <div zclass="span3">
+                        <label value="From Date"/>
+                        <datebox sclass="span12"
+                                 value="@{encounterController.encounterSearchValueObject.fromDate,load-after='searchCriteriaSection.onReload'}"/>
+                    </div>
+                </div>
+                <div zclass="row-fluid">
+                    <div zclass="span3">
+                        <label value="Thru Date"/>
+                        <datebox sclass="span12"
+                                 value="@{encounterController.encounterSearchValueObject.thruDate,load-after='searchCriteriaSection.onReload'}"/>
+                    </div>
+                </div>
+            </div>
+            <div zclass="span5">
+                <div zclass="row-fluid" id="searchCriteriaSection">
+                    <div zclass="span5">
+                        <label value="Chief Complaint"/>
+                        <suggest id="chiefCompaintSuggestionBox" entity="com.nzion.domain.emr.ChiefComplaint"
+                                 searchcolumns="complainName" displaycolumns="complainName"
+                                 requiredcolumn="complainName"
+                                 value="@{encounterController.encounterSearchValueObject.chiefComplaint,load-after='searchCriteriaSection.onReload'}"/>
+                    </div>
+                </div>
+                <div zclass="row-fluid">
+                    <div zclass="span5">
+                        <label value="Diagnosis Description"/>
+                        <suggest id="icdSuggestionBox" entity="com.nzion.domain.emr.IcdElement"
+                                 onLookedUp="encounterController.getEncounterSearchValueObject().setIcdElement(self.getResult())"
+                                 searchcolumns="description,code" displaycolumns="description"
+                                 requiredcolumn="description"
+                                 value="@{encounterController.encounterSearchValueObject.icdString,load-after='searchCriteriaSection.onReload'}"/>
+                    </div>
+                </div>
+                <div zclass="row-fluid">
+                    <div zclass="span5">
+                        <label value="Procedures Description"/>
+                        <suggest id="cptSuggestionBox" entity="com.nzion.domain.emr.Cpt"
+                                 onLookedUp="encounterController.getEncounterSearchValueObject().setCpt(self.getResult())"
+                                 searchcolumns="description" sclass="span12"
+                                 displaycolumns="description" requiredcolumn="description"
+                                 value="@{encounterController.encounterSearchValueObject.cptString,load-after='searchCriteriaSection.onReload'}"/>
+                    </div>
+                </div>
+
+                <div zclass="row-fluid">
+                    <div zclass="span5">
+                        <label value="Drug (Trade Name)"/>
+                        <suggest id="drugSuggestionBox" entity="com.nzion.domain.drug.Drug"
+                                 onLookedUp="encounterController.getEncounterSearchValueObject().setDrug(self.getResult())"
+                                 searchcolumns="tradeName" sclass="span12"
+                                 displaycolumns="tradeName" requiredcolumn="tradeName"
+                                 value="@{encounterController.encounterSearchValueObject.drugName,load-after='searchCriteriaSection.onReload'}"/>
+                    </div>
+                </div>
+                <div zclass="row-fluid">
+                    <div zclass="span5">
+                        <label value="Lab Test Name(Ordered)"/>
+                        <suggest id="labTestName" entity="com.nzion.domain.emr.lab.LabTest"
+                                 onLookedUp="encounterController.getEncounterSearchValueObject().setLabTestName(self.getResult().getTestName())"
+                                 searchcolumns="testName" sclass="span12"
+                                 displaycolumns="testName" requiredcolumn="testName"
+                                 value="@{encounterController.encounterSearchValueObject.labTestName,load-after='searchCriteriaSection.onReload'}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div sclass="panelFoot">
+            <button label="Clear">
+                <attribute name="onClick">
+                    encounterController.setEncounterSearchValueObject(new
+                    com.nzion.view.EncounterSearchValueObject());
+                    patLookupTxt.recreate();
+                    proLookupTxt.recreate();
+                    Events.postEvent("onReload",searchCriteriaSection,null);
+                </attribute>
+            </button>
+            <button label="Search" id="search" sclass="btn submit">
+                <attribute name="onClick">
+                    encounters = encounterController.serachEncounter();
+                    encounterInc.invalidate();
+                    encounterInc.getFellowIfAny("resultPanel").setVisible(true);
+                    encounterInc.setDynamicProperty("encounters", encounters);
+                    encounterInc.setDynamicProperty("encounterController", encounterController);
+                </attribute>
+            </button>
+        </div>
+        <separator/>
+        <include id="encounterInc" src="/patient/encounters.zul" encounters="${encounters}"
+                 encounterController="${encounterController}">
+        </include>
+
+    </window>
+</zk>

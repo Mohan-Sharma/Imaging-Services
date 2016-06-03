@@ -1,0 +1,38 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./facesheetWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	com.nzion.zkoss.composer.PatientSoapNoteController patientSoapNoteController = arg.get("patientSoapNoteController");
+	com.nzion.domain.Patient patient = patientSoapNoteController.getPatient();
+	List latestRecordedPatientImmunizations = soapNoteService.getLatestPatientImmunization(patient, 5);
+</zscript>
+	<div id="facesheetWindow" sclass="soapNoteContL col2">
+		<panel title="Immunizations" collapsible="true" id="immunizationPanel">
+			<panelchildren>
+				<div sclass="dataTables_scrollBody" style="overflow: auto; height: 125px;">
+					<listbox>
+						<listhead>
+							<listheader label="Immunization" />
+							<listheader label="CVX Code" /><!--
+							<listheader label="MVX Code" />
+							--><listheader label="Administered On" />
+							<listheader label="Administered Amount" />
+							<listheader label="Administered Units" />
+							<listheader label="Visit Date" />
+						</listhead>
+						<listitem forEach="${latestRecordedPatientImmunizations}">
+							<listcell label="${each.immunizationfullVaccineName}" />
+							<listcell label="${each.immunizationcvxCode}" /><!--
+							<listcell label="${each.mvxCode}"/>
+							--><listcell label="${each.administeredOn}" />
+							<listcell label="${each.administeredAmount}" />
+							<listcell label="${each.administeredUnits}" />
+							<listcell label="${each.visitDate}" />
+						</listitem>
+					</listbox>
+				</div>
+			</panelchildren>
+		</panel>
+	</div>
+	</zk>

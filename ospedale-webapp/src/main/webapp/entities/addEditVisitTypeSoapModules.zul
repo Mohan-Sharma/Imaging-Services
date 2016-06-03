@@ -1,0 +1,79 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addEditVisitTypeSoapModule"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	<![CDATA[
+			com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+			com.nzion.domain.emr.VisitTypeSoapModule visitTypeSoapModule = arg.get("entity");
+			if(visitTypeSoapModule != null)
+				visitTypeSoapModule = commonCrudService.refreshEntity(visitTypeSoapModule);
+			if(visitTypeSoapModule == null){
+			visitTypeSoapModule = new com.nzion.domain.emr.VisitTypeSoapModule();
+			visitTypeSoapModule.setModules(new HashSet());
+			com.nzion.domain.emr.SoapModule module = commonCrudService.findUniqueByEquality(com.nzion.domain.emr.SoapModule.class,
+					new String[]{"moduleName"},new Object[]{"Diagnosis"});
+			com.nzion.domain.emr.SoapModule HPImodule = commonCrudService.findUniqueByEquality(com.nzion.domain.emr.SoapModule.class,
+					new String[]{"moduleName"},new Object[]{"HPI"});
+			visitTypeSoapModule.getModules().add(HPImodule);
+			visitTypeSoapModule.getModules().add(module);
+			}
+			String label = visitTypeSoapModule.getId()!=null? "Edit Visit Type and Soap Module Configuration":"New Visit Type and Soap Module Configuration";
+			//List visitTypes = commonCrudService.getAll(com.nzion.domain.SlotType.class);
+			 List visitTypes = commonCrudService.findByEquality(com.nzion.domain.SlotType.class,new String[]{"chargeType"},
+     new Object[]{com.nzion.domain.SlotType.CHARGETYPE.OUTPATIENT});
+			List soapModules = commonCrudService.getAll(com.nzion.domain.emr.SoapModule.class);
+			Collections.sort(soapModules);
+			List selectedModules;
+	]]>
+	</zscript>
+<window id="addEditVisitTypeSoapModule"  mode="modal"  width="50%" closable="true">
+<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Visit Type and Encounter Module Configuration</h:small>
+                 <button type="button" zclass="close" onClick="addEditVisitTypeSoapModule.detach();">×</button>
+            </h:h1>
+        </div>
+     <div zclass="container-fluid">
+				 <div zclass="row-fluid">
+                    <div sclass="panelCont"  width="40%">
+							<label value="Visit Type" sclass="labelReqNoPad"/>
+							<label value=" *" zclass="labelReq"/>
+							<combobox model="@{visitTypes}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" selectedItem="@{visitTypeSoapModule.slotType,save-when='Save.onClick'}"/>
+					</div>
+					</div>
+					<label value="Doctor"  />
+					<providerlookup  value="${visitTypeSoapModule.provider}" sclass="span12"  style="margin-left:0px;"
+						onChange="visitTypeSoapModule.setProvider((com.nzion.domain.Provider)event.getOrigin().getData())" />
+				 <div zclass="row-fluid">
+             <div style="margin-top:10px">
+					<listbox model="@{soapModules}"  id="soapModuleListBox" rows="10" sclass="span12" >
+						<listhead>
+							<listheader label="SOAP Modules"/>
+						</listhead>
+						<listitem self="@{each='module'}"  value="@{module}"> 
+							<listcell> 
+								<checkbox onCheck="visitTypeSoapModule.addOrRemoveSoapModule(self.isChecked(),self.getParent().getParent().getValue())"
+								onCreate='self.setChecked(visitTypeSoapModule.getModules().contains(self.getParent().getParent().getValue()));
+								self.setDisabled("HPI".equals(self.getParent().getParent().getValue().getModuleName()) || "Diagnosis".equals(self.getParent().getParent().getValue().getModuleName()))'/>
+								<label value="@{module.moduleName}"/>
+							</listcell>
+						</listitem>
+					</listbox>
+				</div>
+				</div>
+				</div>
+		
+			<div sclass="buttonPanel">
+			<button label="Save" id="Save" zclass="btn-success btn">
+				<attribute name="onClick">
+				<![CDATA[
+					commonCrudService.save(visitTypeSoapModule);
+					com.nzion.util.UtilMessagesAndPopups.showSuccess();
+					addEditVisitTypeSoapModule.detach();
+					]]>
+				</attribute>
+			</button>
+			<button label="Cancel" forward="onClick=onCancel"/>
+		</div>
+</window>
+</zk>

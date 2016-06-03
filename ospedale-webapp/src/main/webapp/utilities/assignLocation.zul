@@ -1,0 +1,53 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./assignLoc"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<window id="assignLoc">
+<zscript>
+	List locationObjList = commonCrudService.getAll(com.nzion.domain.Location.class);
+	Set locationList;
+	com.nzion.domain.Person p;
+</zscript>
+<panel title="Locations">
+<panelchildren style="margin:10px;">
+	<employeelookup id="empLookup">
+		<attribute name="onChange">
+			Clients.closeErrorBox(self);
+			p = commonCrudService.getById(com.nzion.domain.Person.class,event.getOrigin().getData().getId());
+			locationList = new HashSet(p.getLocations());
+		</attribute>
+	</employeelookup>
+	</panelchildren>
+</panel>
+<listbox model="@{locationObjList,load-after='empLookup.onChange'}" width="100%" multiple="true" checkmark="true" 
+				selectedItem="@{locationList, converter=com.nzion.view.component.MultipleListitemBindingConverter}">
+	<listhead>
+			<listheader label="Code" />
+			<listheader label="Location Name" />
+			<listheader label="City"/>
+			<listheader label="Npi"/>
+			<listheader label="Phone"/>
+			<listheader label="Email"/>
+		</listhead>
+		<listitem self="@{each='location'}" value="@{location}">
+			<listcell label="@{location.code}"/>
+			<listcell label="@{location.description}"/>
+			<listcell label="@{location.contacts.postalAddress.city}"/>
+			<listcell label="@{location.npi}"/>
+			<listcell label="@{location.contacts.officePhone}"/>
+			<listcell label="@{location.contacts.email}"/>
+		</listitem>
+</listbox>
+<div sclass="panelFoot">
+	<button label="Save">
+		<attribute name="onClick">
+		if(p == null)
+		  throw new WrongValueException(empLookup,"Please select an Employee");
+		 p.setLocations(locationList);
+		 commonCrudService.save(p); 
+		 com.nzion.util.UtilMessagesAndPopups.showSuccess();
+		</attribute>
+	</button>
+</div>
+</window>
+</zk>

@@ -1,0 +1,146 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./createCasemanager"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import com.nzion.domain.CaseManager;
+	import com.nzion.domain.UserLogin;
+	com.nzion.zkoss.composer.EntityController entityCaseManagerController = new com.nzion.zkoss.composer.EntityController();
+]]>
+		</zscript>
+	<window id="createCasemanager" apply="${entityCaseManagerController}" mode="modal"
+		position="center,top" width="60%" height="90%"
+	title="New Case Manager" closable="true">
+	<style>
+		table .z-label {
+		font: 11px normal Tahoma, Geneva, sans-serif;
+		vertical-align: middle;
+		color: #333;
+		padding:0 0 4px;
+		font-weight:bold;
+		}
+	</style>
+		<div sclass="panelTop" style="margin-left:5px;margin-right:5px;margin-top:5px">
+			<button label="Save" onClick='Events.postEvent("onClick",Save, null)' />
+			<button label="Close" onClick='Events.postEvent("onClick",Close, null)' />
+		</div>
+		<panel title="Case Manager Details" style="margin:5px;margin-bottom:0px">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div>
+						<label value="Case Manager Code" style="text-align:right;" />
+						<textbox cols="15" value="@{vo.caseManager.accountNumber,load-after='Save.onClick'}"
+							id="accountNumber" readonly="true" />
+					</div>
+					<div>
+						<label value="First Name" style="text-align:right;" id="lblfirstName" />
+						<textbox value="@{vo.caseManager.firstName,save-when='Save.onClick'}" id="firstName"
+							focus="true" maxlength="20" onChange="com.nzion.util.UtilDisplay.validateOnlyAlphabetsAndWhiteSpaces(self)"/>
+					</div>
+					<div>
+						<label value="Middle Name" style="text-align:right;" id="lblmiddleName" />
+						<textbox value="@{vo.caseManager.middleName,save-when='Save.onClick'}" id="middleName" 
+						maxlength="1" onChange="com.nzion.util.UtilDisplay.validateOnlyAlphabets(self)"/>
+					</div>
+					<div>
+						<label value="Last Name" style="text-align:right;" id="lbllastName" />
+						<textbox value="@{vo.caseManager.lastName,save-when='Save.onClick'}" id="lastName" 
+						maxlength="20" onChange="com.nzion.util.UtilDisplay.validateOnlyAlphabetsAndWhiteSpaces(self)"/>
+					</div>
+					<div sclass="chkBox">
+						<checkbox checked="@{vo.caseManager.active,save-when='Save.onClick'}" label="Is Active" style="font-weight:bold"></checkbox>
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+		<panel title="Contact Details" style="margin:5px;margin-bottom:0px">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div sclass="col2">
+						<hbox>
+							<label value="Address1" id="lbladdress1" />
+							<span zclass="labelReq">
+								<html><![CDATA[*]]></html>
+							</span>
+						</hbox>
+						<textbox cols="50" value="@{vo.contacts.postalAddress.address1,save-when='Save.onClick'}"
+							id="address1" constraint="no empty" maxlength="30"/>
+					</div>
+					<div sclass="col2">
+						<label value="Address2" style="text-align:right;" id="lbladdress2" />
+						<textbox cols="50" value="@{vo.contacts.postalAddress.address2,save-when='Save.onClick'}"
+							id="address2" maxlength="30"/>
+					</div>
+					<div>
+						<hbox>
+							<label value="State" id="lblstate" />
+							<span zclass="labelReq">
+								<html><![CDATA[*]]></html>
+							</span>
+						</hbox>
+						<textbox value="@{vo.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick'}"
+							id="state" cols="22" constraint="no empty" maxlength="2"/>
+					</div>
+					<div>
+						<label value="County" id="lblcountyGeo" />
+						<textbox value="@{vo.contacts.postalAddress.countyGeo,save-when='Save.onClick'}"
+							id="countyGeo" />
+					</div>
+					<div>
+						<hbox>
+							<label value="City" id="lblcity" />
+							<span zclass="labelReq">
+								<html><![CDATA[*]]></html>
+							</span>
+						</hbox>
+						<textbox cols="22" value="@{vo.contacts.postalAddress.city,save-when='Save.onClick'}"
+							id="city" constraint="no empty" maxlength="20" onChange="com.nzion.util.UtilDisplay.validateNonDigits(self)"/>
+					</div>
+					<div>
+						<hbox>
+							<label value="Zipcode" id="lblpostalCode" />
+							<span zclass="labelReq">
+								<html><![CDATA[*]]></html>
+							</span>
+						</hbox>
+						<textbox value="@{vo.contacts.postalAddress.postalCode,save-when='Save.onClick'}"
+							id="postalCode" constraint="no empty" maxlength="9" onChange="com.nzion.util.UtilDisplay.validateOnlyDigits(self)"/>
+					</div>
+					<div>
+						<label value="e-mail" />
+						<span zclass="labelReq" id="lblEmail" visible="true">
+								<html><![CDATA[*]]></html>
+						</span>
+						<email id="emailAddr" value="@{vo.contacts.email,save-when='Save.onClick'}" constraint="no empty"/>
+					</div>
+
+					<h:fieldset>
+						<h:legend>Phone Details</h:legend>
+						<div>
+							<label value="Office phone" />
+							<phonebox value="@{vo.contacts.officePhone,save-when='Save.onClick'}"
+								cols="10" />
+						</div>
+						<div>
+							<label value="Fax" />
+							<phonebox value="@{vo.contacts.faxNumber,save-when='Save.onClick'}" cols="10" />
+						</div>
+					</h:fieldset>
+				</div>
+			</panelchildren>
+		</panel>
+		<groupbox style="border:none;">
+			<textbox id="display" value="" visible="false"></textbox>
+		</groupbox>
+		<div sclass="panelFoot" style="margin-left:5px;margin-right:5px;margin-top:5px"> 
+			<button label="Save" id="Save" visible="true" onClick="setEntity()" />
+			<button label="Close" id="Close" />
+		</div>
+		<zscript><![CDATA[
+	public void setEntity() {
+	entityCaseManagerController.getEntityViewObject().setEntity(
+			entityCaseManagerController.getEntityViewObject().getCaseManager());
+	display.setValue(firstName.getValue());
+	}
+]]></zscript>
+	</window>
+</zk>

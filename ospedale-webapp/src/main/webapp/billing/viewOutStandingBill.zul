@@ -1,0 +1,389 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./txnItemWindow"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+	xmlns:h="http://www.w3.org/1999/xhtml">
+	<zscript>
+	import com.nzion.domain.billing.InvoiceType;
+    setPageTitle("Patient Out Standing Bill", null);
+	com.nzion.zkoss.composer.BillingController billingController = new com.nzion.zkoss.composer.BillingController();
+	com.nzion.service.common.CommonCrudService service = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	com.nzion.service.billing.BillingService billingService = com.nzion.util.Infrastructure.getSpringBean("billingService");	
+	com.nzion.domain.billing.Contract contract = billingController.getInvoice().getContract();	
+	com.nzion.domain.inpatient.PatientAdmission patientAdmission = billingController.getInvoice().getPatientAdmission();
+	Map allItemsInvoice = (Map)arg.get("ITEMSTOUPD");
+	
+	boolean isInsurance = (patientAdmission.getInsuranceProvider() != null);	
+	Map invoiceItemMap;	
+	Map invoiceDeductibleItemMap;		
+	HashSet selectedInvItems = new HashSet();
+	List invPrevBalanceItems  = billingController.getInvPrevBalanceItemMap().get("PREVIOUSBALANCE");
+	Boolean invPrevBalanceAvailable = com.nzion.util.UtilValidator.isNotEmpty(invPrevBalanceItems); 
+    Boolean deductiblesAvailable = com.nzion.util.UtilValidator.isNotEmpty(billingController.getInvoiceDeductibleItemMap().get(InvoiceType.DEDUCTIBLE.name()));
+    Boolean advanceAvailable = com.nzion.util.UtilValidator.isNotEmpty(billingController.getInvoicePrevAdvanceItemMap().get(InvoiceType.IPD_ADVANCE.name()));
+   
+</zscript>
+	<window id="txnItemWindow" apply="${billingController}" self="@{define(content)}"  closable="true" width="80%" height="85%" mode="modal" title="Out Standing Bill">
+		<div align="right" style="margin-bottom:10px;margin-right:7.2%">
+			<button label="PrintBill" id="printButton"  visible="${billingController.paymentReceived}"
+			onClick="billingController.printBill();" />
+		</div>
+		<div sclass="wrapper">
+			<div sclass="mid">
+					<n:div class="summaryHeader" id="chiefCom">
+						<n:div id="CCTop" height="100%">
+							<div>
+								<div width="100%" style="float:left;width:100%;text-align:center">
+								    <vlayout spacing="5px;">
+									<hlayout> <n:strong> Bill <a> 
+									<attribute name="onClick">
+										Executions.getCurrent().sendRedirect("/billing/viewContractWrapper.zul?Id="+contract.getId(),"_blank");																				
+									</attribute>
+									<label value="(Fee Based On : ${contract.name} )"></label> </a> <n:br/> <div  if="${isInsurance}">  Insurance Provider : <label value="${patientAdmission.insuranceProvider.insuranceProviderName}"></label></div>										
+									</n:strong></hlayout>
+									<hlayout spacing="20px;">
+									   <div >
+									    <n:strong>
+										 Consultant :
+											<span style="margin-top:2px">
+												<name object="@{billingController.invoice.consultant}" />
+											</span>
+										</n:strong>
+										</div>
+										<div if="${patientSoapNote != null}" >
+									    <n:strong>
+										 Visit Type :
+											<span style="margin-top:2px">
+												<label value="@{patientSoapNote.encounterType}" />
+											</span>
+										</n:strong>									
+										</div>
+										<div if="${patientSoapNote != null}">
+									    <n:strong>
+										 Visit Date :
+											<span style="margin-top:2px">										    
+												<label value="@{patientSoapNote.date,converter='com.nzion.view.component.DateConverter'}" />
+											</span>
+										</n:strong>
+										</div>
+								   </hlayout>
+								   </vlayout>
+								</div>							
+							</div>
+							<n:div class="clr patDetCont" style="margin-top:10px;">
+								<image id="patientImage" sclass="patImg" width="46px" height="50px"
+									hover="@{billingController.invoice.patient,converter='com.nzion.view.component.GenderImageConverter'}" />								
+								<div if="${patientAdmission != null}" sclass="patDet">
+										<n:strong>Admission Number :</n:strong>
+										<label value="@{patientAdmission.accountNumber}" />
+										<n:br />
+							    </div>
+								<div sclass="patDet">									
+									<n:strong>MRN:</n:strong>
+									<label value="@{billingController.invoice.patient.accountNumber}" />
+									<n:br />
+								</div>
+								<div sclass="patDet">
+									<n:strong>
+									 Patient Name :
+										<span style="margin-top:2px">
+											<name object="@{billingController.invoice.patient}" />
+										</span>
+									</n:strong>
+									<n:br />									
+								</div>
+								<div sclass="patDet">
+									<n:strong> Gender :</n:strong>
+									<label value="@{billingController.invoice.patient.gender}" />
+									<n:br />
+								</div>
+								<div sclass="patDet">
+									<n:strong> Age :</n:strong>
+									<label value="@{billingController.invoice.patient.age}" />
+									<n:br />
+								</div>
+							</n:div>
+							<div width="100%" sclass="clr chiefComp soapNoteCont curSOAP ui-resizable">
+								<n:br />
+								<listbox oddRowSclass="false" style="margin-left:20px;">
+									<listhead>
+										<listheader width="7px;" />
+										<listheader label="Item" />
+										<listheader label="Price" />
+										<listheader label="Quantity" />
+										<listheader label="Amount" />
+									</listhead>
+								</listbox>
+								<grid model="@{billingController.invoiceItemMap}" id="invoiceItemsGridBox">
+									<rows>
+										<row self="@{each='invoiceItems'}" value="@{invoiceItems}">
+											<label value="@{invoiceItems.key}" style="font-weight:bold" />
+											<detail open="true">
+												<listbox oddRowSclass="false" model="@{invoiceItems.value}">
+													<listhead>
+														<listheader width="20px;" />
+														<listheader />
+														<listheader/>
+														<listheader   />
+														<listheader  />
+													</listhead>
+													<listitem self="@{each='invoiceItem'}" value="@{invoiceItem}">
+														<listcell >
+															<checkbox>
+																<attribute name="onCheck">
+																	Object invItem	= self.getParent().getParent().getValue();
+																	if(self.isChecked())
+																		selectedInvItems.add(invItem);
+																	 else
+																	    selectedInvItems.remove(invItem);
+																</attribute>
+															</checkbox>
+														</listcell>
+														<listcell >
+															<label value="@{invoiceItem.description}" />
+														</listcell>
+														<listcell>
+															<hlayout spacing="3px">
+																<label value="@{invoiceItem.factor}"/>
+																<label value="@{invoiceItem.factorDescription}"/>
+															</hlayout>
+														</listcell>
+														<listcell>
+															<hlayout spacing="3px">
+																<label value="@{invoiceItem.quantity}"/>
+																<label value="@{invoiceItem.quanityDesc}"/>
+															</hlayout>
+														</listcell>
+														<listcell>
+															<decimalbox value="@{invoiceItem.priceValue}"
+																readonly="true" 
+																tooltiptext="@{invoiceItem,converter='com.nzion.view.component.BillingAmountConverter'}"
+																onChange='Events.postEvent("onReload",amountLabel,null);Events.postEvent("onReload",amountToBePaidLabel,null);'
+																constraint="no negative,no empty" />
+															<label value="@{invoiceItem.price.currency.code}"></label>
+														</listcell>
+													</listitem>
+												</listbox>
+											</detail>
+										</row>	
+									</rows>
+								</grid>
+								<grid model="@{billingController.invPrevBalanceItemMap}" if="${invPrevBalanceAvailable}" id="prevBalItemsGridBox">
+									<rows>
+										<row self="@{each='invPrevBalanceItems'}" value="@{invPrevBalanceItems}">
+											<label value="@{invPrevBalanceItems.key}" style="font-weight:bold" />
+											<detail open="true">
+												<listbox oddRowSclass="false" model="@{invPrevBalanceItems.value}" >
+													<listhead>
+														<listheader width="20px;" />
+														<listheader />
+														<listheader/>
+														<listheader   />
+														<listheader  />
+													</listhead>
+													<listitem self="@{each='invPrevBalanceItem'}" value="@{invPrevBalanceItem}">
+														<listcell >
+															<checkbox>
+																<attribute name="onCheck">
+																	Object invItem	= self.getParent().getParent().getValue();
+																	if(self.isChecked())
+																		selectedInvItems.add(invItem);
+																	 else
+																	    selectedInvItems.remove(invItem);
+																</attribute>
+															</checkbox>
+														</listcell>
+														<listcell>
+															<label value="@{invPrevBalanceItem.description}" />
+														</listcell>
+														<listcell>
+															<hlayout spacing="3px">
+																<label value="@{invPrevBalanceItem.factor}"/>
+																<label value="@{invPrevBalanceItem.factorDescription}"/>
+															</hlayout>
+														</listcell>
+														<listcell>
+															<hlayout spacing="3px">
+																<label value="@{invPrevBalanceItem.quantity}"/>
+																<label value="@{invPrevBalanceItem.quanityDesc}"/>
+															</hlayout>
+														</listcell>
+														<listcell>
+															<decimalbox value="@{invPrevBalanceItem.priceValue}"
+																readonly="true" 
+																tooltiptext="@{invPrevBalanceItem,converter='com.nzion.view.component.BillingAmountConverter'}"
+																onChange='Events.postEvent("onReload",amountLabel,null);Events.postEvent("onReload",amountToBePaidLabel,null);'
+																constraint="no negative,no empty" />
+															<label value="@{invPrevBalanceItem.price.currency.code}"></label>
+														</listcell>
+													</listitem>
+												</listbox>
+											</detail>
+										</row>	
+									</rows>
+								</grid>
+								<div style="width:100%">
+									  <div align="right" sclass="total">
+										<label value="${c:l('totalAmount')}" />
+										<label id="amountLabel" 
+										 tooltiptext="@{billingController.invoice,converter='com.nzion.view.component.BillingAmountConverter'}" 											
+											value="@{billingController.invoice.totalAmount,load-after='self.onReload'}" style="font-weight:bold" />
+									</div>
+								</div>
+								<grid model="@{billingController.invoicePrevAdvanceItemMap,load-after='self.onReload'}"  id="advanceDeductible" if="${advanceAvailable}">
+									<rows>
+										<row self="@{each='advanceItemsDeductible'}" value="@{advanceItemsDeductible}">
+											<label value="@{advanceItemsDeductible.key}" style="font-weight:bold" />
+											<detail open="true">
+												<listbox oddRowSclass="false" model="@{advanceItemsDeductible.value}"  >
+													<listhead>
+														<listheader width="20px;" />
+														<listheader />
+														<listheader/>
+														<listheader   />
+														<listheader  />
+													</listhead>
+													<listitem self="@{each='advanceItemDeductible'}" value="@{advanceItemDeductible}">
+														<listcell>
+															<checkbox>
+																<attribute name="onCheck">
+																	Object invItem	= self.getParent().getParent().getValue();
+																	if(self.isChecked())
+																		selectedInvItems.add(invItem);
+																	 else
+																	    selectedInvItems.remove(invItem);
+																</attribute>
+															</checkbox>
+														</listcell>
+														<listcell>
+															<label value="@{advanceItemDeductible.description}" />
+														</listcell>
+														<listcell>
+															<hlayout spacing="3px">
+																<label value="@{advanceItemDeductible.factor}"/>
+																<label value="@{advanceItemDeductible.factorDescription}"/>
+															</hlayout>
+														</listcell>
+														<listcell>
+															<hlayout spacing="3px">
+																<label value="@{advanceItemDeductible.quantity}"/>
+																<label value="@{advanceItemDeductible.quanityDesc}"/>
+															</hlayout>
+														</listcell>
+														<listcell>
+															<decimalbox value="@{advanceItemDeductible.priceValue}"
+																readonly="true" 
+																tooltiptext="@{advanceItemDeductible,converter='com.nzion.view.component.BillingAmountConverter'}"														
+																onChange='Events.postEvent("onReload",amountLabel,null);Events.postEvent("onReload",amountToBePaidLabel,null);'
+																constraint="no negative,no empty" />
+															<label value="@{advanceItemDeductible.price.currency.code}"></label>
+														</listcell>
+													</listitem>
+												</listbox>
+											</detail>
+										</row>	
+									</rows>
+								</grid> 	
+							    <grid model="@{billingController.invoiceDeductibleItemMap,load-after='self.onReload'}"  id="deductibleGrid" if="${deductiblesAvailable}">
+									<rows>
+										<row self="@{each='invoiceItemsDeductible'}" value="@{invoiceItemsDeductible}">
+											<label value="@{invoiceItemsDeductible.key}" style="font-weight:bold" />
+											<detail open="true">
+												<listbox oddRowSclass="false" model="@{invoiceItemsDeductible.value}" >
+													<listhead>
+														<listheader width="20px;" />
+														<listheader />
+														<listheader/>
+														<listheader   />
+														<listheader  />
+													</listhead>
+													<listitem self="@{each='invoiceItemDeductible'}" value="@{invoiceItemDeductible}">
+														<listcell >
+															<checkbox>
+																<attribute name="onCheck">
+																	Object invItem	= self.getParent().getParent().getValue();
+																	if(self.isChecked())
+																		selectedInvItems.add(invItem);
+																	 else
+																	    selectedInvItems.remove(invItem);
+																</attribute>
+															</checkbox>
+														</listcell>
+														<listcell>
+															<label value="@{invoiceItemDeductible.description}" />
+														</listcell>
+														<listcell>
+															<hlayout spacing="3px">
+																<label value="@{invoiceItemDeductible.factor}"/>
+																<label value="@{invoiceItemDeductible.factorDescription}"/>
+															</hlayout>
+														</listcell>
+														<listcell>
+															<hlayout spacing="3px">
+																<label value="@{invoiceItemDeductible.quantity}"/>
+																<label value="@{invoiceItemDeductible.quanityDesc}"/>
+															</hlayout>
+														</listcell>
+														<listcell>
+															<decimalbox value="@{invoiceItemDeductible.priceValue}"
+																readonly="true" 
+																tooltiptext="@{invoiceItemDeductible,converter='com.nzion.view.component.BillingAmountConverter'}"														
+																onChange='Events.postEvent("onReload",amountLabel,null);Events.postEvent("onReload",amountToBePaidLabel,null);'
+																constraint="no negative,no empty" />
+															<label value="@{invoiceItemDeductible.price.currency.code}"></label>
+														</listcell>
+													</listitem>
+												</listbox>
+											</detail>
+										</row>	
+									</rows>
+								</grid>	
+													    
+								<div align="right" sclass="total">
+									<label value="${c:l('amountToBePaid')}" />
+									<label id="amountToBePaidLabel" 
+										value="@{billingController.invoice.amountToBePaid,load-after='self.onReload'}" style="font-weight:bold" />
+								</div>
+								
+								<!-- <div align="right" sclass="total" visible="${billingController.paymentReceived}">
+									<label value="${c:l('collectedAmount')}" />
+									<label										
+										value="@{billingController.invoice.collectedAmount,load-after='self.onReload'}" style="font-weight:bold" />
+								</div> -->
+								
+								<div sclass="panelFoot" >
+									<button label="Generate Bill" id="saveBtn"
+										onClick='generateInvoice();self.setDisabled(true)' visible="${!billingController.paymentReceived}"/>
+									<button label="Close" onClick="txnItemWindow.detach();"> </button>
+									<div align="cenetre"><n:h5>(If no items are selected then it will generate bill for all items)</n:h5></div>
+								</div>								
+							
+							</div>
+						</n:div>
+					</n:div>
+			</div>
+		</div>
+		<zscript>
+			void generateInvoice(){
+			    com.nzion.util.UtilMessagesAndPopups.confirm("Are you Sure want to generate invoice for items present?","Billing Confirmation", Messagebox.YES
+						| Messagebox.NO, Messagebox.QUESTION,new org.zkoss.zk.ui.event.EventListener() {
+					public void onEvent(Event event) {
+						if ("onYes".equals(event.getName())) {
+						    List invSelecteditems = new ArrayList(selectedInvItems);
+						    com.nzion.domain.billing.Invoice invTmp;
+						     if(com.nzion.util.UtilValidator.isNotEmpty(invSelecteditems)){		   		 
+						   		invTmp = billingController.genInvoiceForSelectedItems(billingController.getInvoice(),invSelecteditems,allItemsInvoice);	   		 
+						     } 
+							 else
+							    invTmp =  billingService.generateInvoiceFor(patientAdmission);
+							Executions.getCurrent().sendRedirect("/billing/billingTxnItem.zul?invoiceId=" + invTmp.getId(),"_BillSoapNote");
+							//Events.postEvent("onReload",advanceDeductible,null);
+							//Events.postEvent("onReload",invoiceItemsGridBox,null);
+							//Events.postEvent("onReload",prevBalItemsGridBox,null);
+							//Events.postEvent("onReload",deductibleGrid,null);
+							com.nzion.util.UtilMessagesAndPopups.showSuccess();
+						}
+					}
+				});
+			}
+		</zscript>
+	</window>
+</zk>

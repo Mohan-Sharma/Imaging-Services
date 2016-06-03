@@ -1,0 +1,57 @@
+<?page title="Afya Lab" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientCancelWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+
+    <zscript>
+        com.nzion.zkoss.composer.PatientWithdrawViewModel vm =  arg.get("vm");
+    </zscript>
+
+    <window id="patientCancelWin" style="margin-top:0px;" mode="modal" sclass="modalStyle">
+        <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Reason</h:small>
+                <button type="button" zclass="close">×
+                    <attribute name="onClick">
+                        patientCancelWin.detach();
+                    </attribute>
+                </button>
+            </h:h1>
+        </div>
+
+        <div class="container-fluid">
+            <div zclass="row-fluid">
+
+                <div zclass="span3">
+                    <label value="Cancel Reason"  mold="required"/>
+                    <combobox readonly="true" selectedItem="@{vm.patientWithDraw.cancelReason,save-when='authSave.onClick'}" constraint="no empty" >
+                        <comboitem label="Wrong Patient selected" value="Wrong Patient selected"></comboitem>
+                        <comboitem label="Wrong Amount Entered" value="Wrong Amount Entered"></comboitem>
+                    </combobox>
+                </div>
+                <div zclass="span3">
+                    <label value="Notes" mold="required" />
+                    <textbox
+                            value="@{vm.patientWithDraw.cancelNotes,save-when='authSave.onClick'}"
+                            constraint="no empty" sclass="span12"   />
+                </div>
+
+            </div>
+
+        </div>
+
+        <div sclass="panelFoot">
+            <button label="Save" zclass="btn-success btn" id="authSave">
+                <attribute name="onClick">
+                    vm.cancel(vm.getPatientWithDraw());
+                    patientCancelWin.detach();
+                    com.nzion.util.UtilMessagesAndPopups.showSuccess();
+                </attribute>
+            </button>
+        </div>
+
+    </window>
+
+</zk>            

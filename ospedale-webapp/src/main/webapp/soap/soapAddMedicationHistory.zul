@@ -1,0 +1,111 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addMedicationSectionDiv"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	import com.nzion.domain.drug.Drug;
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	com.nzion.zkoss.composer.MedicationHxComposer composer = arg.get("composer");
+	com.nzion.zkoss.composer.PatientSoapNoteController soapNoteController = arg.get("soapNoteController");
+	com.nzion.domain.emr.soap.MedicationHistorySection historySection = arg.get("historySection");
+	com.nzion.domain.emr.soap.RxSection rxSection = arg.get("rxSection");
+	com.nzion.domain.emr.soap.PatientRx patientRx = arg.get("patientRx");
+	Set drugRoutes = null;
+	Set strengths = null;
+	if (patientRx.getDrug() != null) {
+		Drug drug = patientRx.getDrug();
+		drug = commonCrudService.refreshEntity(drug);
+		drugRoutes = drug.getRoutes();
+		strengths = drug.getStrengths();
+	}
+	List quantities = commonCrudService.findByEquality(com.nzion.domain.drug.DrugSig.class, new String[] { "type" },new Object[] { "QUANTITY" });
+	List quantityQualifiers = commonCrudService.findByEquality(com.nzion.domain.drug.DrugSig.class,	new String[] { "type" }, new Object[] { "QUANTITY_QUALIFIER" });
+	List frequencies = commonCrudService.findByEquality(com.nzion.domain.drug.DrugSig.class, new String[] { "type" },new Object[] { "FREQUENCY" });
+	List supplyUoms = commonCrudService.findByEquality(com.nzion.domain.drug.DrugSig.class, new String[] { "type" },new Object[] { "SUPPLY_UOM" });
+	</zscript>
+	<window id="addMedicationSectionDiv" closable="true" title="Medication History" width="60%" >
+		   <style>.z-bandbox input{ width:335px; }</style>
+		<div style="padding:2px;margin:auto;width:92%;height:10%;">
+		 <div id="dataSection" sclass="form" style="margin:auto;">
+			<vlayout spacing="10px" style="margin:10px;" width="100%">
+				<hlayout style="margin-left:14px;">
+					<label value="Generic Name" mold="required"  sclass="formLabel" />
+					<suggest id="drugSuggestionBox" constraint="no empty:Drug Trade Name Required" entity="com.nzion.domain.drug.Drug" searchcolumns="genericName,tradeName"
+						displaycolumns="genericName,tradeName" requiredcolumn="genericName" value="@{patientRx.drugName}" hideListHeader="false"
+						>
+						<attribute name="onLookedUp">
+							Drug drug = self.getResult();
+							drug = commonCrudService.refreshEntity(drug);
+							patientRx.setDrug(drug);
+							drugRoutes = drug.getRoutes();
+							strengths = drug.getStrengths();
+							patientRx.setDrugDosageForm(drug.getDosageForm());
+						</attribute>
+					</suggest>
+				</hlayout>
+				
+				<hlayout spacing="10px" style="margin-left:24px">
+					<label value="Total Supply" />
+					<intbox value="@{patientRx.totalSupply}" />
+					<!-- <label value="Supply Uom" style="padding-left: 15px;" />
+					<textbox value="@{patientRx.supplyUnit}" width="90px" /> -->
+				</hlayout>
+				
+				<hlayout spacing="10px" style="margin-left:38px">
+					<label value="Start Date" sclass="formLabel" />
+					<datebox id="startDateBox"
+						value="@{patientRx.startDate,load-after='dataSection.onReload'}" />
+					<label value="End Date" sclass="formLabel" style="padding-left: 15px;" />
+					<datebox id="endDateBox" value="@{patientRx.endDate,load-after='dataSection.onReload'}" />
+				</hlayout>
+				<hlayout spacing="10px" style="margin-left:56px">
+					<label value="Status" sclass="formLabel" />
+					<combobox selectedItem="@{patientRx.status,load-after='dataSection.onReload'}" width="150px">
+						<comboitem value="ACTIVE" label="Active"/>
+						<comboitem value="DISCONTINUED" label="Discontinued"/>
+					</combobox>
+					<label value="SIG" sclass="formLabel" style="padding-left: 18px;" />
+					<textbox value="@{patientRx.internalComment,load-after='dataSection.onReload'}" rows="2" cols="90" width="300px" />
+				 </hlayout>
+			</vlayout>
+			<div sclass="panelFoot">
+				<button label="Add" id="addButton" zclass="btn-success btn">
+					<attribute name="onClick">
+					<![CDATA[
+					         
+					  if (checkDrugName()) return;      
+					  if(drugSuggestionBox.getValue()==null)
+					    	throw new WrongValueException(drugSuggestionBox,"Generic Name can't be empty");
+					  if(startDateBox.getValue() != null && endDateBox.getValue() != null && endDateBox.getValue().before(startDateBox.getValue()))
+							throw new WrongValueException(endDateBox,"End Date cannot be before Start Date");
+						if(patientRx.getId()==null){
+						composer.getSection().addPatientRx(patientRx);
+						soapNoteController.saveSoapSection();
+						}else{
+						 commonCrudService.save(patientRx);		
+						}
+						Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null);
+						addMedicationSectionDiv.detach();
+						
+						]]>
+					</attribute>
+				</button>
+				<zscript>
+			<![CDATA[
+				boolean checkDrugName() {
+				if (drugSuggestionBox.getValue() != null && drugSuggestionBox.getResult() instanceof Drug) 
+				return false;
+				else{
+					com.nzion.util.UtilMessagesAndPopups.showError("Please Provide any Generic Name ");
+				return true;
+				}
+			}
+			]]>	
+			</zscript>
+			</div>
+		</div>
+	   </div>
+	</window>
+</zk>
+
+
+			

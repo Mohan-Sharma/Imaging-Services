@@ -1,0 +1,45 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./chiefComplaintSectionDiv"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<window id="chiefComplaintSectionDiv" width="100%">
+<zscript>
+	import com.nzion.domain.emr.soap.*;
+	import com.nzion.util.UtilMisc;
+	com.nzion.zkoss.composer.PatientSoapNoteController controller = arg.get("controller");
+	ChiefComplainSection section = controller.getSoapSection(ChiefComplainSection.class);
+</zscript>
+<panel width="100%" title="History of Present Illness">
+	<panelchildren>
+		<hbox widths="30%,70%" width="98%" height="100%">
+			<listbox model="@{section.patientChiefComplaints}" rows="15" id="chiefComplaintsGrid" width="100%">
+				<attribute name="onSelect">
+					Object selectedChiefComplaint = self.getSelectedItem().getValue();
+					inputDiv.getChildren().clear();
+					Set qaList =  selectedChiefComplaint.getQaTemplateUsed() != null ? selectedChiefComplaint.getQaTemplateUsed().getQuestions() : null;
+					Executions.createComponents("/soap/qa.zul", inputDiv, com.nzion.util.UtilMisc.toMap("qas",qaList , "qaFactory", selectedChiefComplaint));
+				</attribute>
+				<listhead>
+					<listheader label="Complaints"/>
+				</listhead>
+				<listitem self="@{each='cc'}" value="@{cc}">
+					<listcell sclass="confi"> 
+					<span sclass="dragHandle"/>
+					<label value="@{cc.chiefComplaint}"/>
+					</listcell>
+				</listitem>
+			</listbox>
+		<div id="inputDiv" width="100%"/>
+	</hbox>
+	</panelchildren>
+</panel>
+<div sclass="buttonPanel" style="padding:10px;">
+	<button label="Save" zclass="btn btn-success" disabled="${controller.readonly}">
+	<attribute name="onClick">
+		//controller.setEventMessage("HPI"+"\t updated");
+		controller.saveSoapSection();
+	</attribute>
+	</button>
+</div>
+</window>
+</zk>

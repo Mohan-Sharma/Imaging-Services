@@ -1,0 +1,22 @@
+<?component name="dashboard" macroURI="/dashboards/dashboard-macro.zul"?>
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/practiceTemplate.zul"?>
+<zk>
+<zscript>
+	setPageTitle("Dashboard", "");
+	List portletDatas = new ArrayList();
+  <!--   portletDatas.add(new com.nzion.view.PortletData("Appointment", "/portlets/appointment.zul", "../images/Medical Appointment.jpg", true));
+    portletDatas.add(new com.nzion.view.PortletData("Today's Appointment", "/portlets/schedules-of-the-day-portlet.zul","../images/appointment.png", true)); -->
+   <!-- portletDatas.add(new com.nzion.view.PortletData("Messages/Tasks", "/portlets/message-portlet-view.zul","../images/new-message-icon.png", true));-->
+    portletDatas.add(new com.nzion.view.PortletData("Lab Order", "/billing/labOrderPortlet.zul", "../images/labresults.jpg",true));
+    portletDatas.add(new com.nzion.view.PortletData("Billing", "/portlets/frontdeskBillingPortlet.zul","../images/folder_invoices_256.png"));
+
+    <!--
+        portletDatas.add(new com.nzion.view.PortletData("Discharge", "/inPatient/dischargeRequestBilling.zul","../images/hospital-discharge.jpg"));
+        portletDatas.add(new com.nzion.view.PortletData("Billing", "/portlets/frontdeskBillingPortlet.zul","../images/folder_invoices_256.png"));
+        portletDatas.add(new com.nzion.view.PortletData("Lab Order", "/portlets/frontdeskLabOrderPortlet.zul", "../images/labresults.jpg",true));
+    -->
+</zscript>
+<window self="@{define(applicationContent)}" title="Receptionist Dashboard">
+    <dashboard portlets="${portletDatas}" width="100%"/>
+</window>
+</zk>

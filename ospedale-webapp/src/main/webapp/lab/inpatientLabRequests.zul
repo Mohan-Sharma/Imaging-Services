@@ -1,0 +1,91 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./inpatientLabRequest"?>
+
+
+<zk>
+<zscript>
+	<![CDATA[
+	com.nzion.domain.inpatient.PatientAdmission paAdmission = new com.nzion.domain.inpatient.PatientAdmission();
+	
+	 import com.nzion.domain.pfm.BEDSTATUS;;
+     import com.nzion.domain.inpatient.BedStatus;
+     com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+     com.nzion.service.billing.BillingService billingService = com.nzion.util.Infrastructure.getSpringBean("billingService");
+	com.nzion.service.inpatient.BookingServices bookingServices = com.nzion.util.Infrastructure.getSpringBean("bookingService");
+	List reservedAdmissionRequests;	  
+	com.nzion.inpatient.zkoss.BookingController bookingController = new com.nzion.inpatient.zkoss.BookingController();
+	BedStatus bedStatus = new BedStatus();
+	bedStatus.setBedstatus(BEDSTATUS.OCCUPIED);
+			
+
+]]>
+	</zscript>
+<window id="inpatientLabRequest" mode="embedded" zclass="boxStyle" apply="${bookingController}">
+<separator></separator>
+
+	<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+		 	<div zclass="span3">
+		 	<hlayout spacing="3px">			
+						<label value="IP Number" />
+						<textbox sclass="span12" id="ipNumberTextBox" value="@{paAdmission.accountNumber}"/>
+						</hlayout>
+					</div>
+           <div zclass="span4">
+           <hlayout spacing="3px">
+						<label value="Patient" />
+						<patientlookup sclass="span12" onChange="paAdmission.setPatient(event.getOrigin().getData())" />
+						</hlayout>
+			</div>
+				   
+					   
+			</div>
+			</div>
+			<div sclass="panelFoot" align="center" onCreate='Events.postEvent("onClick",inpatientLabRequest.getFellow("search"),null);'>
+				<button label="Search" id="search" zclass="btn-primary btn">
+					<attribute name="onClick"><![CDATA[
+					reservedAdmissionRequests = bookingServices.searchBookingList(paAdmission,bedStatus,null);
+					]]></attribute>
+				</button>
+			</div>
+			<paging id="newLabOrder"></paging>
+			<listbox model="@{reservedAdmissionRequests,load-after='search.onClick'}" mold="paging" paginal="${newLabOrder}" pageSize="10" >
+				<listhead>
+					<listheader label="Patient Name" />
+					<listheader label="IP Number" />
+					<listheader label="Gender"/>
+					<listheader label="Ward Name" />
+					<listheader label="Bed Number" />
+					<listheader label="Action" />
+				</listhead>
+				<listitem self="@{each='reservedAdmissionRequest'}" value="@{reservedAdmissionRequest}">
+					<listcell>
+						<name object="@{reservedAdmissionRequest.patient}"/>
+					</listcell>
+					<listcell label="@{reservedAdmissionRequest.accountNumber}"/>
+					<listcell>
+						<label value="@{reservedAdmissionRequest.patient.gender}"/>
+					</listcell>
+					<listcell>
+						<label value="@{reservedAdmissionRequest.latestAllocatedBed.bed.ward}"/>
+					</listcell>
+					<listcell>
+						<label value="@{reservedAdmissionRequest.latestAllocatedBed.bed}"/>
+					</listcell>
+					<listcell>
+						<button label="Add" id="add">
+                		<attribute name="onClick"><![CDATA[
+                		           
+                       com.nzion.zkoss.ext.Navigation.navigate("/portlets/inpatientLabOrderRequest",com.nzion.util.UtilMisc.toMap(
+								"patientAdmission",self.getParent().getParent().getValue()),inpatientLabRequest);
+                   ]]>
+                </attribute>
+            </button>
+					</listcell>
+					</listitem>
+					</listbox>
+			<separator />
+			
+			
+
+</window>
+</zk>

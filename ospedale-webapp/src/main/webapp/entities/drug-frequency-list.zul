@@ -1,0 +1,11 @@
+<?component name="screen" macro-uri="/home-grid-macro.zul"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	setPageTitle("Drug Frequency", "");
+</zscript>
+	<window>
+		<screen width="100%" pagetitle="Drug Frequency" listtitle="List of Drug Frequency" addpage="addDrugFrequency" entityclass="com.nzion.domain.emr.drug.DrugFrequency"
+			fields="code, description" hidedeletebtn="true"	labels="Code,Description" addmodepopup="true"/>
+	</window>
+</zk>

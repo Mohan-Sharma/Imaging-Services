@@ -1,0 +1,75 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientReminderWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	com.nzion.report.search.view.ReminderMailVo mailVo = new com.nzion.report.search.view.ReminderMailVo();
+	mailVo.setSelectedPatients((Set) arg.get("patients"));
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	Set ignoredPatients = mailVo.getIgnoredPatients();
+	Set receivingPatients = mailVo.getReceivingPatients();
+</zscript>
+	<style>.list { margin-left: 35px; }</style>
+	<window id="patientReminderWindow" title="Send Reminder" width="50%" mode="modal" closable="true">
+		<div sclass="panelCont" height="180px">
+			<n:table style="margin:10px" cellspacing="15">
+				<n:tr>
+					<n:td>
+						<label value="Subject" style="font-weight:bold" />
+					</n:td>
+					<n:td>
+						<textbox cols="60" id="subjectTextBox" value="@{mailVo.subject,save-when='sendButton.onClick'}"/>
+					</n:td>
+				</n:tr>
+				<n:tr>
+					<n:td>
+						<label value="Content" style="font-weight:bold" />
+					</n:td>
+					<n:td>
+						<textbox cols="70" rows="5" id="contentTextBox" value="@{mailVo.mailContent,save-when='sendButton.onClick'}"/>
+					</n:td>
+				</n:tr>
+			</n:table>
+		</div>
+		<div id="successMessageDiv" visible="false" style="margin:10px">
+		<label value="Reminder has sent to following patient(s) successfully." style="font-weight:bold" if="${not empty receivingPatients}"/>
+		  <div forEach="${mailVo.receivingPatients}">
+				<custom-attributes patient="${each}" />
+				<zscript>
+					String receivingPatientName = commonCrudService.getFormattedName(patient);
+				</zscript>
+				<html>
+					<![CDATA[ <ul> <li class="list">${receivingPatientName}</li> </ul> ]]>
+				</html>
+			</div>
+		</div>
+		<div id="failuerMessageDiv" style="margin:10px" visible="false">
+			<label value="Reminder has not been sent to following patient(s) as they do not have email address." style="font-weight:bold" if="${not empty ignoredPatients}"/>
+			<div forEach="${mailVo.ignoredPatients}">
+				<custom-attributes patient="${each}" />
+				<zscript>
+					String patientName = commonCrudService.getFormattedName(patient);
+				</zscript>
+				<html>
+					<![CDATA[ <ul> <li class="list">${patientName}</li> </ul> ]]>
+				</html>
+			</div>
+		</div>
+		<div sclass="panelFoot">
+			<button label="Send" id="sendButton">
+				<attribute name="onClick">
+					if(com.nzion.util.UtilValidator.isNotEmpty(mailVo.getReceivingPatients())){
+					mailVo.sendReminder();
+					com.nzion.util.UtilMessagesAndPopups.displaySuccess("Reminder sent successfully");
+					}
+					failuerMessageDiv.setVisible(true);
+					successMessageDiv.setVisible(true);
+					self.setVisible(false);
+					okBtn.setVisible(true);
+				</attribute>
+			</button>
+			<button id="okBtn" label="Ok" forward="onClick=onCancel" visible="false"/>
+			<button label="Cancel" forward="onClick=onCancel"/>
+		</div>
+	</window>
+</zk>

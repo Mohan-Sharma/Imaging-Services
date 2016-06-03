@@ -1,0 +1,84 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./birthHistoryWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+		<zscript>
+	import com.nzion.domain.emr.UnitOfMeasurement;
+	List lengthUoms = commonCrudRepository.findByEquality(UnitOfMeasurement.class,new String[]{"uomType"},new String[]{"LENGTH"});
+	List weightUoms = commonCrudRepository.findByEquality(UnitOfMeasurement.class,new String[]{"uomType"},new String[]{"WEIGHT"});
+	
+	com.nzion.zkoss.composer.PatientSoapNoteController controller = arg.get("controller");
+	com.nzion.domain.emr.soap.BirthHistorySection birthHistorySection = controller.getSoapSection(com.nzion.domain.emr.soap.BirthHistorySection.class);
+	com.nzion.domain.emr.soap.PatientBirthHistory patientBirthHistory = birthHistorySection.getPatientBirthHistory();
+	if(patientBirthHistory == null){
+		patientBirthHistory = new com.nzion.domain.emr.soap.PatientBirthHistory(birthHistorySection);
+		birthHistorySection.setPatientBirthHistory(patientBirthHistory);
+	}	
+	
+</zscript>
+	<window border="none" id="birthHistoryWindow">
+		<style>
+			.e-spinner-inp{ background: #FFF; border: 1px solid #7F9DB9; height: 19px; } .e-spinner .e-spinner-btn{
+			display: inline-block; background: transparent url(${c:encodeURL('~./zul/img/button/timebtn.gif')})
+			no-repeat 0 0; vertical-align: top; cursor: pointer; width: 17px; height: 19px; border: 0; border-bottom:
+			1px solid #86A4BE; }
+		</style>
+		<div sclass="chiefComp soapNoteCont curSOAP ui-resizable" style="position:relative;">
+				<panel title="Gync &amp; Obs History" collapsible="false"
+						 border="none" style="overflow:auto;background-color: #F9F9F9;">
+					<panelchildren>
+			<h:table width="100%" cellpadding="0px" cellspacing="0px" style="border:0px">
+				<h:tr>
+					<h:td class="soapNoteContR" style="width:99%">
+						<div >
+						 <vlayout spacing="10px" sclass="inputform" >	
+							<hlayout>
+								<label value="Birth Weight" sclass="formLabel"></label>
+								<hbox>
+									<doublebox value="@{patientBirthHistory.weight,save-when='saveButton.onClick'}"/>
+									<combobox model="@{weightUoms}" selectedItem="@{patientBirthHistory.weightUom,save-when='saveButton.onClick'}">
+										<comboitem self="@{each='uomWeight'}" label="@{uomWeight.description}" value="@{uomWeight}" />
+									</combobox>
+								</hbox>
+							</hlayout>
+							<hlayout>
+								<label value="Birth Height" sclass="formLabel"></label>
+								<hbox>
+									<doublebox value="@{patientBirthHistory.height,save-when='saveButton.onClick'}" format="#,##0.##"/>
+									<combobox model="@{lengthUoms}" selectedItem="@{patientBirthHistory.heightUom,save-when='saveButton.onClick'}">
+										<comboitem self="@{each='uom'}" label="@{uom.description}" value="@{uom}" />
+									</combobox>
+								</hbox>
+							</hlayout>
+							<hlayout>
+								<label value="Birth Order" sclass="formLabel"></label>
+								<intbox value="@{patientBirthHistory.orderOfBirth,save-when='saveButton.onClick'}"/>
+							</hlayout>
+							<hlayout>
+								<label value="Delivery" sclass="formLabel"></label>
+									<listbox selectedItem="@{patientBirthHistory.delivery,save-when='saveButton.onClick'}" mold="select">
+										<listitem label="NSVD (Normal Spontaneous Vaginal Delivery)" value="NSVD (Normal Spontaneous Vaginal Delivery)"></listitem>
+										<listitem label="c/SEC (Caesarean Section)" value="c/SEC (Caesarean Section)"></listitem>
+										<listitem label="FT(Full Term)"  value="FT(Full Term)"></listitem>
+										<listitem label="Premature" value="Premature"></listitem>
+									</listbox>
+							</hlayout>
+							<hlayout>
+								<label value="Comments" sclass="formLabel"></label>
+								<textbox value="@{patientBirthHistory.comments,save-when='saveButton.onClick'}" rows="3" cols="40"/>
+							</hlayout>
+						 </vlayout>
+						</div>
+					</h:td>
+				</h:tr>
+			</h:table>
+		</panelchildren>
+		</panel>
+			<div sclass="buttonPanel" style="padding:5px;">
+				<button disabled="${controller.readonly}" label="Save" id="saveButton" zclass="btn btn-success" onClick="controller.saveSoapSection();"/>
+			</div>
+		</div>
+	</window>
+</zk>

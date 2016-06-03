@@ -1,0 +1,49 @@
+<?page title="Patient Insurance" contentType="text/html;charset=UTF-8"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientInsWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+    <zscript><![CDATA[
+	 import com.nzion.domain.Patient;
+	 import com.nzion.domain.PatientInsurance;
+	 Patient patient = arg.get("patient");
+	]]>
+    </zscript>
+    <window id="patientInsWin">
+        <vlayout spacing="20px">
+            <button label="Add">
+                <attribute name="onClick">
+                    Executions.createComponents("/patient/patientInsuranceAdd.zul", null,com.nzion.util.UtilMisc.toMap("patient",
+                    patient,"patientInsListBox",patientInsListBox));
+                </attribute>
+            </button>
+
+            <listbox multiple="true" checkmark="true"
+                     model="@{patient.patientInsurances,load-after='self.onReloadRequest'}"
+                     id="patientInsListBox" oddRowSclass="z-listbox-odd">
+                <listhead sizable="true">
+                    <listheader label="Insurance Name"/>
+                    <listheader	label="Plan Name"/>
+                    <listheader label="Registration Number"/>
+                    <listheader label="Action"/>
+                </listhead>
+                <listitem self="@{each='patInsu'}" value="@{patInsu}">
+                    <listcell label="@{patInsu.insuranceName}"/>
+                    <listcell label="@{patInsu.planName}"/>
+                    <listcell label="@{patInsu.patientRegistrationNo}"/>
+                    <listcell>
+                        <button label="Delete">
+                            <attribute name="onClick">
+                                commonCrudService.delete(self.getParent().getParent().getValue());
+                                patient = commonCrudService.getById(Patient.class, patient.getId());
+                                Events.postEvent("onReloadRequest",patientInsListBox,null);
+                                com.nzion.util.UtilMessagesAndPopups.showSuccess();
+                            </attribute>
+                        </button>
+                    </listcell>
+                </listitem>
+            </listbox>
+
+        </vlayout>
+    </window>
+</zk>

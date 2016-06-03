@@ -1,0 +1,232 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./pastBillsWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+	<zscript>
+	<![CDATA[
+	import java.math.BigDecimal;
+	com.nzion.zkoss.ext.DataExporter exporter = new com.nzion.zkoss.ext.CsvDataExporter();
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	com.nzion.service.billing.BillingService billingService = com.nzion.util.Infrastructure.getSpringBean("billingService");	
+	com.nzion.domain.screen.BillingDisplayConfig billingDisplayConfig = commonCrudService.getByPractice(com.nzion.domain.screen.BillingDisplayConfig.class);
+	com.nzion.domain.inpatient.PatientAdmission patientAdmission =  arg.get("pAdmission");
+	com.nzion.domain.billing.Invoice invoice=new com.nzion.domain.billing.Invoice();
+	com.nzion.domain.billing.InvoiceStatusItem[] billingStatusesArray = com.nzion.domain.billing.InvoiceStatusItem.values();	
+	Map adavanceAndBillPayments =  billingService.getAdvanceAndBillPaymentsFor(patientAdmission);
+	
+	List advancePayments = adavanceAndBillPayments.get("ADVANCEPAYMENTS");
+	List billPayments = adavanceAndBillPayments.get("BILLPAYMENTS");
+	List genInvoiceList = new ArrayList(advancePayments);
+	genInvoiceList.addAll(billPayments);
+	
+	Map invoiceAndItemsToUpd  = billingService.viewInvoiceFor(patientAdmission);
+	com.nzion.domain.billing.Invoice outstandingBillInv = (com.nzion.domain.billing.Invoice)invoiceAndItemsToUpd.get("INVOICE");
+	Boolean isOutStandingAmtExist = com.nzion.util.UtilValidator.isNotEmpty(outstandingBillInv);
+	com.nzion.domain.billing.Invoice[] outstandingBills = {outstandingBillInv};
+	genInvoiceList.add(outstandingBillInv);	
+	Map invoicesOverAllAmounts = billingService.getInvoicesOverAllAmounts(genInvoiceList);	
+	genInvoiceList.remove(outstandingBillInv);
+	BigDecimal totalAmtTillDate = (BigDecimal)invoicesOverAllAmounts.get("overAllTotalAmount");
+	BigDecimal overallBalance = (BigDecimal)invoicesOverAllAmounts.get("overallBalanceAmt");
+	BigDecimal overallCollectedAmt = (BigDecimal)invoicesOverAllAmounts.get("overallCollectedAmt");	
+	BigDecimal overallAmtWithDeduction = (BigDecimal)invoicesOverAllAmounts.get("overallAmtWithDeduction");	
+]]>
+
+</zscript>
+	<window id="pastBillsWindow" self="@{define(content)}" mode="modal" width="85%" height="85%" closable="true" title="Past Bills">
+	<div style="width:99%;margin:1px;">
+			<hlayout spacing="30%">
+				<hlayout spacing="20px">
+				<div > <label value="Patient : "  style="font-weight:normal"> </label> 
+				   <name object="@{patientAdmission.patient}"/></div>
+				<div><label value="IP Number : " style="font-weight:normal"></label><label value="@{patientAdmission.accountNumber}"></label></div>	
+			   </hlayout>
+			   <hlayout spacing="20px">  	
+			    <a label="Add Advance Payment" onClick="collectAdvance();" ></a> 
+				 <a label="Export Invoices Excel" >
+					 	<attribute name="onClick">
+					 	 List tmpInvList = new ArrayList();
+					 	 tmpInvList.addAll(genInvoiceList);
+					 	 tmpInvList.add(outstandingBillInv);
+					 		if(com.nzion.util.UtilValidator.isNotEmpty(tmpInvList))							
+								exporter.export(tmpInvList, new String[]{"patient.firstName","patient.lastName","consultant.firstName","consultant.lastName","id","invoiceDate","invoiceStatus","totalAmount.price","amountToBePaid.price","collectedAmount.price","balanceAmount"}, new String[]{"Patient First Name","Patient Last Name","Consultant First Name","Consultant Last Name","Invoice Number","Invoice Date","Invoice Status", "Total Amount", "Amount After Deduction", "Collected Amount","Balance Amount"}, "invoices.csv");				
+					 	</attribute>
+				 	</a> 		 
+				 <a label="Export In Detail" onClick="">
+				 	<attribute name="onClick">
+					 	 List tmpInvList = new ArrayList();
+					 	 tmpInvList.addAll(genInvoiceList);
+					 	 tmpInvList.add(outstandingBillInv);
+					 	 String[] invoiceFields= {"patient.firstName","patient.lastName","consultant.firstName","consultant.lastName","id","invoiceDate","invoiceStatus","totalAmount.price","amountToBePaid.price","collectedAmount.price","balanceAmount"};					 	
+					 	 String[] invoiceFieldsLabel=  {"Patient First Name","Patient Last Name","Consultant First Name","Consultant Last Name","Invoice Number","Invoice Date","Invoice Status", "Total Amount", "Amount After Deduction", "Collected Amount","Balance Amount"};
+					 	 String[] invoiceItemLabel = {"Item","Actual Price","Quantity","Amount"};
+					 	 String[] invoiceItemFields = {"description","unitPrice","quantity","price.amount"};
+					 		if(com.nzion.util.UtilValidator.isNotEmpty(tmpInvList))							
+								billingService.exportInPatientInvoicesInDetail(tmpInvList, invoiceFields, invoiceFieldsLabel, invoiceItemFields, invoiceItemLabel, "invoicesInDetail.csv");				
+					</attribute>
+				 </a> 
+				</hlayout>
+		    </hlayout>		
+	</div>
+	<div style="width:99%;margin:1px;clear:both">
+ 	<panel title="${c:l('paymentsAsAdvance')}" collapsible="true" >
+ 		 <panelchildren>
+		   <grid model="@{advancePayments,load-after='self.onReload'}" id="advInvoicesGridBox" >
+			   	 <columns>
+		            <column  label="${c:l('invoiceDate')}" />
+					<column label="${c:l('billNumber')}"  />
+					<column label="${c:l('requestedBy')}"  />
+					<column label="${c:l('status')}"  />
+					<column label="${c:l('collectedAmount')}"  />
+					<column label="${c:l('action')}" />
+		        </columns>
+		        <rows>
+		        	<row  self="@{each='advInvoiceMade'}" value="@{advInvoiceMade}">
+		        	  <label value="@{advInvoiceMade.invoiceDate,converter='com.nzion.view.component.DateConverter'}" />
+		        	  <label value="@{advInvoiceMade.id}" />
+		        	  <name object="@{advInvoiceMade.consultant}" />
+		        	  <label value="@{advInvoiceMade.invoiceStatus}" />
+					  <label value="@{advInvoiceMade.collectedAmount}" />
+		        	  <cell>
+		        	    <button label="${c:l('billOpLnk')}"
+							onClick='Executions.getCurrent().sendRedirect("/billing/billingTxnItem.zul?invoiceId=" + self.getParent().getParent().getValue().getId(),"_BillSoapNote");' />
+						<button label="Print"
+							onClick='Executions.getCurrent().sendRedirect("/billing/billingTxnItemPrint.zul?invoiceId=" + self.getParent().getParent().getValue().getId(),"_BillSoapNote");' />						
+		        	  </cell>
+		        	</row>
+		        </rows>
+		   </grid>
+		</panelchildren>
+	</panel>
+   </div>
+ 	<div style="width:99%;margin:1px;clear:both">
+ 	<panel title="Previuos Bills And Payment Status" collapsible="true" >
+ 		 <panelchildren>
+		   <grid model="@{billPayments,load-after='self.onReload'}" id="invoicesGridBox" >
+			   	 <columns>
+			   	 	<column width="25px"></column>
+		            <column  label="${c:l('invoiceDate')}" width="9%"/>
+		            <column label="${c:l('billNumber')}"  width="9%"/>
+					<column label="${c:l('requestedBy')}"  width="15%"/>
+					<column label="${c:l('status')}"  width="9%"/>
+					<column label="${c:l('totalAmount')}"  width="15%"/>
+					<column label="${c:l('amountToBePaid')}"  width="15%"/>
+					<column label="${c:l('collectedAmount')}"  width="15%"/>
+					<column label="${c:l('action')}"  width="20%"/>
+		        </columns>
+		        <rows>
+		        	<row  self="@{each='billPaymentMade'}" value="@{billPaymentMade}">
+		        	  <label value="@{billPaymentMade.invoiceDate,converter='com.nzion.view.component.DateConverter'}" />
+		        	   <label value="@{billPaymentMade.id}" />
+		        	  <name object="@{billPaymentMade.consultant}" />
+		        	  <label value="@{billPaymentMade.invoiceStatus}" />
+					  <label value="@{billPaymentMade.totalAmount}" />
+					  <label value="@{billPaymentMade.amountToBePaid}" />
+					  <label value="@{billPaymentMade.collectedAmount}" />
+		        	  <cell>
+		        	    <button label="${c:l('billOpLnk')}"
+							onClick='Executions.getCurrent().sendRedirect("/billing/billingTxnItem.zul?invoiceId=" + self.getParent().getParent().getValue().getId(),"_BillSoapNote");' />
+						<button label="Print"
+							onClick='Executions.getCurrent().sendRedirect("/billing/billingTxnItemPrint.zul?invoiceId=" + self.getParent().getParent().getValue().getId(),"_BillSoapNote");' />						
+		        	  </cell> 
+		        	  <detail open="false" fulfill="onOpen=/billing/viewBillItems.zul" >
+		        				
+		        	  </detail>
+		        	</row>
+		        </rows>
+		   </grid>
+		</panelchildren>
+	</panel>
+   </div>
+   <div style="width:99%;margin:1px;clear:both">
+   <panel title="Out Standing Amount" collapsible="true">
+ 	 <panelchildren>
+ 	     <grid model="@{outstandingBills,load-after='self.onReload'}" id="outStandingBill" if="${isOutStandingAmtExist}"> 
+ 	     	<columns>
+			   	 	<column width="25px"></column>
+		            <column  label="${c:l('invoiceDate')}" width="10%"/>
+					<column label="${c:l('requestedBy')}"  width="15%"/>
+					<column label="${c:l('status')}"  width="10%"/>
+					<column label="${c:l('totalAmount')}"  width="10%"/>
+					<column label="${c:l('amountToBePaid')}"  width="10%"/>
+					<column label="${c:l('collectedAmount')}"  width="10%"/>
+					<column label="${c:l('action')}"  width="30%"/>
+		        </columns>
+		        <rows>
+		        	<row  self="@{each='unBilledinvoice'}" value="@{unBilledinvoice}">
+		        	  <label value="@{unBilledinvoice.invoiceDate,converter='com.nzion.view.component.DateConverter'}" />
+		        	  <name object="@{unBilledinvoice.consultant}" />
+		        	  <label value="@{unBilledinvoice.invoiceStatus}" />
+					  <label value="@{unBilledinvoice.totalAmount}" />
+					  <label value="@{unBilledinvoice.amountToBePaid}" />
+					  <label value="@{unBilledinvoice.collectedAmount}" />
+		        	  <cell>
+		        	    <button label="Generate Bill"
+							onClick='generateInovoice();' />
+						<button label="Print"
+							onClick='Executions.getCurrent().sendRedirect("/billing/billingTxnItemPrint.zul?invoiceId=&amp;paId="+patientAdmission.getId(),"_BillSoapNote");' />						
+		        	  </cell> 
+		        	  <detail open="false" fulfill="onOpen=/billing/viewBillItems.zul" >		        				
+		        	  </detail>
+		        	</row>
+ 	     		</rows>
+ 	     </grid>
+ 	 </panelchildren>
+	</panel>
+	</div>
+	<div width="100%" align="center">
+		<hlayout spacing="30px">
+			<div><label value="Overall Total Amount:" style="font-weight:bold;font-size:13px;"/>
+				<label id="overAllAmt" 
+					value="@{totalAmtTillDate,load-after='self.onReload'}" style="font-weight:bold;font-size:13px;" />
+					<label value="@{outstandingBillInv.totalAmount.currency.code}" style="font-weight:bold;font-size:13px;"></label>
+			</div>
+			<div><label value="Overall Payable Amount:" style="font-weight:bold;font-size:13px;"/>
+				<label id="overBalAmt" 
+					value="@{overallAmtWithDeduction,load-after='self.onReload'}" style="font-weight:bold;font-size:13px;" />
+					<label value="@{outstandingBillInv.totalAmount.currency.code}" style="font-weight:bold;font-size:13px;"></label>
+			</div>
+			<div>
+			   <label value="${c:l('collectedAmount')}" style="font-weight:bold;font-size:13px;"/>
+				<label id="overAllCollectedAmt" 
+					value="@{overallCollectedAmt,load-after='self.onReload'}" style="font-weight:bold;font-size:13px;" />
+					<label value="@{outstandingBillInv.totalAmount.currency.code}" style="font-weight:bold;font-size:13px;"></label>
+			</div>
+			<div>
+			   <label value="${c:l('balanceAmount')}" style="font-weight:bold;font-size:13px;"/>
+				<label 
+					value="@{overallBalance,load-after='self.onReload'}" style="font-weight:bold;font-size:13px;" />
+					<label value="@{outstandingBillInv.totalAmount.currency.code}" style="font-weight:bold;font-size:13px;"></label>
+			</div>
+		</hlayout>
+    </div>
+	<div sclass="panelFoot">
+		<button label="Close" onClick="pastBillsWindow.detach()"></button>
+	</div>
+		<zscript>		
+		void collectAdvance(){			
+			Window w = com.nzion.zkoss.ext.Navigation.navigateToModalWindow("/billing/collectAdvance",com.nzion.util.UtilMisc.toMap("invoiceObj",null,"billingDisplayConfig",billingDisplayConfig,"invoiceList",advancePayments,"patientAdmission",patientAdmission,"ipExists",true));			
+			//Map invoiceAndItems = billingService.viewInvoiceFor(patientAdmission);
+			//outstandingBills[0] = (com.nzion.domain.billing.Invoice)invoiceAndItems.get("INVOICE"); 
+			w.addForward("onDetach",advInvoicesGridBox,"onReload");
+			Events.postEvent("onReload",outStandingBill,null);
+		}
+		
+		void generateInovoice(){
+			    com.nzion.util.UtilMessagesAndPopups.confirm("Are you Sure want to generate invoice for items present?","Billing Confirmation", Messagebox.YES
+						| Messagebox.NO, Messagebox.QUESTION,new org.zkoss.zk.ui.event.EventListener() {
+					public void onEvent(Event event) {
+						if ("onYes".equals(event.getName())) {
+							com.nzion.domain.billing.Invoice invTmp =  billingService.generateInvoiceFor(patientAdmission);
+							Executions.getCurrent().sendRedirect("/billing/billingTxnItem.zul?invoiceId=" + invTmp.getId(),"_BillSoapNote");
+							Map invoiceAndItems = billingService.viewInvoiceFor(patientAdmission);
+							outstandingBills[0] = (com.nzion.domain.billing.Invoice)invoiceAndItems.get("INVOICE"); 
+							Events.postEvent("onReload",outStandingBill,null);
+							com.nzion.util.UtilMessagesAndPopups.showSuccess();							
+						}
+					}
+				});
+			}
+	</zscript>
+	</window>
+</zk>

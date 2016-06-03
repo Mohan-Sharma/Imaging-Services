@@ -1,0 +1,194 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapVitalSignsWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<window id="soapVitalSignsWin" width="100%">
+		<zscript>
+	import com.nzion.util.UtilMisc;
+	import com.nzion.domain.emr.VitalSign;
+	import com.nzion.domain.Patient;
+	import com.nzion.domain.emr.soap.vitalsign.VitalSignReading;
+	import com.nzion.domain.emr.soap.VitalSignSection;
+	import com.nzion.zkoss.composer.PatientSoapNoteController;
+	PatientSoapNoteController controller = (PatientSoapNoteController) arg.get("controller");
+	VitalSignSection section = (VitalSignSection) controller
+			.getSoapSection(com.nzion.domain.emr.soap.VitalSignSection.class);
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	com.nzion.service.PersonService personService = com.nzion.util.Infrastructure.getSpringBean("personService"); 
+	int patientAgeInYears = com.nzion.util.UtilDateTime.getIntervalInYears(controller.getPatient().getDateOfBirth(),
+			controller.getSoapNote().getDate());
+
+	List personVitalSigns = personService.getPersonVitalSign(com.nzion.util.Infrastructure.getUserLogin().getPerson());
+
+	com.nzion.service.SoapNoteService soapNoteService = com.nzion.util.Infrastructure.getSpringBean("soapNoteService");
+	List readings = soapNoteService.getAllVitalSignReadings(controller.getPatient());
+	readings.removeAll(section.getVitalSignRecordings());
+	session.setAttribute("readings", readings);
+	</zscript>
+		<panel collapsible="false" border="none">
+			<caption label="Vital Sign" />
+			<panelchildren>
+				<div sclass="action" style="float:right;padding:5px">
+				<hlayout>
+					<radiogroup>
+						<radio label="Metric" checked="true" id="metric" w:onClick="javascript:toggleMetric();"/>
+						<radio label="English" id="eng" w:onClick="javascript:toggleEng();"/>
+					</radiogroup>
+					<span sclass="linkBtn linkBtnOn">
+						<a label="New" disabled="${controller.readonly}" id="newBtn" sclass="addBtn" >
+							<attribute name="onClick">
+								VitalSignReading reading = new VitalSignReading(controller.getPatient());
+								reading.setVitalSignSection(section);
+								Window vitalSignReadingWin = (Window) Executions.createComponents("/soap/vitalSignReading.zul", soapVitalSignsWin,
+										UtilMisc.toMap("controller", controller, "reading", reading));
+								vitalSignReadingWin.doModal();
+							</attribute>
+						<n:i class="icon-plus-sign"></n:i>
+						</a>
+						<span />
+					</span>
+		<div>
+		<span sclass="linkBtn linkBtnOn">
+			<a label="Vital Sign Graph">
+				<!--<attribute name="onClick">
+					session.setAttribute("controller", vitalSignController);
+					session.setAttribute("personVitalSigns", personVitalSigns);
+					execution.sendRedirect("/inPatient/inPatientVitalSignGraph.zul", "_blank");																				
+				</attribute>-->
+			</a>
+		</span>
+		<span/>
+		</div>
+					
+				</hlayout>
+				</div>
+				<space height="10px"></space>
+				<zscript>
+		<![CDATA[
+	void plotGrowthChart(com.nzion.zkoss.composer.PatientSoapNoteController controller, String datafile,
+			String vitalsign, String lbl, Patient patient) {
+	if (!"F".equalsIgnoreCase(controller.getPatient().getGender().getEnumCode())
+			&& !"M".equalsIgnoreCase(controller.getPatient().getGender().getEnumCode())) {
+		com.nzion.util.UtilMessagesAndPopups.showError("Growth chart is not available: Patient Gender not defined.");
+		return;
+	}
+	session.setAttribute("patientSoapNoteController", controller);
+	session.setAttribute("datafile", datafile);
+	session.setAttribute("vitalsign", vitalsign);
+	session.setAttribute("lbl", lbl);
+	execution.sendRedirect("/soap/growthChart.zul", "_blank");
+	}
+]]>
+</zscript>
+				<div>
+				<n:div id="metricDiv">
+				<n:table id="vitalSignReading">
+					<n:thead>
+						<n:tr>
+							<n:th>Recorded On</n:th>
+							<n:th>Blood Pressure</n:th>
+							<n:th>Temperature</n:th>
+							<n:th>Pulse</n:th>
+							<n:th>Respiration</n:th>
+							<n:th>Action</n:th>
+						</n:tr>
+					</n:thead>
+					<n:tbody>
+						<n:tr forEach="${readings}">
+							<n:td>${display:fd(each.dateOfMeasurement)}</n:td>
+							<n:td>${each.bloodPressure}</n:td>
+							<n:td>
+								<n:label if="${each.temperature.metricValue!= null}">${each.temperature.metricValue}</n:label>
+								<n:label if="${each.temperature.metricValue!= null}">${each.temperature.metricUnit}</n:label>
+							</n:td>
+							<n:td>${each.pulse}</n:td>
+							<n:td>${each.respiration}</n:td>
+							<n:td>
+							<div>
+							<custom-attributes value="${each}"/>
+								<a class="group"  disabled="${controller.readonly}" onClick='addEditVitalSignReadings((VitalSignReading)self.getParent().getAttribute("value"))'>Edit</a> |
+								<a label="Remove" disabled="${controller.readonly}"  onClick='controller.removeSoapRecord(self.getParent().getAttribute("value"),"vitalSignSection","readings");'/>
+							</div>
+							</n:td>
+						</n:tr> 
+					</n:tbody>
+				</n:table>
+				</n:div>
+				<n:div id="engDiv">
+				<n:table id="vitalSignReadingEng">
+					<n:thead>
+						<n:tr>
+						<n:th>Recorded On</n:th>
+						<n:th>Blood Pressure</n:th>
+						<n:th>Temperature</n:th>
+						<n:th>Pulse</n:th>
+						<n:th>Respiration</n:th>
+						<n:th>Action</n:th>
+						</n:tr>
+					</n:thead>
+					<n:tbody>
+						<n:tr forEach="${readings}">
+						<n:td>${display:fd(each.dateOfMeasurement)}</n:td>
+						
+						<n:td>${each.bloodPressure}</n:td>
+						<n:td>
+							<n:label if="${each.temperature.englishValue!= null}">${each.temperature.englishValue}</n:label>
+							<n:label if="${each.temperature.englishValue!= null}">${each.temperature.englishUnit}</n:label>
+						</n:td>
+						<n:td>${each.pulse}</n:td>
+						<n:td>${each.respiration}</n:td>
+						
+						<n:td>
+						<div>
+						<custom-attributes value="${each}"/>
+							<a class="group" disabled="${controller.readonly}" onClick='addEditVitalSignReadings((VitalSignReading)self.getParent().getAttribute("value"))'>Edit</a> |
+							<a label="Remove" disabled="${controller.readonly}" onClick='controller.removeSoapRecord(self.getParent().getAttribute("value"),"vitalSignSection","readings");'/>
+						</div>
+						</n:td>
+						</n:tr>
+					</n:tbody>
+				</n:table>
+				</n:div>
+			</div>
+			</panelchildren>
+		</panel>
+		<script type="text/javascript">
+			zk.afterMount(function() {
+			jq("#vitalSignReading").dataTable({ "bJQueryUI": true,
+			"sPaginationType": "full_numbers" }); 
+          jq("#vitalSignReadingEng").dataTable({ "bJQueryUI": true,"sPaginationType": "full_numbers"});
+           $("#engDiv").hide();
+			});
+		</script>
+		<script type="text/javascript">
+		<![CDATA[ 
+          function toggleMetric(){ 
+            $("#metricDiv").show();
+            $("#engDiv").hide();
+         }
+		  ]]>
+		</script>
+		<script type="text/javascript">
+		<![CDATA[ 
+          function toggleEng(){ 
+          $("#metricDiv").hide();
+          $("#engDiv").show();
+         }
+		  ]]>
+		</script>
+		<zscript>
+		void addEditVitalSignReadings(VitalSignReading vitalSignReading){
+		if(!vitalSignReading.getVitalSignSection().equals(section)){
+		com.nzion.util.UtilMessagesAndPopups.displayError("This record does not belong to current section.Cannot be edited.");
+		return;
+		}
+		Window window =	Executions.createComponents("/soap/vitalSignReading.zul", soapVitalSignsWin,
+			UtilMisc.toMap("controller", controller, "reading", vitalSignReading));
+			window.doModal();
+		}
+		</zscript>
+	</window>
+</zk>

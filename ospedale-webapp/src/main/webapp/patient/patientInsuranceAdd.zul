@@ -1,0 +1,84 @@
+<?page title="Patient Insurance" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientInsuranceWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <zscript>
+        import  com.nzion.domain.PatientInsurance;
+        import com.nzion.domain.Location;
+        import com.nzion.domain.Patient;
+        Listbox patientInsListBox = arg.get("patientInsListBox");
+        Patient patient = arg.get("patient");
+        PatientInsurance patientInsurance = new PatientInsurance();
+        setPageTitle("Patient Insurance", "");
+        com.nzion.util.RestServiceConsumer restConsumer = new com.nzion.util.RestServiceConsumer();
+        List insuranceMaster = restConsumer.getAllInsuranceCompany();
+        List insurancePlan = new ArrayList();
+    </zscript>
+
+    <window width="70%" id="patientInsuranceWin" mode="modal" closable="true">
+
+        <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Patient Insurance</h:small>
+                <button type="button" zclass="close" onClick="patientInsuranceWin.detach();">×</button>
+            </h:h1>
+        </div>
+
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span2">
+                    <label value="Insurance Provider" mold="required"/>
+                    <combobox id="insurenceMaster" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+                              constraint="no empty" readonly="true">
+                        <attribute name="onSelect">
+                            com.nzion.dto.InsuranceCompanyDto insuCompanyDto = self.getSelectedItem().getValue();
+                            insurancePlan = restConsumer.getInsurancePlanByInsuranceCompany(insuCompanyDto.getInsuranceName());
+                            Events.postEvent("onReloadRequest",insurencePlan,null);
+                        </attribute>
+                        <comboitem forEach="${insuranceMaster}" label="${each.insuranceName}" value="${each}">
+                        </comboitem>
+                    </combobox>
+                </div>
+                <div zclass="span2">
+                    <label value="Insurance Plan Name" mold="required"/>
+                    <combobox id="insurencePlan" model="@{insurancePlan,load-after='self.onReloadRequest'}" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+                              constraint="no empty" readonly="true"	>
+                        <comboitem self="@{each='insurancePlan'}" value="@{insurancePlan}" label="@{insurancePlan.planName}" />
+                    </combobox>
+                </div>
+                <div zclass="span2">
+                    <label value="Plan Id"/>
+                    <textbox readonly="false" id="patientPlanId"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Registration Number"/>
+                    <textbox readonly="false" id="patientRegistrationNo"/>
+                </div>
+            </div>
+
+            <div style="margin-top:5px" sclass="panelFoot">
+                <button label="Save" id="Save" visible="true" zclass="btn-success btn">
+                    <attribute name="onClick">
+                        com.nzion.dto.InsuranceCompanyDto insCompanyDto = insurenceMaster.getSelectedItem().getValue();
+                        com.nzion.dto.InsurancePlanDto insPlanDto = insurencePlan.getSelectedItem().getValue();
+                        patientInsurance.setInsuranceProviderId(insCompanyDto.getInsuranceCode());
+                        patientInsurance.setInsurancePlanId(insPlanDto.getPlanCode());
+                        patientInsurance.setInsuranceName(insCompanyDto.getInsuranceName());
+                        patientInsurance.setPlanName(insPlanDto.getPlanName());
+                        patientInsurance.setPatientPlanId(patientPlanId.getValue());
+                        patientInsurance.setPatientRegistrationNo(patientRegistrationNo.getValue());
+                        patient.addPatientInsurance(patientInsurance);
+                        commonCrudService.save(patient);
+                        restConsumer.insertPatientInsuranceInPortal(patient);
+                        Events.postEvent("onReloadRequest",patientInsListBox,null);
+                        com.nzion.util.UtilMessagesAndPopups.showSuccess();
+                        patientInsuranceWin.detach();
+                    </attribute>
+                </button>
+                <button label="Close" onClick='patientInsuranceWin.detach()' sclass="btn"></button>
+            </div>
+        </div>
+    </window>
+</zk>

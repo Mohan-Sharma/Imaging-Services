@@ -1,0 +1,76 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientImmunizationWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+			import com.nzion.util.*;
+			
+	        com.nzion.zkoss.ext.EntityDropdownRenderer dropdownRenderer = com.nzion.zkoss.ext.EntityDropdownRenderer.DEFAULT_INSTANCE; 
+	    	Collection patientImmunizations=arg.get("patientImmunizations");
+	    	com.nzion.zkoss.composer.PatientSoapNoteController controller = arg.get("controller");
+	    	com.nzion.domain.emr.soap.PatientImmunization patientImmunization = new com.nzion.domain.emr.soap.PatientImmunization();
+	]]></zscript>
+	<window id="patientImmunizationWin" style="border: 5px solid #2d2d2d" mode="modal" width="60%">
+		<div sclass="panelTop">
+			<button disabled="${controller.readonly}" label="Add" id="Save" onClick="patientImmunizations.add(patientImmunization);patientImmunizationWin.detach();"/>
+			<button disabled="${controller.readonly}" label="Cancel" forward="onClick=onCancel"/>
+		</div>
+		<panel>
+			<panelchildren>
+				<div sclass="panelCont">
+						<div>
+							<label value="Vaccine" />
+							<textbox value="@{patientImmunization.vaccine }"/>
+						</div>
+						<div>
+							<label value="Vaccine Type" />
+							<textbox value="@{patientImmunization.vaccineType}"/>
+						</div>
+						<div>
+							<label value="Drug NDC" />
+							<textbox value="@{patientImmunization.druNdc}"/>
+						</div>
+						<div>
+							<label value="Dose" />
+							<textbox value="@{patientImmunization.doses}"/>
+						</div>
+						<div>
+							<label value="Route" />
+							<textbox value="@{patientImmunization.route}"/>
+						</div>
+						<div>
+							<label value="Site" />
+							<textbox value="@{patientImmunization.site}"/>
+						</div>
+						<div>
+							<label value="Lot #" />
+							<textbox value="@{patientImmunization.lotNumber}"/>
+						</div>
+						<div>
+							<label value="Manufacture" />
+							<textbox value="@{patientImmunization.manufactuer}"/>
+						</div>
+						<div>
+							<label value="Expiry" />
+							<datebox value="@{patientImmunization.expiry}"/>
+						</div>
+						<div>
+							<label value="Date on VIS" />
+							<datebox value="@{patientImmunization.vis}"/>
+						</div>
+						<div>
+							<label value="Date given" />
+							<datebox value="@{patientImmunization.given}"/>
+						</div>
+						<div>
+							<label value="Date VIS given" />
+							<datebox value="@{patientImmunization.visGiven}"/>
+						</div>
+						<div sclass="chkBox">
+							<checkbox checked="@{patientImmunization.confidential}" label="Confidential" />
+						</div>
+				</div>
+			</panelchildren>
+	</panel>
+</window>
+</zk>

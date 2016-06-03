@@ -1,0 +1,20 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+xmlns:n="http://www.zkoss.org/2005/zk/native">
+<window >
+<zscript>
+com.nzion.inpatient.zkoss.InPatientAdmissionController inPatientController = new com.nzion.inpatient.zkoss.InPatientAdmissionController();
+import com.nzion.repository.billing.BillingRepository;
+        BillingRepository billingRepository = com.nzion.util.Infrastructure.getSpringBean("billingRepository");
+        List patientAdmissions = billingRepository.getAllOpenPatientAdmission();
+        
+        
+</zscript>
+<html>
+<attribute name="onCreate">
+inPatientController.generateFTL("billingTransactionReport.ftl",self,patientAdmissions);
+</attribute>
+</html>
+</window>
+</zk>

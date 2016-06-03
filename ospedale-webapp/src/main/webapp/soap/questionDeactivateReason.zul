@@ -1,0 +1,20 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk>
+	<zscript>
+	import com.nzion.zkoss.composer.emr.*;
+	ModuleQuestionsController moduleQuestionsController = (ModuleQuestionsController) Executions.getCurrent().getArg()
+			.get("controller");
+</zscript>
+	<window style="border: 7px solid #2d2d2d; background:#FDFFEE;" id="deactivationReasonWindow" width="30%" mode="modal">
+		<div sclass="panelTop">
+			<button label="Deactivate"
+				onClick="moduleQuestionsController.deactivateQuestion(deactivationReasonTxtBox.getValue());deactivationReasonWindow.detach();" />
+			<button label="Cancel" onClick="deactivationReasonWindow.detach()" />
+		</div>
+		<panel title="Enter reason for deactivation">
+			<panelchildren>
+				<textbox id="deactivationReasonTxtBox" rows="7" width="97%" style="margin: 5px;" />
+			</panelchildren>
+		</panel>
+	</window>
+</zk>

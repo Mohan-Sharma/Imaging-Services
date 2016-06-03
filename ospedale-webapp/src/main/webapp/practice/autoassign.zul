@@ -1,0 +1,58 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./autoAssignWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" 	xmlns:w="http://www.zkoss.org/2005/zk/client">
+<window id="autoAssignWindow">
+	<zscript>
+	<![CDATA[
+	import com.nzion.domain.base.IdSequence;
+	import com.nzion.util.Infrastructure;
+	com.nzion.service.common.CommonCrudService service = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	List sequences = Infrastructure.getSessionFactory().getCurrentSession().createCriteria(IdSequence.class).addOrder(org.hibernate.criterion.Order.asc("entityName")).list();
+	]]>
+	</zscript>
+	<panel title="Automatic Assignment" id="autoAssignPanel">
+		<panelchildren style="overflow:auto;height:400px; border:1px solid #86A4BE;border-left:0px;border-right:0px;">
+			<listbox model="@{sequences}" id="autoAssignListbox">
+				<listhead>
+					<listheader label="Description" />
+					<listheader label="Prefix" />
+					<listheader label="Start" />
+					<listheader label="Suffix" />
+					<listheader label="Increment" />
+				</listhead>
+				<listitem self="@{each='seq'}" value="@{seq}">
+				
+				<attribute name="onCreate">
+				<![CDATA[
+					com.nzion.domain.base.IdSequence sequence = (com.nzion.domain.base.IdSequence) self.getValue();
+					if(sequence == null) return;
+					if(com.nzion.util.UtilValidator.isNotEmpty(sequence.getEntityName())){
+					Long count = service.findCount(sequence.getEntityName());
+					((Intbox) ((Listcell) self.getChildren().get(2)).getFirstChild()).setDisabled(count != null && count > 0);
+					}
+				]]>
+				</attribute>
+					<listcell label="@{seq.description}" />
+					<listcell>
+						<textbox value="@{seq.prefix}"/>
+					</listcell>
+					<listcell>
+						<intbox value="@{seq.startIndex}" constraint="no empty"/>
+					</listcell>
+					<listcell>
+						<textbox value="@{seq.suffix}"/>
+					</listcell>
+					<listcell>
+						<intbox value="@{seq.increment}" constraint="no empty,no negative,no zero:Please enter number greater than 0"/>
+					</listcell>
+				</listitem>
+			</listbox>
+		</panelchildren>
+	</panel>
+	<separator></separator>
+	<div align="center">
+	<button label="Save" zclass="btn btn-success" onClick="service.save(sequences);com.nzion.util.UtilMessagesAndPopups.showSuccess();"/>
+	</div>
+</window>
+</zk>

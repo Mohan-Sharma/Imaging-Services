@@ -1,0 +1,122 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addTemplateWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+
+	<zscript><![CDATA[
+	import com.nzion.zkoss.composer.emr.TemplateSetupController;
+	import com.nzion.zkoss.ext.EntityDropdownRenderer;
+	import com.nzion.domain.emr.QATemplate;
+	import com.nzion.util.UtilValidator;
+	TemplateSetupController templateSetupController = new TemplateSetupController();
+	QATemplate qaTemplate = (QATemplate) Executions.getCurrent().getArg().get(
+			"entity");
+	List organSystems = commonCrudService
+			.getAll(com.nzion.domain.emr.OrganSystem.class);
+]]></zscript>
+
+	<window apply="${templateSetupController}" id="addTemplateWin" title="Template Setup" mode="modal" width="60%"
+		position="center,top" closable="true" height="100%">
+		<div width="97%" style="padding:5px">
+			<zscript>
+		</zscript>
+			<panel title="Add Template">
+				<panelchildren style="padding:10px">
+					<div sclass="panelCont">
+						<div>
+							<label value="Template Name" />
+							<label value=" *" zclass="labelReq" />
+							<textbox id="templateNameTextBox" value="@{templateSetupController.template.name}"
+								constraint="no empty:Template Name Required" cols="30" onChange='addTemplateWin.setTitle(self.getValue()+" Template Setup")'/>
+						</div>
+						<div sclass="col2">
+							<label value="Module" />
+							<combobox id="soapModuleCombo" model="@{templateSetupController.modules}"
+								selectedItem="@{templateSetupController.selectedModule}" width="200px !important"
+								onChange='templateQuestionAnswerListBox.setVisible(false);checkForRos(self.getSelectedItem().getValue())'>
+								<comboitem self="@{each='module'}" label="@{module.moduleName}" value="@{module}" />
+							</combobox>
+						</div>
+						<div>
+							<label value="Organ System" id="organSystemLabel" visible="false" />
+							<combobox id="organSystemCombo" model="@{organSystems}" visible="false"
+								onSelect='Events.postEvent("onReloadRequest",templateQuestionListBox,null)'
+								onChange='Events.postEvent("onReloadRequest",templateQuestionListBox,null)'
+								selectedItem="@{templateSetupController.organSystem}">
+								<comboitem self="@{each='organSystem'}" value="@{organSystem}"
+									label="@{organSystem.desc}" />
+							</combobox>
+						</div>
+					</div>
+				</panelchildren>
+				<zscript>
+		<![CDATA[
+	void checkForRos(com.nzion.domain.emr.SoapModule soapModule) {
+		organSystemLabel.setVisible(soapModule.getModuleName().equals("OS")
+				|| soapModule.getModuleName().equals("ROS"));
+		organSystemCombo.setVisible(soapModule.getModuleName().equals("OS")
+				|| soapModule.getModuleName().equals("ROS"));
+		if (!(soapModule.getModuleName().equals("OS") || soapModule.getModuleName().equals(
+				"ROS")))
+		Events.postEvent("onReloadRequest", templateQuestionListBox, null);
+
+	}
+]]>
+		</zscript>
+			</panel>
+			<h:table width="100%" height="400px">
+				<h:tr>
+					<h:td width="50%" height="95%" style="vertical-align:top;">
+						<panel title="Questions" width="100%" height="95%" collapsible="false">
+							<panelchildren>
+								<listbox id="templateQuestionListBox"
+									model="@{templateSetupController.questions,load-after='soapModuleCombo.onSelect'}" rows="10" mold="paging"
+									itemRenderer="${templateSetupController.questionRenderer}" pageSize="10"
+									onSelect="templateQuestionAnswerListBox.setVisible(true)"
+									selectedItem="@{templateSetupController.selectedQuestion}" pagingPosition="both">
+									<listitem self="@{each='question'}" value="@{question}" label="@{question.name}" />
+									<listfoot style="height:10px">
+										<listfooter></listfooter>
+									</listfoot>
+								</listbox>
+							</panelchildren>
+						</panel>
+					</h:td>
+					<h:td width="50%" height="95%" style="vertical-align:top;">
+						<panel title="Answers" width="100%" height="95%" collapsible="false">
+							<panelchildren>
+								<listbox id="templateQuestionAnswerListBox"
+									model="@{templateSetupController.answers,load-after='self.onReloadRequest,templateQuestionListBox.onSelect'}"
+									checkmark="true" multiple="true" rows="10"
+									selectedItem="@{templateSetupController.selectedAnswers,converter=com.nzion.view.component.MultipleListitemBindingConverter}"
+									mold="paging" pageSize="10" pagingPosition="both">
+									<listitem self="@{each='answer'}" value="@{answer}">
+										<listcell label="@{answer.name}" />
+									</listitem>
+									<listfoot style="height:10px">
+										<listfooter></listfooter>
+									</listfoot>
+								</listbox>
+							</panelchildren>
+						</panel>
+					</h:td>
+				</h:tr>
+			</h:table>
+			<div sclass="panelFoot"/>
+		<div sclass="panelFoot">
+				<button label="Save" id="Save"
+					onClick="templateNameTextBox.getValue();templateSetupController.save();addTemplateWin.detach();" />
+				<button label="Preview" id="previewButton" visible="true"
+					onClick="templateSetupController.openPreviewWindow()" />
+				<button label="Cancel" forward="onClick=onCancel" />
+		</div>
+		</div>
+<zscript>
+<![CDATA[
+	if (qaTemplate != null)
+		previewButton.setVisible(true);
+]]>
+</zscript>		
+	</window>
+
+</zk>

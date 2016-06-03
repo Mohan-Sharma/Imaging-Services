@@ -1,0 +1,103 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./referralContractServiceWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+
+    <zscript>
+                <![CDATA[
+                     import com.nzion.service.dto.ServiceMasterDto;
+                     import com.nzion.util.RestServiceConsumer;
+                     com.nzion.zkoss.ext.EntityDropdownRenderer dropdownRenderer = new com.nzion.zkoss.ext.EntityDropdownRenderer(new com.nzion.zkoss.ext.EntityDropDownPersonNameAdapter());
+                ]]>
+    </zscript>
+
+    <window id="referralContractServiceWin" visible="${editOperation}" apply="org.zkoss.bind.BindComposer" viewModel="@id('vm')
+                @init('com.nzion.zkoss.composer.ReferralContractServiceViewModel')"  title="Add Referral Service Contract" >
+
+    <custom-attributes referralContract="${referralContract}"/>
+            <div zclass="container-fluid">
+             <div zclass="row-fluid">
+                	<div zclass="span12">
+                        <label value="Service" />
+                        <textbox id="searchServiceTextBox" />
+                         <button label="Search" zclass="btn-success btn" onClick="@command('search')" />
+
+                        <label value="Pecentage"  />
+                        <decimalbox id="percentageDecimalBox"  format="###.###" value="@{vm.paymentPercentage}">
+                            <attribute name="onChange">
+                                vm.setPaymentAmount(0);
+                            </attribute>
+                          <attribute name="onCreate">
+                                if ("PERCENTAGE_SERVICE_ITEM".equals(referralContract.getPaymentMode()))  {
+                                self.setDisabled(false);
+                                }else{
+                                self.setDisabled(true);
+                                self.setValue(java.math.BigDecimal.ZERO);
+                                }
+                          </attribute>
+                        </decimalbox>
+                         <label value="Amount" />
+                         <decimalbox id="amountDecimalBox" format="##########.###" value="@{vm.paymentAmount}">
+                            <attribute name="onChange">
+                                vm.setPaymentPercentage(0);
+                            </attribute>
+                             <attribute name="onCreate">
+                                 if ("FIX_AMOUNT_PER_SERVICE".equals(referralContract.getPaymentMode()))  {
+                                 self.setDisabled(false);
+                                 }else{
+                                 self.setDisabled(true);
+                                 self.setValue(java.math.BigDecimal.ZERO);
+                                 }
+                             </attribute>
+                         </decimalbox>
+                         <button label="Apply" zclass="btn-success btn" onClick="@command('apply')" />
+                    </div>
+             </div>
+            </div>
+    <panel>
+            <caption label="Service Contract List"/>
+                <panelchildren>
+                        <listbox height="200px" id="serviceContractListBox" model="@{vm.referralContractServices, load-after='self.onReload'}">
+                                	<listhead>
+                                		<listheader label="Type"></listheader>
+                                		<listheader label="Service Name"></listheader>
+                                		<listheader label="Payment Percentage"></listheader>
+                                		<listheader label="Payment Amount"></listheader>
+                                	</listhead>
+                                <listitem self="@{each='svc'}" value="@{svc}">
+                                        <listcell label="@{svc.serviceSubGroupDescription}"/>
+                                        <listcell label="@{svc.serviceName}"/>
+                                        <listcell>
+                                            <decimalbox value="@{svc.paymentPercentage}" format="###.###" constraint="no negative">
+                                                <attribute name="onCreate">
+                                                if ("PERCENTAGE_SERVICE_ITEM".equals(referralContract.getPaymentMode()))  {
+                                                    self.setDisabled(false);
+                                                }else{
+                                                    self.setDisabled(true);
+                                                    self.setValue(java.math.BigDecimal.ZERO);
+                                                }
+                                                </attribute>
+                                            </decimalbox>
+                                        </listcell>
+                                        <listcell>
+                                            <decimalbox value="@{svc.paymentAmount}" format="##########.###" constraint="no negative">
+                                                <attribute name="onCreate">
+                                                    if ("FIX_AMOUNT_PER_SERVICE".equals(referralContract.getPaymentMode()))  {
+                                                        self.setDisabled(false);
+                                                    }else{
+                                                        self.setDisabled(true);
+                                                        self.setValue(java.math.BigDecimal.ZERO);
+                                                    }
+                                                </attribute>
+                                            </decimalbox>
+                                        </listcell>
+                                </listitem>
+                        </listbox>
+                        <div style="margin-top:5px" sclass="panelFoot">
+                            <button label="Save" id="Save" visible="true" zclass="btn-success btn" onClick="@command('save')" />
+                            <button label="Submit" id="Submit" visible="true" zclass="btn-success btn" onClick="@command('submit')" />
+                        </div>
+                </panelchildren>
+    </panel>
+    </window>
+</zk>

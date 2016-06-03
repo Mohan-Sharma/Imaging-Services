@@ -1,0 +1,152 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./drugLookup"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" >
+<window title="Drug Lookup" id="drugLookup" mode="modal" width="65%" position="center" closable="true">
+<zscript>
+	import com.nzion.util.Constants;
+	import com.nzion.domain.Provider;
+	import com.nzion.domain.messaging.*;
+	import com.nzion.domain.*;
+	import com.nzion.domain.emr.soap.PatientRx;
+	import com.nzion.domain.drug.Drug;
+	
+	PatientRx patientRx = (PatientRx)arg.get("patientRx");
+	com.nzion.domain.emr.soap.PatientImmunization immunization = (com.nzion.domain.emr.soap.PatientImmunization)arg.get("patientImmunization");
+	Textbox drugBox = (Textbox)arg.get("drugBox");
+	A favouriteLink = (A)arg.get("favouriteLink");
+	boolean isMedicationHx = arg.get("medicationHistory")==null?false:arg.get("medicationHistory");
+	char[] ALPHABETS = Constants.ALPHABETS;
+	char[] DIGITS = Constants.DIGITS;
+	List masterData=null;
+	String searchColumn;
+	com.nzion.zkoss.composer.SoapRxComposer rxComposer = arg.get("rxComposer");
+	com.nzion.zkoss.composer.MedicationHxComposer medHxComposer = arg.get("medHxComposer");
+	List favouriteDrugs; 
+</zscript>
+	<div width="99%" style="padding:5px">
+				<div sclass="patSearchRes">
+				<radiogroup>
+				<radio label="Pull From Global">
+				<attribute name="onCheck">
+				globalDrugSection.setVisible(true);
+				masterDataDisplayGrid.setModel(new BindingListModelList(new ArrayList(),false));
+				</attribute>
+				</radio>
+				<radio label="Pull From Favourites">
+				<attribute name="onCheck">
+					List favourites = new ArrayList();
+					favouriteDrugs = personService.getPersonFavouriteDrugs(com.nzion.util.Infrastructure.getUserLogin().getPerson());
+					for(com.nzion.domain.person.PersonDrug personDrug : favouriteDrugs)
+					favourites.add(personDrug.getDrug());
+					masterDataDisplayGrid.setModel(new BindingListModelList(favourites,false));
+					globalDrugSection.setVisible(false);
+				</attribute>
+				</radio>
+				</radiogroup>
+				<div id="globalDrugSection" visible="false">
+					<h:table width="80%">
+						<h:tr>
+						<h:td width="15%" style="text-align:right">
+							<label value="Look For:"></label>
+						</h:td>
+						<h:td  width="35%">	
+							<textbox cols="50" id="searchText"/>
+						</h:td>
+						<h:td  width="15%" style="text-align:right">
+							<label value="Search In:"/>
+						</h:td>
+						<h:td  width="20%">
+							<combobox id="searchFields" onSelect="searchColumn=(String)self.getSelectedItem().getValue();">
+								<comboitem id="tradeci" value="tradeName" label="Trade Name"></comboitem>
+								<comboitem value="genericName" label="Generic Name"></comboitem>
+								<attribute name="onCreate">
+									searchFields.setSelectedItem((Comboitem)self.getFirstChild());
+									Events.postEvent("onSelect",self,null);
+								</attribute>
+							</combobox>
+						  </h:td>
+						  <h:td width="15%">
+					      	 <button label="Search" id="search" style="margin-left:10px">
+					      	 	<attribute name="onClick">
+					      	 		masterData =drugRepository.searchDrugs(searchColumn,searchText.getValue());					      	 	
+					      	 		masterDataDisplayGrid.setModel(new BindingListModelList(masterData,false));
+					      	 	</attribute>
+					      	 </button>
+					      </h:td>
+					     </h:tr>
+					 </h:table>
+					 </div>
+				</div>
+		<div sclass="dataTables_scrollBody" style="overflow: auto; height:400px;">
+		<listbox model="@{masterData}" id="masterDataDisplayGrid">
+		<auxhead>
+		 <auxheader colspan="1">
+                <image src="/images/funnel.png" />
+                <textbox id="filter1"  width="100%" onChanging="getFilterData(event,false)"/>
+            </auxheader>
+		 <auxheader colspan="1">
+                <image src="/images/funnel.png" />
+                <textbox id="filter2"  width="100%" onChanging="getFilterData(event,true)" />
+            </auxheader>
+		</auxhead>
+		  <listhead>
+            <listheader hflex="2" label="Trade Name"/>
+            <listheader hflex="2"  label="Generic Name"/>
+        </listhead>
+        <listitem self="@{each='drug'}" value="@{drug}">
+        <listcell>
+        	<label value="@{drug.tradeName}"/>
+       </listcell>
+       <listcell>
+        	<label value="@{drug.genericName}"/>
+        </listcell>
+        <attribute name="onClick">
+				 	<![CDATA[
+				 	    Drug d = (Drug)self.getValue();
+				 	    if(rxComposer!=null)
+				 	  	 rxComposer.setDrug(d);
+						d = commonCrudService.getById(com.nzion.domain.drug.Drug.class,d.getId());
+						if(!isMedicationHx && rxComposer!=null){
+							patientRx.populateDrugAttributes(personService.getPersonDrugsByPersonAndDrug(rxComposer.getMainCtl().getProvider(), d));
+						}
+						if(immunization!=null)
+							immunization.setDrug(d);
+						else
+							patientRx.setDrug(d);
+						drugBox.setValue(d.getTradeName());
+						if(medHxComposer!=null)
+							medHxComposer.setSelectedDrug(d);
+						if(favouriteLink!=null)
+							favouriteLink.setVisible(true);
+						Events.postEvent("onLookedUp",drugLookup.getParent(),null);
+						drugLookup.detach();
+					]]>
+				 </attribute> 
+        </listitem>
+		</listbox>
+			</div>
+	</div>
+	<zscript>
+<![CDATA[
+        import com.nzion.util.UtilValidator;
+		void getFilterData(Event event,boolean generic){
+		if(UtilValidator.isEmpty(masterData)|| UtilValidator.isEmpty(filter1.getValue()) || UtilValidator.isEmpty(filter2.getValue()))
+		return;
+		String data = ((org.zkoss.zk.ui.event.InputEvent) event).getValue();
+		((Textbox) event.getTarget()).setValue(((org.zkoss.zk.ui.event.InputEvent) event).getValue());
+		List filterDrugs = new LinkedList();
+		for (Iterator itr = masterData.iterator(); itr.hasNext();) {
+		Drug drug = (Drug)itr.next();
+		if (drug.getTradeName().toLowerCase().indexOf(filter1.getValue().trim().toLowerCase()) >= 0 && drug.getGenericName().toLowerCase().indexOf(filter2.getValue().trim().toLowerCase()) >= 0) {
+		filterDrugs.add(drug);
+		}
+		}
+		masterDataDisplayGrid.setModel(new ListModelList(filterDrugs));
+		}
+
+	]]>
+</zscript>
+</window>
+</zk>

@@ -1,0 +1,65 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapPatientReferralWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk>
+	<zscript>
+<![CDATA[
+	import com.nzion.domain.emr.soap.*;
+	import com.nzion.zkoss.composer.SoapReferalComposer;
+	ReferralSection referralSection = arg.get("referralSection");
+	com.nzion.zkoss.composer.PatientSoapNoteController patientSoapNoteController = arg.get("controller");
+	List referralTypes = (List) arg.get("referralTypes");
+	List referrals;
+	List specialities = commonCrudService.getAll(com.nzion.domain.Speciality.class);
+	Textbox referalTextBox = arg.get("referalNameTextBox");
+	PatientReferral patientReferral = arg.get("patientReferral");
+	SoapReferalComposer soapReferalComposer = (SoapReferalComposer)arg.get("soapReferalComposer");
+]]>
+</zscript>
+	<window width="50%" height="50%" id="soapPatientReferralWindow" closable="true" title="Search Referral" mode="modal">
+		<div sclass="panelFoot">
+			<button  label="Cancel" forward="onClick=onCancel" />
+
+		</div>
+		<div sclass="panelCont">
+			<div>
+				<label value="First Name" />
+				<textbox id="firstNameTxtBox" />
+			</div>
+			<div>
+				<label value="Last Name" />
+				<textbox id="lastNameTxtBox" />
+			</div>
+		</div>
+		<separator></separator>
+		<div>
+			<button  label="Search" id="searchButton">
+				<attribute name="onClick">
+					referrals = providerService.searchReferral(firstNameTxtBox.getValue(), lastNameTxtBox.getValue(), null);
+				</attribute>
+			</button>
+		</div>
+		<listbox model="@{referrals,load-after='searchButton.onClick'}" width="100%">
+			<listhead>
+				<listheader label="Referral Name" />
+				<listheader label="Registration Number" />
+				<listheader label="City" />
+				<listheader label="Office phone" />
+			</listhead>
+			<listitem self="@{each='referral'}" value="@{referral}">
+				<listcell>
+					<name object="@{referral}" />
+				</listcell>
+				<listcell label="@{referral.detail.registrationId}" />
+				<listcell label="@{referral.contacts.postalAddress.city}" />
+				<listcell label="@{referral.contacts.officePhone}" />
+				<attribute name="onDoubleClick">
+				com.nzion.domain.Referral referal = (com.nzion.domain.Referral) self.getValue();
+				referalTextBox.setValue(referal.getFirstName() + " " + referal.getLastName());
+				patientReferral.setReferral(referal);
+				soapReferalComposer.setReferral(referal);
+				soapPatientReferralWindow.detach();
+				</attribute>
+			</listitem>
+		</listbox>
+	</window>
+</zk>

@@ -1,0 +1,14 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./labTestViewWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		setPageTitle("Lab Test", "");
+</zscript>
+	<window id="labTestViewWindow">
+	<screen width="100%" listtitle="List of LabTests" 
+	entityclass="com.nzion.domain.emr.lab.LabTest" fields="testCode,testDescription"
+	labels="Test Code,Test Description" searchfields="testCode,testDescription"
+	hideactivation="true" hidedeletebtn="true" hideaddbtn = "true"/>
+	</window>
+</zk>

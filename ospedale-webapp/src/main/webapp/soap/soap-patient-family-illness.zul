@@ -1,0 +1,88 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientFamilyIllnessWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	        import com.nzion.domain.emr.soap.PatientFamilyIllness;          
+	        import com.nzion.zkoss.ext.EntityDropdownRenderer;
+	        import com.nzion.domain.emr.soap.FamilyHistorySection;
+	        import com.nzion.domain.emr.FamilyMember;
+			import com.nzion.domain.emr.FamilyIllness;
+	        List familyMembers=commonCrudService.getAll(FamilyMember.class);
+	        PatientFamilyIllness patientFamilyIllness=new PatientFamilyIllness();
+	    	EntityDropdownRenderer relationshipnameRenderer = new EntityDropdownRenderer("relationshipName");
+	    	EntityDropdownRenderer nameRenderer = new EntityDropdownRenderer("name");
+	    	FamilyHistorySection section = arg.get("section");
+	    	com.nzion.zkoss.composer.PatientSoapNoteController controller = arg.get("controller");
+	    	Collection familyIllnesses=arg.get("familyIllnesses");
+	    	List patientFamilyMembers=patientService.getFamilyMembers(controller.getPatient());
+	]]></zscript>
+	<window id="patientFamilyIllnessWin" style="border: 5px solid #2d2d2d" mode="modal" width="60%">
+		<div sclass="panelTop">
+			<button  label="Add" id="Save" onClick="section.addFamilyIllness(patientFamilyIllness);familyIllnesses.add(patientFamilyIllness);patientFamilyIllnessWin.detach();"/>
+			<button  label="Cancel" forward="onClick=onCancel"/>
+		</div>
+	<panel title="Add Family History">
+			<panelchildren>
+				<div sclass="panelCont">
+					<n:table width="80%">
+						<n:tr width="80%">
+							<n:td>
+								<label value="Name" />
+								<combobox id="name" model="@{patientFamilyMembers}" value="@{patientFamilyIllness.name,save-when='Save.onClick'}" itemRenderer="${nameRenderer}" buttonVisible="false" autodrop="true">
+									<attribute name="onSelect">
+									patientFamilyIllness.setMember(self.getSelectedItem().getValue().getFamilyMember().getRelationshipName());
+									</attribute>
+								</combobox>
+							</n:td>
+							<space width="50px"/>
+							<n:td>
+								<label value="Relationship Type" />
+								<label value=" *" zclass="labelReq"/>
+								<combobox  id="familymembers" model="@{familyMembers}" value="@{patientFamilyIllness.member,save-when='Save.onClick',load-after='name.onSelect'}" itemRenderer="${relationshipnameRenderer}" constraint="no empty" />	
+							</n:td>
+						</n:tr>	
+						<n:tr width="80%">
+							<n:td>
+								<label value="Illness" />
+								<label value=" *" zclass="labelReq"/>
+								<hbox><suggest  id="illnessTxt" value="@{patientFamilyIllness.illness,save-when='Save.onClick'}"	entity="com.nzion.domain.emr.FamilyIllness" 
+											searchcolumns="illnessDesc" displaycolumns="illnessDesc" requiredcolumn="illnessDesc" constraint="no empty"/>
+								<button  id="lookUpBtn" label="LookUp">
+									<attribute name="onClick">
+										Map m = com.nzion.util.UtilMisc.toMap("illnessTxt", illnessTxt,"controller",controller);
+										Executions.createComponents("/soap/illness-lookUp.zul",patientFamilyIllnessWin,m);
+									</attribute>
+								</button>
+								</hbox>
+							</n:td>
+							<space width="50px"/>
+							<n:td>
+								<label value="Disease Info" />
+								<textbox  value="@{patientFamilyIllness.diseaseInfo,save-when='Save.onClick'}"/>
+							</n:td>
+						</n:tr>
+						<n:tr width="80%">
+							<n:td>
+								<label value="Age" />
+								<intbox value="@{patientFamilyIllness.age,save-when='Save.onClick'}"/>
+							</n:td>
+							<space width="50px"/>
+							<n:td>
+								<label value="Approximate Date" />
+								<datebox value="@{patientFamilyIllness.approximateDate,save-when='Save.onClick'}"/>
+							</n:td>
+						</n:tr>
+						<n:tr width="80%">
+							<n:td>
+								<div sclass="chkBox">
+									<checkbox checked="@{patientFamilyIllness.active,save-when='Save.onClick'}" label="Alive" />
+								</div>
+							</n:td>
+						</n:tr>
+					</n:table>
+				</div>
+			</panelchildren>
+	</panel>
+</window>
+</zk>

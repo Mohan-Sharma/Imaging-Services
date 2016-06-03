@@ -1,0 +1,54 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	com.nzion.service.SoapNoteService soapNoteService = com.nzion.util.Infrastructure.getSpringBean("soapNoteService");
+	com.nzion.zkoss.composer.PatientSoapNoteController soapNoteController = arg.get("soapNoteController");
+	com.nzion.domain.emr.soap.MedicationHistorySection historySection = arg.get("historySection");
+	com.nzion.domain.emr.soap.RxSection rxSection = arg.get("rxSection");
+	List allMedicationsHis = soapNoteService.getAllMedicationsExcludingCurrentSection(historySection,rxSection,soapNoteController.getPatient());
+	
+	</zscript>
+	<window id="addedMedicationHistory" closable="true" title="Medication History" width="750px">
+		<div style="width:99%;height:99%" >
+			 <div sclass="dataTables_scrollBody" style="98% margin:auto;overflow:auto">
+				<n:table id="mediHistoryGrid" cellpadding="0" cellspacing="0" border="0" class="display" >
+					<n:thead>
+						<n:tr>
+							<n:th>Drug Name</n:th>
+							<n:th>Quantity</n:th>
+							<n:th>Drug Form</n:th>
+							<n:th>Frequency</n:th>
+							<n:th>Total Supply</n:th>
+							<n:th>Supply UOM</n:th>
+							<n:th>Start Date</n:th>
+							<n:th>End Date</n:th>
+						</n:tr>
+					</n:thead>
+					<n:tbody>
+						<n:tr forEach="${allMedicationsHis}">
+							<n:td>${each.drug.tradeName} ${each.drug.genericName}</n:td>											
+							<n:td>${each.quantity}</n:td>
+							<n:td>${each.drugDosageForm}</n:td>
+							<n:td>${each.drugDirection}</n:td>
+							<n:td>${each.totalSupply}</n:td>
+							<n:td>${each.supplyUom}</n:td>
+							<n:td>${each.startDate}</n:td>
+							<n:td>${each.endDate}</n:td>
+						</n:tr>
+					</n:tbody>
+				</n:table>
+				</div>
+		</div>
+		<script type="text/javascript">
+			zk.afterMount(function() { 
+				jq("#mediHistoryGrid").dataTable({
+				"bJQueryUI": true,
+				"sPaginationType": "full_numbers", 
+				"aoColumns":
+							[ null,null,null, null, null, null,null,{ "bSortable": false,"sType": "html"} ] 
+						}); 
+			});
+		</script>
+	</window>
+</zk>
+	

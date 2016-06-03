@@ -1,0 +1,11 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./taxItemWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk>
+<zscript>
+	setPageTitle("Tax Item", "");
+</zscript>
+	<window id="taxItemWindow" self="@{define(content)}">
+		<screen width="100%" listtitle="List of Taxes" addpage="addEditTaxItem" entityclass="com.nzion.domain.billing.TaxItem"  addmodepopup="true"
+			fields="billingHead,taxType.description,cessTaxItem.billingHead,taxLedgerName,taxValue" labels="Billing Head,Tax Type,Cess Tax,Tax Ledger Name,Tax Value," hideactivation="false" hidedeletebtn="true" />
+	</window>
+</zk>

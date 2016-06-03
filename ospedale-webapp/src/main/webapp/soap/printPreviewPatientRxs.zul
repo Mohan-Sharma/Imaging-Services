@@ -1,0 +1,207 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./printPatientRxWin"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xmlns:w="http://www.zkoss.org/2005/zk/client">
+	 <?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String formatDateToDatetimeFormat(java.util.Date)"?>
+	<zscript>
+	com.nzion.service.SoapNoteService soapNoteService = com.nzion.util.Infrastructure
+			.getSpringBean("soapNoteService");
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure
+			.getSpringBean("commonCrudService");
+	Long scheduleId = new Long(param.get("scheduleId")[0]);
+	com.nzion.domain.Schedule schedule = commonCrudService.getById(
+			com.nzion.domain.Schedule.class, scheduleId);
+	com.nzion.domain.Patient patient = schedule.getPatient();
+	com.nzion.domain.Provider provider = (com.nzion.domain.Provider) schedule
+			.getPerson();
+	com.nzion.domain.Location location = schedule.getLocation();
+	com.nzion.domain.Practice practice = com.nzion.util.Infrastructure
+			.getPractice();
+	Date date = new Date();
+	com.nzion.domain.emr.soap.RxSection rxSection = soapNoteService
+			.getSoapSection(scheduleId,
+					com.nzion.domain.emr.soap.RxSection.class);
+	Set patientRxs = rxSection.getPatientRxs();
+	com.nzion.domain.emr.soap.PatientSoapNote patientSoapNote = commonCrudService
+			.findUniqueByEquality(
+					com.nzion.domain.emr.soap.PatientSoapNote.class, new String
+
+					[] { "schedule" }, new Object[] { schedule });
+</zscript>
+	<style>
+		.notePreview{ bottom: -15px; position: relative; }
+		.summaryHeader{ background-color: #ECECEC; border: 1px solid
+		#A2A2A2; border-radius: 3px 3px 3px 3px; margin-top:10px;
+		padding: 8px; } .footerClass{ font-family: arial,sans-serif;
+		font-size: 11px; font-weigh t: normal; text-align: right; }
+		.mid, .pgTtl {padding: 0 98px; } .rCont { top: -10px; width:
+		97%; z-index: 1; } .total{ margin-right:19% } .personDet{
+		border: 1px solid #333; align:center; margin : 2px 0px 0px 0px;
+		} .invoiceTable{ border: 1px solid #333; align:center; }
+		.invoiceTable th{ text-align:left; font-size: 13px;
+		font-weight:bold; border: 1px solid #333;
+		border-collapse:collapsed; padding-left:5px; color:#333;
+		padding:5px; } .invoiceTable td{ text-align:left; font-size:
+		12px; font-weight:bold; border-right: 1px solid #333;
+		border-left: 1px solid #333; border-collapse:collapsed;
+		padding:0px 2px 4px 5px; } .personDet td{ padding:2px; }
+	</style>
+	<div id="printPatientRxWin" width="100%" height="100%"
+		style="background: #fff;">
+		<attribute name="onCreate">
+	Clients.print();
+</attribute>
+		<div sclass="wrapper">
+			<div sclass="mid">
+				<n:div id="CCTop" height="100%"
+					style="width:710px;margin:auto">
+					<n:div align="center">
+					<include src="/soap/patientRxPreviewBanner.zul" width="100%" height="100%" soapnotedate="${patientSoapNote.date}"/>
+				</n:div>
+				<separator />
+					<!-- <image src="/images/icon-img-rx.jpg" height="25px"
+						width="25px" /> -->
+					<n:div class="clr patDetCont"
+						style="width:100%;horizontal-align:center;margin-top:3px">
+						<n:table class="personDet"
+							style="align:center;width:99%">
+							<n:tr>
+								<n:td>
+									<label value="Consultant Name : "
+										style="font-weight:bold;">
+									</label>
+									<name object="@{provider}" />
+								</n:td>
+								<n:td>
+									<label value="Date : "
+										style="font-weight:bold;">
+									</label>
+									<!-- ${provider.regdNo} -->
+									${display:fd(patientSoapNote.date)}
+									
+								</n:td>
+							</n:tr>
+						</n:table>
+					</n:div>
+					<n:div class="clr "
+						style="width:100%;horizontal-align:center;margin-top:3px">
+						<n:table class="personDet"
+							style="align:center;width:99%">
+							<n:tr>
+								<n:td>
+									<n:b>Patient Details :</n:b>
+									<n:br />
+									<hlayout spacing="8%"
+										width="100%">
+										<div>
+											<label value="MRN : "
+												style="font-weight:bold;">
+											</label>
+											<label
+												value="@{patient.accountNumber}"
+												style="font-weight:normal;" />
+										</div>
+										<div >
+											<label value="Name : "
+												style="font-weight:bold;margin-left:39px">
+												
+											</label>
+											<name
+												object="@{patient}" />
+										</div>
+										<div
+											if="${patientAdmission != null}">
+											<label value="IP Number : "
+												style="font-weight:bold;">
+											</label>
+											<label
+												value="@{patientAdmission.accountNumber}" />
+										</div>
+										<div>
+											<label value="Age : "
+												style="font-weight:bold;margin-left:12px">
+											</label>
+
+
+											<label
+												value="@{patient.age}" style="font-weight:normal;" />
+										</div>
+									</hlayout>
+								</n:td>
+							</n:tr>
+							<n:tr>
+								<n:td width="100%">
+									<hlayout spacing="7%"
+										width="100%">
+										<div>
+											<label value="Gender : "
+												style="font-weight:bold;">
+											</label>
+
+
+											<label
+												value="@{patient.gender.description}"
+												style="font-weight:normal;" />
+										</div>
+										<div>
+											<label value="Contact No : "
+												style="font-weight:bold;">
+											</label>
+
+
+											<label
+												value="@{patient.contacts.mobileNumber}"
+												style="font-weight:normal;" />
+										</div>
+										<div
+											style="white-space:nowrap">
+											<label value="Address : "
+												style="font-weight:bold;margin-left:39%">
+											</label>
+											${patient.contacts.postalAddress}
+										</div>
+									</hlayout>
+
+								</n:td>
+							</n:tr>
+						</n:table>
+					</n:div>
+					<n:div class="clr patDetCont"
+						style="width:100%;horizontal-align:center;margin-top:3px">
+						<n:table class="invoiceTable" cellspacing="2"
+							cellpadding="2" style="align:center;width:99%">
+							<n:tr>
+								<n:th width="15%">Generic,Drug Name</n:th>
+								<n:th width="4%">
+									Total Supply
+								</n:th>
+								<n:th width="19%">
+									Start Of Condition
+								</n:th>
+							</n:tr>
+							 <n:tr>
+								<n:td></n:td>
+								<n:td></n:td>
+								<n:td></n:td>
+							</n:tr> 
+						
+							<n:tr forEach="${patientRxs}" >
+								<n:td>
+								${each.drugName}, ${each.drug.tradeName}
+								</n:td>
+								<n:td>
+								${each.totalSupply}
+								</n:td>
+								<n:td>
+								${each.startCondition}
+								</n:td>
+							</n:tr>
+						</n:table>
+					</n:div>
+				</n:div>
+			</div>
+		</div>
+	</div>
+</zk>

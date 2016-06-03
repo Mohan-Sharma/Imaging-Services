@@ -1,0 +1,23 @@
+<?component name="screen" macro-uri="/home-grid-macro.zul"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+
+	<window id="enumerationsList" self="@{define(content)}">
+		<zscript>
+			import com.nzion.enums.EnumerationType;
+			import com.nzion.service.common.impl.EnumerationServiceImpl;
+			import com.nzion.service.common.EnumerationService;
+			com.nzion.service.common.GenericHomeScreenSearchService searchService = com.nzion.util.Infrastructure.getSpringBean("practiceSpecificEnumerationHomeScreenSearchService");
+			setPageTitle("Practice Enumerations", "");
+		</zscript>
+		<screen width="100%" pagetitle="Practice Enumerations" searchservice="${searchService}"
+			listtitle="Enumerations List" addpage="addEnumeration"
+			editpage="addEnumeration" hidedeletebtn="true"
+			entityclass="com.nzion.domain.Enumeration" 
+			fields="enumType, enumCode, description, active"
+			labels="EnumType, Code, Description, Active" addmodepopup="true"
+			editmodepopup="true" />
+	</window>
+</zk>

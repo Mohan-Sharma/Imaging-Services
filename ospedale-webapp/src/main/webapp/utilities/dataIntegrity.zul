@@ -1,0 +1,103 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./dataIntegrityWin"?>
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<zk xmlns:h="http://www.zkoss.org/2005/zk/native" xmlns:a="http://www.zkoss.org/2005/zk/annotation">
+	<zscript>
+	String fileContent = null;
+	String hashValue = null;
+</zscript>
+	<window border="normal" id="dataIntegrityWin">
+		<panel title="Generation of Hash Value">
+			<panelchildren>
+				<div>
+					<label value="Select Algorithm" style="font-weight:bold" />
+					<radiogroup orient="horizontal" id="algorithm" onCheck="Clients.closeErrorBox(self)">
+						<vbox>
+							<radio label="SHA-1" value="SHA-1" />
+							<radio label="MD5" value="MD5" />
+						</vbox>
+					</radiogroup>
+				</div>
+				<separator/>
+				<div>
+					<label value="Test Data" style="font-weight:bold" />
+					<textbox id="databox" rows="15" cols="75" type="text" multiline="true" />
+				</div>
+				<separator height="10px"/>
+				<div>
+					<label value="Browse File" style="font-weight:bold"/>
+					<textbox id="fileNameTextBox" cols="60" readonly="true"/>
+					<fileupload label="Browse" id="uploadBtn">
+						<attribute name="onUpload">
+							org.zkoss.util.media.Media media = ((UploadEvent) event).getMedia();
+							fileNameTextBox.setValue(media.getName());
+							fileContent = media.getStringData();
+						</attribute>
+					</fileupload>
+				</div>
+				<separator height="10px"/>
+				<div>
+				<h:table>
+				<h:tr>
+				<h:td>
+					<button label="Generate Hash">
+						<attribute name="onClick">
+							<![CDATA[
+							    if(algorithm.getSelectedItem() == null)
+							    	throw new WrongValueException(algorithm,"Select an algorithm");
+								String algo = algorithm.getSelectedItem().getValue();
+								if(com.nzion.util.UtilValidator.isEmpty(fileContent) && com.nzion.util.UtilValidator.isEmpty(databox.getValue())){
+									com.nzion.util.UtilMessagesAndPopups.showError("Either Provide Test data or upload File");
+									return;
+								}
+									
+								if (com.nzion.util.UtilValidator.isEmpty(fileContent))
+									hashValue = com.nzion.util.UtilHash.generateHash(algo, databox.getValue());
+								else
+									hashValue = com.nzion.util.UtilHash.generateHash(algo, fileContent);
+								outputLabel.setVisible(true);
+								hashLabel.setValue(hashValue);
+								hashLabel.setStyle("font-weight:bold");
+								expectedHashLabel.setVisible(true);
+								expectedHashTextBox.setVisible(true);
+								hashCodeComparisonSection.setVisible(true);
+							]]>				
+						</attribute>
+					</button>
+					<label id="outputLabel" value="Output:" style="font-weight:bold" visible="false"/>
+					<label id="hashLabel"  />
+					</h:td>
+					</h:tr>
+					<h:tr>
+					<h:td>
+					<div id="hashCodeComparisonSection" visible="false">
+					<label id="expectedHashLabel" value="Expected Hash:" style="font-weight:bold"/>
+					<textbox id="expectedHashTextBox" cols="55" constraint="no empty:Provide Expected Hash Code"/>
+					<button label="Compare Hash" id="compareButton">
+						<attribute name="onClick">
+							<![CDATA[
+								expectedHashTextBox.getValue();     
+								String algo = algorithm.getSelectedItem().getValue();
+								if (com.nzion.util.UtilValidator.isEmpty(fileContent))
+									hashValue = com.nzion.util.UtilHash.generateHash(algo, databox.getValue());
+								else
+									hashValue = com.nzion.util.UtilHash.generateHash(algo, fileContent);
+								if (hashValue.equals(expectedHashTextBox.getValue())) {
+									comparsonLabel.setValue("Generated Hash matches with the expected output.");
+									comparsonLabel.setStyle(";background-color:#00FF00;font-weight:bold");
+								} else {
+									comparsonLabel.setValue("Generated Hash does not match with the expected output.");
+									comparsonLabel.setStyle(";background-color:#800517;color:#fff;font-weight:bold");
+								}
+							]]>				
+						</attribute>
+					</button>
+					<label id="comparsonLabel"/>
+					</div>
+					</h:td>
+				</h:tr>
+				</h:table>	
+				</div>
+			</panelchildren>
+		</panel>
+	</window>
+</zk>

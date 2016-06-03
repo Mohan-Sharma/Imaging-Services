@@ -1,0 +1,130 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./appointmentWindow"?>
+<?component name="appointmentMenu" macro-uri="/appointment/appointment-menu.zul" inline="true"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<style>
+.z-toolbarbutton-cnt {
+    color: #FFFFFF;
+    font-family: Verdana,Tahoma,Arial,Helvetica,sans-serif;
+    font-size: 11px;
+    font-weight: normal;
+    padding: 2px;
+    position: relative;
+}
+			tr.z-listbox-odd { font-size: 10px; font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif; background:
+			#FFFFFF; }
+
+			div.z-listcell-cnt { color: #666666; height: 18px; padding: 0px 0px 0px 0px; vertical-align: middle; }
+			.z-tabbox-accordion-lite .z-tabpanel-accordion-lite { padding: 0px; }
+
+			td.table_header_row_left{ border-color: #CCCCCC; border-style: solid; border-width: 0 0 1px; color: #666666;
+			font-weight: bold; padding: 3px 1px 3px 6px; vertical-align: top; }
+
+			td.table_cell { border-left: 1px solid #CCCCCC; border-style: solid; border-top: 1px solid #E6E6E6;
+			border-width: 1px 0 0 1px; padding: 3px 1px 3px 2px; vertical-align: top; }
+
+			.leftMenuLi { background-color:#ececec;
+			border-color:-moz-use-text-color #A2A2A2 #CCCCCC; border-left:1px solid #A2A2A2; border-right:1px solid
+			#A2A2A2; border-style:none solid solid; border-width:medium 0px 1px; padding-left:20px; position:relative;
+			z-index:0; #background:url("../images/soap_sprite_12.gif") no-repeat scroll 5px 2px transparent; }
+
+			.menuCont{border-top:solid 1px #a2a2a2;}
+		</style>
+	<script type="text/javascript" defer="false">
+		
+		<![CDATA[ document.onclick = function(e){ var evt = window.event || e; var domElem = evt.srcElement ||
+		evt.target; if(domElem.id == 'pdBtn') return; hide('patientDetail', 'patientDetail', domElem.id); }; ]]>
+		
+	</script>
+	<zscript>
+	import com.nzion.util.UtilMisc;
+	com.nzion.zkoss.composer.appointment.ScheduleController scheduleController = new com.nzion.zkoss.composer.appointment.ScheduleController();
+	desktop.setAttribute("scheduleController", scheduleController);
+	Set locations = com.nzion.util.Infrastructure.getUserLogin().getLocations();
+</zscript>
+	<window apply="${scheduleController}" id="appointmentWindow">
+		<appointmentMenu />
+		<panel title="Doctors Day Schedule" id="panel">
+			<panelchildren style="background: #f6f7f8;">
+				<hbox style="height: 20px; background: #757575;" widths="18%, 82%" width="100%">
+					<div width="50%" align="left">
+						<toolbarbutton label="Today" onClick="scheduleController.resetToToday();" id="todayBtn"
+							style="margin-left:100px;" />
+					</div>
+					<div width="50%" align="right">
+						<toolbarbutton label="Doctors Day"
+							onClick='panel.setTitle("Doctors Day Schedule"); scheduleController.changeToDayView();' id="dayBtn" />
+						<toolbarbutton label="Doctors Week"
+							onClick='panel.setTitle("Doctors Week Schedule"); scheduleController.changeToWeekView();' id="weekBtn" />
+						<toolbarbutton label="Doctors Month"
+							onClick='panel.setTitle("Doctors Month Schedule"); scheduleController.changeToMonthView();' id="monthBtn" />
+					</div>
+				</hbox>
+				<hbox widths="18%, 82%" width="100%">
+					<div align="center">
+						<div width="95%" align="left">
+							<tabbox mold="accordion-lite">
+								<tabs align="start">
+									<tab label="Resource and Location" selected="true" />
+									<tab label="More Operations" />
+								</tabs>
+								<tabpanels>
+									<tabpanel>
+										<label value="Location" pre="true" style="font-weight: bold;" width="100%" />
+										<combobox model="@{locations}" selectedItem="@{scheduleController.location}"
+											width="160px" id="locationsCombo" />
+										<label value="Resources" style="font-weight: bold;margin-top:20px;" />
+										<n:div
+											style="overflow:auto;height:150px; border:1px solid #86A4BE;border-left:0px;border-right:0px;">
+											<listbox
+												onSelect="scheduleController.setPersons((List)com.nzion.util.ViewUtil.getSelectedItems(self))"
+												multiple="true" style="border:none;"
+												model="@{scheduleController.schedulableResourcesByLocation, load-after='locationsCombo.onChange'}">
+												<listitem self="@{each='prson'}" value="@{prson}" style="border:0px;">
+													<listcell style="border:0px;">
+														<name object="@{prson}" />
+													</listcell>
+												</listitem>
+											</listbox>
+										</n:div>
+										<calendar id="smallCalendar"
+											value="@{scheduleController.selectedDate, load-after='todayBtn.onClick'}" style="border:0px;" />
+									</tabpanel>
+									<tabpanel>
+										<div align="left">
+											<vbox width="100%">
+												<toolbarbutton label="Waiting List" id="waitingListBtn" width="100%"
+													style="color:black;" onClick="scheduleController.openWaitingListWindow()"/>
+												<toolbarbutton label="Delete all force inserts"
+													onClick="scheduleController.deleteAllForceInserteds();" style="color:black;" />
+												<toolbarbutton label="Multiple Blocks"
+													onClick='Executions.createComponents("/appointment/schedule-multi-block.zul", null, com.nzion.util.UtilMisc.toMap("controller", scheduleController));'
+													style="color:black;" />
+											</vbox>
+										</div>
+									</tabpanel>
+								</tabpanels>
+							</tabbox>
+						</div>
+					</div>
+					<div width="100%">
+						<hbox style="height:25px; background: #DCEEF8; border: 1px solid #CCCCCC; border-top:0px;"
+							width="100%" widths="23%,60%,27%">
+							<div width="100%" align="left" style="vertical-align: middle;">
+								<label id="leftDateLabel" style="font-weight: bold;font-size:12px;" />
+							</div>
+							<div width="100%" align="center" style="vertical-align: middle;">
+								<label id="centerDateLabel" style="font-weight: bold;font-size:12px;" />
+							</div>
+							<div width="100%" align="right" style="vertical-align: middle;">
+								<label id="rightDateLabel" style="font-weight: bold;font-size:12px;" />
+							</div>
+						</hbox>
+						<div id="schedulesVbox" width="100%" style="min-height:100%;" />
+					</div>
+				</hbox>
+				<space height="10px" />
+			</panelchildren>
+		</panel>
+	</window>
+</zk>

@@ -1,0 +1,106 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./createEmployee"?>
+<?component name="enumeration" class="com.nzion.view.component.EnumerationDropdown"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	com.nzion.domain.Employee employee = arg.get("entity");
+	if(employee == null)
+	    employee = new com.nzion.domain.Employee();
+</zscript>
+	<window id="createEmployee"  mode="modal" width="50%" position="center,top" >
+	<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Employee</h:small>
+                <button type="button" zclass="close" onClick="createEmployee.detach();">×</button>
+            </h:h1>
+    </div>
+	<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+					 <div zclass="span6">
+						<label value="First Name" style="text-align:right;" mold="required" id="lblfirstName" />
+						<textbox value="@{employee.firstName,save-when='Save.onClick'}" id="firstName" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"
+							 maxlength="50" onChange="com.nzion.util.UtilDisplay.validateOnlyAlphaNumericAndWhiteSpaces(self)"/>
+					</div>
+					 <div zclass="span6">
+						<label value="Last Name" style="text-align:right;" id="lbllastName" mold="required"/>
+						<textbox value="@{employee.lastName,save-when='Save.onClick'}" id="lastName" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"
+						maxlength="50" onBlur="com.nzion.util.UtilDisplay.validateOnlyAlphaNumericAndWhiteSpaces(self)"/>
+					</div>
+					</div>
+					 <div zclass="row-fluid">
+					<div zclass="span6">
+					    <label value="Code" style="text-align:right;" />
+						<textbox  sclass="span12" value="@{employee.accountNumber,save-when='Save.onClick'}"
+							id="accountNumber"/>
+					</div>
+					 <div zclass="span6">
+						<label value="Gender"  id="lblgender" />
+						<enumeration id="gender" enumType="GENDER" sclass="span12" selectedItem="@{employee.gender,save-when='Save.onClick'}">
+						</enumeration>
+				  </div>
+				  </div>
+				  	<div zclass="row-fluid">
+				  	 <div zclass="span4">
+						<label value="e-mail" />
+						<email id="emailAddr" value="@{employee.contacts.email,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" />
+					</div>
+					 <div zclass="span4">
+				       <label value="Office phone" />
+						<phonebox value="@{employee.contacts.officePhone,save-when='Save.onClick'}" cols="10" sclass="span12" />
+						</div>
+						<div zclass="span4">
+							<label value="Fax" />
+							<phonebox value="@{employee.contacts.faxNumber,save-when='Save.onClick'}" cols="10" sclass="span12" />
+						</div>
+			</div>
+		       <div zclass="row-fluid">
+					 <div zclass="span6">
+					<label value="Address1" id="lbladdress1"  mold="required"/>
+						<textbox rows="2" cols="50" value="@{employee.contacts.postalAddress.address1,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"
+							id="address1" maxlength="50"/>
+					</div>
+					 <div zclass="span6">
+					<label value="Address2" style="text-align:right;" id="lbladdress2" />
+						<textbox rows="2" cols="50" value="@{employee.contacts.postalAddress.address2,save-when='Save.onClick'}" sclass="span12" 
+							id="address2" maxlength="50"/>
+					</div>
+			    </div>
+					
+					<div zclass="row-fluid">
+					 <div zclass="span4">
+						<label value="City" id="lblcity" mold="required"/>
+						<textbox cols="22" value="@{employee.contacts.postalAddress.city,save-when='Save.onClick'}" 
+							id="city" maxlength="50" onBlur="com.nzion.util.UtilDisplay.validateNonDigits(self)" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"/>
+					</div>
+					 <div zclass="span4">
+						<label value="State" id="lblstate" mold="required"/>
+						<enumeration id="state" enumType="STATE" itemRenderer="${stateRenderer}"
+							value="@{employee.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" />
+					</div>
+					 <div zclass="span4">
+						<label value="Postal code" id="lblpostalCode" mold="required" />
+						<zipcodebox value="@{employee.contacts.postalAddress.postalCode,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+							id="postalCode" constraint="no empty"/>
+					</div>
+					</div>
+					
+
+					</div>
+		
+		<div sclass="panelFoot">
+			<button label="Save" id="Save" visible="true" zclass="btn-success btn">
+				<attribute name="onClick">
+				try{
+				commonCrudService.save(employee);
+				createEmployee.detach();
+			    com.nzion.util.UtilMessagesAndPopups.showSuccess();
+				//createEmployee.detach();	
+				}catch(org.springframework.dao.DataIntegrityViolationException e){
+					throw new RuntimeException("User code'"+employee.getAccountNumber()+"' already exists.");
+				}
+				</attribute>
+			</button>
+			<button label="Close" id="Close" onClick='createEmployee.detach();'/>
+		</div>
+	</window>
+</zk>

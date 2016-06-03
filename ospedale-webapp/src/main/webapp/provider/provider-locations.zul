@@ -1,0 +1,61 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<div sclass="gridCont">
+<zscript>
+	List locations = commonCrudService.getAll(com.nzion.domain.Location.class);
+</zscript>	
+		<div sclass="panelHeadTop pagination">
+			<div sclass="fl">
+				<a href="#" label="Visiting Locations" />
+			</div>
+			<div sclass="fr">
+				<paging detailed="true" id="listboxPaging" pageSize="10" pageIncrement="1" />
+			</div>
+		</div>
+		<n:table border="0" cellspacing="0" cellpadding="0">
+			<n:thead>
+				<n:tr>
+					<n:td>
+						<a href="#" class="addBtn" label="Add" id="addLocationBtn"
+							onClick='controller.addLocation()' />
+						<a href="#" class="delBtn" id="deleteLocationBtn" label="Delete"
+							onClick='deleteLocations()' />
+					</n:td>
+					<n:td>
+						<label value="Select Location" />
+						<combobox selectedItem="@{controller.location}" width="250px">
+							<comboitem value="${each}" label="${each.name}"	forEach="${locations}" />
+						</combobox>
+					</n:td>
+				</n:tr>
+			</n:thead>
+		</n:table>
+		<listbox id="locationsGrid" multiple="true" paginal="${listboxPaging}"
+			model="@{controller.provider.locations, load-after='addLocationBtn.onClick,deleteLocationBtn.onClick'}" mold="paging"
+			pageSize="5" checkmark="true" rows="2">
+			<listhead>
+				<listheader label="Code" />
+				<listheader label="Name" />
+			</listhead>
+			<listitem self="@{each='location'}" value="@{'location'}">
+				<listcell>
+					<label value="@{location.locationCode}" />
+				</listcell>
+				<listcell>
+					<label value="@{location.name}" />
+				</listcell>
+			</listitem>
+		</listbox>
+	</div>
+	<zscript>
+	public void deleteLocations() {
+	if (locationsGrid.getSelectedItems() != null) {
+		for (Iterator iter = locationsGrid.getSelectedItems().iterator(); iter.hasNext();) {
+			Listitem li = iter.next();
+			controller.getProvider().getLocations().remove(li.getValue());
+		}
+	}
+	}
+</zscript>
+</zk>

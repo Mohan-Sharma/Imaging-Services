@@ -1,0 +1,26 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./facesheetWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	com.nzion.zkoss.composer.PatientSoapNoteController patientSoapNoteController = arg.get("patientSoapNoteController");
+	com.nzion.domain.Patient patient = patientSoapNoteController.getPatient();
+	List personVitalSigns = personService.getPersonVitalSign(com.nzion.util.Infrastructure.getUserLogin().getPerson());
+	ListitemRenderer vitalsugnRenderer = new com.nzion.zkoss.soap.VitalSignSetListItemRenderer(personVitalSigns);
+	List patientVitalSigns = new ArrayList(soapNoteService.getLatestVitalSigns(patient,5));
+</zscript>
+	<div id="facesheetWindow" sclass="soapNoteContL col2">
+		<panel id="vitalSignPanel" title="Vital Signs" collapsible="true">
+			<panelchildren>
+				<div sclass="dataTables_scrollBody" style="overflow: auto; height: 125px;">
+					<listbox model="@{patientVitalSigns,load-after='self.onReloadRequest'}" id="vitalSignsListbox"
+						itemRenderer="${vitalsugnRenderer}">
+						<listhead>
+							<listheader forEach="${renderer.preferedVitalSigns}" label="${each.name}" />
+						</listhead>
+					</listbox>
+				</div>
+			</panelchildren>
+		</panel>
+	</div>
+</zk>

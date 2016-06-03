@@ -1,0 +1,58 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./signinAppointmentModalWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+import com.nzion.zkoss.ext.EntityDropdownRenderer;
+com.nzion.zkoss.composer.appointment.SigninController controller = arg.get("controller");
+org.zkoss.zul.Listbox schedulesOfTheDayListBox = (org.zkoss.zul.Listbox)arg.get("schedulesOfTheDayListBox");
+//EntityDropdownRenderer providerRenderer = new EntityDropdownRenderer(new com.nzion.zkoss.ext.EntityDropDownPersonNameAdapter());
+String date = new java.text.SimpleDateFormat("MM/dd/yyyy").format(controller.getSelectedDate());
+List allSoapNoteTypes = scheduleService.getAllSoapNoteTypes();
+</zscript>
+<window mode="modal" id="signinAppointmentModalWindow" width="35%" title="New Appointment (${date})" closable="true">
+<panel>
+	<panelchildren>
+	<div sclass="panelCont" width="100%">
+		<div sclass="col2">
+			<label value="Provider" />
+			<providerlookup onChange="controller.getNewSchedule().setProvider(((ForwardEvent)event).getOrigin().getData());" id="providerDropdown"/><!-- 
+			<combobox selectedItem="@{controller.newSchedule.provider}" 
+			id="providerDropdown" model="@{controller.providers}" itemRenderer="${providerRenderer}" constraint="no empty"/>
+		--></div>
+		<div sclass="col2">
+			<label value="Locations" /> 
+			<combobox model="@{controller.newSchedule.provider.locations, load-after='providerDropdown.onChange'}" 
+					selectedItem="@{controller.newSchedule.location}" >
+				<comboitem self="@{each='l'}" label="@{l.name}" value="@{l}"/>
+			</combobox>
+		</div>
+ 		<div sclass="col2">
+			<label value="Patient"/>  	
+			<lookup id="patientAccountNumber" onChange="controller.changePatient(self.getValue())"
+							entity="com.nzion.domain.Patient" searchcolumns="accountNumber, firstName" 
+							displaycolumns="accountNumber, firstName,lastName" requiredcolumn="accountNumber" />
+		    <name id="patientName" object="@{controller.newSchedule.patient, load-after='patientAccountNumber.onChange'}"/>
+		</div>
+ 		<div sclass="col2">
+			<label value="Visit Type"/>
+			<combobox model="@{allSoapNoteTypes}" selectedItem="@{controller.newSchedule.slotType}" >
+				<comboitem self="@{each='soapNoteType'}" label="@{soapNoteType.name}" value="@{soapNoteType}"/>
+			</combobox>  	
+		</div>
+		<div sclass="col2">
+			<label value="Time"/>
+			<timebox value="@{controller.newSchedule.startTime}" width="50%" 
+			onCreate='self.setValue(com.nzion.util.UtilDateTime.timeOnly());Events.postEvent("onChange", self, null);' /> 
+		</div> 
+	</div>
+	</panelchildren>
+</panel>
+<div sclass="panelFoot">
+	<button label="Create" id="createBtn"
+	 onClick='controller.createNewAppointment(schedulesOfTheDayListBox, signinAppointmentModalWindow);' />
+	<button label="Cancel" forward="onClick=onCancel"/>
+</div>
+</window>
+</zk>

@@ -1,0 +1,31 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+	import com.nzion.zkoss.composer.SoapSentenceComposer;
+	import com.nzion.domain.emr.soap.ChiefComplainSection;
+	import com.nzion.domain.emr.soap.LabOrderSection;
+	SoapSentenceComposer sentenceComposer = (SoapSentenceComposer) arg.get("controller");
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	LabOrderSection labOrderSection = (LabOrderSection) sentenceComposer.getSoapNoteController().getSoapSection(LabOrderSection.class,false);
+	sentenceComposer.setSelectedSection(labOrderSection);
+</zscript>
+	<div style="margin-left:10px" if="${empty labOrderSection.labOrder}">
+	<n:h2>${labOrderSection.soapModule.moduleDescription}</n:h2>
+	<label value="No Tests were ordered"/>
+	</div>
+	<div style="margin-left:10px" if="${not empty labOrderSection.labOrder}">
+		<n:h2>${labOrderSection.soapModule.moduleDescription}</n:h2>
+		<n:br />
+		<n:h3>Tests Ordered</n:h3>
+		<n:ol>
+			<n:li forEach="${labOrderSection.labOrder}">
+				<label value="${each.testName}" />
+			</n:li>
+		</n:ol>
+		<n:br />
+	</div>
+	
+</zk>

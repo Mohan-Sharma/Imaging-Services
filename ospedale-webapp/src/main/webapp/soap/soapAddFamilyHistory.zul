@@ -1,0 +1,135 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addFamilyHistorySection"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xmlns:w="http://www.zkoss.org/2005/zk/client">
+<zscript>
+	import com.nzion.domain.emr.soap.FamilyHistorySection;
+	import com.nzion.domain.emr.soap.PatientFamilyIllness;
+	import com.nzion.zkoss.ext.EntityDropdownRenderer;
+	import com.nzion.domain.emr.FamilyMember;
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	com.nzion.zkoss.composer.PatientSoapNoteController controller = (com.nzion.zkoss.composer.PatientSoapNoteController)arg.get("controller");
+	PatientFamilyIllness patientFamilyIllness = (PatientFamilyIllness)arg.get("patientFamilyIllness");
+	FamilyHistorySection familyHistorySection =  (FamilyHistorySection)arg.get("familyHistorySection");
+	
+	if(com.nzion.util.UtilValidator.isEmpty(familyHistorySection.getFamilyIllnesses()))
+		familyHistorySection.setFamilyIllnesses(new HashSet());
+			
+	Set familyHistories = new HashSet();
+	List familyMembers = commonCrudService.getAll(FamilyMember.class);
+	
+	EntityDropdownRenderer relationshipnameRenderer = new EntityDropdownRenderer("relationshipName");
+	EntityDropdownRenderer nameRenderer = new EntityDropdownRenderer("name");
+	List patientFamilyMembers = patientService.getFamilyMembers(controller.getPatient());
+	List allfamilyMembers;
+</zscript>
+	<window id="addFamilyHistorySection" width="55%" closable="true" title="Family History" mode="modal">	
+			<div class="container-fluid" id="editFamilyIllness">
+			<div zclass="row-fluid">
+			<div zclass="span11">
+				    <label value="Illness"  mold="required" />
+					<textbox id="icdLookupTextBox" sclass="span12"   w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+					 value="@{patientFamilyIllness.icd.description,load-after='editFamilyIllness.onReloadRequest'}" readonly="true" rows="3" />
+					
+					<n:div>
+						<a zclass="lookupbtn" disabled="${controller.readonly}">
+						<n:i class="icon-plus-sign"></n:i>
+							<attribute name="onClick">
+								Executions.createComponents("/diagnosis/icdSearch.zul",null,com.nzion.util.UtilMisc.toMap("icdLookupTextBox", icdLookupTextBox,"multiple",false,"patientFamilyIllness",patientFamilyIllness));
+							</attribute>
+							Lookup
+						</a>
+					</n:div>
+					</div>
+					</div>
+						
+						<div zclass="row-fluid">
+						 <div zclass="span5">
+							<label value="Relationship Type" mold="required"/>
+							<combobox id="familymembersCombobox" sclass="span12"  w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" model="@{familyMembers,load-after='editFamilyIllness.onReloadRequest'}"
+								value="@{patientFamilyIllness.member,load-after='editFamilyIllness.onReloadRequest'}" readonly="true"
+								itemRenderer="${relationshipnameRenderer}" >
+							</combobox>
+						  </div>
+						  <div zclass="span4">
+							<label value="Member Name" />
+							<textbox sclass="span12"  w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" value="@{patientFamilyIllness.name}" />
+						  </div>
+						</div>
+						<div zclass="row-fluid">
+							<div zclass="span5">
+								<label value="Status" mold="required"/>
+								<combobox sclass="span12" constraint="no empty"  w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" id="statusCombobox" selectedItem="@{patientFamilyIllness.status,load-after='editFamilyIllness.onReloadRequest'}" readonly="true">
+									<comboitem label="Active" value="Active"/>
+									<comboitem label="Inactive" value="Inactive"/>
+								</combobox>
+							</div>
+							<div zclass="span4">
+								<label value="Health Status"  />
+								<enumeration enumType="PROBLEM_HEALTH_STATUS_CODE" selectedItem="@{patientFamilyIllness.healthStatus,load-after='editFamilyIllness.onReloadRequest'}" readonly="true"/>
+							</div>
+						</div>
+						<div zclass="row-fluid">
+							<div zclass="span5">
+								<label value="Birth Year"  />
+								<intbox sclass="span12"  w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" id="birthYearIntbox"  constraint="no negative:Only +ve Number Required" value="@{patientFamilyIllness.birthYear,load-after='editFamilyIllness.onReloadRequest'}">
+									<attribute name="onChange">
+									<![CDATA[
+										int currentYear = new Date().getYear()+1900;
+										if(self.getValue() != null){
+										int enteredValue = self.getValue();
+										if(enteredValue > currentYear)
+											throw new WrongValueException(birthYearIntbox,"Only Past Year Required");
+										ageBox.setValue(currentYear - enteredValue);
+										}
+									]]>	
+									</attribute>
+								</intbox>
+							</div>
+							<div zclass="span5">
+								<label value="Age"   />
+								<intbox sclass="span12"  w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" id="ageBox" constraint="no negative:Only +ve Number Required"
+									value="@{patientFamilyIllness.age,load-after='editFamilyIllness.onReloadRequest'}"/>
+							</div>
+						</div>
+						<div zclass="row-fluid">
+							<div zclass="span5">
+								<label value="OnSet Date" />
+								<datebox sclass="span12" value="@{patientFamilyIllness.approximateDate,load-after='editFamilyIllness.onReloadRequest'}" />
+							</div>
+							<div zclass="span5">
+								<label value="Comments" />
+								<textbox sclass="span12"  w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" rows="2" cols="50"  style="font-size:15px"
+										value="@{patientFamilyIllness.diseaseInfo,load-after='editFamilyIllness.onReloadRequest'}" />
+							</div>
+						</div>
+					</div>
+					<separator></separator>
+						<div sclass="col2" width="90%">
+							<include src="/soap/soapAuditInfo.zul" record="${patientFamilyIllness}" id="auditInfoInclude"/>
+						</div>	
+						<div sclass="panelFoot">
+							<button disabled="${controller.readonly}" id="Save" zclass="btn-success btn" label="Add">
+								<attribute name="onClick">
+									if(patientFamilyIllness.getIcd() == null)
+										throw new WrongValueException(icdLookupTextBox,"Cannot be empty");
+									if(patientFamilyIllness.getMember() == null)
+										throw new WrongValueException(familymembersCombobox,"Relationship Required");
+									if(patientFamilyIllness.getStatus() == null)	
+										throw new WrongValueException(statusCombobox,"Status Required");
+									if(patientFamilyIllness.getId()==null){
+									familyHistorySection.addFamilyIllness(patientFamilyIllness);
+									controller.saveSoapSection();
+									}
+									else{
+									  commonCrudService.save(patientFamilyIllness);	
+									}
+									Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null);
+									addFamilyHistorySection.detach();
+								</attribute>
+							</button>
+						</div>
+</window>
+</zk>

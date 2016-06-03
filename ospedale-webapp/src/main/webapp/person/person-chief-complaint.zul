@@ -1,0 +1,33 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./personChiefComplaintWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?component name="toolbar" macro-uri="/toolbar.zul"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window  id="personChiefComplaintWin">
+	<zscript>
+	com.nzion.zkoss.composer.PersonProfileController profileController = desktop.getAttribute("profileController");
+	List personChiefComplaints = profileController.getPersonFavourites(com.nzion.domain.person.PersonChiefComplaint.class);
+	</zscript>
+	<div sclass="panelTop">
+		<button label="Save" onClick="profileController.saveFavourites(personChiefComplaints);"/>
+	</div>
+	<panel title="Person Chief Complaint" id="chiefComplaintPanel" 
+	onAddClick='profileController.favouriteAddClicked(personChiefComplaintWin, personChiefComplaintDisplayGrid, personChiefComplaints,"/person/add-person-chief-complaints.zul")'
+	onDeleteClick="profileController.deleteFavourites(personChiefComplaintDisplayGrid, personChiefComplaints)">
+		<panelchildren>
+		<toolbar listenercomponent="${chiefComplaintPanel}" hidecancel="true" hidesearch="true"/>
+		<listbox multiple="true" id="personChiefComplaintDisplayGrid" checkmark="true" mold="paging" pageSize="10" pagingPosition="top"
+				model="@{personChiefComplaints,load-after='self.onReloadRequest'}">
+		<listhead>
+			<listheader label="Chief Complaint"/>
+		</listhead>
+			<listitem self="@{each='personChiefComplaint'}" value="@{personChiefComplaint}" >
+			<listcell>
+				<label value="@{personChiefComplaint.chiefComplaint.complainName}" />
+			</listcell>
+			</listitem>
+		</listbox>
+		</panelchildren>
+	</panel>
+</window>
+</zk>

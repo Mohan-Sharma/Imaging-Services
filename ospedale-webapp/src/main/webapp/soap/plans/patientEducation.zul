@@ -1,0 +1,141 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientEducationWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	com.nzion.zkoss.composer.SoapRecommendationController recommendationController = rc;
+</zscript>
+	<window id="patientEducationWindow">
+		<zscript>
+	import com.nzion.domain.emr.soap.RecommendationSection;
+	com.nzion.zkoss.composer.PatientSoapNoteController soapNoteController = recommendationController.soapNoteController;
+	Set selectedIcdDocs = new HashSet();
+	Set selectedCptDocs = new HashSet();
+	Set selectedMedicationDocs = new HashSet();
+	Set selectedLabOrderDocs = new HashSet();
+	
+	Set docs = new HashSet(com.nzion.util.UtilValidator.isEmpty(recommendationController.getPatientEducationPlan().getDownLoadedDocuments()) ? Collections.emptySet() :
+	 recommendationController.getPatientEducationPlan().getDownLoadedDocuments());
+	
+	public void downLoadDocuments(String zipFileName, Set selectedDocuments,com.nzion.domain.emr.soap.SOAPPlan soapPlan) {
+		recommendationController.downloadPatientEducationDocument(zipFileName,new HashSet(selectedDocuments), soapPlan,recommendationController.getRecommendationSection());
+	}
+</zscript>
+		<hlayout width="100%" style="text-align: center;">
+			<label value="Select Language" />
+			<enumeration enumType="LANGUAGE" id="languageEnum" value="@{recommendationController.language}"
+				readonly="true">
+				<attribute name="onSelect">
+					recommendationController.getFilteredDocuments(self.getSelectedItem().getValue().getDescription());
+				</attribute>
+			</enumeration>
+		</hlayout>
+		<label value="Diagnosis" />
+		<listbox model="@{recommendationController.filteredIcdDos,load-after='languageEnum.onSelect'}"
+			id="icdDocsListBox" rows="5" checkmark="true" multiple="true"
+			selectedItem="@{docs,converter='com.nzion.view.component.MultipleListitemBindingConverter'}">
+			<listhead>
+				<listheader label="Language" />
+				<listheader label="File" />
+				<listheader label="Diagnosis Codes" />
+			</listhead>
+			<listitem self="@{each='icdDoc'}" value="@{icdDoc}">
+				<listcell label="@{icdDoc.language}" />
+				<listcell>
+					<a label="@{icdDoc.file.fileName}" disabled="${soapNoteController.readonly}"
+						onClick='recommendationController.downloadIndividualDocument(selectedIcdDocs,self.getParent().getParent().getValue(),"Pateint-Education.zip");' />
+				</listcell>
+				<listcell label="@{soapNoteController,converter='com.nzion.view.component.CodeListToStringConverter'}"/>
+			</listitem>
+		</listbox>
+		<div sclass="panelFoot">
+			<button label="Download" disabled="${soapNoteController.readonly}">
+				<attribute name="onClick">
+					selectedIcdDocs.addAll(com.nzion.util.ViewUtil.getSelectedItems(icdDocsListBox));
+					recommendationController.soapNoteController.setEventMessage("Diagnosis Document downloaded from Patient Education");
+					downLoadDocuments("Patient-Education.zip", selectedIcdDocs, recommendationController.getPatientEducationPlan());
+				</attribute>
+			</button>
+		</div>
+		<label value="Procedures" />
+		<listbox model="@{recommendationController.filteredCptDocs,load-after='languageEnum.onSelect'}" rows="5"
+			id="cptDocumentsListBox" checkmark="true" multiple="true"
+			selectedItem="@{docs,converter='com.nzion.view.component.MultipleListitemBindingConverter'}">
+			<listhead>
+				<listheader label="Language" />
+				<listheader label="File" />
+				<listheader label="Procedures Codes" />
+			</listhead>
+			<listitem self="@{each='cptDoc'}" value="@{cptDoc}">
+				<listcell label="@{cptDoc.language}" />
+				<listcell>
+					<a label="@{cptDoc.file.fileName}" disabled="${soapNoteController.readonly}"
+						onClick='recommendationController.downloadIndividualDocument(selectedCptDocs,self.getParent().getParent().getValue(),"Pateint-Education.zip");' />
+				</listcell>
+				<listcell label="@{soapNoteController,converter='com.nzion.view.component.CodeListToStringConverter'}"/>
+			</listitem>
+		</listbox>
+		<div sclass="panelFoot">
+			<button label="Download" disabled="${soapNoteController.readonly}">
+				<attribute name="onClick">
+					selectedCptDocs.addAll(com.nzion.util.ViewUtil.getSelectedItems(cptDocumentsListBox));
+					recommendationController.soapNoteController.setEventMessage("CPT Document downloaded from Patient Education");
+					downLoadDocuments("Pateint-Education.zip", selectedCptDocs, recommendationController.getPatientEducationPlan());
+				</attribute>
+			</button>
+		</div>
+		<label value="Medications" />
+		<listbox model="@{recommendationController.filteredMedicationDocs,load-after='languageEnum.onSelect'}" rows="5"
+			checkmark="true" multiple="true" id="medicationDocumentsListBox"
+			selectedItem="@{docs,converter='com.nzion.view.component.MultipleListitemBindingConverter'}">
+			<listhead>
+				<listheader label="Language" />
+				<listheader label="File" />
+				<listheader label="Medications" />
+			</listhead>
+			<listitem self="@{each='medDoc'}" value="@{medDoc}">
+				<listcell label="@{medDoc.language}" />
+				<listcell>
+					<a label="@{medDoc.file.fileName}" disabled="${soapNoteController.readonly}"
+						onClick='recommendationController.downloadIndividualDocument(selectedMedicationDocs,self.getParent().getParent().getValue(),"Pateint-Education.zip");' />
+				</listcell>
+				<listcell label="@{soapNoteController,converter='com.nzion.view.component.CodeListToStringConverter'}"/>
+			</listitem>
+		</listbox>
+		<div sclass="panelFoot">
+			<button label="Download" disabled="${soapNoteController.readonly}">
+				<attribute name="onClick">
+					selectedMedicationDocs.addAll(com.nzion.util.ViewUtil.getSelectedItems(medicationDocumentsListBox));
+					recommendationController.soapNoteController.setEventMessage("Medication Document downloaded from Patient Education");
+					downLoadDocuments("Pateint-Education.zip", selectedMedicationDocs, recommendationController.getPatientEducationPlan());
+				</attribute>
+			</button>
+		</div>
+		<label value="Lab Orders" />
+		<listbox model="@{recommendationController.filteredLabOrderDocs,load-after='languageEnum.onSelect'}" rows="5"
+			checkmark="true" multiple="true" id="labOrderDocumentsListBox"
+			selectedItem="@{docs,converter=com.nzion.view.component.MultipleListitemBindingConverter}">
+			<listhead>
+				<listheader label="Language" />
+				<listheader label="File" />
+				<listheader label="Lab Test Panel Name" />
+			</listhead>
+			<listitem self="@{each='labOrderDoc'}" value="@{labOrderDoc}">
+				<listcell label="@{labOrderDoc.document.language}" />
+				<listcell>
+					<a label="@{labOrderDoc.document.file.fileName}" disabled="${soapNoteController.readonly}"
+						onClick='recommendationController.downloadIndividualDocument(selectedLabOrderDocs,self.getParent().getParent().getValue(),"Pateint-Education.zip");' />
+				</listcell>
+				<listcell label="@{soapNoteController,converter='com.nzion.view.component.CodeListToStringConverter'}"/>
+			</listitem>
+		</listbox>
+		<div sclass="panelFoot">
+			<button label="Download" disabled="${soapNoteController.readonly}">
+				<attribute name="onClick">
+					selectedLabOrderDocs.addAll(com.nzion.util.ViewUtil.getSelectedItems(labOrderDocumentsListBox));
+					recommendationController.soapNoteController.setEventMessage("Lab Order Document downloaded from Patient Education");
+					downLoadDocuments("Pateint-Education.zip", selectedLabOrderDocs, recommendationController.getPatientEducationPlan());
+				</attribute>
+			</button>
+		</div>
+	</window>
+</zk>

@@ -1,0 +1,46 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./personLookup"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<window title="Employee Lookup" id="personLookup" mode="modal" width="40%" position="center" closable="true">
+<zscript>
+	import com.nzion.domain.Person;
+	char[] ALPHABETS = com.nzion.util.Constants.ALPHABETS;
+	List masterData = componentRepository.getMasterDataStartingWith(Person.class,"A","firstName");
+	Textbox textBoxToPerson = arg.get("textBoxToPerson");
+</zscript>
+	<div width="97%" style="padding:5px">
+	<panel id="personLookupPanel">
+		<panelchildren>
+		<vbox>
+			<hbox>
+				<toolbarbutton forEach="${ALPHABETS}" label="${each}" width="15px;"
+				onClick='masterData=componentRepository.getMasterDataStartingWith(Person.class,self.getLabel(),"firstName");
+				masterDataDisplayGrid.setModel(new BindingListModelList(masterData,false));'/></hbox>
+		</vbox>	
+			<listbox model="@{masterData}" mold="paging" id="masterDataDisplayGrid"  rows="10"
+				 pagingPosition="both"> 
+				<listhead>
+					<listheader label="Name" />
+				</listhead>
+				<listitem self="@{each='person'}" value="@{person}">
+					<listcell>
+						<name object="@{person}"/>
+					</listcell>
+					<attribute name="onClick">
+					Person p = self.getValue();
+					textBoxToPerson.setValue(com.nzion.util.ViewUtil.getFormattedName(p));
+					Events.postEvent("onChange", textBoxToPerson, p);
+					personLookup.detach();
+					</attribute>
+				</listitem>
+			</listbox>
+		</panelchildren>
+	</panel>
+	<div sclass="panelFoot">
+		<button label="Close" forward="onClick=onCancel"/>
+	</div>
+	</div>
+</window>
+</zk>

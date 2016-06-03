@@ -1,0 +1,84 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./labTestproductLookupWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+        com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+        com.nzion.repository.common.CommonCrudRepository commonCrudRepository = com.nzion.util.Infrastructure.getSpringBean("commonCrudRepository");
+		List productCategoryList=commonCrudService.getAll(com.nzion.domain.product.ProductCategory.class);
+		Textbox productTextBox = arg.get("productTextBox");
+		com.nzion.zkoss.composer.emr.lab.LabController lController=arg.get("lc");
+		com.nzion.domain.emr.lab.LabTestPanel lPanel=lController.getLabTestPanel();
+		
+	]]>
+	</zscript>
+	<window id="labTestproductLookupWindow" mode="modal" width="60%" title="Product Lookup Screen" >
+		<panel title="Search Products By Category">
+			<panelchildren>
+				<div sclass="panelCont pannelPadding">
+					<div >
+						<label value="Choose Category" />
+						 <combobox id="categoryCombobox"  model="@{productCategoryList}"   >
+        <attribute name="onSelect">
+						<![CDATA[
+    com.nzion.domain.product.ProductCategory pc=(com.nzion.domain.product.ProductCategory)self.getSelectedItem().getValue();
+	List productList=commonCrudRepository.findByEquality(com.nzion.domain.product.Product.class, new String[] { "productCategory" },new Object[] {pc});
+	searchLabel.setVisible(com.nzion.util.UtilValidator.isEmpty(productList));
+	labDisplayGrid.setVisible(com.nzion.util.UtilValidator.isNotEmpty(productList));
+	configPanel.setVisible(productList.size()>5);
+						]]>
+						</attribute>
+						 <comboitem self="@{each='productCategory'}" label="@{productCategory.name}" value="@{productCategory}"/>
+        </combobox>
+						</div>
+					</div>
+				<div sclass="dataTables_scrollBody" height="300px" style="overflow:auto">
+				 <label id="searchLabel" value="No Record Found" visible="false" /> 
+				<paging id="configPanel" visible="false"></paging>
+					<listbox model="@{productList,load-after='self.onReloadRequest,categoryCombobox.onSelect'}" visible="false" id="labDisplayGrid" mold="paging" paginal="${configPanel}">
+						<listhead>
+							
+							<listheader label="Product Code" />
+								<listheader label="Product Name" />
+							<listheader label="Product Type" />
+							
+						</listhead>
+						<listitem self="@{each='product'}" value="@{product}">
+							
+							<listcell>
+								<label value="@{product.productDetails.productCode}" />
+							</listcell>
+							<listcell>
+								<label value="@{product.productDetails.productName}" />
+							</listcell>
+							<listcell>
+								<label value="@{product.productDetails.productType}" />
+							</listcell>
+							
+							
+							<attribute name="onDoubleClick">
+							com.nzion.domain.product.Product product= (com.nzion.domain.product.Product) self.getValue();
+								if(productTextBox!=null){
+								productTextBox.setValue(product.getProductDetails().getProductName());
+								lPanel.setProduct(product);
+								Events.postEvent("onChange", productTextBox, product);
+								labTestproductLookupWindow.detach();
+								}
+								
+							</attribute>
+						</listitem>
+					</listbox>
+				</div>
+			</panelchildren>
+		</panel>
+		
+		<div sclass="buttonPanel">
+			<button label="Cancel">
+			<attribute name="onClick">
+			labTestproductLookupWindow.detach();
+			</attribute>
+			</button>
+		</div>
+	</window>
+</zk>

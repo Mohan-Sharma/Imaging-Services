@@ -1,0 +1,47 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+
+<zscript><![CDATA[
+import 	com.nzion.domain.Provider;
+Provider provider = providerService.getProvider(Executions.getCurrent().getDesktop().getAttribute("provider").getId());
+List familyillnesses= commonCrudService.getAll(com.nzion.domain.emr.FamilyIllness.class);
+
+]]></zscript>
+	<div sclass="panelFoot">
+		<button label="Save" > 
+		<attribute name="onClick">
+			commonCrudService.save(provider);
+			com.nzion.util.UtilMessagesAndPopups.showSuccess();
+		</attribute>
+		</button>
+	</div>
+			<panel title="Provider Family Illness">
+				<panelchildren>
+				<listbox width="100%" multiple="true" checkmark="true" id="familyIllnessList">
+				<attribute name="onSelect">
+					provider.getFamilyIllness().clear();
+					provider.getFamilyIllness().addAll((List)com.nzion.util.ViewUtil.getSelectedItems(self));
+				</attribute>
+				<attribute name="onCreate">
+				<![CDATA[
+					List list=familyIllnessList.getChildren();
+					for(int i = 1; i < list.size();++i){
+						Listitem currentItem = (Listitem)list.get(i);
+						if(provider.getFamilyIllness().contains(currentItem.getValue()))
+							currentItem.setSelected(true);
+					}
+				]]>
+				</attribute>
+					<listhead>
+						<listheader label="Name"/>
+					</listhead>
+					<listitem forEach="${familyillnesses}" value="${each}" >
+						<listcell>
+							<label value="${each.illnessDesc}" />
+						</listcell>
+					</listitem>
+		</listbox>
+		</panelchildren>
+	</panel>	
+</zk>

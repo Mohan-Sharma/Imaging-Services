@@ -1,0 +1,88 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapPatientVitalSignsWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window id="soapPatientVitalSignsWin" mode="modal" closable="true" width="50%" title="Record Vital Signs">
+		<zscript>
+	com.nzion.domain.emr.soap.PatientVitalSignSet patientVitalSignSet = arg
+			.get("entity");
+	boolean isProvider = com.nzion.domain.Roles
+			.hasRole(com.nzion.domain.Roles.PROVIDER);
+</zscript>
+		<div sclass="panelTop">
+			<button label="Add" id="addBtn">
+				<attribute name="onClick">
+				<![CDATA[
+	if (!patientVitalSignSet.hasRecordings())
+		return;
+	soapNoteService.addDerivedValues(patientVitalSignSet);
+	soapPatientVitalSignsWin.detach();
+]]>
+				</attribute>
+			</button>
+			<button label="Cancel" forward="onClick=onCancel" />
+		</div>
+		<panel>
+			<panelchildren>
+				<separator />
+				<vlayout>
+					<hbox style="margin-left:10px;">
+						<vbox>
+							<label value="Name" />
+							<textbox value="@{patientVitalSignSet.name, save-when='addBtn.onClick'}" />
+						</vbox>
+						<vbox width="90%">
+							<hbox>
+								<label value="Recorded On" />
+								<label value="*" style="color:red" />
+							</hbox>
+							<datebox value="@{patientVitalSignSet.recordedOn, save-when='addBtn.onClick'}"
+								id="recordedOndateBox" constraint="no empty" format="MM/dd/yyyy hh:mm:ss a" width="120px">
+								<attribute name="onBlur">
+									if (recordedOndateBox.getValue().compareTo(
+											com.nzion.util.UtilDateTime.nowDate()) > 0) {
+										throw new WrongValueException(recordedOndateBox, "no future");
+									}
+								</attribute>
+							</datebox>
+						</vbox>
+					</hbox>
+					<vlayout style="margin-left:10px;margin-top:8px">
+						<include src="/soap/soapAuditInfo.zul" record="${patientVitalSignSet}" />
+					</vlayout>
+				</vlayout>
+				<separator />
+				<listbox model="@{patientVitalSignSet.nonDerivedVitalSigns}">
+					<listhead>
+						<listheader label="Vital Sign" width="25%" />
+						<listheader label="Value" width="35%" />
+						<listheader label="Abnormal" width="10%" />
+						<listheader label="Comments" width="30%" />
+					</listhead>
+					<listitem self="@{each='patientVitalSign'}" value="@{patientVitalSign}">
+						<listcell>
+							<label value="@{patientVitalSign.vitalSign.name}" />
+						</listcell>
+						<listcell>
+							<decimalbox value="@{patientVitalSign.value}">
+								<attribute name="onChange">
+	self.getParent().getNextSibling().getFirstChild().setChecked(
+			self.getAttribute("patientVitalSign").validate());
+</attribute>
+								<custom-attributes patientVitalSign="@{patientVitalSign}" />
+							</decimalbox>
+							<label value="@{patientVitalSign.vitalSign.unitOfMeasurement.code}" />
+						</listcell>
+						<listcell>
+							<checkbox checked="@{patientVitalSign.abnormal}" disabled="${!isProvider}" />
+						</listcell>
+						<listcell>
+							<textbox value="@{patientVitalSign.comments}" width="90%" />
+						</listcell>
+					</listitem>
+				</listbox>
+			</panelchildren>
+		</panel>
+	</window>
+</zk>
+

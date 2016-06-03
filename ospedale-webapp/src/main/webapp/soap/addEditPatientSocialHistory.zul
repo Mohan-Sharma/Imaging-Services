@@ -1,0 +1,987 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addEditSocialWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+	<zscript><![CDATA[
+	import com.nzion.enums.SmokingStatusEnum;
+	com.nzion.service.SoapNoteService soapNoteService = com.nzion.util.Infrastructure.getSpringBean("soapNoteService");
+	com.nzion.zkoss.composer.PatientSoapNoteController controller = arg.get("controller");
+	com.nzion.domain.emr.soap.SocialHistorySection socialHistorySection = arg.get("socialHistorySection");
+	com.nzion.domain.emr.soap.PatientSocialHistory patientSocialHistory = socialHistorySection.getPatientSocialHistory();
+	com.nzion.domain.emr.soap.PatientSocialHistory preceedingSocialHistory = arg.get("preceedingSocialHistory");
+	if(patientSocialHistory == null){
+		patientSocialHistory = preceedingSocialHistory != null ? preceedingSocialHistory.createCopy() : new com.nzion.domain.emr.soap.PatientSocialHistory();   
+		patientSocialHistory.setSoapSection(socialHistorySection);
+		patientSocialHistory.setPatient(controller.getPatient());
+	}
+	socialHistorySection.setPatientSocialHistory(patientSocialHistory);
+	boolean isFemale = "Female".equalsIgnoreCase(controller.getPatient().getGender() == null ? null : controller.getPatient().getGender().getDescription());
+	List smokingStatuses = Arrays.asList(SmokingStatusEnum.values());
+	void setDivVisible(Radio radio, Div div, Boolean b) {
+		if (b == null)
+			return;
+		radio.setSelected(b);
+		div.setVisible(b);
+	}
+	
+	void setChecked(String value,Textbox textbox,com.nzion.domain.emr.soap.PatientSocialHistory history){
+	history.setBirthControlMethod(value);
+	textbox.setVisible(false);
+	history.setOtherMethodOfBirthControl(null);	
+	}
+	
+	void setPatientLivingArrangement(com.nzion.domain.emr.soap.PatientSocialHistory patientSocialHistory,Textbox txtBox,String value){
+	patientSocialHistory.setLivingArrangement(value);
+	txtBox.setVisible(false);
+	patientSocialHistory.setOtherLivingArrangement(null);
+	}
+	
+	void setSmokingDivVisible() {
+		if (patientSocialHistory.getSmokingStatus() != null
+				&& !(SmokingStatusEnum.NEVER_SMOKER.equals(
+						patientSocialHistory.getSmokingStatus()) || SmokingStatusEnum.UNKNOWN
+						.equals(patientSocialHistory.getSmokingStatus()))) {
+			((Div) addEditSocialWindow.getFellow("cigrattesDiv")).setVisible(true);
+		} else {
+			((Div) addEditSocialWindow.getFellow("cigrattesDiv")).setVisible(false);
+		}
+	}
+]]></zscript>
+	<window id="addEditSocialWindow" height="90%" width="90%" mode="modal" closable="true" >
+	
+			<panel title="Social History" collapsible="true" border="none">
+				<panelchildren style="background-color:#F9F9F9;border:0px;">
+					<div style="margin:10px">
+						<div align="center" style="margin:10px">
+						<button label="Save" zclass="btn btn-success" onClick='Events.postEvent("onClick",saveBtn,null)'/>
+						<button label="Cancel" onClick='addEditSocialWindow.detach();'/>
+						</div>
+					<hlayout spacing="5%">
+						<hlayout spacing="40px">
+							<label value="Terminally Ill" zclass="styled" />
+							<checkbox checked="@{patientSocialHistory.terminallyIll}"/>
+						</hlayout>
+						<hlayout>
+							<label value="Occupation" zclass="styled" />
+							<enumeration  enumType="OCCUPATION" selectedItem="@{patientSocialHistory.occupation}"/>
+						</hlayout>
+						<hlayout>
+							<label value="Marital Status" zclass="styled" />
+							<enumeration  enumType="MARITAL_STATUS" 
+								selectedItem="@{patientSocialHistory.maritalStatus}" />
+						</hlayout>
+						<hlayout>
+							<label value="Hobbies" zclass="styled" />
+							<textbox value="@{patientSocialHistory.hobbies}" width="90%"/>
+						</hlayout>
+					</hlayout>
+					<div style="margin-top:10px">
+						<groupbox closable="false">
+							<caption label="Exercise"/>
+								<vlayout>
+								<hlayout style="margin:10px">
+										<label value="Do you Exercise ? " zclass="styled" />
+										<radiogroup>
+											<radio label="Yes" onCheck="patientSocialHistory.setExercise(true)"
+												onCreate="setDivVisible(self,exerciseDiv,patientSocialHistory.getExercise())" value="Yes">
+												<attribute name="onClick">
+													exerciseDiv.setVisible(true);
+													exerciseTxtBox.setVisible(false);
+												</attribute>
+											</radio>
+											<radio label="No" onCheck="patientSocialHistory.setExercise(false);exerciseTxtBox.setVisible(true);"
+												onCreate="self.setSelected(!patientSocialHistory.getExercise());exerciseTxtBox.setVisible(!patientSocialHistory.getExercise())" value="No">
+												<attribute name="onClick">
+													exerciseDiv.setVisible(false);
+												</attribute>
+											</radio>
+										</radiogroup>
+										<textbox value="@{patientSocialHistory.reasonForNotExercising}" visible="false" id="exerciseTxtBox"/>
+										</hlayout>
+										<div sclass="smokingDiv" visible="false" id="exerciseDiv" width="60%" style="margin-left:10px">
+											<div>
+											<label value="If yes please provide the following information"/>
+											<n:table border="0">
+												<n:thead>
+													<n:tr>
+														<n:th>Physical Activity</n:th>
+														<n:th>Duration(Minutes)</n:th>
+														<n:th>Frequency</n:th>
+													</n:tr>
+												</n:thead>
+												<n:tbody>
+													<n:tr>
+														<n:td align="center">
+															<combobox selectedItem="@{patientSocialHistory.physicalActivityOne}">
+																<comboitem label="Racquetball" value="Racquetball"/>
+																<comboitem label="Basketball" value="Basketball"/>
+																<comboitem label="Baseball" value="Baseball"/>
+																<comboitem label="Cycling" value="Cycling"/>
+																<comboitem label="Swimming" value="Swimming"/>
+															</combobox>
+														</n:td>
+														<n:td align="center">
+															<intbox value="@{patientSocialHistory.activityOneDuration}"/>
+														</n:td>
+														<n:td align="center">
+															<combobox selectedItem="@{patientSocialHistory.activityOneFrequency}">
+																<comboitem label="Daily" value="Daily"/>
+																<comboitem label="Weekly" value="Weekly"/>
+															</combobox>
+														</n:td>
+													</n:tr> 
+													<n:tr>
+														<n:td align="center">
+															<combobox selectedItem="@{patientSocialHistory.physicalActivityTwo}">
+																<comboitem label="Racquetball" value="Racquetball"/>
+																<comboitem label="Basketball" value="Basketball"/>
+																<comboitem label="Baseball" value="Baseball"/>
+																<comboitem label="Cycling" value="Cycling"/>
+																<comboitem label="Swimming" value="Swimming"/>
+															</combobox>
+														</n:td>
+														<n:td align="center">
+															<intbox value="@{patientSocialHistory.activityTwoDuration}"/>
+														</n:td>
+														<n:td align="center">
+															<combobox selectedItem="@{patientSocialHistory.activityTwoFrequency}">
+																<comboitem label="Daily" value="Daily"/>
+																<comboitem label="Weekly" value="Weekly"/>
+															</combobox>
+														</n:td>
+													</n:tr> 
+													<n:tr>
+														<n:td align="center" style="padding-left:20px;">
+															<textbox value="@{patientSocialHistory.otherPhysicalActivity}"/>(Other)
+														</n:td>
+														<n:td align="center">
+															<intbox value="@{patientSocialHistory.otherActivityDuration}"/>
+														</n:td>
+														<n:td align="center">
+															<combobox selectedItem="@{patientSocialHistory.otherActivityFrequency}">
+																<comboitem label="Daily" value="Daily"/>
+																<comboitem label="Weekely" value="Weekely"/>
+															</combobox>
+														</n:td>
+													</n:tr> 
+												</n:tbody>
+											</n:table>
+											</div>
+										</div>
+										<vlayout style="margin:10px">
+											<label value="Exercise Comments" zclass="styled"/>
+											<textbox value="@{patientSocialHistory.exerciseComments}" rows="3" cols="90"/>
+										</vlayout>
+									</vlayout>	
+								</groupbox>
+					</div>		
+					<div style="margin-top:10px">
+						<groupbox closable="false">
+							<caption label="Diet"/>
+								<vlayout>
+								<hlayout style="margin:10px">
+										<label value="Are you satisfied with your weight ? " zclass="styled" />
+										<radiogroup>
+											<radio label="Yes" onCheck="patientSocialHistory.setNormalWeight(true)" 
+											onCreate="self.setSelected(patientSocialHistory.getNormalWeight());" value="Yes">
+												<attribute name="onClick">
+													dietTxtBox.setVisible(false);
+												</attribute>
+											</radio>
+											<radio label="No" onCheck="patientSocialHistory.setNormalWeight(false);dietTxtBox.setVisible(true);"
+												onCreate="self.setSelected(!patientSocialHistory.getNormalWeight());dietTxtBox.setVisible(!patientSocialHistory.getNormalWeight())" value="No">
+											</radio>
+										</radiogroup>
+										<textbox value="@{patientSocialHistory.abnormalWeightReason}" visible="false" id="dietTxtBox"/>
+										</hlayout>
+										<div sclass="smokingDiv"  width="70%" style="margin-left:10px">
+											<div>
+											<label value="Diet(Please select all that apply)"/>
+											<hlayout>
+											<checkbox label="Carbohydrate Counting" value="Carbohydrate Counting" 	
+											onCreate="self.setChecked(patientSocialHistory.getPatientDiet().contains(self.getValue()))"
+											onCheck='patientSocialHistory.addOrRemoveDiet(self.getValue(), event.isChecked())'/>
+									
+											<checkbox label="Low Fat/Low Cholesterol" value="Low Fat/Low Cholesterol"
+											onCreate="self.setChecked(patientSocialHistory.getPatientDiet().contains(self.getValue()))"
+											onCheck='patientSocialHistory.addOrRemoveDiet(self.getValue(), event.isChecked())'/>
+											
+											<checkbox label="Nutritional Shakes" value="Nutritional Shakes"
+											onCreate="self.setChecked(patientSocialHistory.getPatientDiet().contains(self.getValue()))"
+											onCheck='patientSocialHistory.addOrRemoveDiet(self.getValue(), event.isChecked())'/>
+											<checkbox label="Salt" value="Salt"
+											onCreate="self.setChecked(patientSocialHistory.getPatientDiet().contains(self.getValue()))"
+											onCheck='patientSocialHistory.addOrRemoveDiet(self.getValue(), event.isChecked())'/>
+											<checkbox label="High Calorie/Weight gain" value="High Calorie/Weight gain"
+											onCreate="self.setChecked(patientSocialHistory.getPatientDiet().contains(self.getValue()))"
+											onCheck='patientSocialHistory.addOrRemoveDiet(self.getValue(), event.isChecked())'/>
+											<checkbox label="Low Salt" value="Low Salt"
+											onCreate="self.setChecked(patientSocialHistory.getPatientDiet().contains(self.getValue()))"
+											onCheck='patientSocialHistory.addOrRemoveDiet(self.getValue(), event.isChecked())'/>
+											</hlayout>
+											<hlayout>
+											<checkbox label="Regular Food" value="Regular Food"
+											onCreate="self.setChecked(patientSocialHistory.getPatientDiet().contains(self.getValue()))"
+											onCheck='patientSocialHistory.addOrRemoveDiet(self.getValue(), event.isChecked())'/>
+											<checkbox label="Vegetarian" value="Vegetarian"
+											onCreate="self.setChecked(patientSocialHistory.getPatientDiet().contains(self.getValue()))"
+											onCheck='patientSocialHistory.addOrRemoveDiet(self.getValue(), event.isChecked())'/>
+											<checkbox label="Low Calorie/Weight loss" value="Low Calorie/Weight loss"
+											onCreate="self.setChecked(patientSocialHistory.getPatientDiet().contains(self.getValue()))"
+											onCheck='patientSocialHistory.addOrRemoveDiet(self.getValue(), event.isChecked())'/>
+											<checkbox label="Low/No Lactose" value="Low/No Lactose"
+											onCreate="self.setChecked(patientSocialHistory.getPatientDiet().contains(self.getValue()))"
+											onCheck='patientSocialHistory.addOrRemoveDiet(self.getValue(), event.isChecked())'/>
+											<checkbox label="Vegan" value="Vegan"
+											onCreate="self.setChecked(patientSocialHistory.getPatientDiet().contains(self.getValue()))"
+											onCheck='patientSocialHistory.addOrRemoveDiet(self.getValue(), event.isChecked())'/>
+											</hlayout>
+											</div>
+										</div>
+										<vlayout style="margin:10px">
+											<label value="Diet Comments" zclass="styled"/>
+											<textbox value="@{patientSocialHistory.dietComments}" rows="3" cols="90"/>
+										</vlayout>
+									</vlayout>	
+								</groupbox>
+					</div>		
+					
+					<div style="margin-top:10px">
+						<groupbox closable="false">
+							<caption label="Tobacco,Alcohol and Drug Use"/>
+								<hlayout style="margin:10px">
+								<label value="Do you Smoke ? " zclass="styled" />
+								<div>
+								<combobox onSelect="setSmokingDivVisible()" id="comboboxSmoke"
+									selectedItem="@{patientSocialHistory.smokingStatus}"  model="@{smokingStatuses}">
+									<comboitem self="@{each='smokingStatus'}" value="@{smokingStatus}"
+										label="@{smokingStatus.description}">
+									</comboitem>
+								</combobox>
+								</div>
+								<div style="padding:2px" sclass="smokingDiv" 
+									id="cigrattesDiv" width="100%" visible="false">
+									<hbox width="100%" onCreate="setSmokingDivVisible()">
+										<hbox style="padding:8px">
+											<label value="Amount of Cigrattes per Day?" />
+											<intbox id="amountOfCigaretteIntbox" value="@{patientSocialHistory.cigrattesPerDay}"/>
+										</hbox>
+										<hbox style="padding:8px">
+											<label value="Duration of Cigratte Smoking?" />
+											<decimalbox value="@{patientSocialHistory.durationOfSmoking}" />
+										</hbox>
+										<hbox style="padding:8px">
+											<label value="Stopped Smoking Since?"></label>
+											<div>
+												<decimalbox
+													value="@{patientSocialHistory.stoppedSmokingSince}" />
+												<listbox mold="select"
+													selectedItem="@{patientSocialHistory.smokingTimeUnit}">
+													<listitem value="year" label="Year(s)"></listitem>
+													<listitem value="month" label="Month(s)"></listitem>
+													<listitem value="week" label="Week(s)"></listitem>
+												</listbox>
+											</div>
+										</hbox>
+									</hbox>
+								</div>
+								</hlayout>
+								<hlayout style="margin:10px">
+										<label value="Do you take Alcohol ? " zclass="styled" />
+										<radiogroup>
+											<radio label="Yes" onCheck="patientSocialHistory.setAlcohol(true)"
+												onCreate="setDivVisible(self,alcoholDiv,patientSocialHistory.getAlcohol())" value="Yes">
+												<attribute name="onClick">
+													alcoholDiv.setVisible(true);
+												</attribute>
+											</radio>
+											<radio label="No" onCheck="patientSocialHistory.setAlcohol(false)"
+												onCreate="self.setSelected(!patientSocialHistory.getAlcohol())" value="No">
+												<attribute name="onClick">
+													alcoholDiv.setVisible(false);
+												</attribute>
+											</radio>
+										</radiogroup>
+										<div style="padding:8px" sclass="smokingDiv" visible="false" id="alcoholDiv">
+											<div style="padding:8px">
+												<radiogroup>
+													<radio label="Moderate Amounts" value="Moderate Amounts"
+														onCheck="patientSocialHistory.setAmountOfAlcohol(self.getValue())"
+														onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getAmountOfAlcohol()))">
+													</radio>
+													<radio label="Heavy Amounts of Alcohol" value="Heavy Amounts"
+														onCheck="patientSocialHistory.setAmountOfAlcohol(self.getValue())"
+														onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getAmountOfAlcohol()))">
+													</radio>
+												</radiogroup>
+											</div>
+											<div style="padding:8px">
+												<label value="Amounts of Alcohol per Week?"></label>
+												<textbox value="@{patientSocialHistory.amountOfAlcoholPerWeek}" />
+											</div>
+										</div>
+										</hlayout>
+										<hlayout style="margin:10px">
+										<label value="Has history of Alcohol ? " zclass="styled" />
+										<radiogroup>
+											<radio label="Yes"
+												onCheck="patientSocialHistory.setAlcoholicHistory(true)"
+												onCreate="setDivVisible(self,alcoholicHistoryDiv,patientSocialHistory.getAlcoholicHistory());"
+												value="Yes">
+												<attribute name="onClick">
+													alcoholicHistoryDiv.setVisible(true);	
+									           </attribute>
+											</radio>
+											<radio label="No"
+												onCheck="patientSocialHistory.setAlcoholicHistory(false)"
+												onCreate="self.setSelected(!patientSocialHistory.getAlcoholicHistory());" value="No">
+												<attribute name="onClick">
+													alcoholicHistoryDiv.setVisible(false);	
+												</attribute>
+											</radio>
+										</radiogroup>
+										<div style="padding:8px" sclass="smokingDiv" visible="false"
+											id="alcoholicHistoryDiv">
+											<div style="padding:8px">
+												<label value="Stopped taking Alcohol Since?"></label>
+												<div>
+													<intbox value="@{patientSocialHistory.stoppedAlcoholSince}" />
+													<listbox mold="select"
+														selectedItem="@{patientSocialHistory.alcoholTimeUnit}">
+														<listitem value="year" label="Year(s)"></listitem>
+														<listitem value="month" label="Month(s)"></listitem>
+														<listitem value="week" label="Week(s)"></listitem>
+													</listbox>
+												</div>
+											</div>
+										</div>
+										</hlayout>
+										<hlayout style="margin:10px">
+										<label value="Have you ever taken drugs ? " zclass="styled" />
+										<radiogroup>
+											<radio label="Yes" onCheck="patientSocialHistory.setDrugIntake(true)" value="Yes"
+											onCreate="self.setSelected(patientSocialHistory.getDrugIntake());">
+											</radio>
+											<radio label="No"
+												onCheck="patientSocialHistory.setDrugIntake(false)"
+												onCreate="self.setSelected(!patientSocialHistory.getDrugIntake());" value="No">
+											</radio>
+										</radiogroup>
+										</hlayout>
+										<hlayout style="margin:10px">
+											<label value="Have you ever used needle to inject drugs?" zclass="styled"/>										
+											<radiogroup>
+												<radio label="Yes" onCheck="patientSocialHistory.setNeedleToInjectDrugs(true)" 
+												onCreate="self.setSelected(patientSocialHistory.getNeedleToInjectDrugs());" value="Yes">
+												</radio>
+												<radio label="No"
+													onCheck="patientSocialHistory.setNeedleToInjectDrugs(false)"
+													onCreate="self.setSelected(!patientSocialHistory.getNeedleToInjectDrugs());" value="No">
+												</radio>
+											</radiogroup>
+										</hlayout>
+										<vlayout style="margin:10px">	
+											<label value="Drug Comments" zclass="styled"/>
+											<textbox value="@{patientSocialHistory.drugComments}" rows="3" cols="90"/>
+										</vlayout>
+								</groupbox>
+					</div>	
+						<div style="margin-top:10px">
+						<groupbox closable="false">
+							<caption label="Safety Issues"/>
+								<vlayout>
+									<hlayout style="margin:10px">
+										<label value=" Do you use a bike helmet? " zclass="styled" />
+										<radiogroup>
+											<radio label="Yes" onCheck="patientSocialHistory.setHelmets(true)"
+												onCreate="self.setSelected(patientSocialHistory.getHelmets()!= null &amp;&amp; patientSocialHistory.getHelmets())" value="Yes">
+											</radio>
+											<radio label="No" onCheck="patientSocialHistory.setSeatBelts(false);"
+												onCreate="self.setSelected(patientSocialHistory.getHelmets()!= null &amp;&amp; !patientSocialHistory.getHelmets());" value="No">
+											</radio>
+											<radio label="Not Applicable" onCheck="patientSocialHistory.setHelmets(null);"
+												onCreate="self.setSelected(patientSocialHistory.getHelmets() == null);">
+											</radio>
+										</radiogroup>
+									</hlayout>
+									<hlayout style="margin:10px">
+										<label value="Do you use seat belts consistently? " zclass="styled" />
+										<radiogroup>
+											<radio label="Yes" onCheck="patientSocialHistory.setSeatBelts(true)"
+												onCreate="self.setSelected(patientSocialHistory.getSeatBelts()!= null &amp;&amp; patientSocialHistory.getSeatBelts())" value="Yes">
+											</radio>
+											<radio label="No" onCheck="patientSocialHistory.setSeatBelts(false);"
+												onCreate="self.setSelected(patientSocialHistory.getSeatBelts()!= null &amp;&amp; !patientSocialHistory.getSeatBelts());" value="No">
+											</radio>
+											<radio label="Not Applicable" onCheck="patientSocialHistory.setSeatBelts(null);"
+												onCreate="self.setSelected(patientSocialHistory.getSeatBelts() == null);">
+											</radio>
+										</radiogroup>
+									</hlayout>
+									<hlayout style="margin:10px">
+										<label value="Is violence at home is a concern for you? " zclass="styled" />
+										<radiogroup>
+											<radio label="Yes" onCheck="patientSocialHistory.setViolenceAtHome(true)"
+												onCreate="self.setSelected(patientSocialHistory.getViolenceAtHome()!= null &amp;&amp; patientSocialHistory.getViolenceAtHome())" value="Yes">
+											</radio>
+											<radio label="No" onCheck="patientSocialHistory.setViolenceAtHome(false);"
+												onCreate="self.setSelected(patientSocialHistory.getViolenceAtHome()!= null &amp;&amp; !patientSocialHistory.getViolenceAtHome());" value="No">
+											</radio>
+											<radio label="Not Applicable" onCheck="patientSocialHistory.setViolenceAtHome(null);"
+												onCreate="self.setSelected(patientSocialHistory.getViolenceAtHome() == null);">
+											</radio>
+										</radiogroup>
+									</hlayout>
+									<hlayout style="margin:10px">
+										<label value="Do you have a gun at home? " zclass="styled" />
+										<radiogroup>
+											<radio label="Yes" onCheck="patientSocialHistory.setGunAtHome(true)"
+												onCreate="self.setSelected(patientSocialHistory.getGunAtHome()!= null &amp;&amp; patientSocialHistory.getGunAtHome())" value="Yes">
+											</radio>
+											<radio label="No" onCheck="patientSocialHistory.setGunAtHome(false);"
+												onCreate="self.setSelected(patientSocialHistory.getGunAtHome()!= null &amp;&amp; !patientSocialHistory.getGunAtHome());" value="No">
+											</radio>
+											<radio label="Not Applicable" onCheck="patientSocialHistory.setGunAtHome(null);"
+												onCreate="self.setSelected(patientSocialHistory.getGunAtHome() == null);">
+											</radio>
+										</radiogroup>
+									</hlayout>
+									<hlayout style="margin:10px">
+										<label value="Are you afraid of anyone close to you? " zclass="styled" />
+										<radiogroup>
+											<radio label="Yes" onCheck="patientSocialHistory.setFear(true)"
+												onCreate="self.setSelected(patientSocialHistory.getFear()!= null &amp;&amp; patientSocialHistory.getFear())" value="Yes">
+											</radio>
+											<radio label="No" onCheck="patientSocialHistory.setFear(false);"
+												onCreate="self.setSelected(patientSocialHistory.getFear()!= null &amp;&amp; !patientSocialHistory.getFear());" value="No">
+											</radio>
+											<radio label="Not Applicable" onCheck="patientSocialHistory.setFear(null);"
+												onCreate="self.setSelected(patientSocialHistory.getFear() == null);">
+											</radio>
+										</radiogroup>
+									</hlayout>
+									<hlayout style="margin:10px">
+										<label value="Have you ever been hit,slapped,kicked,pushed,shoved or otherwise physcially hurt
+										by your partner or someone close to you? " zclass="styled" />
+										<radiogroup>
+											<radio label="Yes" onCheck="patientSocialHistory.setBeingHit(true)"
+												onCreate="self.setSelected(patientSocialHistory.getBeingHit()!= null &amp;&amp; patientSocialHistory.getBeingHit())" value="Yes">
+											</radio>
+											<radio label="No" onCheck="patientSocialHistory.setSeatBelts(false);"
+												onCreate="self.setSelected(patientSocialHistory.getBeingHit()!= null &amp;&amp; !patientSocialHistory.getBeingHit());" value="No">
+											</radio>
+											<radio label="Not Applicable" onCheck="patientSocialHistory.setBeingHit(null);"
+												onCreate="self.setSelected(patientSocialHistory.getBeingHit() == null);">
+											</radio>
+										</radiogroup>
+									</hlayout>
+									<hlayout style="margin:10px">
+										<label value="Has anyone forced you to have sexual activities? " zclass="styled" />
+										<radiogroup>
+											<radio label="Yes" onCheck="patientSocialHistory.setForcedSexualActivity(true)"
+												onCreate="self.setSelected(patientSocialHistory.getForcedSexualActivity()!= null &amp;&amp; patientSocialHistory.getForcedSexualActivity())" value="Yes">
+											</radio>
+											<radio label="No" onCheck="patientSocialHistory.setForcedSexualActivity(false);"
+												onCreate="self.setSelected(patientSocialHistory.getForcedSexualActivity()!= null &amp;&amp; !patientSocialHistory.getForcedSexualActivity());" value="No">
+											</radio>
+											<radio label="Not Applicable" onCheck="patientSocialHistory.setForcedSexualActivity(null);"
+												onCreate="self.setSelected(patientSocialHistory.getForcedSexualActivity() == null);">
+											</radio>
+										</radiogroup>
+									</hlayout>
+									<vlayout style="margin:10px">
+										<label value="Safety Comments"/>
+										<textbox value="@{patientSocialHistory.safetyIssueComments}" rows="3" cols="90"/>
+									</vlayout>
+									</vlayout>	
+								</groupbox>
+							</div>		
+						
+					<div style="margin-top:10px">
+						<groupbox closable="false">
+							<caption label="Activities and Trips"/>
+								<hbox widths="40%,40%">
+								<vlayout style="margin:10px">
+								<label value="Daily Activities" zclass="styled" />
+								<textbox rows="3" cols="50"
+									tooltiptext="The patient works normally for 4-6 hours every weekdays."
+									value="@{patientSocialHistory.dailyActivities}" />
+								</vlayout>
+								<vlayout style="margin:10px">
+								<label value="Any recent trips? " zclass="styled" />
+								<textbox rows="3" value="@{patientSocialHistory.outsideTripDetails}" cols="50"/>
+								</vlayout>
+								</hbox>
+						</groupbox>
+					</div>		
+					<div if="${isFemale}">
+						<groupbox>
+							<caption label="Gynecological Information"/>
+							<hlayout>
+							<vlayout>
+							<hlayout style="margin:10px">
+								<label value="Any Children ? " zclass="styled" />
+								<radiogroup>
+									<radio label="Yes" onCheck="patientSocialHistory.setAnyChildren(true)"
+										onCreate="setDivVisible(self,childrenDiv,patientSocialHistory.getAnyChildren())" value="Yes">
+										<attribute name="onClick">
+											childrenDiv.setVisible(true);
+										</attribute>
+									</radio>
+									<radio label="No" onCheck="patientSocialHistory.setAnyChildren(false)"
+										onCreate="self.setSelected(!patientSocialHistory.getAnyChildren())" value="No">
+										<attribute name="onClick">
+											childrenDiv.setVisible(false);
+										</attribute>
+									</radio>
+								</radiogroup>
+								</hlayout>
+								<div style="margin-left:10px;" sclass="smokingDiv" visible="false" id="childrenDiv">
+									<div>
+										<label value="How many?"></label>
+										<intbox value="@{patientSocialHistory.numberOfChildren}" />
+									</div>
+								</div>
+								</vlayout>
+								<vlayout>
+								<hlayout style="margin:10px">
+								<label value="Any Past Pregnency? " zclass="styled"/>
+								<radiogroup>
+									<radio label="Yes" onCheck="patientSocialHistory.setAnyPregnancy(true)"
+										onCreate="setDivVisible(self,pregnancyDiv,patientSocialHistory.getAnyPregnancy())" value="Yes">
+										<attribute name="onClick">
+											pregnancyDiv.setVisible(true);
+										</attribute>
+									</radio>
+									<radio label="No" onCheck="patientSocialHistory.setAnyPregnancy(false)"
+										onCreate="self.setSelected(!patientSocialHistory.getAnyPregnancy())" value="No">
+										<attribute name="onClick">
+											pregnancyDiv.setVisible(false);
+										</attribute>
+									</radio>
+								</radiogroup>
+								</hlayout>
+								<div style="margin-left:10px;" sclass="smokingDiv" visible="false" id="pregnancyDiv">
+									<div>
+										<label value="How many?"></label>
+										<intbox value="@{patientSocialHistory.numberOfPregnancy}" />
+									</div>
+								</div>
+								</vlayout>
+								</hlayout>
+								<hlayout>
+								<vlayout>
+								<hlayout style="margin:10px">
+								<label value="Any Past Abortions ? " zclass="styled" />
+								<radiogroup>
+									<radio label="Yes" onCheck="patientSocialHistory.setAnyAbortions(true)"
+										onCreate="setDivVisible(self,abortionsDiv,patientSocialHistory.getAnyAbortions())" value="Yes">
+										<attribute name="onClick">
+											abortionsDiv.setVisible(true);
+										</attribute>
+									</radio>
+									<radio label="No" onCheck="patientSocialHistory.setAnyAbortions(false)"
+										onCreate="self.setSelected(!patientSocialHistory.getAnyAbortions())" value="No">
+										<attribute name="onClick">
+											abortionsDiv.setVisible(false);
+										</attribute>
+									</radio>
+								</radiogroup>
+								</hlayout>
+								<div style="margin-left:10px" sclass="smokingDiv" visible="false"
+									id="abortionsDiv">
+									<div>
+										<label value="How many?"></label>
+										<intbox value="@{patientSocialHistory.numberOfAbortions}" />
+									</div>
+								</div>
+								</vlayout>
+								<vlayout>
+								<hlayout style="margin:10px">
+								<label value="Any Past Miscarriage ? " zclass="styled"/>
+								<radiogroup>
+									<radio label="Yes"
+										onCheck="patientSocialHistory.setAnyMiscarriage(true)"
+										onCreate="setDivVisible(self,miscarriageDiv,patientSocialHistory.getAnyMiscarriage())" value="Yes">
+										<attribute name="onClick">
+											miscarriageDiv.setVisible(true);
+										</attribute>
+									</radio>
+									<radio label="No"
+										onCheck="patientSocialHistory.setAnyMiscarriage(false)"
+										onCreate="self.setSelected(!patientSocialHistory.getAnyMiscarriage())" value="No">
+										<attribute name="onClick">
+											miscarriageDiv.setVisible(false);
+										</attribute>
+									</radio>
+								</radiogroup>
+								</hlayout>
+								<div sclass="smokingDiv" visible="false" style="margin-left:10px"
+									id="miscarriageDiv">
+									<div>
+										<label value="How many?"></label>
+										<intbox value="@{patientSocialHistory.numberOfMiscarriage}" />
+									</div>
+								</div>
+								</vlayout>
+								</hlayout>
+								<hlayout style="margin:10px">
+								<label value="Are you lactating? " zclass="styled"/>
+								<radiogroup>
+									<radio label="Yes" onCheck="patientSocialHistory.setLactating(true)"
+										onCreate="self.setSelected(patientSocialHistory.getLactating())">
+									</radio>
+									<radio label="No" onCheck="patientSocialHistory.setLactating(false)"
+										onCreate="self.setSelected(!patientSocialHistory.getLactating())">
+									</radio>
+								</radiogroup>
+								</hlayout>
+								<hlayout style="margin:10px">
+										<label value="Age At First Menstural Period " zclass="styled" />
+										<intbox value="@{patientSocialHistory.ageAtFirstMensturalPeroid}" />
+										<space/>
+										<label value="Last Menstural Period " zclass="styled" />
+										<div width="30%">
+										<datebox value="@{patientSocialHistory.lastMensturalPeriod}" constraint="no future"/>
+										</div>
+										<space/>
+										<label value="Last Pap Smear" zclass="styled" />
+										<div width="30%">
+										<datebox value="@{patientSocialHistory.lastPapSmear}" constraint="no future" />
+										</div>
+										<space/>
+										<label value="Last Mammogram" zclass="styled"/>
+										<div width="30%">
+										<datebox value="@{patientSocialHistory.lastMammogram}" constraint="no future"/>
+										</div>
+										<space/>
+										<label value="No of Menstural Days" zclass="styled" />
+										<intbox value="@{patientSocialHistory.noOfMensturalDays}" />
+								</hlayout>
+									<hlayout style="margin:10px">
+										<label value="Frequency" zclass="styled" />
+										<radiogroup>
+										<radio label="Regular" onCheck="patientSocialHistory.setRegularMensturalCycle(true)" onClick="frequencyDiv.setVisible(true);">
+											<attribute name="onCreate">
+												if(patientSocialHistory.getRegularMensturalCycle()!=null){
+													self.setSelected(patientSocialHistory.getRegularMensturalCycle());
+													frequencyDiv.setVisible(patientSocialHistory.getRegularMensturalCycle());
+												}
+											</attribute>
+										</radio>
+										<radio label="Irregular" onCheck="patientSocialHistory.setRegularMensturalCycle(false)" onClick="frequencyDiv.setVisible(false);">
+											<attribute name="onCreate">
+												if(patientSocialHistory.getRegularMensturalCycle() == null)
+													self.setSelected(true);
+													else
+													self.setSelected(!patientSocialHistory.getRegularMensturalCycle());
+											</attribute>
+										</radio>
+										</radiogroup>
+									</hlayout>
+									<hlayout style="margin:10px">
+										<div sclass="smokingDiv" visible="false" id="frequencyDiv">
+											<hlayout>
+												<label value="No of Weeks" zclass="styled" />
+												<intbox value="@{patientSocialHistory.noOfMensturalWeeks}" />
+											</hlayout>	
+											<hlayout>
+												<label value="Amount" zclass="styled" />
+												<radiogroup orient="horizontal">
+													<radio label="Light" value="light"
+														onCheck="patientSocialHistory.setAmountOfMensturation(self.getValue())"
+														onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getAmountOfMensturation()))">
+													</radio>
+													<radio label="Normal" value="normal"
+														onCheck="patientSocialHistory.setAmountOfMensturation(self.getValue())"
+														onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getAmountOfMensturation()))">
+													</radio>
+													<radio label="Heavy" value="heavy"
+														onCheck="patientSocialHistory.setAmountOfMensturation(self.getValue())"
+														onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getAmountOfMensturation()))">
+													</radio>
+												</radiogroup>
+											</hlayout>
+										</div>
+									</hlayout>	
+										<vlayout style="margin:10px">
+											<label value="Life Style" zclass="styled" />
+											<radiogroup orient="horizontal">
+												<radio label="Heterosexual" value="Heterosexual"
+													onCheck="patientSocialHistory.setLifeStyle(self.getValue())"
+													onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getLifeStyle()))">
+												</radio>
+												<radio label="N/A" value="N/A"
+													onCheck="patientSocialHistory.setLifeStyle(self.getValue())"
+													onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getLifeStyle()))">
+												</radio>
+												<radio label="Homosexual" value="Homosexual"
+													onCheck="patientSocialHistory.setLifeStyle(self.getValue())"
+													onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getLifeStyle()))">
+												</radio>
+												<radio label="Bisexual" value="Bisexual"
+													onCheck="patientSocialHistory.setLifeStyle(self.getValue())"
+													onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getLifeStyle()))">
+												</radio>
+											</radiogroup>
+										</vlayout>
+										<vlayout style="margin:10px">
+											<label value="Method Of Birth Control" zclass="styled" />
+											<radiogroup orient="horizontal">
+												<radio label="Abstinence" value="Abstinence"
+													onCheck="setChecked(self.getValue(),birthControlMethod,patientSocialHistory);"
+													onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getBirthControlMethod()))">
+												</radio>
+												<radio label="Condoms" value="Condoms"
+													onCheck="setChecked(self.getValue(),birthControlMethod,patientSocialHistory);"
+													onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getBirthControlMethod()))">
+												</radio>
+												<radio label="Contraceptive Patch/ring" value="Contraceptive Patch/ring"
+													onCheck="setChecked(self.getValue(),birthControlMethod,patientSocialHistory);"
+													onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getBirthControlMethod()))">
+												</radio>
+												<radio label="DepoProvera" value="DepoProvera"
+													onCheck="setChecked(self.getValue(),birthControlMethod,patientSocialHistory);"
+													onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getBirthControlMethod()))">
+												</radio>
+												<radio label="Early Withrawal" value="Early Withrawal"
+													onCheck="setChecked(self.getValue(),birthControlMethod,patientSocialHistory);"
+													onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getBirthControlMethod()))">
+												</radio>
+												<radio label="IUD" value="IUD"
+													onCheck="setChecked(self.getValue(),birthControlMethod,patientSocialHistory);"
+													onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getBirthControlMethod()))">
+												</radio>
+												<radio label="Oral Contraceptives" value="Oral Contraceptives"
+													onCheck="setChecked(self.getValue(),birthControlMethod,patientSocialHistory);"
+													onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getBirthControlMethod()))">
+												</radio>
+												<radio label="Tubal Ligation/Vasectomy" value="Tubal Ligation/Vasectomy"
+													onCheck="setChecked(self.getValue(),birthControlMethod,patientSocialHistory);"
+													onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getBirthControlMethod()))">
+												</radio>
+												<hbox>
+												<radio label="Other" value="Other"
+													onCheck="patientSocialHistory.setBirthControlMethod(self.getValue());birthControlMethod.setVisible(true);">
+													<attribute name="onCreate">
+													self.setSelected(self.getValue().equals(patientSocialHistory.getBirthControlMethod()));
+													if(self.isChecked())
+														birthControlMethod.setVisible(true);
+													</attribute>
+												</radio>
+												<textbox value="@{patientSocialHistory.otherMethodOfBirthControl}" id="birthControlMethod" visible="false"/>
+												</hbox>
+												<radio label="None" value="None"
+													onCheck="setChecked(self.getValue(),birthControlMethod,patientSocialHistory);"
+													onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getBirthControlMethod()))"/>
+											</radiogroup>
+													<vlayout>
+													<hlayout>
+													<label value="No Of Preterm Vaginal Deliveries" zclass="styled"/>
+													<intbox value="@{patientSocialHistory.noOfPreTermVagDeliveries}" />
+													<space/>
+													<label value="No Of Full term Vaginal Deliveries" zclass="styled"/>
+													<intbox value="@{patientSocialHistory.noOfFullTermVagDeliveries}" />
+													</hlayout>
+													<hlayout>
+													<label value="No Of  Preterm C-Sect Deliviries" zclass="styled"/>
+													<intbox value="@{patientSocialHistory.noOfPreTermCSectDeliveries}" />
+													<space/>
+													<label value="No Of Full term C-Sect Deliviries" zclass="styled"/>
+													<intbox value="@{patientSocialHistory.noOfFullTermCSectDeliveries}" />
+													</hlayout>
+													<checkbox label="Menopause" onCheck="patientSocialHistory.setIsMenoPause(self.isChecked())" onCreate="self.setChecked(patientSocialHistory.getIsMenoPause());" />
+													</vlayout>
+													<hlayout>
+													<label value="Check problems you have or had" zclass="styled" />
+													<space/>
+														<checkbox label="Abnormal pap smears" value="Abnormal pap smears"
+															onCreate="self.setChecked(patientSocialHistory.getGynecologicalProblems().contains(self.getValue()))"
+															onCheck='patientSocialHistory.addOrRemoveGynecologicalProblem(self.getValue(), event.isChecked())'/>
+														<checkbox label="Endometriosis" value="Endometriosis"
+															onCheck='patientSocialHistory.addOrRemoveGynecologicalProblem(self.getValue(), event.isChecked())'
+															onCreate="self.setChecked(patientSocialHistory.getGynecologicalProblems().contains(self.getValue()))">
+														</checkbox>
+														<checkbox label="Fibroids" value="Fibroids"
+															onCheck='patientSocialHistory.addOrRemoveGynecologicalProblem(self.getValue(), event.isChecked())'
+															onCreate="self.setChecked(patientSocialHistory.getGynecologicalProblems().contains(self.getValue()))"/>
+														<checkbox label="Infertility" value="Infertility"
+															onCheck='patientSocialHistory.addOrRemoveGynecologicalProblem(self.getValue(), event.isChecked())'
+															onCreate="self.setChecked(patientSocialHistory.getGynecologicalProblems().contains(self.getValue()))">
+														</checkbox>
+														<checkbox label="Painfull Periods" value="Painfull Periods"
+															onCheck='patientSocialHistory.addOrRemoveGynecologicalProblem(self.getValue(), event.isChecked())'
+															onCreate="self.setChecked(patientSocialHistory.getGynecologicalProblems().contains(self.getValue()))">
+														</checkbox>
+														<checkbox label="Sexually Transmitted Diseases" value="Sexually Transmitted Diseases"
+															onCheck='patientSocialHistory.addOrRemoveGynecologicalProblem(self.getValue(), event.isChecked())'
+															onCreate="self.setChecked(patientSocialHistory.getGynecologicalProblems().contains(self.getValue()))">
+														</checkbox>
+													</hlayout>
+											</vlayout>
+										</groupbox>
+									</div>
+					<div style="margin-top:10px">
+						<groupbox closable="false">
+							<caption label="Other Information"/>
+								<vlayout style="margin:10px">
+							<label value="Age Of First Sexual Intercourse" zclass="styled" />
+							<radiogroup orient="horizontal">
+								<radio label="Less than 18 yrs old" value="Less than 18 yrs old"
+									onCheck="patientSocialHistory.setAgeOfFirstSexualInterCourse(self.getValue())"
+									onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getAgeOfFirstSexualInterCourse()))">
+								</radio>
+								<radio label="Greater than 18 yrs old" value="Greater than 18 yrs old"
+									onCheck="patientSocialHistory.setAgeOfFirstSexualInterCourse(self.getValue())"
+									onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getAgeOfFirstSexualInterCourse()))">
+								</radio>
+							</radiogroup>
+							<label value="No Of Sexual Partners " zclass="styled" />
+							<radiogroup orient="horizontal">
+								<radio label="3 or less" value="3 or less"
+									onCheck="patientSocialHistory.setNoOfSexualPartners(self.getValue())"
+									onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getNoOfSexualPartners()))">
+								</radio>
+								<radio label="4 or more" value="4 or more"
+									onCheck="patientSocialHistory.setNoOfSexualPartners(self.getValue())"
+									onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getNoOfSexualPartners()))">
+								</radio>
+							</radiogroup>
+							<label value="Did the patient grow up in a strict religious environment? " zclass="styled"/>
+							<radiogroup>
+								<radio label="Yes" onCheck="patientSocialHistory.setStrictReligiousEnvironment(true)"
+									onCreate="self.setSelected(patientSocialHistory.getStrictReligiousEnvironment())">
+								</radio>
+								<radio label="No" onCheck="patientSocialHistory.setStrictReligiousEnvironment(false)"
+									onCreate="self.setSelected(!patientSocialHistory.getStrictReligiousEnvironment())">
+								</radio>
+							</radiogroup>
+							<label value="Does the patient have particular religious belief and has that changed since childhood,adolesence or adulthood? " zclass="styled"/>
+							<radiogroup>
+								<radio label="Yes" onCheck="patientSocialHistory.setReligiousBeliefs(true)"
+									onCreate="setDivVisible(self,religiousBeliefsDiv,patientSocialHistory.getReligiousBeliefs());"  onClick="religiousBeliefsDiv.setVisible(true);">
+								</radio>
+								<radio label="No" onCheck="patientSocialHistory.setReligiousBeliefs(false)"
+									onCreate="self.setSelected(!patientSocialHistory.getReligiousBeliefs())" onClick="religiousBeliefsDiv.setVisible(false);">
+								</radio>
+							</radiogroup>
+								<div style="padding:8px" sclass="smokingDiv" visible="false" id="religiousBeliefsDiv">
+									<div style="padding:8px">
+										<label value="Effect of patient's belief on treatment of psychiatric illness or suicide" zclass="styled" />
+										<textbox value="@{patientSocialHistory.effectOfPatientBelief}" />
+									</div>
+								</div>
+								<label value="Sexual Activity" zclass="styled" />
+								<radiogroup orient="horizontal">
+									<radio label="Never" value="Never"
+										onCheck="patientSocialHistory.setSexualActivity(self.getValue())"
+										onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getSexualActivity()))">
+									</radio>
+									<radio label="Females" value="Females"
+										onCheck="patientSocialHistory.setSexualActivity(self.getValue())"
+										onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getSexualActivity()))">
+									</radio>
+									<radio label="Males" value="Males"
+										onCheck="patientSocialHistory.setSexualActivity(self.getValue())"
+										onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getSexualActivity()))">
+									</radio>
+									<radio label="Both" value="Both"
+										onCheck="patientSocialHistory.setSexualActivity(self.getValue())"
+										onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getSexualActivity()))">
+									</radio>
+								</radiogroup>
+								<label value="Living Arrangement" zclass="styled" />
+								<radiogroup orient="horizontal">
+									<radio label="Alone" value="Alone"
+										onCheck="setPatientLivingArrangement(patientSocialHistory,otherLivingArrangementTxtBox,self.getValue());"
+										onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getLivingArrangement()))"/>
+									<radio label="Family" value="Family"
+										onCheck="setPatientLivingArrangement(patientSocialHistory,otherLivingArrangementTxtBox,self.getValue())"
+										onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getLivingArrangement()))"/>
+									<radio label="RoomMate" value="RoomMate"
+										onCheck="setPatientLivingArrangement(patientSocialHistory,otherLivingArrangementTxtBox,self.getValue())"
+										onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getLivingArrangement()))"/>
+									<hbox>	
+									<radio label="Others" value="Others"
+										onCheck="patientSocialHistory.setLivingArrangement(self.getValue());otherLivingArrangementTxtBox.setVisible(true);">
+										<attribute name="onCreate">
+										self.setSelected(self.getValue().equals(patientSocialHistory.getLivingArrangement()));
+										if(self.isChecked())
+											otherLivingArrangementTxtBox.setVisible(true);
+										</attribute>
+									</radio>
+									<textbox value="@{patientSocialHistory.otherLivingArrangement}" visible="false" id="otherLivingArrangementTxtBox"/>
+									</hbox>
+								</radiogroup>
+								<label value="Stresses" zclass="styled" />
+								<hlayout>
+							<checkbox label="Major Stresses In Last Two Years" value="Major Stresses In Last Two Years"
+								onCreate="self.setChecked(patientSocialHistory.getStresses().contains(self.getValue()))"
+								onCheck='patientSocialHistory.addOrRemoveStress(self.getValue(), event.isChecked())'/>
+							<checkbox label="Money" value="Money"
+								onCreate="self.setChecked(patientSocialHistory.getStresses().contains(self.getValue()))"
+								onCheck='patientSocialHistory.addOrRemoveStress(self.getValue(), event.isChecked())'/>
+							<checkbox label="Job" value="Job"
+								onCreate="self.setChecked(patientSocialHistory.getStresses().contains(self.getValue()))"
+								onCheck='patientSocialHistory.addOrRemoveStress(self.getValue(), event.isChecked())'/>
+							<checkbox label="Marriage" value="Marriage"
+								onCreate="self.setChecked(patientSocialHistory.getStresses().contains(self.getValue()))"
+								onCheck='patientSocialHistory.addOrRemoveStress(self.getValue(), event.isChecked())'/>
+							<checkbox label="Homelife" value="Homelife"
+								onCreate="self.setChecked(patientSocialHistory.getStresses().contains(self.getValue()))"
+								onCheck='patientSocialHistory.addOrRemoveStress(self.getValue(), event.isChecked())'/>
+							<checkbox label="Children" value="Children"
+								onCreate="self.setChecked(patientSocialHistory.getStresses().contains(self.getValue()))"
+								onCheck='patientSocialHistory.addOrRemoveStress(self.getValue(), event.isChecked())'/>
+							<checkbox label="Other Stress" value="Other Stress"
+								onCheck='otherStressTxtBox.setVisible(self.isChecked());'>
+								<attribute name="onCreate">
+								self.setChecked(patientSocialHistory.getOtherStress()!= null);
+								if(self.isChecked())
+									otherStressTxtBox.setVisible(true);
+								</attribute>
+							</checkbox>
+							</hlayout>
+							<textbox value="@{patientSocialHistory.otherStress}" id="otherStressTxtBox" visible="false"/>	
+								<label value="ChildHood" zclass="styled" />
+								<radiogroup orient="horizontal">
+									<radio label="Mostly Happy" value="Mostly Happy"
+										onCheck="patientSocialHistory.setChildHood(self.getValue())"
+										onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getChildHood()))">
+									</radio>
+									<radio label="Mostly Painful" value="Mostly Painful"
+										onCheck="patientSocialHistory.setChildHood(self.getValue())"
+										onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getChildHood()))">
+									</radio>
+									<radio label="Normal" value="Normal"
+										onCheck="patientSocialHistory.setChildHood(self.getValue())"
+										onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getChildHood()))">
+									</radio>
+									<radio label="Dont Recall" value="DontRecall"
+										onCheck="patientSocialHistory.setChildHood(self.getValue())"
+										onCreate="self.setSelected(self.getValue().equals(patientSocialHistory.getChildHood()))">
+									</radio>
+								</radiogroup>
+								<vlayout style="margin:10px">
+								<label value="Comments" zclass="styled"/>
+								<textbox rows="3" value="@{patientSocialHistory.comments}" cols="90"/>
+								</vlayout>
+								</vlayout>	
+								</groupbox>
+					</div>		
+					</div>
+					<div sclass="buttonPanel">
+						<button disabled="${controller.readonly}" label="Save" id="saveBtn" zclass="btn btn-success">
+							<attribute name="onClick">
+							controller.saveSoapSection();
+							Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null);
+							Events.postEvent("onSaveClick",addEditSocialWindow.getParent(),null);
+							addEditSocialWindow.detach();
+							</attribute>
+						</button>
+					</div>
+				</panelchildren>
+			</panel>
+	</window>
+</zk>

@@ -1,0 +1,17 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk>
+<zscript>
+		import com.nzion.util.Infrastructure;
+		import com.nzion.domain.docmgmt.NodeVO;
+		NodeVO fileNodeVO = jcrService.getFile(nodeVO.getPath());
+		String mimeType = fileNodeVO.getMimeType();
+		java.io.InputStream is = fileNodeVO.getInputStream();
+		org.zkoss.util.media.AMedia media = new org.zkoss.util.media.AMedia(fileNodeVO.getName(),"",mimeType,is);
+		org.zkoss.zkmax.zul.Filedownload.save(media);
+</zscript>
+		<iframe id="content" width="100%" height="100%"></iframe>
+		<zscript>
+			content.setContent(media);
+		</zscript>
+</zk>

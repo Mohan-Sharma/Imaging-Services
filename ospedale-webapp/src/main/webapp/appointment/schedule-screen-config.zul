@@ -1,0 +1,43 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./appointmentDisplayScreen"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+	com.nzion.domain.screen.ScheduleConfig screenDisplay = commonCrudService.getAppointmentDisplayScreen();
+	List allAppointmentDisplayScreenColumns = scheduleService.getDisplayColumns();
+	List selectedColumns = screenDisplay.getColumnsAsList();
+	Set statusConfigs = screenDisplay.getStatusConfigs();
+	public void saveSettings(){
+		screenDisplay.setColumnsList(selectedColumns);
+		commonCrudService.save(screenDisplay);	
+		com.nzion.util.UtilMessagesAndPopups.showSuccess();
+	}
+</zscript>
+<window id="appointmentDisplayScreen" >
+	<div sclass="panelTop">		
+	<button label="Save" onClick="saveSettings()"/>
+	</div>
+	<panel title="Schedule Display">
+		<panelchildren>
+			<hbox widths="70%, 30%" width="100%">
+			<div width="100%">
+				<shuttle source="${allAppointmentDisplayScreenColumns}" target="${selectedColumns}" />
+			</div>
+			<div width="100%">
+				<listbox model="@{statusConfigs}">
+					<listitem self="@{each='config'}" value="@{config}">
+						<listcell>
+							<label value="@{config.status.description}"/>
+						</listcell>
+						<listcell>
+							<colorbox color="@{config.color}" onChange="self.getParent().getParent().getValue().setColor(self.getColor())"/>
+						</listcell>
+					</listitem>
+				</listbox>
+			</div>
+			</hbox>
+		</panelchildren>
+	</panel>
+</window>
+</zk>

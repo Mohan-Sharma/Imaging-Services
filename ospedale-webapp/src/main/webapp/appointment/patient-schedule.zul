@@ -1,0 +1,130 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientScheduleModalWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+	<![CDATA[
+	com.nzion.domain.Schedule currentSchedule = arg.get("schedule");
+	String dateTime = com.nzion.util.UtilDateTime.format(currentSchedule.getStartDate(), currentSchedule.getStartTime());
+	]]>
+</zscript>
+<window mode="modal" id="patientScheduleModalWindow" onWaitingListReceived="useWaitingList(event)" width="40%" closable="true" title="Book Appointment (${dateTime})">
+	<zscript>
+	<![CDATA[
+	import com.nzion.util.UtilMisc;
+	com.nzion.zkoss.composer.appointment.ScheduleController scheduleController = arg.get("controller");
+	boolean booked = currentSchedule.getId() != null;
+	
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	List referrals = commonCrudService.getAll(com.nzion.domain.Referral.class);
+	com.nzion.zkoss.ext.EntityDropdownRenderer dropdownRenderer = new com.nzion.zkoss.ext.EntityDropdownRenderer(new com.nzion.zkoss.ext.EntityDropDownPersonNameAdapter());
+
+	void useWaitingList(Event event) {
+		currentSchedule.populateFromWaitingList((com.nzion.domain.ScheduleWaitingList) event.getData());
+		patientAccountNumber.setDynamicProperty("value", currentSchedule.getPatient());
+		patientAccountNumber.recreate();
+	}
+
+	void checkPatient() {
+		if (currentSchedule.getPatient() == null)
+			throw new WrongValueException(patientAccountNumber, "Cannot be empty.");
+	}
+	List patientLabOrders;
+]]>
+	</zscript>
+		<style>
+			.notesBtn{background-position:5px -1016px} .multiBtn{background-position:5px -1037px} .lockBtn{background-position:5px
+			-1058px} .dirBtn{background-position:5px -1080px} .waitBtn{background-position:5px -1100px} .z-panel-children {
+			background:#f4f4f4; repeat scroll 0 0 white; } 
+			
+			.cira-label{ display:block; font-size:11px; font-weight:bold; padding:7px 0 4px; }
+
+			.z-bandpopup{ width:400px; }
+
+			.toolbarbutton-cnt {
+			font-family:Verdana,Tahoma,Arial,Helvetica,sans-serif; font-size:11px; font-weight:normal; padding:2px; position:relative;
+			}
+		</style>
+		<panel style="padding:10px">
+			<panelchildren>
+				<h:table border="0" cellspacing="0" cellpadding="0" sclass="grid">
+					<h:thead>
+						<h:tr>
+							<h:td>
+							<span sclass="linkBtn">
+									<toolbarbutton style="color:#006699;" sclass="multiBtn" label="Schedule Recurrence">
+										<attribute name="onClick">
+											checkPatient();
+											Map args = com.nzion.util.UtilMisc.toMap("scheduleController", scheduleController, "schedule", currentSchedule, "parentWindow", patientScheduleModalWindow);
+											Window wlModalWindow = Executions.createComponents("/appointment/multibook.zul", patientScheduleModalWindow, args);
+										</attribute>
+									</toolbarbutton>
+								</span>
+								<span sclass="linkBtn">
+									<toolbarbutton style="color:#006699;" sclass="waitBtn" label="Wait" disabled="${booked}">
+										<attribute name="onClick">
+											Map args = new HashMap();
+											args.put("componentToReceiveWaitingList", patientScheduleModalWindow);
+											Executions.createComponents("/appointment/schedule-waiting-list.zul", patientScheduleModalWindow, args);
+										</attribute>
+									</toolbarbutton>
+								</span>
+							</h:td>
+						</h:tr>
+					</h:thead>
+				</h:table>
+				<div sclass="panelCont panel" style="background-color:#f4f4f4">
+					<div sclass="col2">
+						<label zclass="cira-label" value="Appointment With"  />
+						<textbox value="${currentSchedule.person.firstName} ${currentSchedule.person.lastName}" readonly="true" />
+					</div>
+					<div sclass="col2">
+						<label zclass="cira-label" value="Location" />
+						<textbox value="${currentSchedule.location.name}" readonly="true" />
+					</div>
+					<div sclass="col2">
+						<label value="Patient" />
+						<label value="*" style="color:red"/>
+						<patientlookup  id="patientAccountNumber" value="${currentSchedule.patient}"
+						onChange="currentSchedule.setPatient(event.getOrigin().getData());patientLabOrders=labService.getPatientLabOrdersFor(currentSchedule.getPatient())" />
+					</div>
+					<div sclass="col2">
+						<label zclass="cira-label" value="Phone" />
+						<phonebox value="@{currentSchedule.patientContactNumber, load-after='patientScheduleModalWindow.onWaitingListReceived'}" />
+					</div>
+					<div sclass="col2">
+						<div>
+						<label value="Visit Type"/>
+						<label value="*" style="color:red"/>
+						</div>
+						<combobox id="visitTypeCombobox" model="@{scheduleService.allSoapNoteTypes}" width="100%" constraint="no empty" selectedItem="@{currentSchedule.slotType}"	readonly="true"	>
+							<comboitem self="@{each='slotType'}" value="@{slotType}" label="@{slotType.name}" />
+						</combobox>
+					</div>
+					<div sclass="col2">
+						<label zclass="cira-label" value="Chief Complaint" />
+						<suggest entity="com.nzion.domain.emr.ChiefComplaint" value="@{currentSchedule.chiefComplaint}" 
+							searchcolumns="complainName" displaycolumns="complainName" requiredcolumn="complainName"/>
+					</div>
+					<div sclass="col2">
+						<label value="Referral Name" />
+						<combobox id="referral" model="@{referrals}" 
+									selectedItem="@{currentSchedule.referral}" readonly="true" itemRenderer="${dropdownRenderer}"/>
+					</div>
+					<div style="width:96% !important;">
+						<label zclass="cira-label" value="Comments" />
+						<textbox rows="5" style="width:99% !important;"
+							value="@{currentSchedule.comments, load-after='patientScheduleModalWindow.onWaitingListReceived'}" />
+					</div>
+					<div class="panelFoot" width="100%;margin:-1px">
+						<button label="Save" unless="${booked}" id="saveBtn" 
+							onClick="visitTypeCombobox.getValue();checkPatient();scheduleController.createSchedule(currentSchedule); patientScheduleModalWindow.detach();" />
+						<button label="Save"  if="${booked}" id="updateBtn" 
+							onClick="checkPatient();scheduleController.updateSchedule(currentSchedule);patientScheduleModalWindow.detach();"/>
+						<button label="Cancel" forward="onClick=onCancel"/>
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+	</window>
+</zk>

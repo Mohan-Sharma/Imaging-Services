@@ -1,0 +1,141 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./changeScheduleStatusModalWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<window mode="modal" id="changeScheduleStatusModalWindow"  closable="true" sclass="modalStyle">
+<zscript>
+<![CDATA[
+    import com.nzion.domain.billing.Invoice;
+    import com.nzion.domain.billing.InvoiceItem;
+    import java.math.BigDecimal;
+    import com.nzion.domain.CalendarSlot;
+    import com.nzion.domain.Provider;
+    import com.nzion.domain.Schedule;
+    import com.nzion.domain.screen.BillingDisplayConfig;
+    import com.nzion.domain.Person;
+    com.nzion.service.SigninService signinService = com.nzion.util.Infrastructure.getSpringBean("signinService");
+    com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+    com.nzion.service.billing.BillingService billingService = com.nzion.util.Infrastructure.getSpringBean("billingService");
+	com.nzion.domain.emr.PatientVisit patientVisit = new com.nzion.domain.emr.PatientVisit();
+	com.nzion.domain.Schedule currentSchedule = arg.get("schedule");
+	Component slotListbox = arg.get("slotListbox");
+	Component providerList = arg.get("providerList");
+	Component appointmentDate = arg.get("appointmentDate");
+	Component searchCriteriaSection = arg.get("searchCriteriaSection");
+	
+
+	Component visitTypebox = arg.get("visitTypebox");
+	Button chkBtn = arg.get("chkBtn");
+	List fixedAssets = fixedAssetService.getAllRoomsByLocation(com.nzion.util.Infrastructure.getUserLogin().getLocations());
+	List persons = signinService.getAllConsultablePersonsByLocation(com.nzion.util.Infrastructure.getUserLogin().getLocations());
+	
+	
+	com.nzion.zkoss.ext.EntityDropdownRenderer dropdownRenderer = new com.nzion.zkoss.ext.EntityDropdownRenderer(new com.nzion.zkoss.ext.EntityDropDownPersonNameAdapter());
+	com.nzion.zkoss.composer.appointment.ScheduleController scheduleController = arg.get("controller");
+	Person toMeet = null;
+	String fixedAssetName = null;
+	
+	if(scheduleController!=null)
+	if(scheduleController.getPerson()!=null){
+	toMeet = scheduleController.getPerson();
+	if(toMeet instanceof Provider){
+	if(((Provider)toMeet).getRoom()!=null)
+	fixedAssetName = ((Provider)toMeet).getRoom().getFixedAssetName();
+	}
+	}
+	
+]]>
+</zscript>
+<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Update Status</h:small>
+                <button type="button" zclass="close" onClick="changeScheduleStatusModalWindow.detach();">×</button>
+            </h:h1>
+        </div>
+<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span4">
+                 <label value="Time"  mold="required" />
+                 <timebox value="@{patientVisit.time}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"  constraint="no past"/>
+                 </div>
+                 <div zclass="span4">
+                 <label value="To Room"  mold="required" />
+                 <combobox value="${fixedAssetName}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" selectedItem="@{patientVisit.room,save-when='saveBtn.onClick'}" constraint="no empty:Room Required" readonly="true">
+					<comboitem forEach="${fixedAssets}" label="${each.fixedAssetName}" value="${each}" />
+				</combobox>		
+                 </div>
+                 <div zclass="span4">
+                 <label value="To Meet"  mold="required" />
+               <combobox id= "toMeetCombo" value="${toMeet}" selectedItem="@{patientVisit.metWith,save-when='saveBtn.onClick'}" constraint="no empty:To Meet Required" readonly="true"
+				itemRenderer="${dropdownRenderer}" model="@{persons}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/> 
+					
+                 </div>
+                </div>
+                </div>
+                
+<n:div class="panelFoot">					
+	<button id="saveBtn" label="Save" zclass="btn-success btn">
+	<attribute name="onClick">
+	<![CDATA[
+	         if(com.nzion.domain.Schedule.STATUS.EXAMINING.equals(currentSchedule.getStatus())){
+	      	   com.nzion.util.UtilMessagesAndPopups.showError("This appointment has already been checked in.");
+	      	   return;
+	         }
+   if(chkBtn!=null)
+   if(chkBtn.getLabel().startsWith("Checkin")){
+    if(currentSchedule.getPatient()==null){
+    com.nzion.util.UtilMessagesAndPopups.showError("Select a Patient to proceed");
+    return;
+    }
+    if(providerList!=null)
+    if(providerList.getSelectedItem() == null){
+    com.nzion.util.UtilMessagesAndPopups.showError("Select a Provider to proceed");
+    return;
+    }
+   if(providerList.getSelectedItem()!=null){
+        Provider provider = (Provider)providerList.getSelectedItem().getValue();
+         if(slotListbox.getSelectedItem() == null){
+         com.nzion.util.UtilMessagesAndPopups.showError("Select a time slot to proceed");
+         return;
+         }
+        
+      CalendarSlot slot = ((CalendarSlot)slotListbox.getSelectedItem().getValue());
+      currentSchedule.setPerson(provider);
+      currentSchedule.setStartTime(slot.getStartTime());
+      currentSchedule.setEndTime(slot.getEndTime());
+      currentSchedule.setStartDate(com.nzion.util.UtilDateTime.getDayStart(appointmentDate.getValue()));
+      currentSchedule.setSequenceNum(slot.getSequenceNum());
+      scheduleController.createSchedule(currentSchedule);
+    }  
+	        }
+   patientVisit.setMetWith(toMeet);
+   if(toMeetCombo.getSelectedItem()!=null)
+   patientVisit.setMetWith((Person)toMeetCombo.getSelectedItem().getValue());
+   
+		if(scheduleController==null){
+			currentSchedule = commonCrudService.refreshEntity(currentSchedule);		
+			signinService.addVisitToSchedule(patientVisit, currentSchedule);
+			changeScheduleStatusModalWindow.detach();	
+			return;
+		}
+		scheduleController.saveVisit(currentSchedule,patientVisit);
+		
+        
+		 
+		BillingDisplayConfig billingDisplayConfig = commonCrudService.getByPractice(BillingDisplayConfig.class);
+		if ("patientVisit".equals(billingDisplayConfig.getIsConsultationPriceTriggered())) {
+			scheduleController.generateInvoice(currentSchedule);
+		}else{
+			 Executions.sendRedirect("/dashboards/frontDeskDashBoard.zul");
+		}
+		
+		
+	    changeScheduleStatusModalWindow.detach();	
+	   
+	    ]]>
+	</attribute>
+	</button>
+	<button label="Cancel" forward="onClick=onCancel"/>
+</n:div>
+</window>
+</zk>

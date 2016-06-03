@@ -1,0 +1,192 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapGeneralExam"?>
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:c="client">
+	<zscript>
+	import com.nzion.zkoss.composer.PatientSoapNoteController;
+	import com.nzion.domain.emr.soap.GeneralExaminationSection;
+	import com.nzion.domain.emr.soap.PatientGeneralExamination;
+	PatientSoapNoteController controller = (PatientSoapNoteController) arg.get("controller");
+	Component soapGeneralExamWin = (Component)arg.get("soapGeneralExamWin");
+	GeneralExaminationSection generalExaminationSection = (GeneralExaminationSection)controller.getSelectedSection();
+	PatientGeneralExamination patientGeneralExamination = (PatientGeneralExamination) arg.get("reading");
+	boolean editMode = true; 
+	 if (patientGeneralExamination == null){ 
+	  patientGeneralExamination = new PatientGeneralExamination();
+	  editMode = false;
+	  }
+</zscript>
+	<window title="Growth Datas" border="normal" closable="true" id="soapGeneralExam" width="55%" mode="modal">
+		<style>
+			.form input{
+				width:50px;
+			}
+			.z-decimalbox-disd{
+				background-color:grey !important;	
+			}
+		</style>
+		<script>
+			<![CDATA[
+
+			function toggle(a,b){
+			var fields = ["height","weight","head","chest"];
+				for(var i=0; i<fields.length; i++){
+					var pwdWidget = zk.Widget.$("$"+fields[i]+"_"+b);
+            		pwdWidget.setDisabled(true);
+					zk.Widget.$("$"+fields[i]+"_"+a).setDisabled(false);
+            	}
+            }
+			
+			zk.afterMount(function() { 
+				toggle('metric','en');			
+			});
+			]]>
+		</script>
+		<separator bar="true"></separator>
+		<div class="form" style="padding:5px !important">
+			<n:table width="550px" cellspacing="10px">
+			<n:tr>
+					<n:td>
+						<label value="Date of Measurement" class="name"/>
+					</n:td>
+					<n:td colspan="4">
+						<datebox value="@{patientGeneralExamination.dateOfMeasurement}" constraint="no empty" style="width:110px;"/>
+					</n:td>
+				</n:tr>
+				<n:tr>
+					<n:td>
+						<label value="Time of Measurement" class="name"/>
+					</n:td>
+					<n:td colspan="4" >
+						<timebox value="@{patientGeneralExamination.timeOfMeasurement}" constraint="no empty" style="display:inline-block;width:100px;"/>
+					</n:td>
+				</n:tr>
+			<n:tr>
+					<n:td>
+						<label value="Measurement Unit" class="name"/>
+					</n:td>
+					<n:td colspan="4">
+						<radiogroup selectedItem="@{patientGeneralExamination.englishMetricFlag,converter='com.nzion.view.component.RadioGroupBinder'}">
+						<radio label="Metric" value="metric" checked="true">
+							<attribute c:name="onCheck">
+								toggle('metric','en');
+							</attribute>
+						</radio>
+						<radio label="English" value="english">
+							<attribute c:name="onCheck">
+								toggle('en','metric');
+							</attribute>
+						</radio>
+						</radiogroup>
+					</n:td>
+				</n:tr>
+			<n:tr>
+					<n:td>
+						<label value="Height" class="name"  />
+					</n:td>
+					<n:td>
+						<decimalbox value="@{patientGeneralExamination.height.metricValue,save-when='save.onClick'}" constraint="no empty" id="height_metric"></decimalbox>
+					</n:td>
+					<n:td width="10px">
+						<label value="@{patientGeneralExamination.height.metricUnit}" />
+					</n:td>
+					<n:td>
+						<decimalbox value="@{patientGeneralExamination.height.englishValue}" id="height_en"/>
+					</n:td>
+					<n:td>
+						<label value="@{patientGeneralExamination.height.englishUnit}" />
+					</n:td>
+				</n:tr>
+				<n:tr>
+					<n:td>
+						<label value="Weight" class="name" />
+					</n:td>
+					<n:td>
+						<decimalbox value="@{patientGeneralExamination.weight.metricValue,save-when='save.onClick'}" constraint="no empty" id="weight_metric"></decimalbox>
+					</n:td>
+					<n:td width="10px">
+						<label value="@{patientGeneralExamination.weight.metricUnit}" />
+					</n:td>
+					<n:td>
+						<decimalbox value="@{patientGeneralExamination.weight.englishValue}" id="weight_en"/>
+					</n:td>
+					<n:td>
+						<label value="@{patientGeneralExamination.weight.englishUnit}" />
+					</n:td>
+				</n:tr>
+				<n:tr>
+					<n:td>
+						<label value="Head Circumference" class="name" />
+					</n:td>
+					<n:td>
+						<decimalbox value="@{patientGeneralExamination.headCircumference.metricValue}" id="head_metric"></decimalbox>
+					</n:td>
+					<n:td>
+						<label value="@{patientGeneralExamination.headCircumference.metricUnit}" />
+					</n:td>
+					<n:td>
+						<decimalbox value="@{patientGeneralExamination.headCircumference.englishValue}" id="head_en"/>
+					</n:td>
+					<n:td>
+						<label value="@{patientGeneralExamination.headCircumference.englishUnit}" />
+					</n:td>
+				</n:tr>
+				<n:tr>
+					<n:td>
+						<label value="Chest Circumference" class="name" />
+					</n:td>
+					<n:td>
+						<decimalbox value="@{patientGeneralExamination.chestCircumference.metricValue}" id="chest_metric"></decimalbox>
+					</n:td>
+					<n:td>
+						<label value="@{patientGeneralExamination.chestCircumference.metricUnit}" />
+					</n:td>
+					<n:td>
+						<decimalbox value="@{patientGeneralExamination.chestCircumference.englishValue}" id="chest_en"/>
+					</n:td>
+					<n:td>
+						<label value="@{patientGeneralExamination.chestCircumference.englishUnit}" />
+					</n:td>
+				</n:tr> 
+				<n:tr>
+			       <n:td>
+				    <label value="Nourishment" class="name" />
+				   </n:td>
+				  <n:td>
+			       <enumeration enumType="NUTRITION_TYPE" id="nutritionType" selectedItem="@{patientGeneralExamination.nourishment,save-when='save.onClick'}"  />
+			      </n:td>
+		      </n:tr> 
+		      <n:tr>
+			       <n:td>
+				    <label value="Build" class="name" />
+				   </n:td>
+				  <n:td>
+			       <enumeration enumType="BUILD_TYPE" id="buildType" selectedItem="@{patientGeneralExamination.built,save-when='save.onClick'}" />
+			      </n:td>
+		      </n:tr> 
+				<n:tr>
+					<n:td colspan="5" style="text-align:center">
+								<button label="Save" id="save" zclass="btn btn-success">
+								<attribute name="onClick">
+								    
+             						    patientGeneralExamination.calculateBMI();
+             						    if(editMode){
+             						    commonCrudService.save(patientGeneralExamination);
+             						    Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null); 
+										soapGeneralExam.detach();
+             						    return;
+             						    }
+             						    generalExaminationSection.addGeneralExamination(patientGeneralExamination);
+										commonCrudService.save(generalExaminationSection);
+										controller.saveSoapSection();
+										Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null); 
+										soapGeneralExam.detach();
+										</attribute>
+								</button>
+								<button label="Cancel" sclass="cancelBtn" onClick="soapGeneralExam.detach();"></button>
+					</n:td>
+				</n:tr>
+			</n:table>
+		</div>
+	</window>
+</zk>

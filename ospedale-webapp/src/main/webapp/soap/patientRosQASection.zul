@@ -1,0 +1,33 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<window>
+<zscript>
+	com.nzion.zkoss.composer.emr.PatientQuestionAnswerController controller = new com.nzion.zkoss.composer.emr.PatientQuestionAnswerController();
+</zscript>
+<div width="100%" id="qaRootDiv" apply="${controller}">
+	<vbox forEach="${controller.questionAndAnswers}" style="margin: 3px;" width="100%">
+		<label value="${each.question.desc}" />
+		<hbox if="${each.havingOnlyOneAnswer}" onCreate='controller.renderForSingleAnswer(self);'>
+			<custom-attributes answer="${each}"/>
+		</hbox>
+		<div unless="${each.havingOnlyOneAnswer}">
+			<hbox if="${each.question.isMultiple}">
+				<checkbox label=" ${each.name}" forEach="${each.answers}" onCreate='controller.renderForMultipleAnswer(self);'
+										onCheck="controller.handleAnswerSelection(self);">
+					<custom-attributes answer="${each}"/>
+				</checkbox>
+			</hbox>
+			<hbox unless="${each.question.isMultiple}">
+				<radiogroup>
+					<radio label=" ${each.name}" forEach="${each.answers}" onCreate='controller.renderForMultipleAnswer(self)'
+							onCheck="controller.handleAnswerSelection(self);" >
+						<custom-attributes answer="${each}" />
+					</radio>
+				</radiogroup>					
+			</hbox>
+		</div>
+	</vbox>
+</div>
+</window>
+</zk>

@@ -1,0 +1,83 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./mlcReportWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+		com.nzion.zkoss.composer.emr.MlcSearchController mlcSearchController = new com.nzion.zkoss.composer.emr.MlcSearchController();
+		com.nzion.zkoss.ext.DataExporter exporter = new com.nzion.zkoss.ext.CsvDataExporter();
+	</zscript>
+<window id="mlcReportWin" apply="${mlcSearchController}">
+	<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>MLC Reports</h:small>
+            </h:h1>
+     </div>
+     
+     <div class="container-fluid">
+       
+       <div zclass="row-fluid">
+       	<div zclass="span4">
+       		<label value="Doctor"/>
+       		<providerlookup onChange="mlcSearchController.setProvider((com.nzion.domain.Provider)event.getOrigin().getData());" sclass="span12"/>
+       	</div>
+      
+       	<div zclass="span4">
+       		<label value="From Date" />
+       		<datebox sclass="span12" value="@{mlcSearchController.fromDate}"/>
+       	</div>
+       	<div zclass="span4">
+       		<label value="Thru Date"/>
+       		<datebox sclass="span12" value="@{mlcSearchController.thruDate}"/>
+       	</div>
+       </div>
+       
+     </div>
+     <div align="center" sclass="panelFoot" >
+     	<button label="Search" zclass="btn-primary btn">
+     		<attribute name="onClick">
+     			mlcSearchController.search();
+     			Events.postEvent("onReloadRequest",mlcReportListBox,null);
+     		</attribute>
+     	</button>
+     </div>
+     <panel id="searchResults" title="Search Results" style="margin-top:10px;">
+			<caption height="15px">
+			  <div style="float:right">
+					<a  tooltiptext="Export" label="Export" sclass="btn btn-mini">
+					<attribute name="onClick">	
+						exporter.export(mlcSearchController.getPatientSoapNotes(), new String[]{"patient.firstName","patient.lastName","provider.firstName","provider.lastName",
+						"date"}, new String[]{"Patient First Name","Patient Last Name",
+						"Doctor First Name","Doctor Last Name","Date"}, "mlc-report.csv");					
+					</attribute>
+					</a>
+				</div>	
+			</caption>
+			<panelchildren>
+				<listbox id="mlcReportListBox"  model="@{mlcSearchController.patientSoapNotes,load-after='self.onReloadRequest'}" mold="paging">
+					<listhead>
+						<listheader label="Date"/>
+						<listheader label="Doctor"/>
+						<listheader label="Patient"/>
+						<listheader label="Action"/>
+					</listhead>
+					<listitem self="@{each='psn'}" value="@{psn}">
+						<listcell label="@{psn.date}"/>
+						<listcell>
+							<name object="@{psn.provider}"/>
+						</listcell>
+						<listcell>
+							<name object="@{psn.patient}"/>
+						</listcell>
+						<listcell>
+							<button label="View Encounter" sclass="btn btn-mini">
+								<attribute name="onClick">
+									Executions.getCurrent().sendRedirect("/soap/soapnote.zul?scheduleId="+((Listitem)(self.getParent().getParent())).getValue().getSchedule().getId(),"_soapNote");
+								</attribute>
+							</button>
+						</listcell>
+					</listitem>
+				</listbox>
+			</panelchildren>
+	</panel>
+</window>
+</zk>

@@ -1,0 +1,187 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapPatientPastTreatmentHistoryWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<window id="soapPatientPastTreatmentHistoryWindow">
+	<script type="text/javascript">
+		function showDelButton(comp){
+			jQuery('#'+comp.uuid).find('img').fadeIn('slow');
+		}
+		function hideDelButton(comp){
+			jQuery('#'+comp.uuid).find("img").fadeOut(15);
+		}
+	</script>
+	<zscript>
+		com.nzion.zkoss.composer.PatientSoapNoteController patientSoapNoteController = arg.get("patientSoapNoteController");
+		import com.nzion.domain.emr.soap.PatientPastObservationHistory;
+		PatientPastObservationHistory pastObservationHistory = new PatientPastObservationHistory();
+		com.nzion.domain.emr.soap.PastHistorySection pastHistorySection = arg.get("soapSection");
+		Set pastObservationHistories =new HashSet(soapNoteService.getAllSoapRecordsExcludingCurrentSection(patientSoapNoteController.getPatient(),pastHistorySection,PatientPastObservationHistory.class));
+		List observations = commonCrudService.getAll(com.nzion.domain.emr.Observation.class);
+		Set observationHistories = new HashSet();
+		Set patientPastObservationHistories = pastHistorySection.getPatientPastObservationHistories();
+		if(patientPastObservationHistories == null){
+		patientPastObservationHistories = new HashSet();
+		pastHistorySection.setPatientPastObservationHistories(patientPastObservationHistories);
+		}
+	</zscript>
+	<vbox>
+		<span sclass="linkBtn linkBtnOn">
+			<a  id="addBtn1" disabled="${patientSoapNoteController.readonly}" sclass="addBtn" label="New" onClick='pastObservationHistory = new PatientPastObservationHistory();Events.postEvent("onReloadRequest",addPastObservationWindow,null)'/>
+			<span />
+		</span>
+	</vbox>
+		<h:table width="100%" cellpadding="0px" cellspacing="0px" style="border:0px">
+				<h:tr>
+					<h:td class="soapNoteContL" onClick="expandRHS(this.id)">
+					<vbox>
+						<panel title="Observations" collapsible="false" height="300px">
+							<panelchildren>
+							<radiogroup id="statusRadioGrp" >
+								<radio label="Current" value="Active" checked="true" id="activeRadio" onCreate='Events.postEvent("onCheck",activeRadio,null)'>
+								<attribute name="onCheck">
+									observationHistories.clear();
+									observationHistories.addAll(pastHistorySection.getPatientPastObservationHistories());
+									Events.postEvent("onReloadRequest",pastObservationListbox,null);
+								</attribute>
+								</radio>
+								<radio label="Past" value="InActive"  id="inactiveRadio">
+								<attribute name="onCheck">
+									observationHistories.clear();
+									observationHistories.addAll(pastObservationHistories);
+									Events.postEvent("onReloadRequest",pastObservationListbox,null);
+								</attribute>
+								</radio>
+							</radiogroup>
+								<div sclass="dataTables_scrollBody" height="290px" style="overflow:auto">	
+									<listbox id="pastObservationListbox" style="overflow:auto"
+										model="@{observationHistories,load-after='self.onReloadRequest,saveBtn.onClick'}">
+										<listhead>
+											<listheader label="Observation Name" />
+											<listheader label="Recorded Date" />
+											<listheader label="Recorded Time" />
+										</listhead>
+										<listitem self="@{each='patientObservationHistory'}"
+											value="@{patientObservationHistory}">
+											<attribute name="onClick">
+													pastObservationHistory = self.getValue();
+													Events.postEvent("onReloadRequest",addPastObservationWindow,null);									
+											</attribute>
+											<listcell>
+												<label value="@{patientObservationHistory.observation.name}"/>
+											</listcell>
+											<listcell>
+												<label value="@{patientObservationHistory.recordedOn,converter='com.nzion.view.component.DateConverter'}" />
+											</listcell>
+											<listcell>
+												<label value="@{patientObservationHistory.recordedTime,converter='com.nzion.view.component.TimeConverter'}" />
+											</listcell>
+										</listitem>
+									</listbox>
+								</div>
+							</panelchildren>
+						</panel>
+						<div sclass="panelFoot">
+						<button  label="Save" disabled="${patientSoapNoteController.readonly}">
+							<attribute name="onClick">
+								patientSoapNoteController.setEventMessage("Past Observation"+"\t updated");
+								patientSoapNoteController.saveSoapSection();
+							</attribute>
+						</button>
+						</div>
+					</vbox>
+				</h:td>
+	<h:td class="soapNoteContR">
+		<div id="editTreatment" sclass="posRel" style="border:0px">
+		<div sclass="slideHandle" id="slideHandle">
+			<attribute w:name="onClick">
+				var slideHandle = jQuery('#'+this.uuid);
+				slideHandle.parent().closest('.soapNoteContR').toggleClass('CCRCollapse');
+				slideHandle.toggleClass('SHCollapse');
+				slideHandle.parent().find('div.panelCont').toggleClass('hidePanelCont');
+				slideHandle.parent().find('div.panelFoot').toggleClass('hidePanelCont');
+				slideHandle.parent().find('button').toggleClass('hidePanelCont'); var obj =
+				slideHandle.parent().parent().parent().parent().find('.z-listbox-header'); obj.css('width','auto');
+			</attribute>
+		</div>
+		<div style="display: block;" id="addPastObservationWindow">
+			<div sclass="panelCont" style="border:0px" height="285px">
+				<div sclass="col2" width="60%">
+					<label value="Name"/>
+					<label value="*" style="color:red"/>
+					<combobox model="@{observations}" id="observationCombobox" readonly="true" selectedItem="@{pastObservationHistory.observation,load-after='addPastObservationWindow.onReloadRequest',save-when='saveBtn.onClick'}" 
+					onChange="pastObservationHistory.initObservation((com.nzion.domain.emr.Observation)self.getSelectedItem().getValue())" constraint="no empty:Name Required">
+						<comboitem self="@{each='observation'}" label="@{observation.name}" value="@{observation}"/>
+					</combobox>
+				</div>
+				<div sclass="col2">
+					<label value="Recorded Date"/>
+					<datebox value="@{pastObservationHistory.recordedOn,load-after='addPastObservationWindow.onReloadRequest'}" id="recordedDateBox"/>
+				</div>
+				<div sclass="col2">
+					<label value="Recorded Time"/>
+					<timebox value="@{pastObservationHistory.recordedTime,load-after='addPastObservationWindow.onReloadRequest'}" id="recorderTimeBox"/>
+				</div>
+				<div height="150px" style="overflow:auto" width="90%">
+				<listbox model="@{pastObservationHistory.observationValues,load-after='observationCombobox.onSelect,addPastObservationWindow.onReloadRequest'}">
+					<listhead>
+						<listheader label="Collection Name"/>
+						<listheader label="Value"/>
+					</listhead>
+					<listitem self="@{each='observationValue'}" value="@{observationValue}">
+						<listcell>
+							<label value="@{observationValue.collectionName}"/> 
+						</listcell>
+						<listcell>
+							<hbox>
+							<intbox  width="90%" value="@{observationValue.value}"/>
+							<label value="@{observationCombobox.selectedItem.value.uom}"/>
+							</hbox>
+						</listcell>
+					</listitem>
+				</listbox>
+				</div>
+			</div>
+		</div>
+		
+		<div sclass="panelFoot">					
+				<button  label="Add" id="saveBtn" disabled="${patientSoapNoteController.readonly}">
+					<attribute name="onClick">
+					<![CDATA[
+					    if(pastObservationHistory.getId()==null){     
+					    pastObservationHistory.setPatient(pastHistorySection.getSoapNote().getPatient());
+					    pastObservationHistory.setSoapSection(pastHistorySection);
+						pastHistorySection.addPatientPastObservationHistory(pastObservationHistory);
+						Events.postEvent("onCheck",activeRadio,null);
+						activeRadio.setChecked(true);
+					    }
+						if (recorderTimeBox.getValue() == null) throw new WrongValueException(recorderTimeBox, "Cannot Be Empty");
+						if (observationCombobox.getSelectedItem() == null)
+							throw new WrongValueException(observationCombobox, "Cannot Be Empty");
+						if (recordedDateBox.getValue() == null) throw new WrongValueException(recordedDateBox, "Cannot Be Empty");
+						
+						if(com.nzion.util.UtilValidator.isEmpty(pastObservationHistory.getUpdatedBy()) && pastHistorySection.getPatientPastObservationHistories().size() == 1)
+							patientSoapNoteController.setEventMessage("Past Observation Created");
+						else
+							patientSoapNoteController.setEventMessage("Past Observation Updated");
+						
+						if(!pastHistorySection.equals(pastObservationHistory.getSoapSection()))
+							commonCrudService.save(pastObservationHistory);	
+						
+						Events.postEvent("onReloadRequest", addPastObservationWindow, null);
+						Events.postEvent("onClick", addBtn1, null);
+						]]>	
+					</attribute>
+				</button>
+			</div>
+		</div>			
+	           	</h:td>
+			</h:tr>
+		</h:table>
+		<zscript>
+	<![CDATA[
+	]]>
+	</zscript>
+	</window>
+</zk>

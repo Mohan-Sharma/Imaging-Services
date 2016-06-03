@@ -1,0 +1,17 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	import com.nzion.zkoss.composer.SoapSentenceComposer;
+	import com.nzion.domain.emr.soap.*;
+	SoapSentenceComposer sentenceComposer = (SoapSentenceComposer) arg.get("controller");
+	RecommendationSection recommendationSection = (RecommendationSection) sentenceComposer.getSoapNoteController().getSoapSection(RecommendationSection.class,false);
+	sentenceComposer.setSelectedSection(recommendationSection);
+	</zscript>
+	<div style="margin-left:10px">
+		<n:h2>Recommendation</n:h2>
+		<n:h3>
+			<label>${recommendationSection.recommendedNotes}</label>
+		</n:h3>
+	</div>
+</zk>

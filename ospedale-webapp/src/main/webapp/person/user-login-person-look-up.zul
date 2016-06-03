@@ -1,0 +1,23 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<hbox width="100%" >
+	<textbox id="personLookupTxt" forward="onChange=onChange" readonly="true"/>
+	<n:div style="width:70px;">
+	<span id="lookUpBtn" sclass="linkBtn linkBtnOn">
+		<a sclass="lookupBtn">
+			<attribute name="onClick">
+				Executions.createComponents("/portlets/message-portlet-person-lookup.zul",null,com.nzion.util.UtilMisc.toMap("personLookupTxt",personLookupTxt));
+			</attribute>
+			Lookup
+		</a>
+	<span/>
+	</span>
+	</n:div>
+	</hbox>
+	<zscript>
+	com.nzion.domain.Person person = arg.get("value");
+	if(person != null)
+		personLookupTxt.setValue(com.nzion.util.ViewUtil.getFormattedName(person));
+	</zscript>
+</zk>

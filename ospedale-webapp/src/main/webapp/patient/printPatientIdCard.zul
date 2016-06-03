@@ -1,0 +1,120 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientIdCardWin"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+	xmlns:h="http://www.w3.org/1999/xhtml">
+<zscript>
+String patientId = (String) Executions.getCurrent().getParameter("patientId");
+com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+com.nzion.domain.Patient patient=commonCrudService.getById(com.nzion.domain.Patient.class, new Long(patientId));
+ com.nzion.domain.Practice practice=com.nzion.util.Infrastructure.getPractice();
+Date createdTxTimestamp = patient.getCreatedTxTimestamp();
+String dateInAMPM = com.nzion.util.UtilDateTime.format(createdTxTimestamp);
+</zscript>
+<window id="patientIdCardWin" self="@{define(content)}" >
+ <attribute name="onCreate">
+				 Clients.print();
+    	</attribute>
+    		<div style="width:35%;float:left;border:1px dashed #222;height:150px;padding:10px;">
+						
+						<h:h3 style="text-align:center">${practice.practiceName}</h:h3>
+						
+						<div style="display:block">
+							<div style="width:150px;float:left;text-align:right">
+								<label>Telephone:</label>
+							</div>
+							<div style="margin-left:175px">
+								${practice.contacts.officePhone}
+							</div>
+						</div>
+						
+						<div style="display:block">
+							<div style="width:150px;float:left;text-align:right">
+								Fax: 
+							</div>
+							<div style="margin-left:175px">
+								${practice.contacts.faxNumber}
+							</div>		
+						</div>
+						
+						<div style="display:block">
+							<div style="width:150px;float:left;text-align:right">
+								Address: 
+							</div>
+							<div style="margin-left:175px">
+								${practice.contacts.email}
+							</div>
+						</div>
+						<h:br/>
+						<div style="display:block;margin-left:125px">
+							${practice.contacts.postalAddress.address1},${practice.contacts.postalAddress.address2}
+							<h:br/>
+							<h:span>${practice.contacts.postalAddress.city},</h:span>
+							<h:br/>
+						${practice.contacts.postalAddress.stateProvinceGeo},${practice.contacts.postalAddress.zipCode}
+						</div>
+			</div>
+			<div style="width:35%;float:left;border:1px dashed #222;height:150px;padding:10px;;line-height:30px">
+				<div style="float:right">
+				<image id="patientImage" sclass="patImg" width="100px" height="75px"
+							hover="@{patient,converter='com.nzion.view.component.GenderImageConverter'}" style="display:block" />
+				</div>
+				<div style="float:left">
+						<div style="display:block">
+							<div style="width:120px;float:left;text-align:right">
+								MRN: 
+							</div> 
+							<div style="margin-left:145px">
+							${patient.accountNumber}
+							</div>
+						</div>
+						
+						<div style="display:block">
+							<div style="width:120px;float:left;text-align:right">
+								Patient Name: 
+							</div> 
+							<div style="margin-left:145px">
+								${patient.firstName} ${patient.middleName} ${patient.lastName}
+							</div>
+						</div>
+						
+						<div style="display:block">
+							<div style="width:120px;float:left;text-align:right">
+								Gender: 
+							</div> 
+							<div style="margin-left:145px">
+							${patient.gender.description}
+							</div>
+						</div>
+						
+						<div style="display:block">
+							<div style="width:120px;float:left;text-align:right">
+								Mobile: 
+							</div> 
+							<div style="margin-left:145px">
+								${patient.contacts.mobileNumber}
+							</div>
+						</div>
+						<div style="display:block">
+							<div style="width:120px;float:left;text-align:right">
+								Address: 
+							</div> 
+							<div style="margin-left:145px">
+								${patient.contacts.postalAddress}
+							</div>
+						</div>
+						
+						<div style="display:block">
+							<div style="width:120px;float:left;text-align:right">
+								Validity: 
+							</div> 
+							<div style="margin-left:145px">
+								${dateInAMPM}
+							</div>
+						</div>
+			</div>
+			
+			</div>
+			
+	</window>
+</zk>

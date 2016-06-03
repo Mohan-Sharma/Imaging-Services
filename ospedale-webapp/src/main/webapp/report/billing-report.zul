@@ -1,0 +1,613 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./billingReportWindow"?>
+<?component name="cptlookup" macro-uri="/utilities/cptlookup.zul" inline="false"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+		<![CDATA[
+		 import com.nzion.util.UtilValidator;
+		 com.nzion.zkoss.ext.DataExporter exporter = new com.nzion.zkoss.ext.CsvDataExporter();
+		 com.nzion.domain.billing.InvoiceStatusItem[] billingStatusesArray = com.nzion.domain.billing.InvoiceStatusItem.values();
+		 com.nzion.zkoss.composer.emr.BillingSearchController billingSearchController = new com.nzion.zkoss.composer.emr.BillingSearchController();
+		 com.nzion.service.billing.BillingService billingService=com.nzion.util.Infrastructure.getSpringBean("billingService");
+		 Map invoiceItemsGroup;
+		 Map invoicePaymentGroup;
+		 List invoicesTmp;
+		 List userLogins = commonCrudService.getAll(com.nzion.domain.UserLogin.class);
+		]]>
+	</zscript>
+	<window id="billingReportWindow" apply="${billingSearchController}">
+		<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Billing Reports</h:small>
+            </h:h1>
+         </div>
+	<div class="container-fluid">
+       <div zclass="row-fluid">
+                 <div zclass="span3">
+			<label value="Patient"  />	
+			<patientlookup onChange="billingSearchController.getBillingSearchVO().setPatient((com.nzion.domain.Patient)event.getOrigin().getData())" />
+		</div>
+		<div zclass="span2">
+				<label value="IP number" />
+				<textbox id="ipNumber" value="@{billingSearchController.billingSearchVO.ipNumber}" sclass="span12"/>
+		</div>
+		<div zclass="span3">
+				<label value="Consultant"  />
+				<providerlookup id="empLookup" onChange="billingSearchController.getBillingSearchVO().setConsultant(event.getOrigin().getData())"/>
+				
+			</div>
+			<div zclass="span2">
+			<label value="Invoice Status"  />
+		     <combobox model="@{billingStatusesArray}" value="@{billingSearchController.billingSearchVO.status}" sclass="span12">
+			     <comboitem self="@{each='status'}" value="@{status}" label="@{status}" style="padding-right:10px" />
+		     </combobox>
+		</div>
+		</div>
+		<div zclass="row-fluid">
+		<div zclass="span3">
+			<label value="Procedures" />
+				<cptlookup id="cptlookupbox" onChange="billingSearchController.getBillingSearchVO().setCpt(event.getOrigin().getData())" />
+			</div>
+			<div zclass="span2">
+				<label value="Invoice Date From"  />
+				<datebox id="fromDate"   value="@{billingSearchController.billingSearchVO.fromDate}" sclass="span12"/>
+		</div>
+		<div zclass="span2">
+				<label value="Invoice Date Thru"  />
+				<datebox id="thruDate" value="@{billingSearchController.billingSearchVO.thruDate}" sclass="span12"/>
+		</div>
+		<div zclass="span2">
+			<label value="Received By"  />
+		     <combobox id="userCombo" model="@{userLogins}" value="@{billingSearchController.billingSearchVO.collectedByUser}" sclass="span12">
+			     <comboitem self="@{each='user'}" value="@{user}" label="@{user.username}" style="padding-right:10px" />
+		     </combobox>
+		</div>
+		
+		<div zclass="span2">
+			<label value="Total Amount Range"  />
+				<combobox id="totalAmtRange" selectedItem="@{billingSearchController.billingSearchVO.lowEndAmtQuantifier}" sclass="span12">
+					<comboitem label="Equal" value="Equal" />
+					<comboitem label="Greater Than" value="Greater" />
+					<comboitem label="Less Than" value="Less" />
+					<comboitem label="Between" value="Between" />
+					<attribute name="onSelect">
+					if(self.getSelectedItem()!=null){
+						label.setVisible("Between".equalsIgnoreCase((String) self.getSelectedItem().getValue()));
+						amountIntBox.setVisible("Between".equalsIgnoreCase((String) self.getSelectedItem().getValue()));
+						}
+					</attribute>
+				</combobox>
+				</div>
+				<div zclass="span1">
+				<label value="Amount"  />
+				<decimalbox  value="@{billingSearchController.billingSearchVO.lowAmntRange.amount}" sclass="span12"/>
+				</div>
+			<div zclass="span2">
+				<label id="label" value="And" visible="false" />
+				<decimalbox id="amountIntBox"  visible="false" value="@{billingSearchController.billingSearchVO.highAmntRange.amount}"/>
+			</div>
+					
+		</div>
+			</div>
+		<div align="center" sclass="panelFoot"  >
+					<button label="Search Bills" id="searchButton" zclass="btn-primary btn"  >
+						<attribute name="onClick">
+						<![CDATA[
+						//if(UtilValidator.isEmpty(billingSearchController.getBillingSearchVO().getIpNumber()) && UtilValidator.isEmpty (billingSearchController.getBillingSearchVO().getStatus()) && 
+							//	UtilValidator.isEmpty (billingSearchController.getBillingSearchVO().getFromDate()) && UtilValidator.isEmpty (billingSearchController.getBillingSearchVO().getThruDate())
+								//&& UtilValidator.isEmpty (billingSearchController.getBillingSearchVO().getPatient()) && UtilValidator.isEmpty (billingSearchController.getBillingSearchVO().getConsultant()) && 
+								//UtilValidator.isEmpty (billingSearchController.getBillingSearchVO().getCpt()) && UtilValidator.isEmpty (billingSearchController.getBillingSearchVO().getLowEndAmtQuantifier())){
+								//billingSearchController.searchInvoiceBy(fromDate.getValue(),thruDate.getValue()).clear();
+								//com.nzion.inpatient.util.InpatientMessagesUtil.showEmptySearchError();
+							   // return;
+		    		//	}
+					    billingSearchController.searchInvoiceBy(fromDate.getValue(),thruDate.getValue());
+						searchResults.setVisible(true);
+						searchResultsSplitter.setVisible(true);
+						searchResultGrid.setVisible(true);
+						groupByResultGrid.setVisible(false);
+						groupByForInvoiceItems.setVisible(false);
+						groupByForInvoicePayment.setVisible(false);
+						groupByComboBox.selectItem(null);
+						java.math.BigDecimal totalAmts = java.math.BigDecimal.ZERO;
+					     invoicesTmp =  billingSearchController.getInvoices();													
+				         if(searchResultGrid.getSelectedCount()>0){
+				            invoicesTmp = new ArrayList(); 												        									        	
+				             Set selectedlistItems = searchResultGrid.getSelectedItems();											        	
+				        	  for(Object obj : selectedlistItems)
+				        		invoicesTmp.add(((com.nzion.domain.billing.Invoice)((Listitem)obj).getValue()));											        								        	
+				         }											    	
+				    	 totalAmts = sumOfInvoiceAmts(invoicesTmp);												    		
+				    	 totalAmountLabel.setValue(totalAmts.toString());		
+						
+						
+						
+						]]>
+						</attribute>
+					</button>
+			</div>
+			<separator></separator>
+		<space height="5px" />
+		<hlayout width="100%" style="text-align:center;background-color:grey" id="searchResultsSplitter" visible="false">
+			<image src="/images/collapse-content.png" style="text-align:center">
+				<attribute w:name="onClick">
+					jq(this.$f('searchForm')).slideToggle(1000);
+				</attribute>
+				<attribute name="onClick">
+					if(self.getSrc().contains("expand")){
+						self.setSrc("/images/collapse-content.png");
+					}
+					else if(self.getSrc().contains("collapse")){
+						self.setSrc("/images/expand-content.png");
+					}
+				</attribute>
+			</image>
+		</hlayout>
+		<space height="5px" />
+		<panel visible="false" id="searchResults" title="Search Results" width="100%" >
+			<caption height="15px">
+			  <div style="float:right">
+					<span sclass="linkBtn linkBtnOn" style="margin:-3px 13px;">
+					<a  tooltiptext="Export" label="Export" sclass="reminderBtn">
+					<attribute name="onClick">	
+					exportData();					
+					</attribute>
+					</a>
+					</span>
+				</div>	
+			</caption>
+			<panelchildren>
+				<hlayout spacing="20px" style="padding:10px" width="50%">
+					<label value="Group By:" />
+					<listbox id="groupByComboBox" mold="select" sizedByContent="true" style="padding:2px">
+						<listitem/>
+						<listitem label="Procedure" value="Procedure" />
+						<listitem label="Bill Item" value="BillItem" />
+						<listitem label="Payment  Mode" value="paymentMode" />
+						<attribute name="onSelect">
+									<![CDATA[	
+       					         
+									if(self.getSelectedItem().getValue() != null && self.getSelectedItem().getValue().equals("Procedure")){
+										searchResultGrid.setVisible(false);
+										 groupByForInvoiceItems.setVisible(false);
+										 groupByForInvoicePayment.setVisible(false);
+										 groupByResultGrid.setVisible(self.getSelectedItem().getValue() != null);										
+										// billingSearchController.getGroupedItems((String)self.getSelectedItem().getValue());
+										 billingSearchController.getCptGroupedItems((String)self.getSelectedItem().getValue());
+										 gridColumn.setLabel(self.getSelectedItem().getLabel());
+									}
+									else if(self.getSelectedItem().getValue() != null && self.getSelectedItem().getValue().equals("paymentMode")){
+										searchResultGrid.setVisible(false);
+										 groupByForInvoiceItems.setVisible(false);
+							               groupByResultGrid.setVisible(false);
+							               groupByForInvoicePayment.setVisible(self.getSelectedItem().getValue() != null);
+							               if(self.getSelectedItem().getValue() != null){	
+							            	   invoicePaymentGroup =billingSearchController.groupByInvoicePayment();
+											 }
+							               gridPaymentsColumn.setLabel(self.getSelectedItem().getLabel());
+							               
+							               
+									}
+									else{			
+										searchResultGrid.setVisible(false);
+										 groupByResultGrid.setVisible(false);
+										 groupByForInvoicePayment.setVisible(false);
+										 groupByForInvoiceItems.setVisible(self.getSelectedItem().getValue() != null);
+										 if(self.getSelectedItem().getValue() != null){											 
+									 		 invoiceItemsGroup = billingSearchController.groupByInvoiceItems();
+										 }
+										 gridItemsColumn.setLabel(self.getSelectedItem().getLabel());
+									}	
+									searchResultGrid.setVisible(self.getSelectedItem().getValue() == null);	
+									]]>
+						</attribute>
+					</listbox>
+				</hlayout>
+				<div height="500px" style="overflow:auto" id="searchResultDiv">
+					<listbox  id="searchResultGrid" model="@{billingSearchController.invoices,load-after='searchButton.onClick'}"
+						checkmark="true" multiple="true" >
+						<listhead>
+							<listheader label="Patient Name"
+								onCreate='billingSearchController.setAscendingComparator(self,"patient.firstName");billingSearchController.setDescendingComparator(self,"patient.firstName")' />
+							<listheader label="Consultant Name"
+								onCreate='billingSearchController.setAscendingComparator(self,"consultant.firstName");billingSearchController.setDescendingComparator(self,"consultant.firstName")' />
+							<listheader label="Invoice Date"
+								onCreate='billingSearchController.setAscendingComparator(self,"invoiceDate");billingSearchController.setDescendingComparator(self,"invoiceDate")' />
+							<listheader label="Invoice Status"
+								onCreate='billingSearchController.setAscendingComparator(self,"invoiceStatus");billingSearchController.setDescendingComparator(self,"invoiceStatus")' />
+							<listheader label="Invoice Number"
+								onCreate='billingSearchController.setAscendingComparator(self,"ipNumber");billingSearchController.setDescendingComparator(self,"ipNumber")' />
+							<listheader label="Amount"
+								onCreate='billingSearchController.setAscendingComparator(self,"totalAmount.amount");billingSearchController.setDescendingComparator(self,"totalAmount.amount")' />
+								<listheader label="Action" />
+						</listhead>
+						<listitem self="@{each='invoice'}" value="@{invoice}">
+							<listcell>
+								<name object="@{invoice.patient}" />
+							</listcell>
+							<listcell>
+								<name object="@{invoice.consultant}" />
+							</listcell>
+							<listcell label="@{invoice.invoiceDate,converter='com.nzion.view.component.DateConverter'}" />
+							<listcell label="@{invoice.invoiceStatus}" />
+							<listcell >
+								<label value="@{invoice.invoiceNumber}" />
+							</listcell>
+							<listcell label="@{invoice.totalAmount.amount}" />
+							<listcell>
+							<button label="Bill">
+								<attribute name="onClick">
+								com.nzion.domain.billing.Invoice invoice = self.getParent().getParent().getValue();
+								if("IPD".equals(invoice.getInvoiceType().name())){
+								Executions.getCurrent().sendRedirect("/billing/billingTxnItemInpatient.zul?invoiceId=" + self.getParent().getParent().getValue().getId(),"_BillSoapNote");
+								}
+								else{
+									Executions.getCurrent().sendRedirect("/billing/billingTxnItem.zul?invoiceId=" + self.getParent().getParent().getValue().getId(),"_BillSoapNote");
+									}
+								</attribute>
+							</button>
+						</listcell>
+						</listitem>
+						<listfoot>
+							<listfooter></listfooter>
+							<listfooter></listfooter>
+							<listfooter></listfooter>
+							<listfooter></listfooter>
+							<listfooter>
+							<label value="Total Amount" style="font-weight:bold"/>
+								<!-- <button label="Total Amount">
+									<attribute name="onClick">
+											java.math.BigDecimal totalAmts = java.math.BigDecimal.ZERO;
+										     invoicesTmp =  billingSearchController.getInvoices();													
+									         if(searchResultGrid.getSelectedCount()>0){
+									            invoicesTmp = new ArrayList(); 												        									        	
+									             Set selectedlistItems = searchResultGrid.getSelectedItems();											        	
+									        	  for(Object obj : selectedlistItems)
+									        		invoicesTmp.add(((com.nzion.domain.billing.Invoice)((Listitem)obj).getValue()));											        								        	
+									         }											    	
+									    	 	totalAmts = sumOfInvoiceAmts(invoicesTmp);												    		
+									    	   totalAmountLabel.setValue(totalAmts.toString());		
+									</attribute>
+								</button>	 -->
+							</listfooter>
+							<listfooter>
+								<div >
+										<label  id="totalAmountLabel"  zclass="blackHeading" style="font-weight:bold">  </label>
+								</div>
+							</listfooter>
+						</listfoot>
+					</listbox>		
+					<grid id="groupByResultGrid" fixedLayout="true" model="@{billingSearchController.invoiceCptItemMap,load-after='groupByComboBox.onSelect'}"
+						visible="false">
+						<columns>
+							<column width="40px"></column>
+ 							<column label="PROCEDURE" id="gridColumn" sortAscending="${billingSearchController.ascendingComparator}"
+								sortDescending="${billingSearchController.descendingComparator}">
+							</column>
+						</columns>
+ 						<rows>
+							<row self="@{each='invoiceItemGroup'}" value="@{invoiceItemGroup}">
+								<detail open="false">
+									<listbox checkmark="true" multiple="true" 
+										model="@{invoiceItemGroup.value}" id="groupByResultListBox">
+										<listhead>
+											<listheader label="Patient Name" />
+											<listheader label="Doctor Name" />
+											<listheader label="Invoice Status" />
+											<listheader label="Invoice ID" />
+											<listheader label="Invoice Date" />
+											<listheader label="IP/OP Number" />
+											<listheader label="Item" />
+											<listheader label="Item Amount" />
+											<listheader label="Action" />
+										</listhead>
+										<listitem self="@{each='invoiceCptItem'}" value="@{invoiceCptItem}">
+											<listcell>
+												<name object="@{invoiceCptItem.invoice.patient}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<name object="@{invoiceCptItem.invoice.consultant}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<label value="@{invoiceCptItem.invoice.invoiceStatus}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<label value="@{invoiceCptItem.invoice.id}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<label value="@{invoiceCptItem.invoice.invoiceDate,converter='com.nzion.view.component.DateConverter'}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<label value="@{invoiceCptItem.invoice.ipNumber,converter='com.nzion.view.component.IpOrOpNumberConverter'}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<label value="@{invoiceCptItem.description}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<label value="@{invoiceCptItem.price.amount}" style="font-weight:normal" />
+											</listcell>
+												
+											<listcell>
+											<button label="Bill">
+						                    <attribute name="onClick">
+						                   com.nzion.domain.billing.Invoice invoice = ((com.nzion.domain.billing.InvoiceItem)self.getParent().getParent().getValue()).getInvoice();
+								if("IPD".equals(invoice.getInvoiceType().name())){
+								Executions.getCurrent().sendRedirect("/billing/billingTxnItemInpatient.zul?invoiceId=" + ((com.nzion.domain.billing.InvoiceItem)self.getParent().getParent().getValue()).getInvoice().getId(),"_BillSoapNote");
+								}
+								else{
+									 Executions.getCurrent().sendRedirect("/billing/billingTxnItem.zul?invoiceId=" +  ((com.nzion.domain.billing.InvoiceItem)self.getParent().getParent().getValue()).getInvoice().getId(),"_BillSoapNote");
+									}
+						         				
+						        		  	</attribute>
+						        			</button>
+						     				   </listcell>
+										</listitem>
+										
+										<listfoot visible="false">
+										<listfooter></listfooter>
+										<listfooter></listfooter>
+										<listfooter></listfooter>
+										<listfooter></listfooter>
+										<listfooter>
+											<button label="Total Amount">
+												<attribute name="onClick">
+														List invoicesTmp =  billingSearchController.getInvoices();
+												        if(searchResultGrid.getSelectedCount()>0){	
+												        	invoicesTmp.clear();										        	
+												        	Set selectedlistItems = searchResultGrid.getSelectedItems();
+												        	for(Object obj : selectedlistItems)
+												        		invoicesTmp.add(((com.nzion.domain.billing.Invoice)((Listitem)obj).getValue()));											        								        	
+												        }
+												    	java.math.BigDecimal totalAmts = sumOfInvoiceAmts(invoicesTmp);	
+												    	self.getParent().getNextSibling().getFirstChild().setValue(totalAmts.toString());
+												</attribute>
+											</button>
+										</listfooter>
+										<listfooter>
+											<label  zclass="blackHeading" style="font-weight:bold">  </label>
+										</listfooter>
+									</listfoot>
+									</listbox>
+ 								</detail>
+								<label value="@{invoiceItemGroup.key}" />
+							</row>
+						</rows>
+					</grid>
+					<!-- Result for Group By Line Items -->
+					<grid id="groupByForInvoiceItems" fixedLayout="true" model="@{invoiceItemsGroup,load-after='groupByComboBox.onSelect'}"
+						visible="false">
+						<columns>
+							<column width="40px"></column>
+ 							<column label="PROCEDURE" id="gridItemsColumn" sortAscending="${billingSearchController.ascendingComparator}"
+								sortDescending="${billingSearchController.descendingComparator}">
+							</column>
+						</columns>
+ 						<rows>
+							<row self="@{each='invItemGroup'}" value="@{invItemGroup}">
+								<detail open="false">
+									<listbox checkmark="true" multiple="true" 
+										model="@{invItemGroup.value}" >
+										<listhead>
+											<listheader label="Patient Name" />
+											<listheader label="Doctor Name" />
+											<listheader label="Invoice Status" />
+											<listheader label="Invoice ID" />
+											<listheader label="Invoice Date" />
+											<listheader label="IP/OP Number" />
+											<listheader label="Item" />
+											<listheader label="Item Amount" />
+											<listheader label="Action" />
+										</listhead>
+										<listitem self="@{each='invoiceItm'}" value="@{invoiceItm}">
+											<listcell>
+												<name object="@{invoiceItm.invoice.patient}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<name object="@{invoiceItm.invoice.consultant}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<label value="@{invoiceItm.invoice.invoiceStatus}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<label value="@{invoiceItm.invoice.id}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<label value="@{invoiceItm.invoice.invoiceDate,converter='com.nzion.view.component.DateConverter'}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<label value="@{invoiceItm.invoice.ipNumber,converter='com.nzion.view.component.IpOrOpNumberConverter'}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<label value="@{invoiceItm.description}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<label value="@{invoiceItm.price.amount}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+											<button label="Bill">
+						                    <attribute name="onClick">
+						                     com.nzion.domain.billing.Invoice invoice = ((com.nzion.domain.billing.InvoiceItem)self.getParent().getParent().getValue()).getInvoice();
+								if("IPD".equals(invoice.getInvoiceType().name())){
+								Executions.getCurrent().sendRedirect("/billing/billingTxnItemInpatient.zul?invoiceId=" + ((com.nzion.domain.billing.InvoiceItem)self.getParent().getParent().getValue()).getInvoice().getId(),"_BillSoapNote");
+								}
+								else{
+									 Executions.getCurrent().sendRedirect("/billing/billingTxnItem.zul?invoiceId=" +  ((com.nzion.domain.billing.InvoiceItem)self.getParent().getParent().getValue()).getInvoice().getId(),"_BillSoapNote");
+									}
+						        		  	</attribute>
+						        			</button>
+						     				   </listcell>
+										</listitem>										
+										<listfoot>
+										<listfooter></listfooter>
+										<listfooter></listfooter>
+										<listfooter></listfooter>
+										<listfooter></listfooter>
+										<listfooter>
+											<button label="Total Amount">
+												<attribute name="onClick">												       
+														Object mapItem =  self.getParent().getParent().getParent().getParent().getParent().getValue();
+														Set billItems = mapItem.getValue();
+												        if(self.getParent().getParent().getParent().getSelectedCount()>0){	
+												        	billItems = new HashSet(); 	
+												        	for(Object obj : self.getParent().getParent().getParent().getSelectedItems())
+												        		billItems.add(((com.nzion.domain.billing.InvoiceItem)((Listitem)obj).getValue()));											        								        	
+												        }
+												    	 java.math.BigDecimal totalItemsAmts = sumOfBillItemsAmts(billItems);	
+												    	 self.getParent().getNextSibling().getFirstChild().setValue(totalItemsAmts.toString()); 
+												</attribute>
+											</button>
+										</listfooter>
+										<listfooter>
+											<label  zclass="blackHeading" style="font-weight:bold"> </label>
+										</listfooter>
+									</listfoot>
+									</listbox>
+ 								</detail>
+								<label value="@{invItemGroup.key}" />
+							</row>
+						</rows>
+					</grid>
+					<grid id="groupByForInvoicePayment" fixedLayout="true" model="@{invoicePaymentGroup,load-after='groupByComboBox.onSelect'}"
+						visible="false">
+						<columns>
+							<column width="40px"></column>
+ 							<column label="PaymentMode" id="gridPaymentsColumn" sortAscending="${billingSearchController.ascendingComparator}"
+								sortDescending="${billingSearchController.descendingComparator}">
+							</column>
+						</columns>
+ 						<rows>
+							<row self="@{each='invPaymentGroup'}" value="@{invPaymentGroup}">
+								<detail open="false">
+									<listbox checkmark="true" multiple="true" 
+										model="@{invPaymentGroup.value}" >
+										<listhead>
+											 <listheader label="Patient Name" />
+											<listheader label="Doctor Name" />
+											<listheader label="Invoice Status" />
+											<listheader label="Invoice ID" />
+											<listheader label="Invoice Date" /> 
+											<listheader label="Payment Mode" />
+											<listheader label="Item Amount" />
+											<listheader label="Action" />
+										</listhead>
+										<listitem self="@{each='invoicePayment'}" value="@{invoicePayment}">
+											 <listcell>
+												<name object="@{invoicePayment.invoice.patient}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<name object="@{invoicePayment.invoice.consultant}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<label value="@{invoicePayment.invoice.invoiceStatus}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<label value="@{invoicePayment.invoice.id}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<label value="@{invoicePayment.invoice.invoiceDate,converter='com.nzion.view.component.DateConverter'}" style="font-weight:normal" />
+											</listcell> 
+											
+											<listcell>
+												<label value="@{invoicePayment.paymentMethod}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<label value="@{invoicePayment.amount.amount}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+											<button label="Bill">
+						                    <attribute name="onClick">
+						                    
+						        com.nzion.domain.billing.Invoice invoice = ((com.nzion.domain.billing.InvoicePayment)self.getParent().getParent().getValue()).getInvoice();
+								if("IPD".equals(invoice.getInvoiceType().name())){
+								Executions.getCurrent().sendRedirect("/billing/billingTxnItemInpatient.zul?invoiceId=" + ((com.nzion.domain.billing.InvoicePayment)self.getParent().getParent().getValue()).getInvoice().getId(),"_BillSoapNote");
+								}
+								else{
+									 Executions.getCurrent().sendRedirect("/billing/billingTxnItem.zul?invoiceId=" + ((com.nzion.domain.billing.InvoicePayment)self.getParent().getParent().getValue()).getInvoice().getId(),"_BillSoapNote");
+									}
+						         				
+						        		  	</attribute>
+						        			</button>
+						     				   </listcell>
+										</listitem>										
+										<listfoot>
+										<listfooter></listfooter>
+										<listfooter></listfooter>
+										<listfooter></listfooter>
+										<listfooter></listfooter>
+										<listfooter>
+											<button label="Total Amount">
+												<attribute name="onClick">												       
+														Object mapItem =  self.getParent().getParent().getParent().getParent().getParent().getValue();
+														Set billItems = mapItem.getValue();
+												        if(self.getParent().getParent().getParent().getSelectedCount()>0){	
+												        	billItems = new HashSet(); 	
+												        	for(Object obj : self.getParent().getParent().getParent().getSelectedItems())
+												        		billItems.add(((com.nzion.domain.billing.InvoicePayment)((Listitem)obj).getValue()));											        								        	
+												        }
+												    	 java.math.BigDecimal totalItemsAmts = sumOfBillPaymentsAmts(billItems);	
+												    	 self.getParent().getNextSibling().getFirstChild().setValue(totalItemsAmts.toString()); 
+												</attribute>
+											</button>
+										</listfooter>
+										<listfooter>
+											<label  zclass="blackHeading" style="font-weight:bold"> </label>
+										</listfooter>
+									</listfoot>
+									</listbox>
+ 								</detail>
+								<label value="@{invPaymentGroup.key}" />
+							</row>
+						</rows>
+					</grid>
+					
+					
+					
+					
+				</div>
+			</panelchildren>
+		</panel>
+		<zscript>
+		   void exportData(){
+		  	 List items = new ArrayList();
+		     if(UtilValidator.isNotEmpty(searchResultGrid.getSelectedItems())){		   		 
+		   		 for(Object itm : searchResultGrid.getSelectedItems()){
+		   		 	com.nzion.domain.billing.Invoice inv = (com.nzion.domain.billing.Invoice)((Listitem)itm).getValue();
+		   		 	items.add(inv);
+		   		 }		   		 
+		     }
+		  	 else
+		  		items = billingSearchController.getInvoices();
+			 if(com.nzion.util.UtilValidator.isNotEmpty(items))							
+		    	 exporter.export(items, new String[]{"patient.firstName","patient.lastName","consultant.firstName","consultant.lastName","invoiceDate","invoiceStatus","totalAmount.amount","collectedAmount.amount"}, new String[]{"Patient First Name","Patient Last Name","Consultant First Name","Consultant Last Name","Invoice Date","Invoice Status", "Total Amount", "Collected Amount"}, "encounters.csv");
+		 }
+		 java.math.BigDecimal sumOfInvoiceAmts(List invs){
+		    java.math.BigDecimal totalInvsAmt = java.math.BigDecimal.ZERO;
+		 	for(Object obj : invs){
+		 		com.nzion.domain.billing.Invoice invObj = (com.nzion.domain.billing.Invoice)obj;	
+		 		totalInvsAmt = totalInvsAmt.add(invObj.getTotalAmount().getAmount());
+		 	}	
+		 	return totalInvsAmt;
+		 }
+		 
+		 java.math.BigDecimal sumOfBillItemsAmts(Set invs){
+		    java.math.BigDecimal totalInvsAmt = java.math.BigDecimal.ZERO;
+		 	for(Object obj : invs){
+		 		com.nzion.domain.billing.InvoiceItem invObj = (com.nzion.domain.billing.InvoiceItem)obj;	
+		 		totalInvsAmt = totalInvsAmt.add(invObj.getPrice().getAmount());
+		 	}	
+		 	return totalInvsAmt;
+		 }
+		 
+		  java.math.BigDecimal sumOfBillPaymentsAmts(Set invPayments){
+		    java.math.BigDecimal totalInvsPaymentAmt = java.math.BigDecimal.ZERO;
+		 	for(Object obj : invPayments){
+		 		com.nzion.domain.billing.InvoicePayment invObj = (com.nzion.domain.billing.InvoicePayment)obj;	
+		 		totalInvsPaymentAmt = totalInvsPaymentAmt.add(invObj.getAmount().getAmount());
+		 	}	
+		 	return totalInvsPaymentAmt;
+		 }
+		
+		</zscript>
+	</window>
+</zk>

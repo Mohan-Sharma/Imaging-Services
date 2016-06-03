@@ -1,0 +1,67 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addeditcpt"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<zscript>
+com.nzion.domain.emr.Cpt cpt = arg.get("entity");
+com.nzion.service.common.CommonCrudService service = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+if(cpt == null){
+   cpt = new com.nzion.domain.emr.Cpt();
+     }
+ if(cpt != null){
+   cpt =cpt;
+     }
+String label = cpt.getId()!=null?"Edit Procedures":"New Procedures";
+</zscript>
+<window id="addeditcpt" mode="modal" width="40%" closable="true"  position="center,top" > 
+<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Procedure</h:small>
+                <button type="button" zclass="close" onClick="addeditcpt.detach();">×</button>
+            </h:h1>
+        </div>
+	<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span8">
+                        <label value="Procedure Code"  mold="required" />
+						<textbox value="@{cpt.id}" id="code" constraint="no empty" disabled="${!(empty cpt.id)}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                	</div>
+                	<div zclass="span2">
+                      <label value="Price"/> 
+					  <decimalbox value="@{cpt.price}"  sclass="span12"/>
+                	</div>
+               </div>
+                	
+                	<div zclass="row-fluid">
+                	<div zclass="span10">
+                      <label value="Procedure Description"  />
+						<textbox rows="3" sclass="span12" value="@{cpt.description}" id="desc" />
+                	</div>
+                	</div>
+                	<div zclass="row-fluid">
+                	<div zclass="span10">
+                        <label value="Long Description" />
+						<textbox sclass="span12" rows="3" value="@{cpt.longDescription}"  multiline="true"/>
+                	</div>
+			</div>
+			</div>
+			<div sclass="panelFoot">
+			<button label="Save" id="Save" zclass="btn-success btn">
+				<attribute name="onClick">
+					if(com.nzion.util.UtilValidator.isEmpty(code.getValue()))
+						throw new WrongValueException(code, "Can not be empty");
+					
+						try {
+							cpt.setLocation(com.nzion.util.Infrastructure.getSelectedLocation());
+							commonCrudService.save(cpt);
+						} catch (Exception e) {
+							Messagebox.show("CPT "+cpt.getId()+" already exist.");
+						}
+					com.nzion.util.UtilMessagesAndPopups.showSuccess();
+					addeditcpt.detach();
+				</attribute>
+			</button>
+			<button label="Cancel" onClick='addeditcpt.detach()' sclass="btn"/>
+		</div>
+</window>
+</zk>

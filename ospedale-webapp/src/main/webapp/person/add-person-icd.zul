@@ -1,0 +1,67 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addIcdWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window id="addIcdWindow" mode="modal" position="center,top" width="60%" height="70%"
+	title="Add Diagnosis" closable="true">
+	<div width="97%" style="padding:5px">
+	<zscript><![CDATA[
+	com.nzion.zkoss.composer.PersonProfileController profileController = desktop.getAttribute("profileController");
+	List list=arg.get("list");
+	List icds;
+]]></zscript>
+			<panel border="none" id="icdPanel" onCancelClick="addIcdWindow.detach();"
+		onAddClick='profileController.addPersonFavourites(icdListbox,addIcdWindow,list,com.nzion.domain.person.PersonIcd.class,com.nzion.domain.emr.IcdElement.class);'>
+			<panelchildren>
+				<toolbar listenercomponent="${icdPanel}" hidedelete="true" hidesearch="true"/>
+				<div sclass="panelCont" height="40px">
+					<div sclass="col2">
+						<label value="Diagnosis Code" />
+						<textbox id="codeTextBox" />
+					</div>
+					<div sclass="col2">
+						<label value="Diagnosis Description" />
+						<textbox id="descriptionTextBox" />
+					</div>
+				</div>
+				<div sclass="panelFoot">
+					<button label="Search" id="searchBtn">
+						<attribute name="onClick">
+						<![CDATA[
+							String code = codeTextBox.getValue();
+							String description = descriptionTextBox.getValue();
+							if (code.isEmpty() && description.isEmpty()) {
+								com.nzion.util.UtilMessagesAndPopups.showError("Provide either Code and Description For Search");
+								return;
+							}
+							icds = icdService.searchIcdBy(code, description);
+							noresultLabel.setVisible(com.nzion.util.UtilValidator.isEmpty(icds));
+							searchResultPanel.setVisible(true);
+						]]>
+						</attribute>
+					</button>
+				</div>
+			</panelchildren>
+		</panel>
+		<separator height="10px" />
+		<panel title="Search Result" id="searchResultPanel" visible="false" collapsible="true">
+			<panelchildren>
+				<label value="No Record Found" id="noresultLabel" visible="false" style="font-weight:bold" />
+				<listbox id="icdListbox" model="@{icds,load-after='searchBtn.onClick'}" mold="paging" multiple="true" pageSize="10"
+					checkmark="true"
+					selectedItem="@{icdGroupController.selectedIcdElements,converter=com.nzion.view.component.MultipleListitemBindingConverter}"
+					pagingPosition="top">
+					<listhead>
+						<listheader label="Diagnosis Code" />
+						<listheader label="Diagnosis Description" />
+					</listhead>
+					<listitem self="@{each='icd'}" value="@{icd}">
+						<listcell label="@{icd.code}" />
+						<listcell label="@{icd.description}" />
+					</listitem>
+				</listbox>
+			</panelchildren>
+		</panel>
+		</div>
+	</window>
+</zk>

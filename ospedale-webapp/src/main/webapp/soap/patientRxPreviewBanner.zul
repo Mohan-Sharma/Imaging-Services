@@ -1,0 +1,39 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xmlns:w="http://www.zkoss.org/2005/zk/client">
+	
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<?xel-method prefix="displayName" name="fn" class="com.nzion.util.ViewUtil" signature="String getFormattedName(java.lang.Object)"?>
+	<?xel-method prefix="displayAge" name="da" class="com.nzion.util.UtilDateTime" signature="String calculateAge(java.util.Date,java.util.Date)"?>
+	<zscript>
+	Date visitDate = soapnotedate;
+	
+	</zscript>
+<window width="98%">
+<separator/>
+	<n:div width="98%">
+	<n:table>
+	<n:tr>
+		<h:td align="center"><n:strong style="font-size:20px">${practice.practiceName}</n:strong></h:td>
+	</n:tr>
+	
+	<n:tr>
+		<h:td align="center">
+			<n:strong style="font-size:15px;margin-right:2px;padding:10px">${location.contacts.postalAddress.address1}</n:strong>
+			<n:strong style="font-size:15px;margin-right:2px;padding:10px">${location.contacts.postalAddress.city}</n:strong>
+			<n:strong style="font-size:15px;margin-right:2px;padding:10px">${location.contacts.postalAddress.stateProvinceGeo}</n:strong>
+		</h:td>
+	</n:tr>
+		<n:tr>
+			<h:td>
+				<n:strong style="font-size:15px;margin-right:2px;padding:10px">Tel : </n:strong> ${location.contacts.officePhone}
+				<n:strong style="font-size:15px;padding:10px">Fax : </n:strong> ${location.contacts.faxNumber}
+			</h:td>
+	</n:tr>
+	</n:table>
+	</n:div>
+	
+	
+<separator/>
+</window>
+</zk>

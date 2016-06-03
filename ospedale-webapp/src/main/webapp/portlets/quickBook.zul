@@ -1,0 +1,127 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./quickBookWin"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" >
+	<zscript>
+	import com.nzion.zkoss.composer.appointment.ScheduleController;
+	import com.nzion.domain.Provider;	
+	import com.nzion.service.ScheduleService;
+	import com.nzion.domain.Schedule;
+	import com.nzion.domain.CalendarSlot;	
+	import com.nzion.domain.util.SlotAvailability;
+	import com.nzion.service.ProviderService;
+	import com.nzion.util.Infrastructure;
+	import com.nzion.domain.screen.ScheduleConfig;
+	 com.nzion.domain.Patient patient;
+	com.nzion.service.common.CommonCrudService commonCrudService = Infrastructure.getSpringBean("commonCrudService");
+	ProviderService providerService = Infrastructure.getSpringBean("providerService");
+	
+	Schedule.STATUS[] scheduleStatusArr =  Schedule.STATUS.values();	
+	com.nzion.domain.Location location = (com.nzion.domain.Location) Sessions.getCurrent().getAttribute("_location");
+	ScheduleService scheduleService = com.nzion.util.Infrastructure.getSpringBean("scheduleService");
+	ScheduleConfig screenConfig = scheduleService.getAppointmentDisplayScreen();
+	
+	Schedule currentSchedule = new Schedule();
+	currentSchedule.setLocation(location);
+	ScheduleController scheduleController = arg.get("scheduleController");
+	com.nzion.zkoss.composer.appointment.AppointmentListcell sourceComponent = arg.get("sourceComponent");
+	com.nzion.domain.Person person = com.nzion.util.Infrastructure.getLoggedInPerson();
+	Provider  provider= commonCrudService.getById(Provider.class,person.getId());
+	if(scheduleController!=null)
+	scheduleController.setSelectedComponent(sourceComponent);
+	currentSchedule.setVisitType(provider.getSoapNoteType());	
+	CalendarSlot slot = sourceComponent.getSlot();	
+	com.nzion.service.FixedAssetService  fixedAssetService = Infrastructure.getSpringBean("fixedAssetService");
+	com.nzion.service.SigninService signinService = com.nzion.util.Infrastructure.getSpringBean("signinService");
+	com.nzion.domain.emr.PatientVisit patientVisit = new com.nzion.domain.emr.PatientVisit();
+	List fixedAssets = fixedAssetService.getAllRoomsByLocation(com.nzion.util.Infrastructure.getUserLogin().getLocations());
+	patientVisit.setTime(slot.getStartTime());
+	patientVisit.setRoom(provider.getRoom());
+	</zscript>	
+	<window  title="Quick Create Appointment" border="normal" id="quickBookWin" height="60%" width="85%" style="margin-top:5px;" mode="modal" closable="true" position="center">
+	<style>
+		div.z-hlayout{
+			white-space: wrap;
+		}
+		
+		#2{
+		white-space: wrap;
+		color:red;
+		}
+	</style>
+		<hlayout spacing="15%" style="margin:10px;" sclass="form">
+			<!-- <image hover="@{patient,converter='com.nzion.view.component.GenderImageConverter'}" height="100px" width="100px"/> -->
+			<vlayout spacing="15px" >
+				<hlayout sclass="patientLkup">
+					<label value="Patient" mold="required" sclass="name"/>					
+				   <quickpatientlookup id="patientAccountNumber" value="${currentSchedule.patient}"
+                        onChange='currentSchedule.setPatient(event.getOrigin().getData());
+                        patient=currentSchedule.getPatient();
+						Events.postEvent("onReload",patientDetVbox,null);'/>
+                 </hlayout>
+				<div id="patientDetVbox">
+				<vlayout spacing="20px" >
+				<hlayout spacing="10px">
+					<label sclass="name" value="MRN :"/>
+					<label value="@{currentSchedule.patient.accountNumber,load-after='patientDetVbox.onReload'}" />
+				</hlayout>
+				<hlayout spacing="10px">
+					<label sclass="name" value="Mobile:"></label>
+					<label value="@{currentSchedule.patient.contacts.mobileNumber,load-after='patientDetVbox.onReload'}" />
+				</hlayout>
+				<hlayout spacing="10px">
+					<label sclass="name" value="Date of Birth:"></label>
+					<label value="@{currentSchedule.patient.dateOfBirth,converter='com.nzion.view.component.DateConverter',load-after='patientDetVbox.onReload'}" />
+				</hlayout>
+				</vlayout>		
+				</div>	
+				</vlayout>			 
+			<vlayout spacing="20px" >
+				<hlayout spacing="10px">
+					<label sclass="name" value="Appointment Date:" ></label>					
+					<label value="@{scheduleController.selectedDate,converter='com.nzion.view.component.DateConverter'}" />
+				</hlayout>						
+				<hlayout spacing="10px">
+					<label sclass="name" value="Visit Type : " mold="required"></label>
+					<combobox id="visitTypebox" model="@{scheduleService.allSoapNoteTypes}" selectedItem="@{currentSchedule.visitType,load-after='onReload'}">
+							<comboitem self="@{each='slotType'}" value="@{slotType}" label="@{slotType.name}" />
+				    </combobox>
+				</hlayout>
+				<hlayout spacing="10px">
+					<label value="Signin Time : " sclass="name"  mold="required"></label>
+					<timebox value="@{patientVisit.time}" style="display:inline-block;width:100px;" constraint="no past"/>
+				</hlayout>
+				<hlayout spacing="10px">
+					<label sclass="name" value="Room : " mold="required"></label>
+					<combobox selectedItem="@{patientVisit.room,save-when='saveBtn.onClick'}" constraint="no empty:Room Required" readonly="true">
+					<comboitem forEach="${fixedAssets}" label="${each.fixedAssetName}" value="${each}" />
+				</combobox>		
+				</hlayout>
+			</vlayout>
+		</hlayout>		
+		<div sclass="panelFoot" >
+		   <button label="Book" zclass="btn-success btn" id="saveBtn">
+		   <attribute name="onClick">
+						if(currentSchedule.getPatient()==null){
+							com.nzion.util.UtilMessagesAndPopups.showError("Select a Patient to proceed");
+							return;
+						}						
+					  
+					    if(visitTypebox.getSelectedItem() == null){
+							com.nzion.util.UtilMessagesAndPopups.showError("Select a visit type to proceed");
+							return;
+						}
+						currentSchedule.setPerson(person);
+						currentSchedule.setStartTime(slot.getStartTime());
+						
+						currentSchedule.setEndTime(slot.getEndTime());
+						currentSchedule.setStartDate(com.nzion.util.UtilDateTime.getDayStart(scheduleController.getSelectedDate()));
+						currentSchedule.setSequenceNum(slot.getSequenceNum());
+						patientVisit.setMetWith(person);	
+						scheduleController.createQuickBook(currentSchedule,patientVisit);						
+						quickBookWin.detach();	
+		   </attribute>
+		   </button>
+				 <button label="Close" onClick='quickBookWin.detach()' sclass="btn"></button> 
+		</div>
+	</window>
+</zk>

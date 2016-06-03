@@ -1,0 +1,51 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./siteWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript><![CDATA[
+	    com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");              
+        com.nzion.domain.drug.Site site = Executions.getCurrent().getArg().get("entity");
+        String label = site!=null?"Edit ":"New ";
+    	site = site == null ? new com.nzion.domain.drug.Site() : site;
+]]></zscript>
+		<window id="siteWindow" width="30%" position="center,top"  closable="true" mode="modal">
+		 <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Site</h:small>
+                  <button type="button" zclass="close" onClick="siteWindow.detach();">×</button>
+            </h:h1>
+        </div>
+	<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span4">
+						<label value="Site Code" mold="required" />
+						<textbox value="@{site.code}" id="code" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" maxlength="30" constraint="no empty"  sclass="span12" />
+					</div>
+					</div>
+					<div zclass="row-fluid">
+					 <div zclass="span6">
+						<label value="Site Name" />
+						<textbox cols="50" rows="2" value="@{site.description}" sclass="span12" id="name" />	
+					</div>
+				</div>
+				</div>
+				
+			
+		<div sclass="panelFoot">
+		<button label="Save" id="Save" zclass="btn-success btn">
+			<attribute name="onClick">
+			try{
+				if(com.nzion.util.UtilValidator.isEmpty(code.getValue()))
+					throw new WrongValueException(code, "Can not be empty");
+				if(com.nzion.util.UtilValidator.isEmpty(name.getValue()))
+					throw new WrongValueException(name, "Can not be empty");
+				commonCrudService.save(site);
+				siteWindow.detach();
+				}catch(org.springframework.dao.DataIntegrityViolationException exception){
+				throw new RuntimeException("Site " +site.getCode() + " already exists");
+				}
+			</attribute>
+		</button>
+		<button label="Cancel" forward="onClick=onCancel"/>
+	</div>
+	</window>
+</zk>

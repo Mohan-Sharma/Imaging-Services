@@ -1,0 +1,68 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addLabResultWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	         import com.nzion.domain.emr.lab.*;
+	         LabTestResult labTestResult = arg.get("labTestResult");
+	]]>
+	</zscript>
+	<window id="addLabResultWindow">
+		<h:table width="100%">
+			<h:tr>
+				<h:td width="20%">
+					<label value="Test Name" />
+				</h:td>
+				<h:td width="20%">
+					<label value="Reference Range" />
+				</h:td>
+				<h:td width="20%">
+					<label value="Unit" />
+				</h:td>
+				<h:td width="20%">
+					<label value="Result" />
+				</h:td>
+				<h:td width="20%">
+					<label value="Note" />
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td style="vertical-align:top;width:20%">
+					<label value="@{labTest.testName,load-after='testResultPanel.onReloadRequest'}" />
+				</h:td>
+				<h:td style="vertical-align:top;width:30%">
+					<grid model="@{labReferenceRanges,load-after='testResultPanel.onReloadRequest'}"
+						style="border-right-width:0px;border-left-width:0px;border-top-width:0px;border-bottom-width:0px;background:none">
+						<rows>
+							<row self="@{each='labReferenceRange'}" value="@{labReferenceRange}"
+								style="border-right-width:0px;border-left-width:0px;border-top-width:0px;border-bottom-width:0px;background:none">
+								<label value="@{labReferenceRange.referenceRange}" />
+							</row>
+						</rows>
+					</grid>
+				</h:td>
+				<h:td style="vertical-align:top;width:10%">
+					<label value="@{labTest.uom.description,load-after='testResultPanel.onReloadRequest'}" />
+				</h:td>
+				<h:td style="vertical-align:top;width:20%">
+					<textbox value="@{labTestResult.labTestValue,load-after='testResultPanel.onReloadRequest'}" />
+				</h:td>
+				<h:td style="vertical-align:top;width:20%">
+					<textbox value="@{labTestResult.notes,load-after='testResultPanel.onReloadRequest'}" />
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td>
+					<button label="Save">
+						<attribute name="onClick">
+						labTestResult.setLabTestPanel(labTestPanel);
+						labTestResults.add(labTestResult);
+						</attribute>
+					</button>
+				</h:td>
+			</h:tr>
+		</h:table>
+
+	</window>
+</zk>

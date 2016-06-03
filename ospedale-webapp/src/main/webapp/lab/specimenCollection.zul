@@ -1,0 +1,139 @@
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <zscript>
+     Component outpatientLabRequestTab= Executions.getCurrent().getArg().get("labResultTab");
+    </zscript>
+    <window apply="org.zkoss.bind.BindComposer" mode="modal" sclass="modalStyle"     id="specimenCollWin"
+            viewModel="@id('vm') @init('com.nzion.zkoss.composer.emr.lab.SpecimenCollectionViewModel')">
+
+        <div zclass="container-fluid">
+        <div zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Lab Requisition Detail</h:small>
+                <button type="button" zclass="close" onClick="specimenCollWin.detach();">×</button>
+            </h:h1>
+        </div>
+            <h:dl class="dl-horizontal">
+                <h:dt>Patient Name</h:dt>
+                <h:dd><name object="@bind(vm.labRequisition.patient)"/></h:dd>
+
+                <h:dt>Token</h:dt>
+                <h:dd><label value="@bind(vm.labRequisition.token)"/></h:dd>
+
+                <h:dt>Clinical History</h:dt>
+                <h:dd><label value="@bind(vm.labRequisition.clinicalHistory)"/></h:dd>
+
+                <h:dt>Remarks</h:dt>
+                <h:dd><label value="@bind(vm.labRequisition.remarks)"/></h:dd>
+            </h:dl>
+
+        </div>
+
+        <div>
+            <div zclass="pull-left">
+                <space width="10px"/>
+                <a label="New" onClick="@command('NewSpecimen')" zclass="btn">
+                    <h:i class="icon-plus-sign"></h:i>
+                </a>
+            </div>
+        </div>
+        <listbox model="@bind(vm.specimenModelList)" emptyMessage="Yet to have a Collection for this Lab Requisition." selectedItem="@bind(vm.specimenModel)">
+            <listhead>
+                <listheader label="Specimen Label"  width="15%"/>
+                <listheader label="Collection Volume"/>
+                <listheader label="Collection Date Time" width="25%"/>
+                <listheader label="Specimen Source" width="15%"/>
+                <listheader label="Test/Profile Name"/>
+                <listheader width="10%"/>
+            </listhead>
+            <template name="model" var="specimenModel">
+                <listitem>
+                    <listcell label="@load(specimenModel.specimenLabel)"></listcell>
+                    <listcell label="@load(specimenModel.collectionVolume)"></listcell>
+                    <listcell label="@load(specimenModel.specimenCollectedDateTime)"/>
+                    <listcell label="@load(specimenModel.labSpecimenSource.description)"/>
+                    <listcell>
+                    <vlayout children="@init(specimenModel.labTestResultSet)">
+                    <template name="children" var="node">
+            		<label value="@load(node.testName)" />
+        			</template>
+                    </vlayout>
+                    </listcell>
+                    <listcell>
+                        <button label="Remove" sclass="btn-mini"
+                                onClick="@command('RemoveSpecimenModel',arg1=specimenModel)"/>
+                    </listcell>
+                </listitem>
+            </template>
+        </listbox>
+        <separator bar="true"/>
+            <h:h3>
+                <h:small>Specimen Detail</h:small>
+            </h:h3>
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Specimen Label" mold="required"/>
+                    <textbox constraint="no empty:Specimen Label can't be empty" value="@bind(vm.specimenModel.specimenLabel)" sclass="span12"></textbox>
+                </div>
+                <div zclass="span3">
+                    <label value="Collection Method"/>
+                    <textbox value="@bind(vm.specimenModel.collectionMethod)" sclass="span12"></textbox>
+                </div>
+                <div zclass="span3">
+                    <label value="Lab Test Name"/>
+                    <listbox model="@load(vm.labTestResults)" sclass="span12" 
+                            selectedItems="@bind(vm.specimenModel.labTestResultSet)" 
+                            mold="select"
+                            multiple="true">
+                        <template name="model" var="labTestResult">
+                            <listitem value="@load(labTestResult)">
+                                <listcell  label="@load(labTestResult.testName)"></listcell>
+                            </listitem>
+                        </template>
+                    </listbox>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Collection Volume"/>
+                    <textbox value="@bind(vm.specimenModel.collectionVolume)" sclass="span12"></textbox>
+                </div>
+                <div zclass="span3">
+                    <label value="Collection Unit"/>
+                    <textbox value="@bind(vm.specimenModel.collectionVolumeUnits)" sclass="span12"></textbox>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Collection DateTime"/>
+                    <datebox value="@bind(vm.specimenModel.specimenCollectedDateTime)" sclass="span12" format="dd/MM/yyyy HH:mm" placeholder="dd/MM/yyyy HH:mm"></datebox>
+                </div>
+                <div zclass="span2">
+                    <label value="Specimen Source"/>
+                    <combobox model="@load(vm.specimenSourceList)"
+                              selectedItem="@bind(vm.specimenModel.labSpecimenSource)">
+                        <template name="model" var="specimen">
+                            <comboitem label="@load(specimen.description)" value="@bind(specimen)"/>
+                        </template>
+                    </combobox>
+                </div>
+            </div>
+            <div zclass="panelFoot">
+                   <button label="Save" sclass="btn btn-success" onClick="@command('SaveSpecimenModel')"></button>
+                   <button label="Close" sclass="btn">
+                   <attribute name="onClick">
+                   if(outpatientLabRequestTab !=null){
+                   	Events.postEvent(Events.ON_SELECT,outpatientLabRequestTab,null);
+                   }
+                   specimenCollWin.detach();
+                   </attribute>
+                   </button>
+            </div>
+        </div>
+    </window>
+
+</zk>

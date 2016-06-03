@@ -1,0 +1,85 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./exportVaccineWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		com.nzion.zkoss.composer.XIComposer xiComposer = new com.nzion.zkoss.composer.XIComposer();
+		List patientImmunizations;
+		setPageTitle("Export Vaccine", "");
+		com.nzion.domain.Patient patient;
+	</zscript>
+	<window id="exportVaccineWindow">
+		<panel title="Search Patient Immunization">
+			<panelchildren>
+				<div sclass="panelCont" height="50px">
+					<div>
+						<label value="Visit From Date" />
+						<label value="*" style="color:red" />
+						<datebox id="fromDateBox" constraint="no empty:From Date Required"/>
+					</div>
+					<div>
+						<label value="Visit Thru Date" />
+						<datebox id="thruDateBox" value="@{encounterController.encounterSearchValueObject.thruDate}" />
+					</div>
+					<div>
+					<label value="Patient"/>
+					<hbox >
+					<textbox id="patientLookupTxt" forward="onChange=onChange" readonly="true">
+					<attribute name="onChange">
+						patient  = (com.nzion.domain.Patient)event.getData();
+					</attribute>
+					</textbox>
+						<n:div style="width:70px;">
+						<span id="lookUpBtn" sclass="linkBtn linkBtnOn">
+							<a sclass="lookupBtn">
+								<attribute name="onClick">
+									Executions.createComponents("/patient/patient-search-window.zul",null,com.nzion.util.UtilMisc.toMap("patientLookupTxt", patientLookupTxt)).doModal();
+								</attribute>
+								Lookup
+							</a>
+						<span/>
+						</span>
+						</n:div>
+					</hbox>
+					</div>
+				</div>
+				<div sclass="panelFoot">
+					<button id="searchBtn" label="Search">
+					<attribute name="onClick">
+						patientImmunizations = xiComposer.searchPatientImmunization(fromDateBox.getValue(),thruDateBox.getValue(),patient);
+						resultLabel.setVisible(com.nzion.util.UtilValidator.isEmpty(patientImmunizations));
+					</attribute>
+					</button>
+				</div>
+			</panelchildren>
+		</panel>
+		<panel height="250px">
+			<panelchildren>
+				<label id="resultLabel" value="No Record Found" visible="false" style="font-weight:bold"/>
+				<div height="250px" style="overflow:auto">
+					<listbox model="@{patientImmunizations,load-after='searchBtn.onClick'}" multiple="true" checkmark="true" selectedItem="@{xiComposer.selectedPatientImmunizations,converter=com.nzion.view.component.MultipleListitemBindingConverter}">
+						<listhead>
+							<listheader label="Patient Name" />
+							<listheader label="Vaccine Name" />
+							<listheader label="Administered Amount" />
+							<listheader label="Administered Unit" />
+							<listheader label="Administered On" />
+						</listhead>
+						<listitem self="@{each='patientImmunization'}">
+						<listcell>
+							<name object="@{patientImmunization.patient}"/>
+						</listcell>
+						<listcell label="@{patientImmunization.immunization.fullVaccineName}"/>
+						<listcell label="@{patientImmunization.administeredAmount}"/>
+						<listcell label="@{patientImmunization.administeredUnits}"/>
+						<listcell label="@{patientImmunization.administeredOn,converter='com.nzion.view.component.DateConverter'}"/>
+						</listitem>
+					</listbox>
+				</div>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot">
+			<button label="Export" onClick="xiComposer.exportCDCFile()"/>
+		</div>
+	</window>
+</zk>

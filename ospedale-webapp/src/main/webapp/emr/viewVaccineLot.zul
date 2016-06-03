@@ -1,0 +1,13 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./viewVaccineLotWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+		setPageTitle("Vaccine Lot ", "");
+</zscript>
+	<window id="viewVaccineLotWindow">
+		<screen width="100%" listtitle="List of Vaccine Lot" addpage="vaccineLot" editpage="vaccineLot" addmodepopup="true"
+			entityclass="com.nzion.domain.emr.VaccineLot" fields="lotNumber,productName,dosesRemaining,unit,expiryDate"
+			hidedeletebtn="true" searchfields="lotNumber,productName"/>
+	</window>
+</zk>

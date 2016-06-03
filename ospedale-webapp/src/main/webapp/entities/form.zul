@@ -1,0 +1,9 @@
+<?component name="masterEntity" macroURI="../entities/master-entity.zul" inline="true"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk>
+	<zscript><![CDATA[
+	        com.nzion.domain.emr.Form form = Executions.getCurrent().getArg().get("entity");
+	        form = form == null ? new com.nzion.domain.emr.Form() : form;
+]]></zscript>
+	<masterEntity entityvalue="${form}" panelvalue="Form" codevalue="Form Code" descriptionvalue="Form Name"/>
+</zk>

@@ -1,0 +1,21 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/verticalTemplate.zul"?>
+<zk>
+<zscript>
+String[] labels;
+String[] ids;
+</zscript>
+<div self="@{insert(utilityContent)}">
+	<zscript><![CDATA[
+	if(!com.nzion.util.Infrastructure.getUserLogin().hasRole(com.nzion.domain.Roles.PATIENT)){
+		labels = new String[]{"Change Password","Forgot Password Settings"};
+		//ids = new String[]{"personChangePassword","personForgotPasswordSettings","emergencyContactList"};
+		ids = new String[]{"personChangePassword","personForgotPasswordSettings"};
+	}
+	else{
+		labels = new String[]{"Change Password","Forgot Password Settings"};
+		ids = new String[]{"personChangePassword","personForgotPasswordSettings"};
+	}
+	renderTabs(labels, ids);
+	]]></zscript>
+</div>
+</zk>

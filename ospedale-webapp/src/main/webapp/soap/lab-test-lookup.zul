@@ -1,0 +1,49 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./labTestLookUpWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window mode="modal" id="labTestLookUpWin" width="40%" position="center" closable="true" title="Lab Test Lookup">
+		<div width="97%" style="padding:5px">
+			<zscript>
+				import com.nzion.util.Constants;
+				import com.nzion.domain.emr.lab.LabTest;
+				import com.nzion.domain.emr.lab.LabTestPanel;
+				Textbox component = arg.get("testName");
+				Textbox testCodeComponent = arg.get("testCode");
+				char[] ALPHABETS = Constants.ALPHABETS;
+				com.nzion.repository.ComponentRepository componentRepository = com.nzion.util.Infrastructure.getSpringBean("componentRepository");
+				Collection masterData = componentRepository.getMasterDataStartingWith(LabTestPanel.class, "A", "panelName");
+				com.nzion.domain.emr.soap.PatientLabOrder patientLabOrder = arg.get("patientLabOrder");
+			</zscript>
+			<div sclass="panelTop">
+				<button label="Cancel" forward="onClick=onCancel" />
+			</div>
+			<panel title="Lab Tests">
+				<panelchildren>
+					<hbox>
+						<toolbarbutton forEach="${ALPHABETS}" label="${each}" width="15px;"
+							onClick='masterData=componentRepository.getMasterDataStartingWith(LabTestPanel.class,self.label,"panelName");Events.postEvent("onReloadRequest",labTestDisplayGrid,null)' />
+					</hbox>
+					<div height="200px" style="overflow:auto">
+						<listbox model="@{masterData,load-after='self.onReloadRequest'}" id="labTestDisplayGrid">
+							<listhead>
+								<listheader label="Test Panel Name" />
+							</listhead>
+							<listitem self="@{each='test'}" value="@{test}">
+								<attribute name="onClick">
+									LabTestPanel labTestPanel = (LabTestPanel)self.getValue();
+									patientLabOrder.setLabTestPanel(labTestPanel);
+									component.setValue(self.getValue().getPanelName());
+									Events.postEvent("onChange", component, null);
+									labTestLookUpWin.detach();
+								</attribute>
+								<listcell>
+									<label value="@{test.panelName}" />
+								</listcell>
+							</listitem>
+						</listbox>
+					</div>
+				</panelchildren>
+			</panel>
+		</div>
+	</window>
+</zk>

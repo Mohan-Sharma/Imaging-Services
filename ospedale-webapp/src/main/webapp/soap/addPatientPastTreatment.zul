@@ -1,0 +1,63 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./editTreatment"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	com.nzion.zkoss.composer.PatientSoapNoteController soapNoteController = arg.get("controller");
+	com.nzion.domain.emr.soap.PatientPastTreatmentHistory pastTreatmentHistory = arg.get("pastTreatmentHistory");
+	com.nzion.domain.emr.soap.PastHistorySection pastHistorySection = arg.get("pastHistorySection");
+//	Set pastTreatmentHistories = arg.get("pastTreatmentHistories");
+	</zscript>
+	<window id="editTreatment" title="Add/Edit Treatment" closable="true" width="50%">
+		<div sclass="form">
+					<vlayout spacing="5px">
+					<hlayout spacing="5px">
+					<label value="Admit Date" sclass="name" style="width:250px;" mold="required"/>
+					<datebox value="@{pastTreatmentHistory.admissionDate,save-when='addBtn.onClick'}" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty,no future"/>
+				</hlayout>
+
+					<hlayout spacing="5px">
+					<label value="Admission Type" sclass="name" style="width:250px;" mold="required"/>
+					<enumeration enumType="TREATMENT_ADMISSION_TYPE"
+						selectedItem="@{pastTreatmentHistory.admissionType,save-when='addBtn.onClick'}" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty:Admission Type Required"/>
+			</hlayout>
+					<hlayout spacing="5px">
+					<label value="Admit Reason" sclass="name" style="width:250px;"/>
+					<textbox value="@{pastTreatmentHistory.admissionReason,save-when='addBtn.onClick'}" rows="4"/>
+				</hlayout>
+				<hlayout spacing="5px">
+					<label value="Hospital" sclass="name" style="width:250px;" />
+					<textbox value="@{pastTreatmentHistory.hospitalName,save-when='addBtn.onClick'}" rows="4"/>
+				</hlayout>
+				</vlayout>
+				<div sclass="col2" width="90%">
+					<include src="/soap/soapAuditInfo.zul" record="${pastTreatmentHistory}" id="auditInfoInclude"/>
+				</div>	
+			</div>
+	
+		<div sclass="panelFoot">
+			<button label="Add" zclass="btn-success btn" id="addBtn" disabled="${patientSoapNoteController.readonly}">
+				<attribute name="onClick">
+				<![CDATA[
+				    if(pastTreatmentHistory.getId()==null){     
+			 		pastTreatmentHistory.setPatient(pastHistorySection.getSoapNote().getPatient());
+					pastTreatmentHistory.setSoapSection(pastHistorySection);
+					pastHistorySection.addPatientPastTreatmentHistory(pastTreatmentHistory);
+					soapNoteController.saveSoapSection();
+				    }
+					if(com.nzion.util.UtilValidator.isEmpty(pastTreatmentHistory.getUpdatedBy()) && pastHistorySection.getPatientPastTreatmentHistories().size() == 1)
+						soapNoteController.setEventMessage("Past Treatment Created");
+					else
+						soapNoteController.setEventMessage("Past Treatment Updated");
+					commonCrudService.save(pastTreatmentHistory);
+					Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null);
+					Clients.evalJavaScript("toggleTreatment()");
+					editTreatment.detach();
+				]]>	
+				</attribute>
+			</button>
+		</div>
+	</window>
+</zk>

@@ -1,0 +1,102 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapReviewOfSystemWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+		import com.nzion.domain.emr.soap.PatientRosQA;
+		import com.nzion.service.common.CommonCrudService;
+		import com.nzion.domain.emr.QATemplate;
+		import com.nzion.domain.emr.soap.RosSection;
+		import com.nzion.domain.emr.OrganSystem;
+		com.nzion.zkoss.composer.PatientSoapNoteController patientSoapNoteController = arg.get("controller");
+		RosSection rosSection = (RosSection) patientSoapNoteController.getSoapSection(RosSection.class, true);
+		QATemplate qaTemplate = rosSection.getQaTemplate() == null ? patientSoapNoteController.getQATemplate() : rosSection.getQaTemplate();
+		rosSection.setQaTemplate(qaTemplate);
+		Set patientRosQAs;
+		Set rosSectionOrgans = new HashSet();
+		Collection questions;
+		if (qaTemplate != null) rosSectionOrgans = qaTemplate.getOrganSystems();
+		if (com.nzion.util.UtilValidator.isEmpty(rosSection.getPatientRosQAs()))
+			patientRosQAs = rosSection.getPatientRosQuetionAnswers(rosSectionOrgans);
+		else
+			patientRosQAs = rosSection.getPatientRosQAs();
+			PatientRosQA selectedPatientRosQA;
+			OrganSystem organSystem;
+	]]>
+</zscript>
+	<window id="soapReviewOfSystemWindow">
+		<h:table height="100%">
+			<h:tr height="85%">
+				<h:td class="soapNoteContL" height="100%" style="vertical-align:top;width:30%">
+					<panel>
+						<panelchildren>
+						<vlayout>
+							<div sclass="dataTables_scrollBody" style="height: 400px;">
+								<listbox model="@{patientRosQAs}" id="organSytemListBox">
+									<listhead>
+										<listheader label="OrganSystem" />
+										<listheader label="Status" />
+									</listhead>
+									<listitem self="@{each='patintRosQA'}" value="@{patintRosQA}">
+										<listcell label="@{patintRosQA.organSystem.desc}" />
+										<listcell>
+											<listbox id="rosResolutionListBox" mold="select"
+												selectedItem="@{patintRosQA.normal}">
+												<listitem label="Not Reviewed" value="NOTASKED" />
+												<listitem label="Normal" value="NORMAL" />
+												<listitem label="Abnormal" value="ABNORMAL" />
+												<attribute name="onSelect">
+													patientRosSectionPanel.setVisible(self.getSelectedItem().getValue().equals("ABNORMAL"));
+													selectedPatientRosQA = self.getParent().getParent().getValue();
+													organSystem = self.getParent().getParent().getValue().getOrganSystem();
+													commonCrudService.refreshEntity(organSystem);
+													questions = commonCrudService.getQuestions(qaTemplate, organSystem);
+													openQASection();
+												</attribute>
+											</listbox>
+										</listcell>
+										<attribute name="onClick">
+											organSystem = self.getValue().getOrganSystem();
+											commonCrudService.refreshEntity(organSystem);
+											patientRosSectionPanel.setVisible(self.getValue().getNormal().equals("ABNORMAL"));
+											questions = commonCrudService.getQuestions(qaTemplate, organSystem);
+											openQASection();
+										</attribute>
+									</listitem>
+								</listbox>
+							</div>
+							<vlayout>
+								<label value="Overall Observation" style="font-weight:bold"/>
+								<textbox value="@{rosSection.rosNote}" rows="2" cols="50"/>
+							</vlayout>
+							</vlayout>
+						</panelchildren>
+					</panel>
+				</h:td>
+				<h:td class="soapNoteContR" height="100%" style="width:70%;vertical-align:top">
+					<panel id="patientRosSectionPanel" visible="false">
+						<panelchildren>
+							<separator height="15px" />
+							<div id="patientRosSectionDiv" visible="false" />
+						</panelchildren>
+					</panel>
+				</h:td>
+			</h:tr>
+		</h:table>
+		<div align="start" sclass="panelFoot">
+			<button disabled="${controller.readonly}" id="saveButton" label="Save"
+				onClick="patientSoapNoteController.saveSoapSection();com.nzion.util.UtilMessagesAndPopups.showSuccess();" />
+		</div>
+		<zscript>
+		<![CDATA[
+	void openQASection() {
+	patientRosSectionDiv.setVisible(true);
+	patientRosSectionDiv.getChildren().clear();
+	Executions.createComponents("/soap/qa.zul", patientRosSectionDiv, com.nzion.util.UtilMisc.toMap("qas", questions,
+			"qaFactory", rosSection.getPatientRosQA(organSystem)));
+	}
+]]>
+		</zscript>
+	</window>
+</zk>

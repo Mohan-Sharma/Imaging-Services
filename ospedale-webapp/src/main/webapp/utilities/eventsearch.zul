@@ -1,0 +1,103 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./auditsearchWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:w="http://www.zkoss.org/2005/zk/client" xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window border="normal" id="auditsearchWindow">
+		<zscript>
+			com.nzion.enums.EventType[] eventType = com.nzion.enums.EventType.values();
+			List users = commonCrudService.getAll(com.nzion.domain.UserLogin.class);
+			setPageTitle("Event Logs", "");
+			com.nzion.zkoss.composer.EventLogSearchController eventLogSearchController = new com.nzion.zkoss.composer.EventLogSearchController();
+			List eventLogs = null;
+		</zscript>
+		<panel title="Event Search">
+			<panelchildren>
+				<div sclass="panelCont" height="120px" id="eventSearchDiv">
+					<div>
+						<label value="Event Type"></label>
+						<combobox model="@{eventType}" id="eventTypeCombobox" readonly="true"
+							selectedItem="@{eventLogSearchController.eventType}">
+							<comboitem label="@{eventType}" value="@{eventType}" />
+							<attribute name="onSelect">
+								patientLookUpDiv.setVisible(!eventLogSearchController.checkEventLogType());
+							</attribute>
+						</combobox>
+					</div>
+					<div id="patientLookUpDiv">
+						<label value="Patient"></label>
+						<div>
+						<patientlookup
+							onChange="eventLogSearchController.setPatient(event.getOrigin().getData())"/>
+						</div>	
+					</div>
+					<div>
+						<label value="From Date"></label>
+						<datebox id="fromDateBox"
+							value="@{eventLogSearchController.fromDate,save-when='eventSearchBtn.onClick'}" />
+					</div>
+					<div>
+						<label value="Thru Date" />
+						<datebox id="thruDateBox"
+							value="@{eventLogSearchController.thruDate,save-when='eventSearchBtn.onClick'}" />
+					</div>
+					<div>
+						<label value="From Time"></label>
+						<timebox id="fromTimeBox"
+							value="@{eventLogSearchController.fromTime,save-when='eventSearchBtn.onClick'}" format="hh:mm a" />
+					</div>
+					<div>
+						<label value="Thru Time" />
+						<timebox id="thruTimeBox"
+							value="@{eventLogSearchController.thruTime,save-when='eventSearchBtn.onClick'}" format="hh:mm a" />
+					</div>
+					<div>
+						<label value="User" />
+						<combobox id="personCombobox" model="@{users}"
+							selectedItem="@{eventLogSearchController.userLogin,save-when='eventSearchBtn.onClick'}">
+							<comboitem self="@{each='user'}" value="@{user}" label="@{user.username}" />
+						</combobox>
+					</div>
+				</div>
+				<div sclass="panelFoot">
+					<button label="Search" id="eventSearchBtn">
+						<attribute name="onClick">
+							eventLogs = eventLogSearchController.searchEventLog();
+						</attribute>
+					</button>
+				</div>
+			</panelchildren>
+		</panel>
+		<div sclass="fr">
+			<paging id="listboxPaging" pageSize="15" pageIncrement="1" />
+		</div>
+		<listbox id="eventSearchOutput" model="@{eventLogs,load-after='eventSearchBtn.onClick'}" mold="paging"
+			paginal="${listboxPaging}">
+			<listhead sizable="true">
+				<listheader label="Event Type" width="13%"
+					onCreate='eventLogSearchController.enableAscendingSort(self,"eventType");eventLogSearchController.enableDescendingSort(self,"eventType")' />
+				<listheader label="Date" width="8%"
+					onCreate='eventLogSearchController.enableAscendingSort(self,"createdDate");eventLogSearchController.enableDescendingSort(self,"createdDate")' />
+				<listheader label="Time" width="8%"
+					onCreate='eventLogSearchController.enableAscendingSort(self,"createdTime");eventLogSearchController.enableDescendingSort(self,"createdTime")' />
+				<listheader label="Patient Identification" width="16%"
+					onCreate='eventLogSearchController.enableAscendingSort(self,"patient.firstName");eventLogSearchController.enableDescendingSort(self,"patient.firstName")' />
+				<listheader label="User Identification" width="11%"
+					onCreate='eventLogSearchController.enableAscendingSort(self,"userLogin.username");eventLogSearchController.enableDescendingSort(self,"userLogin.username")' />
+				<listheader label="Action Taken" width="44%"
+					onCreate='eventLogSearchController.enableAscendingSort(self,"detail");eventLogSearchController.enableDescendingSort(self,"detail")' />
+			</listhead>
+			<listitem self="@{each='eventLog'}">
+				<listcell label="@{eventLog.eventType}" />
+				<listcell label="@{eventLog.createdDate,converter='com.nzion.view.component.DateConverter'}" />
+				<listcell label="@{eventLog.createdTime,converter='com.nzion.view.component.TimeConverter'}" />
+				<listcell image="@{eventLog,converter='com.nzion.view.component.EventLogConverter'}" />
+				<listcell>
+					<name object="@{eventLog.userLogin.person}" />
+					<label value="-" />
+					<label value="@{eventLog.userLogin.person.id}" />
+				</listcell>
+				<listcell label="@{eventLog.detail}" />
+			</listitem>
+		</listbox>
+	</window>
+</zk>

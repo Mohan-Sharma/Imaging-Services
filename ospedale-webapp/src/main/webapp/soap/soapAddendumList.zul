@@ -1,0 +1,22 @@
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native">
+<style>
+.comment-header {
+background:none repeat scroll 0 0 #F8F8F8;
+border:2px solid #EEEEEE;
+margin:10px 0;
+padding:5px;
+position:relative;
+}
+</style>
+<div height="200px" style="overflow:auto;">
+	<zscript>
+		List soapAddendums = dParam;
+	</zscript>
+	<div forEach="${soapAddendums}">
+		<div align="left" sclass="comment-header"> 
+			<hbox widths="14%,88%"> <datebox value="${each.createdTxTimestamp}" disabled="true" buttonVisible="false" format="MM-dd-yyyy KK:mm:ss a"/> <n:div style="margin-top:2px"><label value="by"/>  <name object="${each.person}"/> </n:div></hbox> 
+		</div>
+		<label value="${each.comments}" height="40px"/>
+	</div>
+	</div>
+</zk>

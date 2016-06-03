@@ -1,0 +1,128 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+   
+    <window id="acctgReportWin"  apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('acctgSearchController') @init('com.nzion.zkoss.composer.emr.AcctgSearchController')">
+             <zscript>
+             import com.nzion.domain.Patient;
+        com.nzion.zkoss.ext.DataExporter exporter = new com.nzion.zkoss.ext.CsvDataExporter();
+        com.nzion.domain.billing.AcctgTransTypeEnum[] acctgTransEnumArrays= com.nzion.domain.billing.AcctgTransTypeEnum.values();
+   </zscript>
+        <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Accounting Transaction Report</h:small>
+            </h:h1>
+        </div>
+        <div class="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Doctor"/>
+                    <providerlookup id="providerLookUpBox" 
+                            onChange="acctgSearchController.setProviderId(event.getOrigin().getData().getId());"/>
+                </div>
+                <div zclass="span3">
+                    <label value="Patient"/>
+                    <patientlookup  id="patientLookUpBox"
+                            onChange="acctgSearchController.setPatientId(event.getOrigin().getData().getId())"/>
+                </div>
+
+                <div zclass="span2">
+                    <label value="IP Number"/>
+                    <textbox id="ipNumberTxt" value="@bind(acctgSearchController.ipNumber)" sclass="span12"/>
+                </div>
+                </div>
+                 <div zclass="row-fluid">
+                 <div zclass="span3">
+                   <label value="Accounting Transaction Type"/>
+                    <combobox model="@load(acctgTransEnumArrays)" id="transactionTypeEnumCombobox" sclass="span12" readonly="true"
+                              selectedItem="@bind(acctgSearchController.acctgTransTypeEnum)">
+                        <template name="model" var="acctgTrans">
+                            <comboitem label="@load(acctgTrans.description)" value="@bind(acctgTrans)"/>
+                        </template>
+                    </combobox>
+                </div>
+                <div zclass="span2">
+                    <label value="Transaction From Date"/>
+                    <datebox id="fromDate"    sclass="span12"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Transaction Thru Date"/>
+                    <datebox id="thruDate" sclass="span12"/>
+                </div>
+                <div zclass="span2">
+                 <hbox  style="margin-top:20px">
+                     <checkbox id="extPatientId" label="External Patients"  ></checkbox>
+                     </hbox>
+                </div>
+            </div>
+        </div>
+        <div align="center" sclass="panelFoot">
+            <button label="Search" zclass="btn btn-primary" onClick="@command('Search',fromDate=fromDate,thruDate=thruDate,extPatientCheckbox=extPatientId)">
+            </button>
+            <button label="Reset" zclass="btn btn-danger" onClick="@command('Reset',fromDate=fromDate,thruDate=thruDate,ipNumberTxt=ipNumberTxt,transactionTypeEnumCombobox=transactionTypeEnumCombobox)">
+            </button>
+        </div>
+        <panel id="searchResults" title="Search Results" style="margin-top:10px;">
+            <caption height="15px">
+                <div style="float:right">
+                    <a tooltiptext="Export" label="Export" sclass="btn btn-mini">
+                        <attribute name="onClick">
+                            exporter.export(acctgSearchController.getAcctgTransactionEntries(), new
+                            String[]{"id","acctgTrans.transactionDate","ledgerId","provider.firstName","patient","patientAdmission.accountNumber","speciality","acctgTrans.acctgTransTypeEnum","debitOrCredit","amount","description","extPatientFlag"},
+                            new String[]{"Transaction Id","Transaction Date","Ledger","Provider","Patient","IP Number","Speciality","Type","Debit/Credit","Amount","Description","External Patient"},
+                            "acctg-trans-entry-report.csv");
+                        </attribute>
+                    </a>
+                </div>
+            </caption>
+            <panelchildren>
+                <grid id="acctgListGrid"
+                      model="@bind(acctgSearchController.acctgTransactionEntries)"
+                      mold="paging">
+                    <columns menupopup="auto">
+                        <!--<listheader label="Ledger"/>     -->
+                        <column label="Transaction ID" width="6.7%"/>
+                        <column label="Transaction Date" width="12%"/>
+                        <column label="Ledger" width="7%"/>
+                        <column label="Type"/>
+                        <column label="IP Number"/>
+                         <column label="Patient"/> 
+                        <column label="Provider"/>
+                        <column label="Speciality" width="7%"/> 
+                        <column label="Debit/Credit" width="6%"/>
+                        <column label="Amount" width="7%" align="right" style="text-align:right"/>
+                        <column label="Description" width="20%"/>
+                        <column label="External" width="7%"/>
+                    </columns>
+                    <template name="model" var="acctgEntry">
+                        <row value="@bind(acctgEntry)">
+                         <zscript>
+                          com.nzion.domain.Patient patient = acctgEntry.getPatient();
+                         if(patient == null){
+                         patient = new com.nzion.domain.Patient();
+                          }else{
+                        commonCrudService.refreshEntity(patient);
+                          }
+                        </zscript>
+                            <label value="@load(acctgEntry.acctgTrans.id)"/>
+                            <label value="@load(acctgEntry.acctgTrans.transactionDate)"/>
+                            <label value="@load(acctgEntry.ledgerId)"/>
+                            <label value="@load(acctgEntry.acctgTrans.acctgTransTypeEnum)"/>
+                            <label value="@load(acctgEntry.patientAdmission.accountNumber)"/>
+                            <name object="@load(acctgEntry.patient)"/> 
+                            <name object="@load(acctgEntry.provider)"/>
+                            <label value="@load(acctgEntry.speciality.description)"/>
+                            <label value="@load(acctgEntry.debitOrCredit)"/>
+                            <label value="@load(acctgEntry.amount)"/>
+                            <label value="@load(acctgEntry.description)"/>
+                            <label value="@load(acctgEntry.extPatientFlag)"/>
+                        </row>
+                    </template>
+                    <foot>
+                        <footer id="footer" />
+                    </foot>
+                </grid>
+            </panelchildren>
+        </panel>
+    </window>
+</zk>

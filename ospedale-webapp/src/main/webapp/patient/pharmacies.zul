@@ -1,0 +1,66 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./pharmacyView" ?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:a="http://www.zkoss.org/2005/zk/annotation">
+	<zscript><![CDATA[
+	Long pId = (Long) Executions.getCurrent().getArg().get("patientId");
+	Component displayArea = (Component)arg.get("displayArea");
+	com.nzion.domain.Patient patient =commonCrudService.getById(com.nzion.domain.Patient.class,arg.get("patient").getId());
+	Map m = new HashMap();
+	m.put("patient",patient);
+]]>
+</zscript>
+
+	<window id="pharmacyView">
+		<div sclass="grid clr">
+			<n:table border="0" cellspacing="0" cellpadding="0">
+				<n:thead>
+					<n:tr>
+						<n:td>
+							<a href="#" class="addBtn" label="Add">
+								<attribute name="onClick">
+			           			  	Map m = new HashMap();
+			           			  	m.put("patient",patient);
+			           			  	Window w = ((Window)Executions.createComponents("/patient/patient-pharmacy.zul",null,m));
+								</attribute>
+							</a>
+							<a href="#" class="delBtn" label="Delete" id="delBtn">
+								<attribute name="onClick">
+								patient.getPharmacies().removeAll(com.nzion.util.ViewUtil.getSelectedItems(pharmacyListbox));
+								commonCrudService.save(patient);
+								</attribute>
+							</a>
+						</n:td>
+					</n:tr>
+				</n:thead>
+			</n:table>
+			<listbox id="pharmacyListbox" model="@{patient.pharmacies,load-after='self.onReloadRequest,delBtn.onClick'}" 
+			multiple="true" checkmark="true" rows="10">
+				<listhead>
+					<listheader label="Pharmacy Name"></listheader>
+					<listheader label="NCPDP"></listheader>
+					<listheader label="City"></listheader>
+					<listheader label="Zip"></listheader>
+					<listheader label="Phone"></listheader>
+				</listhead>
+					<listitem self="@{each='pharmacy'}" value="@{pharmacy}">
+						<listcell>
+							<label value="@{pharmacy.name}" />
+						</listcell>
+						<listcell>
+							<label value="@{pharmacy.ncdp}" />
+						</listcell>
+						<listcell>
+							<label value="@{pharmacy.city}" />
+						</listcell>
+						<listcell>
+							<label value="@{pharmacy.zip}" />
+						</listcell>
+						<listcell>
+							<label value="@{pharmacy.phone}" />
+						</listcell>
+					</listitem>
+			</listbox>
+		</div>
+		<zscript>
+		</zscript>
+	</window>
+</zk>

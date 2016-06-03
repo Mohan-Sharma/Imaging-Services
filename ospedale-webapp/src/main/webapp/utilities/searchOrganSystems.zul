@@ -1,0 +1,35 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./searchOrganSystemsWin"?>
+<zk>
+<zscript>
+		import com.nzion.service.common.CommonCrudService;
+		import com.nzion.domain.emr.QATemplate;
+		import com.nzion.zkoss.composer.QASetupComposer;
+		QASetupComposer qaSetupComposer = (QASetupComposer)arg.get("qaSetupComposer");
+		Listbox organSystemsListbox = (Listbox)arg.get("organSystemsListbox");
+		CommonCrudService commonCrudService = (CommonCrudService) com.nzion.util.Infrastructure
+			.getSpringBean("commonCrudService");
+		List organSystems = commonCrudService.getAll(com.nzion.domain.emr.OrganSystem.class);
+</zscript>
+<window title="Organ Systems" border="none" id="searchOrganSystemsWin" closable="true" width="30%">
+
+		<div  style="overflow: auto; height: 330px;">
+		<listbox model="@{organSystems}" multiple="true" checkmark="true"
+			selectedItem="@{qaSetupComposer.selectedQATemplate.organSystems,converter='com.nzion.view.component.MultipleListitemBindingConverter'}">
+				<listhead>
+					<listheader label="Organ System"></listheader>
+				</listhead>
+				<listitem self="@{each='zk'}" label="@{zk.desc}" value="@{zk}"></listitem>
+		</listbox>
+		</div>
+		<div sclass="panelFoot">
+			<button label="Save" zclass="btn btn-success">
+				<attribute name="onClick">
+					qaSetupComposer.saveQATemplate();
+					Events.postEvent("onReload",organSystemsListbox,null);
+					searchOrganSystemsWin.detach();
+				</attribute>
+			</button>
+		</div>
+</window>
+</zk>

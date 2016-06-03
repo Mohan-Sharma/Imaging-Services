@@ -1,0 +1,97 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./editOperation"?>
+<?component name="cptlookup" macro-uri="/utilities/cptlookup.zul" inline="false"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	List sites = commonCrudService.getAll(com.nzion.domain.drug.Site.class);
+	com.nzion.zkoss.composer.PatientSoapNoteController soapNoteController = arg.get("controller");
+	com.nzion.domain.emr.soap.PastHistorySection pastHistorySection = arg.get("pastHistorySection");
+	com.nzion.domain.emr.soap.PatientPastOperationHistory pastOperationHistory = arg.get("pastOperationHistory");
+//	Set pastOperationHistories = arg.get("pastOperationHistories");
+	</zscript>
+	<window id="editOperation" mode="modal" closable="true" title="Add/Edit Surgeries" width="50%">
+	<attribute name="onReload">
+		cptSection.setVisible(true);
+	</attribute>
+		<div sclass="form">
+					<vlayout spacing="5px">
+					<hlayout spacing="5px">
+					<label value="Procedure" sclass="name" style="width:250px;" mold="required" />
+					<cptlookup onChange="pastOperationHistory.addCpts(event.getOrigin().getData());" value="${pastOperationHistory.cptCodes}" style="width:150px;" 
+										id="cptlookupbox" multiple="true"/>
+				</hlayout>
+				<hlayout spacing="5px"  id="cptSection">
+					<listbox id="cptListbox" model="@{pastOperationHistory.cpts,load-after='self.onReloadRequest,editOperation.onReload, cptlookupbox.onChange'}">
+						<listhead>
+							<listheader label="Procedure Code" width="20%" />
+							<listheader label="Procedure Description" width="65%" />
+							<listheader label="Action" width="15%" />
+						</listhead>
+						<listitem self="@{each='cpt'}" value="@{cpt}">
+							<listcell label="@{cpt.id}" />
+							<listcell label="@{cpt.description}" sclass="z-word-wrap" />
+							<listcell>
+								<a  class="delBtn">
+								<attribute name="onClick">
+								Set cpts = pastOperationHistory.getCpts();
+								cpts.remove((com.nzion.domain.emr.Cpt) self.getParent().getParent().getValue());
+								self.getParent().getParent().detach();
+								</attribute>
+								</a>
+							</listcell>
+						</listitem>
+					</listbox>
+			</hlayout>
+				<hlayout spacing="5px">
+				<label value="Site" sclass="name" style="width:250px;"/>
+				<combobox  model="@{sites}" value="@{pastOperationHistory.site,load-after='editOperation.onReload',save-when='addBtn.onClick'}" readonly="true">
+					<comboitem self="@{each='site'}" label="@{site.description}"/>
+				</combobox>
+				</hlayout>
+				<hlayout spacing="5px" >
+					<label value="Date of Procedure" sclass="name" style="width:250px;"/>
+					<datebox
+						value="@{pastOperationHistory.occuranceDate,save-when='addBtn.onClick'}" constraint="no future:Only Past Date Required" />
+				</hlayout>
+				<hlayout spacing="5px">
+					<label value="Doctor" sclass="name" style="width:250px;"/>
+					<textbox
+						value="@{pastOperationHistory.operatedBy,save-when='addBtn.onClick'}" style="width:143px" />
+				</hlayout>
+				<hlayout spacing="5px">
+					<label value="Location" sclass="name" style="width:250px;"/>
+					<textbox tooltiptext="Enter Location"
+						value="@{pastOperationHistory.locationName,save-when='addBtn.onClick'}" style="width:143px" />
+				</hlayout>
+				<hlayout spacing="5px">
+					<include src="/soap/soapAuditInfo.zul" record="${pastOperationHistory}" id="auditInfoInclude"/>
+				</hlayout>
+				</vlayout>
+			</div>
+		
+		<div sclass="panelFoot">
+			<button label="Add" id="addBtn" disabled="${patientSoapNoteController.readonly}">
+				<attribute name="onClick">
+				<![CDATA[
+				    if(pastOperationHistory.getId()==null){     
+				    pastOperationHistory.setPatient(pastHistorySection.getSoapNote().getPatient());
+				    pastOperationHistory.setSoapSection(pastHistorySection);
+					pastHistorySection.addPatientPastOperationHistory(pastOperationHistory);
+					soapNoteController.saveSoapSection();
+				    }
+				    if(com.nzion.util.UtilValidator.isEmpty(pastOperationHistory.getCpts()))
+				        throw new WrongValueException(cptlookupbox , "Procedure Required"); 
+					if(com.nzion.util.UtilValidator.isEmpty(pastOperationHistory.getUpdatedBy()) && pastHistorySection.getPatientPastOperationHitories().size() == 1)
+						soapNoteController.setEventMessage("Past Surgery Created");
+					else
+						soapNoteController.setEventMessage("Past Surgery Updated");	
+			    	commonCrudService.save(pastOperationHistory);
+					Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null);
+					editOperation.detach();
+					]]>	
+				</attribute>
+			</button>
+		</div>
+	</window>
+</zk>

@@ -1,0 +1,36 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./providerqasetup"?>
+<zk>
+<zscript>
+	import com.nzion.service.common.CommonCrudService;
+	import com.nzion.domain.emr.SoapModule;
+	import com.nzion.zkoss.composer.ProviderController;
+	com.nzion.repository.common.CommonCrudRepository commonCrudRepository = com.nzion.util.Infrastructure.getSpringBean("commonCrudRepository");
+	SoapModule soapModule = new SoapModule();
+	soapModule.setSoapModuleType(com.nzion.enums.SoapModuleType.QA);
+	Collection soapModules = commonCrudRepository.getQASoapModules();
+	ProviderController providerController = controller;
+</zscript>
+	<panel title="Templates" id="providerqasetup">
+	<panelchildren>
+	<div height="300px" style="overflow:auto">
+		<listbox model="@{providerController.provider.soapModuleTemplates}" id="soapModuleBox" >
+			<listhead>
+				<listheader label="Encounter Module Name"></listheader>
+				<listheader label="Template"></listheader>
+			</listhead>
+			<listitem self="@{each='sm'}">
+				<listcell>
+					<label value="@{sm.soapModule.moduleName}"></label>
+				</listcell>
+				<listcell>
+					<combobox selectedItem="@{sm.qaTemplate}" model="@{sm.soapModule.qaTemplates}">
+						<comboitem self="@{each='cbi'}" label="@{cbi.name}" value="@{cbi}"></comboitem> 
+					</combobox>
+				</listcell>
+			</listitem>
+		</listbox>
+	</div>
+	</panelchildren>
+	</panel>
+</zk>

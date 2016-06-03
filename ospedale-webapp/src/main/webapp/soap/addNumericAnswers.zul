@@ -1,0 +1,86 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addNumericResponseWin"?>
+<zk>
+	<zscript><![CDATA[
+	import com.nzion.domain.emr.Answer;
+	import com.nzion.zkoss.ext.EntityDropdownRenderer;
+	import com.nzion.domain.emr.NumericResponse;
+	import com.nzion.zkoss.composer.emr.SoapModuleAnswersController;
+	
+	System.out.println("************* arg "+arg);
+	NumericResponse numericResponse = (NumericResponse) Executions.getCurrent().getArg().get("selectedNumericResponse");
+	System.out.println("************* numericResponse "+numericResponse);
+	Boolean isEditMode = (Boolean) arg.get("isEditMode");
+	SoapModuleAnswersController soapModuleAnswersController = (SoapModuleAnswersController)arg.get("baseController");
+	
+	boolean isEditMode() {
+	return isEditMode != null && Boolean.TRUE.equals(isEditMode);
+	}
+	
+]]></zscript>
+
+	<window id="addNumericResponseWin" mode="modal"
+		style="border: 5px solid #2d2d2d">
+		<panel title="Add/Edit Answer">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div>
+						<label value="Name" />
+						<label value="*" style="color:red"/>
+						<textbox id="answerName" value="@{numericResponse.name}" constraint="no empty:Name Required"/>
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+		<panel title="Add/Edit Numeric Response">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div>
+						<label value="Prefix" />
+						<textbox id="prefix"
+							value="@{numericResponse.numericOption.prefix}" />
+					</div>
+					<div>
+						<label value="Suffix" />
+						<textbox id="suffix"
+							value="@{numericResponse.numericOption.suffix}" />
+					</div>
+					<div>
+						<label value="Start" />
+						<textbox id="start"
+							value="@{numericResponse.numericOption.start}" />
+					</div>
+					<div>
+						<label value="Increment" />
+						<textbox id="increment"	
+							value="@{numericResponse.numericOption.increment}" />
+					</div>
+					<div>
+						<label value="End" />
+						<textbox id="end"
+							value="@{numericResponse.numericOption.end}" />
+					</div>
+					<div>
+						<label value="Suffix Plural Form" />
+						<textbox id="pluralText" value="@{numericResponse.numericOption.pluralSuffix}" />
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot">
+			<button label="Save" id="Save"
+				onClick="answerName.getValue(); save();addNumericResponseWin.detach();" />
+			<button label="Cancel"
+				onClick="addNumericResponseWin.detach();" />
+		</div>
+		<zscript><![CDATA[
+		void save() {
+		commonCrudService.save(numericResponse);
+		//soapModuleAnswersController.refreshAnswerTree();
+		soapModuleAnswersController.refreshListbox();
+	}
+]]></zscript>
+		
+	</window>
+
+</zk>

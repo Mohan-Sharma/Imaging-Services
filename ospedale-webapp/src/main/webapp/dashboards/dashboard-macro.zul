@@ -1,0 +1,61 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation" xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import com.nzion.view.HomePageHelper;
+	List portletDatas = arg.get("portlets");
+    com.nzion.view.PortletData  portletData = portletDatas.remove(0);
+	]]></zscript>
+	<div zclass="width:100%">
+	    <hlayout spacing="30px" width="100%">
+	        <vlayout spacing="4px" style="overflow: hidden;width:120px;text-align:center;">
+	        <div >
+			<label value="${portletData.title}"></label></div>
+			<div style="overflow: hidden;width:120px;">
+		    	<div style="overflow: hidden;width:54%;margin-left:23%;margin-right:23%;" zclass="demo-category-over" id="firstIcon">
+				     <textbox value="${portletData.title}" visible="false"></textbox>
+				      <textbox value="${portletData.url}" visible="false"></textbox>
+					  <image src="${portletData.imageUrl}" width="50px" height="50px" sclass="demo-category-img">
+						<attribute name="onClick" >
+						    setSelected((Div)self.getParent());
+							includePage.setSrc(self.getPreviousSibling().getValue());
+							panelData.setTitle(self.getPreviousSibling().getPreviousSibling().getValue());
+							includePage.invalidate();
+						</attribute>
+					 </image>
+			    </div>
+		    </div>
+		   </vlayout >
+		    <vlayout forEach="${portletDatas}" spacing="4px" style="overflow: hidden;width:120px;text-align:center;">
+		      <div > <label value="${each.title}" ></label></div>
+				<div style="overflow: hidden;width:54%;margin-left:23%;margin-right:23%;" zclass="demo-category">
+				     <textbox value="${each.title}" visible="false"></textbox>
+				      <textbox value="${each.url}" visible="false"></textbox>
+					 <image src="${each.imageUrl}" width="50px" height="50px" sclass="demo-category-img">
+						<attribute name="onClick" >
+						    setSelected((Div)self.getParent());
+							includePage.setSrc(self.getPreviousSibling().getValue());
+							panelData.setTitle(self.getPreviousSibling().getPreviousSibling().getValue());
+							includePage.invalidate();
+							session.setAttribute("portletImg",self);
+						</attribute>
+					 </image>
+			    </div>
+		    </vlayout>
+	    </hlayout>
+	</div>
+	<div style="width:100%">
+	    		<panel id="panelData" title="${portletData.title}" width="100%">
+	    			<panelchildren>
+					   <include id="includePage" src="${portletData.url}">
+				       </include>
+	    			</panelchildren>
+	    		</panel>
+	</div>
+	<zscript>
+				Div oldSelf = firstIcon;
+				void setSelected(Div self){
+					oldSelf.setZclass("demo-category");
+					self.setZclass("demo-category-over");
+					oldSelf = self;
+				}
+	</zscript>
+</zk>

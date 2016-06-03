@@ -1,0 +1,171 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./quickSearchResultsDiv"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?xel-method prefix="d" name="format" class="com.nzion.util.UtilDateTime" signature="java.lang.String format(java.util.Date)"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		Textbox quickPatientLookupTxt = arg.get("quickPatientLookupTxt");
+	</zscript>
+	<window id="quickpatientSearchWindow" width="75%" sclass="modalStyle" title="Quick Patient Lookup ( Double Click to Select )" closable="true" mode="modal">
+	 <div id="quickSearchResultsDiv">
+        <zscript>
+            import com.nzion.util.UtilValidator;
+            import com.nzion.util.UtilMessagesAndPopups;
+            import com.nzion.domain.Patient;
+            com.nzion.service.impl.FileBasedServiceImpl fileBasedServiceImpl = com.nzion.util.Infrastructure.getSpringBean("fileBasedServiceImpl");
+            List patientList = (List) desktop.getAttribute("patients");
+            com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+            com.nzion.domain.Patient patient = desktop.getAttribute("patient");
+            Textbox quickPatientLookupTxt = arg.get("quickPatientLookupTxt");
+            if (patient == null)
+            patient = new com.nzion.domain.Patient();
+        </zscript>
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span2">
+                    <n:label>MRN</n:label>
+                    <textbox id="accountNumber"  value="@{patient.accountNumber}" onOK='Events.postEvent("onClick",search,null)' sclass="span12" />
+                </div>
+                
+                <div zclass="span1">
+                    <n:label>Title</n:label>
+                    <combobox selectedItem="@{patient.salutation}"
+                               id="title"
+                              sclass="span12">
+							<comboitem label="Ms" value="Ms" />
+								<comboitem label="Miss" value="Miss" />
+								<comboitem label="Mr" value="Mr" />
+								<comboitem label="Mrs" value="Mrs" />
+								<comboitem label="Dr" value="Dr" />
+								<comboitem label="Sr" value="Sr" />
+								<comboitem label="Sra" value="Sra" />
+						</combobox>
+  				</div>
+                
+                
+                <div zclass="span2">
+                    <n:label>First Name</n:label>
+                    <textbox id="pfirstName"  value="@{patient.firstName}" onChange="enableAddButton();"  onOK='Events.postEvent("onClick",search,null)' sclass="span12" />
+                </div>
+                <div zclass="span2">
+                    <n:label>Last Name</n:label>
+                    <textbox id="plastName"  value="@{patient.lastName}"   onOK='Events.postEvent("onClick",search,null)' sclass="span12" />
+                </div>
+                <div zclass="span2">
+                    <n:label>Mobile phone</n:label>
+                    <textbox id="mobilePhone"  value="@{patient.contacts.mobileNumber}"     onOK='Events.postEvent("onClick",search,null)' sclass="span12" />
+                </div>
+                <div zclass="span2">
+                    <n:label>Gender</n:label>
+						<enumeration id="gender" selectedItem="@{patient.gender}"  onChange="enableAddButton();" enumType="GENDER" onOK='Events.postEvent("onClick",search,null)' sclass="span12"
+							 />
+                </div>
+                <div zclass="span2" visible="false">
+                    <n:label>Date Of Birth</n:label>
+                      <!-- <datebox id="dateOfBirth" value="@{patient.dateOfBirth,save-when='add.onClick,search.onClick'}" onChange="enableAddButton();"  onOK='Events.postEvent("onClick",search,null)' sclass="span12"
+							 /> -->
+					<datebox id="dateOfBirth" value="@{patient.dateOfBirth}"  sclass="span12"
+							 />		 
+                     </div>
+                 
+                 <div zclass="span1">
+                    <n:label>Age</n:label>
+                      <intbox id="age" value="@{patient.age}" onChange="enableAddButton();"  onOK='Events.postEvent("onClick",search,null)' sclass="span12"
+							constraint="no negative,no zero" >
+							 
+							 <attribute name="onBlur">
+								if (age.getValue() != null) {
+									Date dobValue = com.nzion.util.UtilDateTime.getDateOfBirth(age.getValue());
+									dateOfBirth.setValue(dobValue);
+									patient.setDateOfBirth(dobValue);
+								}
+							</attribute>
+					</intbox>		 
+                     </div>
+                </div>
+              
+                <separator></separator>
+             <div sclass="panelFoot" align="center">
+                <button label="Search" id="search" zclass="btn-primary btn">
+                        <attribute name="onClick">
+                            <![CDATA[
+                                     patientList = commonCrudRepository.simulateExampleSearch(new String[] {"lastName","accountNumber","firstName","contacts.mobileNumber","gender","dateOfBirth"},patient);
+                                ]]>
+                        </attribute>
+                    </button>
+                    <button zclass="btn-primary btn" id="add" label="Add Patient"  disabled="${patient.firstName eq null &amp;&amp; patient.gender eq null &amp;&amp;  patient.dateOfBirth eq null}">
+                    <attribute name="onClick">
+                   patient= commonCrudService.save(patient);
+                   fileBasedServiceImpl.createDefaultFolderStructure(patient);
+                   quickPatientLookupTxt.setValue(patient.toString());
+                   Events.postEvent("onPatientSelect",quickPatientLookupTxt,patient);
+                   quickpatientSearchWindow.detach();
+                    </attribute>
+                    </button>
+                    <zscript> <![CDATA[
+                     void enableAddButton(){
+                     add.setDisabled(true);
+                     if(UtilValidator.isNotEmpty(pfirstName.getValue()) && UtilValidator.isNotEmpty(gender.getValue()) && UtilValidator.isNotEmpty(age.getValue())){
+                     add.setDisabled(false);
+                       }
+                     }
+                     ]]>
+                    </zscript>
+                </div>
+                
+                <grid id="patientSearchDisplayGrid" model="@{patientList, load-after='search.onClick'}"  mold="paging"   pageSize="10" style="border:none;"
+              width="100%">
+            <columns>
+                <column width="15%"></column>
+                <column width="30%">Patient Name/Address/Mobile phone</column>
+                <column width="20%">Gender/Date of Birth/Age</column>
+                <column>MRN#</column>
+                <column>View</column>
+            </columns>
+            <rows sclass="narrow">
+                <row self="@{each='patient'}" value="@{patient}" >
+                    <image hover="@{patient,converter='com.nzion.view.component.GenderImageConverter'}"
+                           style="display:block">
+                    </image>
+                    <div>
+                        <name object="@{patient}"/>
+                        <n:br/>
+                        <n:label class="muted">Address:</n:label>
+                        <n:br/>
+                        <label value="@{patient.contacts.postalAddress}"/>
+                        <n:br/>
+                        <n:label class="muted">Mobile phone:</n:label>
+                        <n:br/>
+                        <image src="../images/mobile.png" width="10px" height="10px"/>
+                        <label value="@{patient.contacts.mobileNumber}"/>
+                        <n:br/>
+                    </div>
+                    <div>
+                        <label value="@{patient.gender}"/>
+                        <n:br/>
+                        <label  value="@{patient.dateOfBirth,converter='com.nzion.view.component.DateConverter'}"/>
+                        <n:br/>
+                        <label value="@{patient.age}"/>
+                    </div>
+                    <label value="@{patient.accountNumber}"/>
+                    <a label="Profile">
+                        <attribute name="onClick">
+                            Executions.getCurrent().sendRedirect("/patient/viewPatientWrapper.zul?patientId="+
+                            self.getParent().getValue().getId(),
+                            "_blank");
+                        </attribute>
+                    </a>
+                    <attribute name="onDoubleClick">
+                     Events.postEvent("onPatientSelect",quickPatientLookupTxt,self.getValue());
+                         quickPatientLookupTxt.setValue(com.nzion.util.ViewUtil.getFormattedName(self.getValue()));
+                     quickpatientSearchWindow.detach();
+                    </attribute>
+                </row>
+            </rows>
+        </grid>
+            
+        </div>
+    </div>
+	</window>
+</zk>

@@ -1,0 +1,136 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./searchResultsDiv"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<?xel-method prefix="d" name="format"  class="com.nzion.util.UtilDateTime"  signature="java.lang.String format(java.util.Date)"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.w3.org/1999/xhtml">
+	<zscript>
+	import com.nzion.util.UtilValidator;
+	import com.nzion.zkoss.ext.Navigation;
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	com.nzion.repository.common.CommonCrudRepository commonCrudRepository = com.nzion.util.Infrastructure.getSpringBean("commonCrudRepository");
+	List referralList = new ArrayList();
+	 com.nzion.domain.Referral referral = new com.nzion.domain.Referral();
+	 List specialities = commonCrudService.getAll(com.nzion.domain.Speciality.class);
+	  com.nzion.service.common.EnumerationService enumerationService=com.nzion.util.Infrastructure.getSpringBean("enumerationService");
+	List enumerationGender=enumerationService.getRelevantEnumerationsByType("GENDER");
+	</zscript>
+	<style>
+	#patSearchRes {
+	overflow:hidden;
+	width:100%;
+	}
+	.panelCont label, .panelCont input, .panelCont select {
+	display:inline;
+	}
+	</style>
+	<div zclass="boxStyle" style="overflow:auto;height:100%" id="searchResultsDiv">
+		   <div zclass="customLeftBox">
+		   	<vbox align="center"> 		 
+		   	   <div>	     	    
+   			    <div style="width:225px;"><label zclass="whiteHeading" value="${c:l('searchCond')}"/></div>   			  
+					<div>
+					    <div style="text-align:left;padding-top:3px;padding-left:21px">
+							<label value="First Name" zclass="whiteSubHeading"/>
+							</div><div>
+							 <textbox id="firstName"  style="text-align:left;" height="20px" cols="30"/>
+					    </div>
+				    </div>
+					<div >
+					    <div style="text-align:left;padding-top:3px;padding-left:21px">
+							<label value="Last Name" zclass="whiteSubHeading"/>	
+							</div><div>				
+							<textbox id="lastName"  style="text-align:left;" height="20px" cols="30"/>
+					    </div>
+				    </div>
+					<div >
+					     <div style="text-align:left;padding-top:3px;padding-left:21px;padding-bottom:2px;">
+							<label value="Gender" zclass="whiteSubHeading"/>	
+							</div>
+						<div>				
+						<!-- 	<enumeration id="gender" enumType="GENDER" style="text-align:left;background:#fff" selectedItem="@{referral.gender}"/>  -->
+							<combobox id="gender" model="@{enumerationGender}" selectedItem="@{referral.gender}"> </combobox>
+					    </div>
+				    </div>
+					<div >
+					 	 <div style="text-align:left;padding-top:3px;padding-left:21px">
+							 <label value="Speciality" zclass="whiteSubHeading"/>	
+							 </div>
+						<div style="overflow:auto; -moz-box-shadow: 0 2px 6px 0 rgba(147, 147, 202, 0.4) inset;border:1px solid #86A4BE" height="150px"  width="200px" >		
+							<listbox model="@{specialities}" maxlength="50"  multiple="true"  checkmark="true" id="specialityListbox" 
+										selectedItem="@{referral.specialities, converter=com.nzion.view.component.MultipleListitemBindingConverter}">
+									<listitem self="@{each}" value="@{each}" label="@{each.description}"/>
+							</listbox>
+				    	</div>
+				    </div>
+					
+				     <div id="patSearchRes" align="center" style="width:225px;">
+				    	<separator></separator>
+						<hlayout >						  
+						   <span class="linkBtn linkBtnOn">
+						      <a  label="Search" id="search">
+						      	<attribute name="onClick"><![CDATA[
+								com.nzion.domain.Enumeration selectedGender = gender.getSelectedItem() == null ? null : gender.getSelectedItem().getValue();
+								if(UtilValidator.isEmpty(firstName.getValue()) && UtilValidator.isEmpty(lastName.getValue()) && selectedGender == null && UtilValidator.isEmpty(referral.getSpecialities()))
+					      	 		Messagebox.show("Please Provide Any Of The One Search Criteria","Warning",1,null);
+						      	 else{
+						      		referralList = providerService.searchReferralBy(firstName.getValue(),lastName.getValue(),selectedGender,referral.getSpecialities());
+								lblNoRecFound.setVisible(referralList == null || referralList.size() == 0);
+						      	 }
+								]]></attribute>	
+						      </a>
+						      <span/>
+						      </span>
+						      </hlayout>
+						     <separator></separator>
+					 </div>
+				</div>
+			</vbox>		
+		</div>
+		<!--Left Search  Panel ends-->
+		<div style="width:81%;vertical-align:top;float:left;">  
+		<div style="width:100%;vertical-align:top;">		
+			<panel title="Refferal Search Result" id="searchPanel" style="width:100%;vertical-align:top;">
+				<panelchildren>	
+					<div  style="overflow:auto;vertical-align:top;" width="100%">
+						<paging id="searchPaging" pageSize="4" detailed="true" pageIncrement="1"/>	
+						<grid id="ReferalSearchDisplayGrid"  mold="paging" paginal="${searchPaging}" model="@{referralList, load-after='search.onClick'}" style="border:none;" width="100%">
+							<columns>
+							<column label="${c:l('doctor')}" width="25%"/>
+							<column label="${c:l('gender')}" width="25%"/>
+							<column label="${c:l('specialities')}" width="25%"/>
+							<column label="${c:l('contacts')}" width="25%"/>
+							</columns>
+							<rows>
+							<row self="@{each='referral'}" value="@{referral}">
+								<div  style="margin-left:10px;">
+									<name object="@{referral}"/>
+								</div>
+								<div  align="left">
+									<label value="@{referral.gender}" />
+								</div>
+								<div  align="left">
+									<label value="@{referral.specialities}" />
+								</div>
+								<div>
+									<label value="${c:l('officePhone')}:"  />
+								 	<label value="@{referral.contacts.officePhone}" />
+								 	<h:br/>
+									<label value="${c:l('email')}:" />
+								 	<label value="@{referral.contacts.email}" />
+								 	<h:br/>
+								</div>
+							</row>
+							</rows>
+						</grid>
+					</div>	
+				</panelchildren>
+			</panel>
+		</div>
+		</div>  
+		<div visible="false" id="lblNoRecFound">
+			<label value="No records available"/>
+	    </div>
+  </div>
+</zk>

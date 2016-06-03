@@ -1,0 +1,44 @@
+<?page title="New Qualification" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addqual"?>
+<zk>
+	<zscript>
+	com.nzion.zkoss.composer.ProviderController controller = ((com.nzion.zkoss.composer.ProviderController) Executions.getCurrent().getArg().get("controller"));
+	Listbox qualificationsGrid = (Listbox) Executions.getCurrent().getArg().get("qualificationsGrid");
+</zscript>
+	<window id="addqual"  mode="modal"  closable="true" title="New Qualification">
+		<panel>
+			<panelchildren>
+				<div sclass="panelCont">
+					<div>
+						<label value="Start Date" />
+						<label value=" *" zclass="labelReq"/>
+						<datebox
+							value="@{controller.qualification.fromDate, load-after='addQualificationBtn.onClick', save-when='addQualificationBtn.onClick'}" constraint="no empty"/>
+						<label value="End Date" />
+						<label value=" *" zclass="labelReq"/>
+						<datebox
+							value="@{controller.qualification.thruDate, load-after='addQualificationBtn.onClick',save-when='addQualificationBtn.onClick'}" constraint="no empty"/>
+						<label value="Title" />
+						<label value=" *" zclass="labelReq"/>
+						<textbox
+							value="@{controller.qualification.title, load-after='addQualificationBtn.onClick',save-when='addQualificationBtn.onClick'}" constraint="no empty"/>
+						<label value="Major" />
+						<textbox
+							value="@{controller.qualification.major, load-after='addQualificationBtn.onClick',save-when='addQualificationBtn.onClick'}" />
+						<label value="Description" />
+						<textbox
+							value="@{controller.qualification.description, load-after='addQualificationBtn.onClick',save-when='addQualificationBtn.onClick'}" width="400px;" />
+						<label value="." />
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot">
+				<button label="Save" id="addQualificationBtn"
+					onClick='controller.addQualification(self);Events.postEvent("onReloadRequest", qualificationsGrid, null);addqual.detach();' />
+				<button label="Cancel" onClick="addqual.detach();" />
+		</div>
+		<zscript>
+</zscript>
+	</window>
+</zk>

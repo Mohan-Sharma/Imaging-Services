@@ -1,0 +1,116 @@
+<?page title="Patient Corporate" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientCorporateWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+    <zscript>
+        import  com.nzion.domain.PatientCorporate;
+        import com.nzion.domain.Location;
+        import com.nzion.domain.Patient;
+        Patient patient = arg.get("patient");
+        PatientCorporate patientCorporate = new PatientCorporate();
+        setPageTitle("Patient Corporate", "");
+        List corporateMaster = patientService.getAllCorporateMaster();
+        List corporatePlanList = new ArrayList();
+    </zscript>
+
+    <window id="patientCorporateWin" >
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span2">
+                    <label value="Corporate Name" mold="required"/>
+                    <combobox id="corporateMaster" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+                              constraint="no empty" readonly="true">
+                        <attribute name="onSelect">
+                            Map corporateMasterMap = self.getSelectedItem().getValue();
+                            corporatePlanList = patientService.getSelectedCorporatePlan(corporateMasterMap.get("corporateCode"));
+                            Events.postEvent("onReloadRequest",corporatePlan,null);
+                            address1.setValue((String)corporateMasterMap.get("address1"));
+                            address2.setValue((String)corporateMasterMap.get("address2"));
+                            state.setValue((String)corporateMasterMap.get("state"));
+                            city.setValue((String)corporateMasterMap.get("city"));
+                            contactPerson.setValue((String)corporateMasterMap.get("contactName"));
+                            zip.setValue((String)corporateMasterMap.get("zip"));
+                            landline.setValue((String)corporateMasterMap.get("landline"));
+                        </attribute>
+                        <comboitem forEach="${corporateMaster}" label="${each.corporateName}" value="${each}">
+                        </comboitem>
+                    </combobox>
+                </div>
+                <div zclass="span2">
+                    <label value="Corporate Plan Name" mold="required"/>
+                    <combobox id="corporatePlan" model="@{corporatePlanList,load-after='self.onReloadRequest'}" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+                              constraint="no empty" readonly="true"	>
+                        <comboitem self="@{each='corporatePlan'}" value="@{corporatePlan}" label="@{corporatePlan.planName}" />
+                    </combobox>
+                </div>
+
+                <div zclass="span2">
+                    <label value="Employee Id"/>
+                    <textbox readonly="false" id="employeeId"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Employee Role"/>
+                    <textbox readonly="false" id="employeeRole"/>
+                </div>
+
+            </div>
+
+            <div zclass="row-fluid">
+                <div zclass="span2">
+                    <label value="Address 1"/>
+                    <textbox readonly="true" id="address1"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Address 2"/>
+                    <textbox readonly="true" id="address2"/>
+                </div>
+                <div zclass="span2">
+                    <div width="120px">
+                        <label value="State"/>
+                    </div>
+                    <textbox readonly="true" id="state"/>
+                </div>
+                <div zclass="span1">
+                    <label value="City"/>
+                    <textbox readonly="true" id="city"/>
+                </div>
+            </div>
+
+            <div zclass="row-fluid">
+                <div zclass="span2">
+                    <label value="Contact Person"/>
+                    <textbox readonly="true" id="contactPerson"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Postal Code"/>
+                    <textbox readonly="true" id="zip"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Office Number"/>
+                    <textbox readonly="true" id="landline"/>
+                </div>
+            </div>
+
+
+            <div style="margin-top:5px" sclass="panelFoot">
+                <button label="Save" id="Save" visible="true" zclass="btn-success btn">
+                    <attribute name="onClick">
+                        patient = commonCrudService.getById(Patient.class, patient.getId());
+                        patientCorporate.setCorporateId(corporateMaster.getSelectedItem().getValue().get("corporateCode"));
+                        patientCorporate.setCorporatePlanId(corporateMaster.getSelectedItem().getValue().get("planCode"));
+                        patientCorporate.setCorporateName(corporateMaster.getSelectedItem().getValue().get("corporateName"));
+                        patientCorporate.setCorporatePlanName(corporatePlan.getSelectedItem().getValue().get("planName"));
+                        patientCorporate.setContactName(corporateMaster.getSelectedItem().getValue().get("contactName"));
+                        patientCorporate.setLandline(corporateMaster.getSelectedItem().getValue().get("landline"));
+                        patientCorporate.setEmployeeId(employeeId.getValue());
+                        patientCorporate.setEmployeeRole(employeeRole.getValue());
+                        patient.setPatientCorporate(patientCorporate);
+                        commonCrudService.save(patient);
+                        com.nzion.util.UtilMessagesAndPopups.showSuccess();
+                    </attribute>
+                </button>
+            </div>
+        </div>
+    </window>
+</zk>

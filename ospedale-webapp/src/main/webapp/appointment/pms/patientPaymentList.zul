@@ -1,0 +1,104 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientPayment"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		<![CDATA[
+	import com.nzion.zkoss.composer.appointment.ScheduleController;
+	import com.nzion.domain.pms.PatientPayment;
+	ScheduleController scheduleController = (ScheduleController) arg.get("scheduleController");
+]]>
+	</zscript>
+
+	<window mode="modal" id="patientPayment" position="center" closable="true" title="List of Payments" width="65%">
+		<box widths="100%" width="100%" id="gridRoot">
+			<div sclass="gridCont">
+				<div sclass="grid clr">
+					<n:table border="0" cellspacing="0" cellpadding="0"
+						width="100%">
+						<n:thead>
+							<n:tr>
+								<n:td>
+									<a href="#popup" class="addBtn"	label="Add" id="addBtn" onClick='displayPayment()' />
+									<a href="#" class="delBtn" label="Delete" onClick='deletePayment()' visible="${!hideDeleteBtn}" />
+								</n:td>
+							</n:tr>
+						</n:thead>
+					</n:table>
+					<listbox multiple="true" checkmark="true"
+						model="@{scheduleController.listofPaymentsForSchedule,load-after='self.onReloadRequest'}"
+						id="payments" oddRowSclass="z-listbox-odd">
+						<listhead sizable="true">
+							<listheader sort="auto"
+								label="Receipt No">
+							</listheader>
+							<listheader sort="auto"
+								label="Receipt Date">
+							</listheader>
+							<listheader sort="auto"
+								label="Transaction Type">
+							</listheader>
+							<listheader sort="auto" label="Mode"></listheader>
+							<listheader sort="auto" label="Check No"></listheader>
+							<listheader sort="auto" label="Amount" align="right"></listheader>
+							<listheader sort="auto"
+								label="Receipt Notes">
+							</listheader>
+						</listhead>
+						<listitem self="@{each='payment'}">
+							<listcell>
+								<label value="@{payment.receiptNumber}"></label>
+							</listcell>
+							<listcell>
+								<label value="@{payment.receiptDate}"></label>
+							</listcell>
+							<listcell>
+								<label
+									value="@{payment.transactionType.description}">
+								</label>
+							</listcell>
+							<listcell>
+								<label
+									value="@{payment.modeOfPayment.description}">
+								</label>
+							</listcell>
+							<listcell>
+								<label value="@{payment.checkNumber}"></label>
+							</listcell>
+							<listcell>
+								<label value="@{payment.amount}"></label>
+							</listcell>
+							<listcell>
+								<label
+									value="@{payment.receiptNote.noteContent}">
+								</label>
+							</listcell>
+
+						</listitem>
+					</listbox>
+				</div>
+			</div>
+			<div sclass="panelFoot">
+				<button id="close" label="Cancel"
+					onClick="patientPayment.detach()">
+				</button>
+			</div>
+		</box>
+		<zscript>
+		<![CDATA[
+	void deletePayment() {
+		PatientPayment payment = (PatientPayment) payments.getSelectedItem()
+				.getValue();
+		scheduleController.deletePatientPayment(payment);
+	}
+	
+	void displayPayment() {
+		Window win = (Window)Executions.createComponents("/appointment/pms/patientPayment.zul", null,com.nzion.util.UtilMisc.toMap("scheduleController",
+						scheduleController,"paymentsListbox",payments));
+	}
+]]>
+		</zscript>
+
+	</window>
+</zk>

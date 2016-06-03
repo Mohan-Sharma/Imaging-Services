@@ -1,0 +1,44 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./exportSoapNoteWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		com.nzion.zkoss.composer.ElectronicCopyOfHealthRecordComposer composer = new com.nzion.zkoss.composer.ElectronicCopyOfHealthRecordComposer();
+	</zscript>
+	<window id="exportSoapNoteWindow" apply="${composer}">
+	<zscript>
+		setPageTitle("Electronic Copy Of Health Records", "");
+	</zscript>
+			<div sclass="gridCont">
+			<div sclass="panelHeadTop pagination">
+				<div sclass="fl">
+					<a href="#" label="List of Electronic Copy Of Health Record Request" />
+				</div>
+				<div sclass="fr">
+			<paging detailed="true" id="listboxPaging" pageSize="20" pageIncrement="1" />
+				</div>
+			</div>
+			</div>
+			<checkbox label="New"  onCheck="composer.selectStatus((CheckEvent)event)" id="newChkBox" checked="true" value="New"/>
+			<checkbox label="Complete" onCheck="composer.selectStatus((CheckEvent)event)" id="completedChkBox" value="Completed"/>
+				<listbox model="@{composer.recordRequests,load-after='self.onReloadRequest'}" id="healthRecordsListBox" paginal="${listboxPaging}" mold="paging">
+					<listhead>
+						<listheader label="Patient"/>
+						<listheader label="Requested Date"/>
+						<listheader label="Status"/>
+						<listheader label="Priority"/>
+						<listheader label="Action"/>
+					</listhead>
+					<listitem self="@{each='record'}" value="@{record}"> 
+						<listcell label="@{record.patient}"/>
+						<listcell label="@{record.endDate,converter='com.nzion.view.component.DateConverter'}"/>
+						<listcell label="@{record.status}"/>
+						<listcell label="@{record.priority}"/>
+						<listcell>
+							<button label="Process" onClick="composer.changeStatus(event)" disabled="@{record.completed}"/>
+							<a label="View Reason" onClick='Executions.createComponents("/utilities/viewRequestReason.zul",null,com.nzion.util.UtilMisc.toMap("requestRecord",self.getParent().getParent().getValue()));'/>
+						</listcell>
+					</listitem>
+				</listbox>
+			</window>
+</zk>

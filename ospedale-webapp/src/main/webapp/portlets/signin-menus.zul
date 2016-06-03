@@ -1,0 +1,23 @@
+<zk>
+<zscript>
+	com.nzion.domain.Schedule selectedSchedule;
+</zscript>
+<menupopup id="CHECKEDIN" onOpen="if(event.isOpen())selectedSchedule = event.getReference().getValue();">
+    <menuitem label="Change patient meeting">
+    	<attribute name="onClick">
+    		Map m = new HashMap();
+    		m.put("okEventListener", signinController.getAddEditPatientVisitListener(selectedSchedule));	
+  			Executions.createComponents("/appointment/add-edit-patient-visit.zul", null, m);
+    	</attribute>
+    </menuitem>
+</menupopup>
+
+<menupopup id="CHECKEDOUT">
+	<attribute name="onOpen">
+	if(event.isOpen())
+	selectedSchedule = event.getReference().getValue();
+	</attribute>
+    <menuitem label="Print Prescription" onClick='Executions.getCurrent().sendRedirect("/soap/printPatientRxs.zul?scheduleId="+selectedSchedule.getId(),"_blank");' />
+    <menuitem label="Print Referrals" onClick='Executions.getCurrent().sendRedirect("/soap/printAllreferrals.zul?scheduleId="+selectedSchedule.getId(),"_blank");' />
+</menupopup>
+</zk>

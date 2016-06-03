@@ -1,0 +1,136 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./createPCP"?>
+<?component name="enumeration" class="com.nzion.view.component.EnumerationDropdown"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	com.nzion.domain.Pcp pcp = arg.get("entity");
+	if(pcp == null)
+	    pcp = new com.nzion.domain.Pcp();
+	List specialities= commonCrudService.getAll(com.nzion.domain.Speciality.class);
+	com.nzion.zkoss.ext.EntityDropdownRenderer entityDropdownRenderer = new com.nzion.zkoss.ext.EntityDropdownRenderer("description");
+</zscript>
+	<window id="createPCP" mode="modal" position="center,top" width="60%"
+	title="Create/Update PCP" closable="true">
+	<style>
+		table .z-label {
+		font: 11px normal Tahoma, Geneva, sans-serif;
+		vertical-align: middle;
+		color: #333;
+		padding:0 0 4px;
+		font-weight:bold;
+		}
+	</style>
+	<div style="padding:5px">
+		<panel title="PCP Details">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div>
+						<label value="PCP Code" style="text-align:right;" />
+						<textbox cols="15" value="@{pcp.accountNumber,load-after='Save.onClick'}"
+							id="accountNumber" readonly="true" />
+					</div>
+					<div>
+						<label value="First Name" style="text-align:right;" id="lblfirstName" />
+						<span zclass="labelReq">
+								<html><![CDATA[*]]></html>
+						</span>
+						<textbox cols="40" value="@{pcp.firstName,save-when='Save.onClick'}" id="firstName" constraint="no empty"
+							focus="true" maxlength="20" onChange="com.nzion.util.UtilDisplay.validateOnlyAlphabetsAndWhiteSpaces(self)"/>
+					</div>
+					<div>
+						<label value="Middle Name" style="text-align:right;" id="lblmiddleName" />
+						<textbox value="@{pcp.middleName,save-when='Save.onClick'}" id="middleName" 
+						maxlength="1" onChange="com.nzion.util.UtilDisplay.validateOnlyAlphabets(self)"/>
+					</div>
+					<div>
+						<label value="Last Name" style="text-align:right;" id="lbllastName" />
+						<span zclass="labelReq">
+								<html><![CDATA[*]]></html>
+						</span>
+						<textbox value="@{pcp.lastName,save-when='Save.onClick'}" id="lastName" constraint="no empty"
+						maxlength="20" onChange="com.nzion.util.UtilDisplay.validateOnlyAlphabetsAndWhiteSpaces(self)"/>
+					</div>
+					<div sclass="chkBox">
+						<checkbox checked="@{pcp.active,save-when='Save.onClick'}" label="Is Active" style="font-weight:bold"></checkbox>
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+		<separator/>
+		<panel title="Contact Details">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div sclass="col2">
+						<hbox>
+							<label value="Address1" id="lbladdress1" />
+							<span zclass="labelReq">
+								<html><![CDATA[*]]></html>
+						</span>
+						</hbox>
+						<textbox cols="50" value="@{pcp.contacts.postalAddress.address1,save-when='Save.onClick'}" constraint="no empty"
+							id="address1" maxlength="50"/>
+					</div>
+					<div sclass="col2">
+						<label value="Address2" style="text-align:right;" id="lbladdress2" />
+						<textbox cols="50" value="@{pcp.contacts.postalAddress.address2,save-when='Save.onClick'}"
+							id="address2" maxlength="50"/>
+					</div>
+					<div>
+						<hbox>
+							<label value="City" id="lblcity" />
+							<span zclass="labelReq">
+								<html><![CDATA[*]]></html>
+							</span>
+						</hbox>
+						<textbox cols="22" value="@{pcp.contacts.postalAddress.city,save-when='Save.onClick'}" 
+							id="city" maxlength="50" onChange="com.nzion.util.UtilDisplay.validateNonDigits(self)" constraint="no empty"/>
+					</div>
+					<div>
+						<hbox>
+							<label value="State" id="lblstate" />
+							<span zclass="labelReq">
+								<html><![CDATA[*]]></html>
+							</span>
+						</hbox>
+						<textbox value="@{pcp.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick'}"
+							id="state" cols="22" maxlength="2" constraint="no empty" 
+							onBlur="self.setValue(self.getValue().toUpperCase());"/>
+					</div>
+					<div>
+						<hbox>
+							<label value="Postal code" id="lblpostalCode" />
+							<span zclass="labelReq">
+								<html><![CDATA[*]]></html>
+							</span>
+						</hbox>
+						<zipcodebox value="@{pcp.contacts.postalAddress.postalCode,save-when='Save.onClick'}"
+							id="postalCode" onBlur="com.nzion.util.UtilDisplay.validateFiveDigits(self)" constraint="no empty"/>
+					</div>
+					<div>
+						<label value="e-mail" />
+						<email id="emailAddr" value="@{pcp.contacts.email,save-when='Save.onClick'}"/>
+					</div>
+
+					<h:fieldset>
+						<h:legend>Phone Details</h:legend>
+						<div>
+							<label value="Office phone" />
+							<phonebox value="@{pcp.contacts.officePhone,save-when='Save.onClick'}"
+								cols="10" />
+						</div>
+						<div>
+							<label value="Fax" />
+							<phonebox value="@{pcp.contacts.faxNumber,save-when='Save.onClick'}" cols="10" />
+						</div>
+					</h:fieldset>
+				</div>
+			</panelchildren>
+		</panel>
+		<separator/>
+		<div sclass="panelFoot"> 
+			<button label="Save" id="Save" visible="true" onClick="commonCrudService.save(pcp);createPCP.detach();" />
+			<button label="Close" id="Close" onClick="createPCP.detach();" />
+		</div>
+		</div>
+	</window>
+</zk>

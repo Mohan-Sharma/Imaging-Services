@@ -1,0 +1,335 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./collectAdvanceWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	import java.math.BigDecimal;
+	import com.nzion.domain.product.common.Money;
+	import com.nzion.domain.screen.BillingDisplayConfig;
+	com.nzion.service.common.CommonCrudService  commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	com.nzion.service.billing.BillingService  billingService = com.nzion.util.Infrastructure.getSpringBean("billingService");
+    com.nzion.domain.billing.Invoice invoice =  arg.get("invoiceObj");
+    
+    if(invoice == null) { invoice = new  com.nzion.domain.billing.Invoice();} else{ invoice = commonCrudService.getById(com.nzion.domain.billing.Invoice.class, invoice.getId());};
+    BillingDisplayConfig billingDisplayConfig = arg.get("billingDisplayConfig");    
+    com.nzion.domain.billing.InvoicePayment invoicePayment = new com.nzion.domain.billing.InvoicePayment();
+    if(billingDisplayConfig == null)
+   		 billingDisplayConfig = commonCrudService.getByPractice(BillingDisplayConfig.class);
+   		  com.nzion.domain.emr.UnitOfMeasurement billingDisplayUom = billingDisplayConfig.getCurrency();
+   		 new Money(invoice.getCollectedAmount().getAmount(),Currency.getInstance(billingDisplayUom.getCode()));
+  // 	invoice.getCollectedAmount().setCurrency(Currency.getInstance(billingDisplayUom.getCode()));
+   java.math.BigDecimal getCollectedAmount(){
+		java.math.BigDecimal collectedamt = java.math.BigDecimal.ZERO;
+			Set invoicePayments = invoice.getInvoicePayments();
+			for(com.nzion.domain.billing.InvoicePayment invPayment:invoicePayments)
+				collectedamt = collectedamt.add(invPayment.getAmount().getAmount());
+			return collectedamt;
+		}
+		java.math.BigDecimal amt = getCollectedAmount();
+   	Boolean ipExists = arg.get("ipExists");
+   	com.nzion.domain.inpatient.PatientAdmission pAdmission;
+   	List invoiceList ;
+   	if(ipExists){
+     pAdmission = arg.get("patientAdmission");
+     invoiceList = arg.get("invoiceList");
+   	}
+   	com.nzion.inpatient.zkoss.InPatientAdmissionController admissionController = new com.nzion.inpatient.zkoss.InPatientAdmissionController();
+   			
+   	Date currDate=new Date();
+   	List invoicePaymentsForTransaction=new ArrayList();
+   	
+   	
+    </zscript>
+    <window id="collectAdvanceWin" mode="modal" width="80%" position="center"  closable="true">
+	<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Collect Advance</h:small>
+                <button type="button" zclass="close" onClick="collectAdvanceWin.detach();">×</button>
+            </h:h1>
+        </div>
+		<div zclass="container-fluid" visible="${!paymentReceived}">
+			 <div zclass="row-fluid">
+					 <div zclass="span4">
+						<label value="Payment Mode" mold="required"/>												
+					    <enumeration enumType="PAYMENT_MODE"
+						selectedItem="@{invoicePayment.paymentMethod,save-when='addButton.onClick',load-after='addButton.onClick'}"
+						constraint="no empty:Payment Mode Required" id="paymentModeBox" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+						<attribute name="onSelect">
+							 <![CDATA[
+
+                                if(self.getSelectedItem() != null)
+                                {
+                                com.nzion.domain.Enumeration tmpPayMode = self.getSelectedItem().getValue();
+                                 insuranceNameDiv.setVisible(tmpPayMode.getEnumCode().equals("INSURANCE_CARD"));
+                                 if(tmpPayMode.getEnumCode().equals("INSURANCE_CARD") && pAdmission.getInsuranceProvider()!=null){
+                                	 invoicePayment.setInsuranceScheme(pAdmission.getInsuranceProvider().getInsuranceProviderName());
+                                 }
+                                if(tmpPayMode.getEnumCode().equals("CASH")){
+                                bankNameDiv.setVisible(false);
+                                transactionNumbDiv.setVisible(false);
+                                chequeOrDDNumbDiv.setVisible(false);
+                                chequeOrDDDateDiv.setVisible(false);
+                                 policyNoDiv.setVisible(false);
+                                }
+                                if(tmpPayMode.getEnumCode().equals("DEBIT_CARD")){
+                                bankNameDiv.setVisible(true);
+                                transactionNumbDiv.setVisible(true);
+                                chequeOrDDNumbDiv.setVisible(false);
+                                chequeOrDDDateDiv.setVisible(false);
+                                policyNoDiv.setVisible(false);
+                                }
+                                if(tmpPayMode.getEnumCode().equals("CREDIT_CARD")){
+                                bankNameDiv.setVisible(true);
+                                transactionNumbDiv.setVisible(true);
+                                chequeOrDDNumbDiv.setVisible(false);
+                                chequeOrDDDateDiv.setVisible(false);
+                                    policyNoDiv.setVisible(false);
+                                }
+                                if(tmpPayMode.getEnumCode().equals("PERSONAL_CHEQUE")){
+                                bankNameDiv.setVisible(true);
+                                transactionNumbDiv.setVisible(false);
+                                chequeOrDDNumbDiv.setVisible(true);
+                                chequeOrDDDateDiv.setVisible(true);
+                                 policyNoDiv.setVisible(false);
+                                }
+                                if(tmpPayMode.getEnumCode().equals("INSURANCE_CARD")){
+                                transactionNumbDiv.setVisible(false);
+                                chequeOrDDNumbDiv.setVisible(false);
+                                chequeOrDDDateDiv.setVisible(false);
+                                bankNameDiv.setVisible(false);
+                                policyNoDiv.setVisible(true);
+                                }
+                                }
+                                ]]>
+						</attribute>
+					  </enumeration>
+				</div>
+				 <div zclass="span4">
+						<label value="Amount" mold="required"/>
+					<decimalbox id="amountInpBox" 
+						value="@{invoicePayment.amount.amount,load-after='onReload',save-when='addButton.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" onChange="self.getValue()"/>
+				</div>
+				
+				
+				<div zclass="span3">
+						<label value="Payment Date :" />
+						<datebox value="@{currDate,load-after='onReload',save-when='addButton.onClick'}" sclass="span12"
+							format="d/M/yy KK:mm:ss a">
+							<attribute name="onCreate">
+							invoicePayment.setPaymentDate(self.getValue());
+							</attribute>
+							<attribute name="onChange">
+							invoicePayment.setPaymentDate(self.getValue());
+							</attribute>
+						</datebox>
+					</div>
+				
+				
+				</div>
+			<div zclass="row-fluid">	
+				<div id="bankNameDiv" visible="false">
+					<div>
+						<label value="Bank Name" mold="required"/>
+					</div>
+					<textbox id="bankNameBox"
+						value="@{invoicePayment.bankName,load-after='addButton.onClick',save-when='addButton.onClick'}" />												
+				</div>
+				<div id="transactionNumbDiv" visible="false">
+					<div>
+						<label value="Transaction Number" mold="required"/>
+					</div>
+					<textbox id="transactionNumbInp"  
+						value="@{invoicePayment.transactionNumb,load-after='addButton.onClick',save-when='addButton.onClick'}" />												
+				</div>
+				<div id="chequeOrDDNumbDiv" visible="false">
+					<div>
+						<label value="Cheque Number" mold="required"/>
+					</div>
+					<textbox id="chequeOrDDNumbBox" 
+						value="@{invoicePayment.chequeOrDdNo,load-after='addButton.onClick',save-when='addButton.onClick'}" />
+						
+				</div>
+				<div id="chequeOrDDDateDiv" visible="false">
+					<div>
+						<label value="Cheque Date" mold="required"/>
+					</div>	
+					<datebox  id="chequeOrDDDateBox" 
+						value="@{invoicePayment.chequeOrDdDate,load-after='addButton.onClick',save-when='addButton.onClick'}" />												
+				</div>	
+				 <div id="insuranceNameDiv" visible="false">
+                        <div > 
+                            <label value="Insurance Name" />
+                        </div>
+                      <textbox id="insuranceNameId"
+                                    value="@{invoicePayment.insuranceName,load-after='addButton.onClick',save-when='addButton.onClick'}" /> 
+                 
+                    </div> 
+                     <div id="policyNoDiv" visible="false">
+                        <div>
+                            <label value="Policy No"/>
+                        </div>
+                        <textbox id="policyNoBox" 
+                                   value="@{invoicePayment.policyNo,load-after='addButton.onClick',save-when='addButton.onClick'}"  />
+                    </div>
+                   
+			</div>
+	</div>
+	
+			
+			<div  align="center">
+						 <button zclass="btn-success btn" id="addButton" label="Add" visible="${!billingController.paymentReceived}" >
+					 <attribute name="onClick">
+						 invoicePayment.setAdvance(true);
+						 validateAddPayment();
+						 invoicePayment = new com.nzion.domain.billing.InvoicePayment();
+						 amt = getCollectedAmount();
+						 collectedValueLabel.setValue(amt.toString());
+					 </attribute>
+					 </button>
+					</div>
+			<div style="margin:auto;width:100%" align="center" >
+				 <hlayout style="clear:both;width:100%" spacing="20px">
+					<div style="margin-top:15px;">	
+					    <label value="Collected Amount" />
+						<label id="collectedValueLabel"
+							value="${collectedamt}" style="font-weight:bold;color:red" />
+						<label value="@{invoice.collectedAmount.currency.code}" />
+					</div>
+					
+				 </hlayout>									 
+				</div>	 
+			<listbox id="paymentListbox" model="@{invoice.invoicePayments,load-after='self.onReload'}">
+				<listhead>
+					<listheader label="Payment Mode" />
+					<listheader label="Amount" />
+					<listheader label="Bank" />
+					<listheader label="Transaction #" />
+					<listheader label="Cheque #" />
+					<listheader label="Cheque Date" />
+					 <listheader label="Insurance Name"/>
+                        <listheader label="Policy No"/>
+				</listhead>
+				<listitem self="@{each='mode'}" value="@{mode}">
+					<listcell label="@{mode.paymentMethod.description}" />
+					<listcell label="@{mode.amount.price}" />
+					<listcell label="@{mode.bankName}" />
+					<listcell label="@{mode.transactionNumb}" />
+					<listcell label="@{mode.chequeOrDdNo}" />
+					<listcell label="@{mode.chequeOrDdDate,converter='com.nzion.view.component.DateConverter'}" />
+					 <listcell label="@{mode.insuranceName}"/>
+                        <listcell label="@{mode.policyNo}"/>
+					<!-- <listcell>
+						<button label="Remove" visible="${!paymentReceived}"
+							onClick='removeTxnPaymentItem(self.getParent().getParent().getValue());self.getParent().getParent().detach();Events.postEvent("onReload",collectedValueLabel,null)' />
+					</listcell> -->
+				</listitem>
+			</listbox>
+		<div sclass="panelFoot">
+			<button label="Done" zclass="btn-success btn" onClick="initiateInvoice();
+			"> </button>
+			<button label="Cancel" onClick="collectAdvanceWin.detach();"></button>
+		</div>
+		<zscript>
+		import com.nzion.domain.billing.PaymentType;
+		import com.nzion.domain.billing.InvoiceType;
+		   void validateAddPayment(){	
+		       if(paymentModeBox.getSelectedItem() == null){
+		       com.nzion.util.UtilMessagesAndPopups.displayError("Please select the payment mode");	
+			   return;
+		       }
+		      
+		       if(amountInpBox.getValue() == null){
+		       com.nzion.util.UtilMessagesAndPopups.displayError("Please provide the amount");	
+			   return;
+		       }		       
+				com.nzion.domain.Enumeration tmpPayMode  = paymentModeBox.getSelectedItem().getValue();
+				if(tmpPayMode.getEnumCode().equals("DEBIT_CARD") || tmpPayMode.getEnumCode().equals("CREDIT_CARD")){					
+					if(com.nzion.util.UtilValidator.isEmpty(transactionNumbInp.getValue()) || com.nzion.util.UtilValidator.isEmpty(bankNameBox.getValue())){					
+						com.nzion.util.UtilMessagesAndPopups.displayError("Please provide the Bank name and Transaction number");	
+						return;
+					} 																			
+				}
+				if(tmpPayMode.getEnumCode().equals("PERSONAL_CHEQUE")){
+					if((chequeOrDDDateBox.getValue() == null) || com.nzion.util.UtilValidator.isEmpty(bankNameBox.getValue()) || com.nzion.util.UtilValidator.isEmpty(chequeOrDDNumbBox.getValue())){					
+						com.nzion.util.UtilMessagesAndPopups.displayError("Please provide the Bank name, Cheque number, Cheque date");	
+						return;
+					} 																			
+				}
+				//invoicePayment.setAmount(new Money(new BigDecimal(10),billingDisplayConfig.getCurrency()));
+
+				
+				
+				 String enumCode= invoicePayment.getPaymentMethod().getEnumCode();
+        
+        if(invoice.getInvoiceType().name().equals(InvoiceType.IPD.name())){
+        	if(enumCode.equals("CASH"))
+        		invoicePayment.setPaymentType(PaymentType.IPD_ADVANCE_CASH);
+        	if(enumCode.equals("DEBIT_CARD"))
+        			invoicePayment.setPaymentType(PaymentType.IPD_ADVANCE_DEBIT_CARD);
+        	if(enumCode.equals("CREDIT_CARD"))
+    			invoicePayment.setPaymentType(PaymentType.IPD_ADVANCE_CREDIT_CARD);
+        	if(enumCode.equals("PERSONAL_CHEQUE"))
+    			invoicePayment.setPaymentType(PaymentType.IPD_ADVANCE_PERSONAL_CHEQUE);
+        	if(enumCode.equals("INSURANCE_CARD"))
+    			invoicePayment.setPaymentType(PaymentType.IPD_ADVANCE_INSURANCE_CARD);
+    			
+        }else if(invoice.getInvoiceType().name().equals(InvoiceType.OPD.name())){
+        	if(enumCode.equals("CASH"))
+        		invoicePayment.setPaymentType(PaymentType.OPD_CASH);
+        	if(enumCode.equals("DEBIT_CARD"))
+        			invoicePayment.setPaymentType(PaymentType.OPD_DEBIT_CARD);
+        	if(enumCode.equals("CREDIT_CARD"))
+    			invoicePayment.setPaymentType(PaymentType.OPD_CREDIT_CARD);
+        	if(enumCode.equals("PERSONAL_CHEQUE"))
+    			invoicePayment.setPaymentType(PaymentType.OPD_PERSONAL_CHEQUE);
+        	if(enumCode.equals("INSURANCE_CARD"))
+    			invoicePayment.setPaymentType(PaymentType.OPD_INSURANCE_CARD);
+        }else{
+        	if(enumCode.equals("CASH"))
+        		invoicePayment.setPaymentType(PaymentType.CASUALTY_CASH);
+        	if(enumCode.equals("DEBIT_CARD"))
+        			invoicePayment.setPaymentType(PaymentType.CASUALTY_DEBIT_CARD);
+        	if(enumCode.equals("CREDIT_CARD"))
+    			invoicePayment.setPaymentType(PaymentType.CASUALTY_CREDIT_CARD);
+        	if(enumCode.equals("PERSONAL_CHEQUE"))
+    			invoicePayment.setPaymentType(PaymentType.CASUALTY_PERSONAL_CHEQUE);
+        	if(enumCode.equals("INSURANCE_CARD"))
+    			invoicePayment.setPaymentType(PaymentType.CASUALTY_INSURANCE_CARD);
+        }
+												
+				invoice.addInvoicePayment(invoicePayment);			
+				invoicePaymentsForTransaction.add(invoicePayment);
+				Events.postEvent("onReload",collectedValueLabel,null);
+				Events.postEvent("onReload",paymentListbox,null);	
+}
+		    void removeTxnPaymentItem(com.nzion.domain.billing.InvoicePayment txnPayment) {
+				invoice.setCollectedAmount(new Money( invoice.getCollectedAmount().getAmount().subtract(txnPayment.getAmount().getAmount()), invoice.getCollectedAmount().getCurrency() ));
+				invoice.getInvoicePayments().remove(txnPayment);
+		   }
+		   
+		   void initiateInvoice(){
+		        Messagebox.show("Are you sure you want proceed?", "Payment Confirm?", Messagebox.YES | Messagebox.NO,
+					Messagebox.QUESTION, new org.zkoss.zk.ui.event.EventListener() {
+						public void onEvent(Event evt) throws Exception {
+						if ("onYes".equals(evt.getName())) {
+							try {
+								 	billingService.saveInvoiceForIp(pAdmission,  invoice);
+								 	com.nzion.domain.billing.AcctgTransaction acctgTrans = 	
+								 	com.nzion.service.util.TransactionHelper.createAccountingTransactionEntryForAdvance(invoice,invoicePaymentsForTransaction,commonCrudService);
+							   		commonCrudService.save(acctgTrans);
+							   		collectAdvanceWin.detach();
+							 } catch (Exception e) {
+							     com.nzion.util.UtilMessagesAndPopups.displayError(e.getMessage());
+								e.printStackTrace();
+							}
+						} else {
+							return;
+						}
+					}
+				});	
+				
+				
+		   }
+		    
+		</zscript>
+	</window>
+</zk>

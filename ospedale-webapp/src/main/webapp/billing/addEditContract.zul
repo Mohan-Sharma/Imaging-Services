@@ -1,0 +1,222 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./contractWindow"?>
+<?component name="cptlookup" macro-uri="/utilities/cptlookup.zul" inline="false"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<zscript><![CDATA[
+     com.nzion.domain.billing.Contract  contract = arg.get("entity");
+     contract = contract == null ? new com.nzion.domain.billing.Contract() : contract;     
+     com.nzion.service.common.CommonCrudService service = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+     com.nzion.service.billing.BillingService billingService = com.nzion.util.Infrastructure.getSpringBean("billingService");
+     com.nzion.zkoss.composer.ContractController contractController = new com.nzion.zkoss.composer.ContractController();    
+     
+     List allInsuranceProviList = service.getAll(com.nzion.domain.pms.InsuranceProvider.class);
+//            if(com.nzion.util.UtilValidator.isNotEmpty(contract.getInsuranceProviders()))
+//    			 allInsuranceProviList.addAll(contract.getInsuranceProviders());
+            
+     boolean isInsurance = contract.getContractType().equals(com.nzion.domain.billing.Contract.CONTRACTTYPE.INSURANCE);
+     boolean isSelf = contract.getContractType().equals(com.nzion.domain.billing.Contract.CONTRACTTYPE.SELF);
+     List cptPList= new ArrayList();
+	]]></zscript>
+<window id="contractWindow" mode="modal" closable="true"  width="80%"  position="center">
+<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Contract</h:small>
+                <button type="button" zclass="close" onClick="contractWindow.detach();">×</button>
+            </h:h1>
+        </div>
+	<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span3">
+			  	  <label value="Name" mold="required"></label>
+			  	   <textbox value="@{contract.name,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"> </textbox>
+			   </div> 
+			       <div zclass="span2" style="margin-top:20px" >
+			   			<label value="Type" mold="required" ></label> 	
+			 		 	 <radiogroup>		 				
+						     <radio label="Insurance" id="insuranceChk" checked="${isInsurance}">
+						     <attribute name="onCheck">
+						        contract.setContractType(com.nzion.domain.billing.Contract.CONTRACTTYPE.INSURANCE);
+						     	insuranceTab.setDisabled(false);
+						     	insuranceProviderList.setDisabled(false);
+						     	insuranceProviderList.setDisabled(!com.nzion.domain.billing.Contract.CONTRACTTYPE.SELF.equals(contract.getContractType()));
+						     </attribute>
+						     </radio>
+						     <space></space>
+						  <radio label="Self" id="selfContractChk" checked="${isSelf}"> 
+						  		<attribute name="onCheck">
+						  		    contract.setContractType(com.nzion.domain.billing.Contract.CONTRACTTYPE.SELF);
+						     		insuranceTab.setDisabled(true);	
+						     		Events.postEvent("onClick",cptPriceTab,null);			     	    
+						   		</attribute>
+						  </radio> 
+				   	 </radiogroup>
+			   </div>
+			   <!-- </div>
+			   <div zclass="row-fluid">  -->
+			    <div zclass="span2">		  
+			       <label value="From Date" mold="required" ></label>
+			       <datebox  sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" id="fromDate" value="@{contract.effectivePeriod.fromDate,save-when='Save.onClick'}" constraint="no empty"> </datebox>
+			    </div>
+			    <div zclass="span2">
+			        <label value="Thru Date" ></label> 
+			    	<datebox sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" id="thruDate" value="@{contract.effectivePeriod.thruDate,save-when='Save.onClick'}" > </datebox>
+			   </div>				  
+			</div>
+			</div>
+			
+		<tabbox height="300px">
+			<tabs>
+				<tab id="cptPriceTab" focus="false" selected="false" onCreate='Events.postEvent("onClick",cptPriceTab,null)' >
+				<attribute name="onClick" >
+					 self.setSelected(true);	
+					 if(contract.getId()!=null){		
+					 cptPList = service.findByEquality(com.nzion.domain.billing.CptPrice.class,new String[]{"contract"}, new Object[]{contract});	
+					 service.refreshEntity(contract); 				 
+					}
+					 Events.postEvent("onReloadRequest",cptPriceList,null);
+				</attribute>
+				 	Procedures Price				
+				</tab>
+				<tab id="insuranceTab" onCreate="self.setDisabled(!isInsurance)" selected="false">
+				 	Insurance				
+				</tab>
+				</tabs>
+			<tabpanels>
+				<tabpanel>
+				  <div>
+				       <div width="100%">
+				          <div width="width:30%;float:left;align:center;padding:5px">
+				        	 <a label="Add" id="view" sclass="btn"> 
+				        	  <n:i class="icon-plus"></n:i>
+				        	 <attribute name="onClick">
+				        	 	 Window w = com.nzion.zkoss.ext.Navigation.navigateToModalWindow("/billing/addEditCptPricing",com.nzion.util.UtilMisc.toMap("contract", contract,"enity",null,"cptPList",cptPList));
+								 w.addForward("onDetach", cptPriceList, "onReloadRequest");
+				        	 </attribute></a> <span/>
+				        </div>
+				      </div>
+				  		<listbox id="cptPriceList" model="@{cptPList, load-after='onReloadRequest'}" mold="paging"  oddRowSclass="z-listbox-odd" pageSize="20" pagingPosition="top">
+				  		 <listhead >
+				  		 	<listheader>Procedures Code</listheader>
+				  		 	<listheader>Procedures Descriprtion</listheader>
+				  		 	<listheader>Actual Price</listheader>
+				  		 	<listheader>Allowed Price</listheader>
+				  		 	<listheader>Action</listheader>
+				  		 </listhead>
+				  		 <listitem  self="@{each='cptPrice'}" value="@{cptPrice}">
+				  		 	<listcell >
+				  		 		<label value="@{cptPrice.cpt.id}"></label>
+				  		 	</listcell>
+				  		 	<listcell>
+				  		 		<label value="@{cptPrice.cpt.description}"></label>
+				  		 	</listcell>
+				  		 	<listcell>
+				  		 	    <label value="@{cptPrice.price.amount}"></label>
+				  		 	    <label value="@{cptPrice.price.currency.code}"></label>
+				  		 	</listcell>
+				  		 	<listcell>
+				  		 	    <label value="@{cptPrice.allowedPrice.amount}"></label>
+				  		 	    <label value="@{cptPrice.allowedPrice.currency.code}"></label>
+				  		 	</listcell>
+				  		 	
+				  		 	<listcell>
+				  		 			<a label="Edit">
+				  		 				<attribute name="onClick">
+				  		 						 Window w = com.nzion.zkoss.ext.Navigation.navigateToModalWindow("/billing/addEditCptPricing",com.nzion.util.UtilMisc.toMap("contract", contract,"entity",self.getParent().getParent().getValue()));
+								 				 w.addForward("onDetach", cptPriceTab, null);
+				  		 				</attribute>
+				  		 			</a>
+				  		 			<a label="| Delete">
+				  		 				<attribute name="onClick">
+				  		 				com.nzion.domain.billing.CptPrice price = self.getParent().getParent().getValue();
+				  		 				     com.nzion.util.UtilMessagesAndPopups.confirm("Are You Sure? Want to Delete", "Delete Confirmation", Messagebox.YES
+									| Messagebox.NO, Messagebox.QUESTION, new org.zkoss.zk.ui.event.EventListener() {
+								public void onEvent(Event event) {
+								if ("onYes".equals(event.getName())) {
+				  		 						
+				  		 						cptPList.remove(price); 
+				  		 						service.delete(price);				 
+				  		 						Events.postEvent("onReloadRequest",cptPriceList,null);	
+				  		 						com.nzion.util.UtilMessagesAndPopups.showSuccess();				  		 				
+										}
+										}										
+										}
+									);
+									 						
+				  		 				</attribute>
+				  		 			</a>
+				  		 	</listcell>
+				  		 </listitem>
+				  		</listbox>
+				 </div>
+				</tabpanel>
+				<tabpanel  focus="false" id="insuranceTabPanel">
+				   <div>
+				   		<listbox id="insuranceProviderList" selectedItem="@{contract.insuranceProviders,load-after='selfContractChk.onCheck,insuranceChk.onCheck',converter=com.nzion.view.component.MultipleListitemBindingConverter}" multiple="true" checkmark="true" 
+				   		model="@{allInsuranceProviList, load-after='self.onReloadRequest'}" mold="paging"  oddRowSclass="z-listbox-odd" pageSize="20" pagingPosition="top">
+				  		 <listhead >
+				  		 	<listheader >Insurance Code</listheader>
+				  		 	<listheader >Insurance Name</listheader>
+				  		 	<listheader >Email</listheader>
+				  		 	<listheader >City</listheader>
+				  		 	<listheader >State</listheader>
+				  		 	<listheader >Telephone Number</listheader>
+				  		 </listhead>
+				  		 <listitem  self="@{each='insuProvider'}" value="@{insuProvider}" checkable="true" >
+				  		 	<listcell>
+				  		 		<label value="@{insuProvider.accountNumber}"></label>
+				  		 	</listcell>
+				  		 	<listcell>
+				  		 		<label value="@{insuProvider.insuranceProviderName}"></label>
+				  		 	</listcell>
+				  		 	<listcell>
+				  		 		<label value="@{insuProvider.contacts.email}"></label>
+				  		 	</listcell>				  		 		
+				  		 	<listcell>
+				  		 		<label value="@{insuProvider.contacts.postalAddress.city}"></label>
+				  		 	</listcell>
+				  		 	<listcell>
+				  		 		<label value="@{insuProvider.contacts.postalAddress.stateProvinceGeo}"></label>
+				  		 	</listcell>
+				  		 	<listcell>
+				  		 		<label value="@{insuProvider.contacts.officePhone}"></label>
+				  		 	</listcell>
+				  		 </listitem>
+				  		 </listbox>
+				   </div>
+				</tabpanel>
+			</tabpanels>
+		</tabbox>		
+		<div sclass="panelFoot">				
+			<button id="Save" label="Save" zclass="btn-success btn">
+				<attribute name="onClick">
+				<![CDATA[
+						com.nzion.domain.billing.Contract contractTmp;
+				         if(contract.getId() == null){
+							contract.setCptPrices(new HashSet(cptPList));
+				        }
+				        contractController.setContract(contract);
+						if(insuranceChk.isChecked()){
+							if( 0 >= insuranceProviderList.getSelectedCount()){
+							   com.nzion.util.UtilMessagesAndPopups.displayError("Please Select Insurance Provider");	
+							   return;
+							}
+							contractController.saveInsuContract(insuranceProviderList);
+						}
+						else{							
+							contract.setInsuranceProviders(Collections.emptySet());
+							service.save(contract);						
+						}
+						com.nzion.util.UtilMessagesAndPopups.showSuccess();
+						contractWindow.detach();
+						]]>
+							
+				</attribute>
+			</button>
+			<button id="Cancel" label="Cancel">
+				<attribute name="onClick">
+				contractWindow.detach();
+				</attribute>
+			</button>
+		</div>		
+</window>
+</zk>

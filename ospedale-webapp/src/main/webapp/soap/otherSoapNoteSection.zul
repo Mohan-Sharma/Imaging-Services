@@ -1,0 +1,26 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./otherSoapNoteSectionDiv"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<div id="otherSoapNoteSectionDiv" width="100%">
+	<zscript>
+		com.nzion.zkoss.composer.PatientSoapNoteController controller = arg.get("controller");
+		com.nzion.domain.emr.soap.OtherSoapNoteSection otherSoapSection = controller.getSoapSection(com.nzion.domain.emr.soap.OtherSoapNoteSection.class);
+		otherSoapSection.getSoapModule().getModuleName();
+	</zscript>
+	<panel title="${otherSoapSection.soapModule.moduleName}" width="100%" border="normal">
+		<panelchildren>
+			<div>
+			<zscript>
+				com.nzion.domain.emr.QATemplate qaTemplate = otherSoapSection.getQaTemplate() == null ?controller.getQATemplate(): otherSoapSection.getQaTemplate();
+				otherSoapSection.setQaTemplate(qaTemplate);
+				Executions.createComponents("/soap/qa.zul", otherSoapNoteSectionDiv, com.nzion.util.UtilMisc.toMap("qas", qaTemplate!=null?qaTemplate.getQuestions():null, "qaFactory", otherSoapSection));
+			</zscript>
+			</div>
+		</panelchildren>
+	</panel>
+	<div align="center">
+		<button label="Save" onClick='controller.saveSoapSection();Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null)' disabled="${controller.readonly}"/>
+	</div>
+</div>
+</zk>

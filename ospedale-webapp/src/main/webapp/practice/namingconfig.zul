@@ -1,0 +1,38 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" 	xmlns:w="http://www.zkoss.org/2005/zk/client">
+<?xel-method prefix="display" name="format" class="com.nzion.util.UtilDisplay" signature="java.lang.String camelcaseToUiString(java.lang.String)"?>
+<window>
+	<zscript>
+	import com.nzion.domain.screen.NamingDisplayConfig;
+	com.nzion.service.common.CommonCrudService service = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	NamingDisplayConfig displayConfig = service.getAll(NamingDisplayConfig.class).get(0);
+	</zscript>
+	<panel title="Naming Config (Drag and drop to change the order)">
+		<panelchildren>
+			<listbox>
+				<listhead>
+					<listheader label="Position 1" />
+					<listheader label="Position 2" />
+					<listheader label="Position 3" visible="false" />
+				</listhead>
+				<listitem id="namingListItem">
+					<listcell label="${display:format(each)}" value="${each}" forEach="${displayConfig.namingParts}" draggable="true" droppable="true" onDrop="com.nzion.util.ViewUtil.swapChildComponents((Component)event.getDragged(), (Component)event.getTarget(), (Component)self.getParent());"/>
+				</listitem>
+			</listbox>
+		</panelchildren>
+	</panel>
+	<separator></separator>
+	<div align="center">
+	<button label="Save" zclass="btn-success btn">
+		<attribute name="onClick">
+			displayConfig.setPosition3(namingListItem.getChildren().get(0).getValue());
+			displayConfig.setPosition5(namingListItem.getChildren().get(1).getValue());
+			//displayConfig.setPosition4(namingListItem.getChildren().get(2).getValue());
+			service.save(displayConfig);
+			com.nzion.util.UtilMessagesAndPopups.showSuccess();
+		</attribute>
+	</button>
+	</div>
+</window>
+</zk>

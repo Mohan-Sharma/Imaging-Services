@@ -1,0 +1,49 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patinetBilling"?>
+<?component name="enumeration" class="com.nzion.view.component.EnumerationDropdown"?>
+<zk xmlns:h="http://www.zkoss.org/2005/zk/native" xmlns:a="http://www.zkoss.org/2005/zk/annotation">
+	<zscript><![CDATA[
+	import com.nzion.zkoss.composer.pms.*;
+	PatientBillingController patientBillingController = new PatientBillingController();
+]]>
+</zscript>
+	<window id="patinetBilling" apply="${patientBillingController}" width="100%" contentStyle="overflow:auto">
+		<div sclass="panelTop">
+			<button label="Save" onClick='Events.postEvent("onClick",Save, null)'/>
+		</div>
+		
+		<panel border="normal" collapsible="true" title="Patient Billing">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div>
+						<label value="Bill Type"></label>
+						<enumeration id="billType" enumType="BILL_TYPE"
+							selectedItem="@{vo.billType,save-when='Save.onClick'}" />
+					</div>
+					<div>
+						<label value="Form Name"></label>
+						<enumeration id="formName" enumType="FORM_NAME"
+							selectedItem="@{vo.statBillingFormName,save-when='Save.onClick'}" />
+					</div>
+					<div>
+						<label value="Method"></label>
+						<enumeration id="methodName" enumType="BILLING_METHOD"
+							selectedItem="@{vo.statBillingMethod,save-when='Save.onClick'}" />
+					</div>
+					<div>
+						<label value="Patient Recalls Method"></label>
+						<enumeration id="recallMethod" enumType="PATIENT_RECALL_METHOD"
+							selectedItem="@{vo.recallMethod,save-when='Save.onClick'}" />
+					</div>
+					<div>
+						<label value="Hold Stm Until"></label>
+						<datebox id="statHold" value="@{vo.statHoldUntil,save-when='Save.onClick'}"></datebox>
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+	<div sclass="panelFoot">
+			<button id="Save" label="Save" />
+	</div>
+
+	</window>
+</zk>

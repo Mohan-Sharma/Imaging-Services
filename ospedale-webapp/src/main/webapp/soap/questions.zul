@@ -1,0 +1,137 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./winTemplateQASetup"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import com.nzion.zkoss.composer.emr.ModuleQuestionsController;
+	import com.nzion.zkoss.ext.EnumDropdownRenderer;
+	import com.nzion.zkoss.ext.EntityDropdownRenderer;
+	import com.nzion.domain.emr.EMRProviderInfo;
+	import com.nzion.domain.Provider;
+	import com.nzion.util.ViewUtil;
+	import com.nzion.enums.GenderApplicabilityForQuestion;
+	import com.nzion.enums.AnswerType;
+	import com.nzion.zkoss.ext.Navigation;
+	import com.nzion.util.UtilMisc;
+	import com.nzion.domain.emr.*;
+	ModuleQuestionsController controller = new ModuleQuestionsController();
+	EntityDropdownRenderer soapModuleComboboxRenderer = new EntityDropdownRenderer("moduleName");
+	EntityDropdownRenderer organSystemComboboxRenderer = new EntityDropdownRenderer("desc");
+	EnumDropdownRenderer enumDropdownRenderer = new EnumDropdownRenderer();
+	GenderApplicabilityForQuestion[] genderApplicabilityForQuestions = GenderApplicabilityForQuestion.values();
+	AnswerType[] answerTypes = AnswerType.values();
+	setPageTitle("Module Questions", "");
+	List organSystems = commonCrudService.getAll(OrganSystem.class);
+]]></zscript>
+	<window apply="${controller}" width="100%" id="winTemplateQASetup">
+		<style>.z-combobox-inp{ width:320px !important; }</style>
+		<panel title="Manage Questions">
+			<panelchildren style="padding:10px">
+				<div>
+					<label value="Module" style="font-size:12px"></label>
+					<combobox width="200px" model="@{controller.soapModules}" constraint="no empty" id="soapModuleCombo"
+						selectedItem="@{controller.selectedSoapModule}"
+						onChange="controller.fetchModuleQuestions(self.selectedItem.value);checkForRos((SoapModule)self.getSelectedItem().getValue());"
+						onSelect="checkForRos((SoapModule)self.getSelectedItem().getValue())">
+						<comboitem self="@{each='module'}" value="@{module}" label="@{module.moduleName}" width="320px">
+						</comboitem>
+					</combobox>
+					<label value="Organ System" id="lblOrganSystem"></label>
+					<combobox model="@{controller.organSystems,load-after='soapModuleCombo.onChange'}" constraint="no empty"
+						itemRenderer="${organSystemComboboxRenderer}" id="organSystemCombo" selectedItem="@{controller.selectedOrganSystem}"
+						onChange="controller.fetchOrganSystemQuestions(self.selectedItem.value)" onSelect="controller.fetchOrganSystemQuestions(self.selectedItem.value)"/>
+				</div>
+			</panelchildren>
+		</panel>
+		<zscript>
+		<![CDATA[
+			void checkForRos(SoapModule soapModule) {
+				lblOrganSystem.setVisible("ROS".equals(soapModule.getModuleName()) || "Examination".equals(soapModule.getModuleName()));
+				organSystemCombo.setVisible("ROS".equals(soapModule.getModuleName()) || "Examination".equals(soapModule.getModuleName()));
+			}
+		]]>
+		</zscript>
+		<box widths="100%" width="100%" id="gridRoot">
+			<div sclass="gridCont">
+				<div sclass="panelHeadTop pagination">
+					<div sclass="fl">
+						<a href="#" label="Questions" />
+					</div>
+					<div sclass="fr">
+						<paging detailed="true" id="listboxPaging" pageSize="10" pageIncrement="1" />
+					</div>
+				</div>
+			</div>
+			<div sclass="grid clr">
+				<n:table border="0" cellspacing="0" cellpadding="0">
+					<n:thead>
+						<n:tr>
+							<n:td>
+								<a href="#popup" class="addBtn" label="Add" id="AddQuestion">
+									<attribute name="onClick"><![CDATA[
+									Map args = UtilMisc.toMap("soapmodule", soapModuleCombo.selectedItem.value, "allquestions", controller
+												.getQuestions(), "postevent", templateQuestionListBox);
+									if (organSystemCombo.isVisible()) {
+										args = UtilMisc.toMap("soapmodule", soapModuleCombo.selectedItem.value, "allquestions", controller.getQuestions(),
+												"organsystem", organSystemCombo.selectedItem.value, "postevent", templateQuestionListBox);
+									}
+									Navigation.navigateToModalWindow("addQuestion", args);
+									]]></attribute>
+								</a>
+								<a href="#" class="actvBtn" onClick='controller.activateQuestion()' label="Activate" />
+								<a href="#" class="dactvBtn" label="Deactivate"
+									onClick="controller.openDeactivateReasonWindow()" />
+								<div visible="false">
+									<a href="#" class="delBtn" label="Delete" id="RemoveQuestion"
+										onClick='controller.removeQuestion()' />
+								</div>
+								<n:form>
+									<label value="Search" visible="${!hideSearch}" />
+									<span class="searchBox" visible="${!hideSearch}">
+										<textbox name="search" id="txtSearch" value="@{controller.searchText}"
+											onOK='Events.postEvent("onClick",searchQuestionButton,null)' />
+										<toolbarbutton zclass="toolbarSearchImg" id="searchBtn"
+											onClick='Events.postEvent("onClick",searchQuestionButton,null)' />
+										<button id="searchQuestionButton" onClick="controller.fetchQuestions();"
+											visible="false" />
+									</span>
+								</n:form>
+							</n:td>
+						</n:tr>
+					</n:thead>
+				</n:table>
+				<listbox multiple="true" checkmark="true" paginal="${listboxPaging}" mold="paging"
+					oddRowSclass="z-listbox-odd" id="templateQuestionListBox"
+					selectedItem="@{controller.selectedQuestions,converter=com.nzion.view.component.MultipleListitemBindingConverter}"
+					model="@{controller.questions,load-after='templateQuestionListBox.onReload,searchQuestionButton.onClick,RemoveQuestion.onClick,organSystemCombo.onChange'}">
+					<listhead>
+						<listheader label="Name" sort="auto" />
+						<listheader label="Applies To" sort="auto" />
+						<listheader label="Multiple" sort="auto" />
+						<listheader label="Positive/Negative" sort="auto" />
+					</listhead>
+					<listitem self="@{each='question'}" value="@{'question'}">
+						<attribute name="onDoubleClick">
+							<![CDATA[
+							Navigation.navigateToModalWindow("addQuestion", UtilMisc.toMap("question", self.value, "postevent",
+									templateQuestionListBox));
+							]]>
+						</attribute>
+						<listcell>
+							<label value="@{question.desc}" />
+						</listcell>
+						<listcell>
+							<label value="@{question.genderApplicabilityForQuestion}" />
+						</listcell>
+						<listcell>
+							<label value="@{question.isMultiple}" />
+						</listcell>
+						<listcell>
+							<label value="@{question.isYesNo}" />
+						</listcell>
+					</listitem>
+				</listbox>
+			</div>
+		</box>
+	</window>
+</zk>

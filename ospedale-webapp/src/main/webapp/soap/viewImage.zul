@@ -1,0 +1,10 @@
+<zk>
+	<window mode="modal" title="Image ${arg.imageFile.fileName}" closable="true" width="40%" >
+	<zscript><![CDATA[
+	com.nzion.domain.File imageFile = arg.get("imageFile");
+	java.io.FileInputStream fileInputStream = new java.io.FileInputStream(imageFile.getFilePath());
+	org.zkoss.image.AImage aImage = new org.zkoss.image.AImage(imageFile.getFileName(),fileInputStream);
+	]]></zscript>
+	<image id="image" content="${aImage}" height="100%" width="100%"/>
+	</window>
+</zk>

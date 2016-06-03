@@ -1,0 +1,30 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+		import com.nzion.zkoss.composer.SoapSentenceComposer;
+		import com.nzion.domain.emr.soap.OtherSoapNoteSection;
+		SoapSentenceComposer sentenceComposer = (SoapSentenceComposer)arg.get("controller");
+		OtherSoapNoteSection otherSoapNoteSection = soapNoteService.getSoapSection(sentenceComposer.getSoapNoteController().getSoapNote(),sentenceComposer.getSelectedModule(),OtherSoapNoteSection.class);
+		Set qas = otherSoapNoteSection.getQas();
+		sentenceComposer.setSelectedSection(otherSoapNoteSection);
+		com.nzion.zkoss.composer.SoapOtherSectionSentenceComposer otherComposer = new com.nzion.zkoss.composer.SoapOtherSectionSentenceComposer();
+		boolean editable=false;
+		if(arg.get("editable")!=null)
+		editable = true;
+	</zscript>
+<window style="margin-left:10px" apply="${otherComposer}">
+		<style>
+		tr.z-row td.z-row-inner, tr.z-row .z-cell{
+ 			border-style:none none none;
+ 		}
+		</style>
+		<n:h2>${otherSoapNoteSection.soapModule.moduleDescription}</n:h2>
+		<textbox value="${otherSoapNoteSection.sentence}" style="border:none" cols="100" multiline="true" visible="${editable}"/>
+		<label value="Comments" style="font-size:12px;font-weight:bold;" visible="${!editable}" if="${otherSoapNoteSection.sectionComments!=null}"/>
+		<label value="${otherSoapNoteSection.remarks}" visible="${!editable}"/>
+		<textbox value="${otherSoapNoteSection.remarks}" style="border:none" cols="100" multiline="true" visible="${editable}"  if="${otherSoapNoteSection.sectionComments!=null}"/>
+</window>
+</zk>

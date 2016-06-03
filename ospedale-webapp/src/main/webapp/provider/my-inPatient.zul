@@ -1,0 +1,109 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./myInPatientAdmissionWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	         import com.nzion.domain.pfm.BEDSTATUS;
+	         import com.nzion.domain.inpatient.BedStatus;
+	         import com.nzion.domain.inpatient.PatientAdmission;
+	 com.nzion.inpatient.zkoss.MyInpatientController inPatientController = new com.nzion.inpatient.zkoss.MyInpatientController();
+	 com.nzion.service.inpatient.InPatientAdmissionService inPatientAdmissionService = com.nzion.util.Infrastructure.getSpringBean("inPatientAdmissionService");
+	 com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	 List patientIpList = null;
+	 com.nzion.domain.inpatient.DischargeSummary dSummary;
+	 inPatientController.setPatientAdmission(new com.nzion.domain.inpatient.PatientAdmission());
+	 List bedStatusList=commonCrudService.getAll(com.nzion.domain.inpatient.BedStatus.class);
+	 BEDSTATUS[] bedstatus = new BEDSTATUS[]{BEDSTATUS.OCCUPIED,BEDSTATUS.BOOKED,BEDSTATUS.PENDINGDISCHARGE,BEDSTATUS.DISCHARGED};
+	 BedStatus defaultBedStatus= commonCrudService.findUniqueByEquality(BedStatus.class,new String[]{"bedstatus"} ,new Object[]{BEDSTATUS.OCCUPIED});
+	 patientIpList = inPatientController.searchPatientAdmissionsByCriteria(false,null,defaultBedStatus);
+]]>
+	</zscript>
+	<window id="myInPatientAdmissionWin" self="@{define(content)}" apply="${inPatientController}">
+			<hlayout spacing="25px" sclass="form">
+				<hlayout spacing="7px">
+					<label value="Patient Name"  sclass="name"/>
+					<div width="280px">
+					<patientlookup onChange="inPatientController.PatientAdmission.setPatient((com.nzion.domain.Patient)event.getOrigin().getData())" />
+					</div>
+					<label value="IP Number" class="name"></label>
+					<textbox id="iPNo" ></textbox>
+				</hlayout>
+				
+				 <hlayout spacing="6px">
+		     <label value="${c:l('bedStatus')}" sclass="name"/>
+					<combobox id="status" model="@{bedstatus}" >
+						<comboitem self="@{each='bedStatus'}" value="@{bedStatus}" label="@{bedStatus.bedstatus}"/>
+					</combobox>
+		     </hlayout>
+		     <hlayout spacing="6px">
+					<checkbox id="otherDoctorPatient" label="All Patients" />
+				</hlayout>
+			</hlayout>
+			<div align="center" sclass="panelFoot buttonPanel" >
+			<zscript>
+			<![CDATA[
+			BedStatus selectedBedStatus = null;
+				if(status.getSelectedItem()!=null && status.getSelectedItem().getValue()!=null){
+				 BEDSTATUS selectedStatus =(BEDSTATUS)status.getSelectedItem().getValue();
+				 selectedBedStatus = commonCrudService.findUniqueByEquality(BedStatus.class,new String[]{"bedstatus"} ,new Object[]{selectedStatus});
+				}
+				 patientIpList = inPatientController.searchPatientAdmissionsByCriteria(otherDoctorPatient.isChecked(),iPNo.getValue(),selectedBedStatus);
+				 ]]>
+			</zscript>
+			<button label="Search" id="searchBtn" zclass="btn-primary btn" style="text-align:center">
+			<attribute name="onClick"><![CDATA[
+			    BedStatus selectedBedStatus = null;
+				if(status.getSelectedItem()!=null && status.getSelectedItem().getValue()!=null){
+				 BEDSTATUS selectedStatus =(BEDSTATUS)status.getSelectedItem().getValue();
+				 selectedBedStatus = commonCrudService.findUniqueByEquality(BedStatus.class,new String[]{"bedstatus"} ,new Object[]{selectedStatus});
+				}
+				 patientIpList = inPatientController.searchPatientAdmissionsByCriteria(otherDoctorPatient.isChecked(),iPNo.getValue(),selectedBedStatus);
+				]]></attribute>
+			</button>
+			</div>
+		<paging id="configPanel"></paging>
+		<listbox id="myInpatientListBox" model="@{patientIpList,load-after='searchBtn.onClick,self.onCreate'}" mold="paging" paginal="${configPanel}" pageSize="15">
+			<listhead>
+				<listheader label="Patient Name" />
+				<listheader label="IP Number" />
+				<listheader label="Doctor Name" />
+				<listheader label="Admission Date" />
+				<listheader label="Ward Type" />
+				<listheader label="Bed" />
+				<listheader label="Discharge Summary Status" />
+				<listheader label="${c:l('bedStatus')}" />
+				<listheader label="Nurse Station" />
+				<listheader label="Admission Status" />
+				<listheader label="Action" />
+			</listhead>
+			<listitem self="@{each='patientAdmission'}" value="@{patientAdmission}">
+				<listcell>
+					<name object="@{patientAdmission.patient}" />
+				</listcell>
+				<listcell label="@{patientAdmission.accountNumber}" />
+				<listcell>
+					<name object="@{patientAdmission.pcp}" />
+				</listcell>
+				<listcell label="@{patientAdmission.admittedDate,converter='com.nzion.view.component.DateConverter'}"/>	
+				<listcell label="@{patientAdmission.latestAllocatedBed.bed.ward.wardType.description}" />
+				<listcell label="@{patientAdmission.latestAllocatedBed.bed.bedNo}" />
+				<listcell label="@{patientAdmission.dischargeSummary.status}" />
+				<listcell label="@{patientAdmission.latestAllocatedBed.bed.bedStatus.bedstatus}" />
+				<listcell label="@{patientAdmission.latestAllocatedBed.bed.ward.nurseStation.name}" />
+				<listcell label="@{patientAdmission.ipAdmissionType}" />
+				<listcell>
+					<a label="View">
+						<attribute name="onClick">
+	com.nzion.domain.inpatient.PatientAdmission patientAdmission = (com.nzion.domain.inpatient.PatientAdmission) self.getParent().getParent().getValue();
+	if(BEDSTATUS.BOOKED.equals(patientAdmission.getLatestAllocatedBed().getBed().getBedStatus().getBedstatus()))
+	com.nzion.util.UtilMessagesAndPopups.showError("The Bed is not yet occupied. Cannot be viewed");
+	else
+    com.nzion.zkoss.ext.Navigation.navigate("/inPatient/inpatient-admission-template", com.nzion.util.UtilMisc.toMap("patientAdm", patientAdmission), contentArea);
+</attribute>
+					</a>
+				</listcell>
+			</listitem>
+		</listbox>
+
+	</window>
+</zk>

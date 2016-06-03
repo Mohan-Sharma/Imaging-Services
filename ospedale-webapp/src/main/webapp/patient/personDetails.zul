@@ -1,0 +1,179 @@
+<zscript>
+	System.out.println("\n\n\n\n\n ddddddddddddddddddddd " + Path.getComponent("/NewPatient").getFellowIfAny("save",true));
+</zscript>
+
+	<h:table style="width:100%">
+		<h:tr>
+			<h:td>
+				<label value="First Name" style="text-align:right;" id="lblfirstName"/>
+			</h:td>
+			<h:td>
+				<textbox value="@{patientVO.patient.firstName}" id="firstName"/>
+			</h:td>
+			<h:td>
+				<label value="Middle Name" style="text-align:right;" id="lblmiddleName"/>
+			</h:td>
+			<h:td>
+				<textbox value="@{patientVO.patient.middleName}" id="middleName"/>
+			</h:td>
+			<h:td>
+				<label value="Last Name" style="text-align:right;" id="lbllastName"/>
+			</h:td>
+			<h:td>
+				<textbox value="@{patientVO.patient.lastName}" id="lastName"/>
+			</h:td>
+		</h:tr>
+	</h:table>
+	<groupbox>
+		<caption label="Primary Location"></caption>
+		<h:table>
+			<h:tr>
+				<h:td>
+					<label value="Attn Name" style="text-align:right;" />
+				</h:td>
+				<h:td>
+					<textbox value="@{patientVO.postalAddress.attnName}" />
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td>
+					<label value="Address1" style="text-align:right;" />
+				</h:td>
+				<h:td colspan="3">
+					<textbox cols="50" value="@{patientVO.postalAddress.address1}" />
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td>
+					<label value="Address2" style="text-align:right;" />
+				</h:td>
+				<h:td>
+					<textbox cols="50" value="@{patientVO.postalAddress.address2}" />
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td>
+					<label value="Country" style="text-align:right;" />
+				</h:td>
+				<h:td>
+					<textbox value="@{patientVO.postalAddress.countryGeo}" />
+				</h:td>
+				<h:td>
+					<label value="State" style="text-align:right;" />
+				</h:td>
+				<h:td>
+					<textbox value="@{patientVO.postalAddress.stateProvinceGeo}" />
+				</h:td>
+				<h:td>
+					<label value="City" style="text-align:right;" />
+				</h:td>
+				<h:td>
+					<textbox value="@{patientVO.postalAddress.city}" />
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td>
+					<label value="Pincode" style="text-align:right;" />
+				</h:td>
+				<h:td>
+					<intbox value="@{patientVO.postalAddress.postalCode}" />
+				</h:td>
+			</h:tr>
+		</h:table>
+	</groupbox>
+	<groupbox>
+		<caption label="Work Tele"></caption>
+		<h:table width="100%">
+			<h:tr>
+				<h:td>
+					<label value="Ask For Name" style="text-align:right;" />
+				</h:td>
+				<h:td>
+					<textbox value="@{patientVO.workPhone.askForName}" />
+				</h:td>
+				<h:td>
+					<label value="Country Code" style="text-align:right;" />
+				</h:td>
+				<h:td>
+					<intbox value="@{patientVO.workPhone.countryCode}" />
+				</h:td>
+				<h:td>
+					<label value="Area Code" style="text-align:right;" />
+				</h:td>
+				<h:td>
+					<intbox value="@{patientVO.workPhone.areaCode}" />
+				</h:td>
+				<h:td>
+					<label value="Contact Number" style="text-align:right;" />
+				</h:td>
+				<h:td>
+					<intbox value="@{patientVO.workPhone.contactNumber}" />
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td>
+					<label value="Ext" style="text-align:right;" />
+				</h:td>
+				<h:td>
+					<intbox value="@{patientVO.workPhone.extensionNumber}" />
+				</h:td>
+				<h:td>
+					<label value="Primary" style="text-align:right;" />
+					<checkbox checked="@{patientVO.isWorkPhonePrimary}"></checkbox>
+				</h:td>
+			</h:tr>
+		</h:table>
+	</groupbox>
+
+
+	<groupbox>
+		<caption label="Home Tele"></caption>
+		<h:table width="100%">
+			<h:tr>
+				<h:td>
+					<label value="Ask For Name" style="text-align:right;" />
+				</h:td>
+				<h:td>
+					<textbox value="@{patientVO.homePhone.askForName}" />
+				</h:td>
+				<h:td>
+					<label value="Country Code" style="text-align:right;" />
+				</h:td>
+				<h:td>
+					<intbox value="@{patientVO.homePhone.countryCode}" />
+				</h:td>
+				<h:td>
+					<label value="Area Code" style="text-align:right;" />
+				</h:td>
+				<h:td>
+					<intbox value="@{patientVO.homePhone.areaCode}" />
+				</h:td>
+				<h:td>
+					<label value="Contact Number" style="text-align:right;" />
+				</h:td>
+				<h:td>
+					<intbox value="@{patientVO.homePhone.contactNumber}" />
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td>
+					<label value="Primary" style="text-align:right;" />
+					<checkbox checked="@{patientVO.isHomePhonePrimary}"></checkbox>
+				</h:td>
+			</h:tr>
+		</h:table>
+	</groupbox>
+
+	<groupbox>
+		<caption label="Primary Email"></caption>
+		<h:table width="100%">
+			<h:tr>
+				<h:td>
+					<label value="Email" style="text-align:right;" />
+				</h:td>
+				<h:td>
+					<email value="@{patientVO.emailAddress.emailAddress}" />
+				</h:td>
+			</h:tr>
+		</h:table>
+	</groupbox>

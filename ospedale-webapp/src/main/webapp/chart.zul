@@ -1,0 +1,12 @@
+<zk>
+    <div width="100%">
+    	<imagemap id="imge"/>
+    </div>
+	<zscript>
+	com.nzion.zkoss.composer.ChartController controller = chartcontroller;
+	if("true".equals(timeseries))
+		controller.renderTimeSeriesChart(imge);
+	else
+		controller.renderXYSeriesChart(imge);
+	</zscript>
+</zk>

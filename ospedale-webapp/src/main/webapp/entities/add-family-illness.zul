@@ -1,0 +1,49 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./familyIllnes"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript><![CDATA[
+import com.nzion.domain.emr.FamilyIllness;
+FamilyIllness familyIllness=(FamilyIllness)Executions.getCurrent().getArg().get("entity");
+String label = familyIllness==null?" New ":" Edit ";
+familyIllness=familyIllness==null? new FamilyIllness() : familyIllness;
+]]></zscript>
+<window id="familyIllnes" title="${label}Family Illness" mode="modal" width="40%" position="center,top" closable="true">
+	<div width="97%" style="padding:5px">
+	<panel title="Family Illness">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div sclass="col2">
+						<label value="Name" />
+						<label value=" *" zclass="labelReq"/>
+						<textbox value="@{familyIllness.name,save-when='Save.onClick'}" constraint="no empty" />
+					</div>
+					<div sclass="col2">
+						<label value="Description" />
+						<label value=" *" zclass="labelReq"/>
+						<textbox value="@{familyIllness.illnessDesc,save-when='Save.onClick'}" constraint="no empty" />	
+					</div>
+<!--					<div sclass="chkBox">-->
+<!--						<checkbox checked="@{familyIllness.active,save-when='Save.onClick'}"-->
+<!--							label="Active" />-->
+<!--					</div>-->
+				</div>
+			</panelchildren>
+	</panel>
+	
+		<div sclass="panelFoot" />
+		<separator/>
+	
+			<div sclass="panelFoot">
+			<button label="Save" id="Save" >
+				<attribute name="onClick">
+					commonCrudService.save(familyIllness);
+					com.nzion.util.UtilMessagesAndPopups.showSuccess();
+					familyIllnes.detach();
+				</attribute>
+			</button>
+			<button label="Cancel" forward="onClick=onCancel"/>
+		</div>
+		</div>
+</window>
+</zk>

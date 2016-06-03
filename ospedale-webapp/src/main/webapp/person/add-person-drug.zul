@@ -1,0 +1,71 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./localDrugSearchWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window id="localDrugSearchWin" mode="modal" position="center,top" width="60%" height="70%"
+	title="Add Drugs" closable="true">
+	<div width="97%" style="padding:5px">
+	<zscript><![CDATA[
+	import com.nzion.domain.Provider;
+	import com.nzion.zkoss.ext.EntityDropdownRenderer;
+	List list=arg.get("list");
+	com.nzion.zkoss.composer.PersonProfileController profileController = desktop.getAttribute("profileController");
+	EntityDropdownRenderer dropdownRenderer = EntityDropdownRenderer.DEFAULT_INSTANCE;
+	EntityDropdownRenderer masterDataDescriptionRenderer = new EntityDropdownRenderer("description");
+	List drugs;
+	List quantities=commonCrudService.searchByExample(new com.nzion.domain.drug.DrugSig("QUANTITY"));
+	List QuantityQualifierList=commonCrudService.searchByExample(new com.nzion.domain.drug.DrugSig("QUANTITY_QUALIFIER"));
+	List drugDirectionList=commonCrudService.searchByExample(new com.nzion.domain.drug.DrugSig("FREQUENCY"));
+]]></zscript>
+		<panel title="Search For Drugs" id="searchDrugs" 
+		onAddClick="profileController.addPersonDrugs(personFavouriteDrugDisplayGrid,localDrugSearchWin,list)"
+		onCancelClick="localDrugSearchWin.detach();">
+			<attribute name="onSearchClick">
+				drugs = personService.getUnAddedDrugs(profileController.getPerson(), event.getData().toString());
+			</attribute>
+			<panelchildren>
+				<toolbar listenercomponent="${searchDrugs}" hidedelete="true" />
+				<listbox multiple="true" checkmark="true" width="100%" id="personFavouriteDrugDisplayGrid"  mold="paging"
+					model="@{drugs, load-after='searchDrugs.onSearchClick'}" pageSize="10" pagingPosition="top">
+					<listhead>
+						<listheader label="Drug Name" width="13%"/>
+						<listheader label="Drug Strength" width="15%"/>
+						<listheader label="Drug Routes" width="15%"/>
+						<listheader label="Qty Qualifier" width="15%"/>
+						<listheader label="Qty" width="15%"/>
+						<listheader label="Form"/>
+						<listheader label="Direction" width="15%"/>
+						<listheader label="Special Instructions" width="12%"/>
+					</listhead>
+					<listitem self="@{each='personDrug'}" value="@{personDrug}">
+						<listcell>
+							<label value="@{personDrug.drug.tradeName}" />
+						</listcell>
+						<listcell>
+							<combobox model="@{personDrug.drug.strengths}" itemRenderer="${dropdownRenderer}" selectedItem="@{personDrug.strength}" />
+						</listcell>
+						<listcell>
+							<combobox model="@{personDrug.drug.routes}" itemRenderer="${dropdownRenderer}" selectedItem="@{personDrug.drugDosageRoute}" />
+						</listcell>
+						<listcell>
+							<combobox model="@{quantities}"  itemRenderer="${masterDataDescriptionRenderer}" selectedItem="@{personDrug.quantity}"/>
+						</listcell>
+						<listcell>
+							<combobox model="@{QuantityQualifierList}"  itemRenderer="${masterDataDescriptionRenderer}" selectedItem="@{providerDrug.quantityQualifier}"/>
+						</listcell>
+						<listcell>			
+							<textbox value="@{personDrug.drug.dosageForm}" />			
+						</listcell>
+						<listcell>
+							<combobox model="@{drugDirectionList}"  itemRenderer="${dropdownRenderer}" selectedItem="@{personDrug.drugDirection}"/>		
+						</listcell>
+						<listcell>	
+							<textbox value="@{personDrug.specialInstruction}" />
+						</listcell>
+					</listitem>
+				</listbox>
+			</panelchildren>
+		</panel>
+		</div>
+	</window>
+</zk>

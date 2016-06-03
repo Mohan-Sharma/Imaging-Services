@@ -1,0 +1,54 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientFamilyMembersWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	import com.nzion.domain.Patient;
+	import com.nzion.domain.PatientFamilyMember;
+	List patientFamilyMembers=patientService.getFamilyMembers(args.get("patient"));
+	args.put("patientFamilyMembers", patientFamilyMembers);
+</zscript>
+	<window id="patientFamilyMembersWin">
+	<panel title="Patient Family Members" id="familyMembersPanel">
+		<attribute name="onAddClick">
+			args.put("entity",null);
+			Window w = Executions.createComponents("/patient/patient-family-member.zul",patientFamilyMembersWin,args);
+			w.addForward("onDetach", familyMembersDisplayGrid, "onReloadRequest");
+		</attribute>
+		<attribute name="onDeleteClick">
+			List toBeDeleted=com.nzion.util.ViewUtil.getSelectedItems(familyMembersDisplayGrid);
+			patientFamilyMembers.removeAll(toBeDeleted);
+			commonCrudService.delete(toBeDeleted);
+		</attribute>
+		<panelchildren>
+		<toolbar listenercomponent="${familyMembersPanel}" hidecancel="true" hidesearch="true"/>
+		<listbox multiple="true" id="familyMembersDisplayGrid" checkmark="true" model="@{patientFamilyMembers,load-after='self.onReloadRequest,familyMembersPanel.onDeleteClick'}">
+			<listhead>
+				<listheader label="Name"/>
+				<listheader label="Home phone"/>
+				<listheader label="Mobile"/>
+				<listheader label="RelationShip Type"/>
+			</listhead>
+			<listitem self="@{each='patientFamilyMember'}" value="@{patientFamilyMember}" >
+		<attribute name="onDoubleClick">
+			args.put("entity",self.getValue());
+			Window w = Executions.createComponents("/patient/patient-family-member.zul",patientFamilyMembersWin,args);
+			w.addForward("onDetach", familyMembersDisplayGrid, "onReloadRequest");
+		</attribute>
+				<listcell>
+					<label value="@{patientFamilyMember.name}"  />
+				</listcell>
+				<listcell>
+					<label value="@{patientFamilyMember.contacts.homePhone}" />
+				</listcell>
+				<listcell>
+					<label value="@{patientFamilyMember.contacts.mobileNumber}" />
+				</listcell>
+				<listcell>
+					<label value="@{patientFamilyMember.familyMember.relationshipName}" />
+				</listcell>
+			</listitem>
+		</listbox>
+		</panelchildren>
+		</panel>
+	</window>
+</zk>

@@ -1,0 +1,52 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./PastFamilyHistoryDisplayGrid"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:w="http://www.zkoss.org/2005/zk/client" xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+
+	<zscript>
+	import com.nzion.zkoss.composer.PatientSoapNoteController;
+	import com.nzion.domain.emr.soap.FamilyHistorySection;
+	import com.nzion.domain.emr.soap.PatientFamilyIllness;
+	import com.nzion.zkoss.ext.EntityDropdownRenderer;
+	import com.nzion.domain.emr.FamilyMember;
+	PatientSoapNoteController controller = (PatientSoapNoteController)arg.get("controller");
+	com.nzion.service.common.CommonCrudService ccs = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	List patientFamilyHistories = ccs.findByEquality(PatientFamilyIllness.class, new String[]{"status","patient"}, new Object[]{"Inactive",controller.getSoapNote().getPatient()});	
+</zscript>
+ 	<window id="PastFamilyHistoryDisplayGrid" width="60%" closable="true" title="Family History">	
+			<div style="padding:5px">
+				<n:table id="PastFamilyHistoryDisplayGrid" cellpadding="0" cellspacing="0" border="0" class="display" >
+					<n:thead>
+						<n:tr>
+							<n:th>Relationship</n:th>
+							<n:th>Illness</n:th>
+							<n:th>Health Status</n:th>
+							<n:th>OnSet Date</n:th>
+						</n:tr>
+					</n:thead>
+					<n:tbody>
+						<n:tr forEach="${patientFamilyHistories}">
+							<n:td>${each.member}</n:td>
+							<n:td>${each.icd.code} - ${each.icd.description}</n:td>
+							<n:td>${each.healthStatus}</n:td>
+							<n:td>${display:fd(each.approximateDate)}</n:td>
+						
+						</n:tr>
+					</n:tbody>
+				</n:table>
+				</div>
+		<script type="text/javascript">
+			zk.afterMount(function() { 
+				jq("#PastFamilyHistoryDisplayGrid").dataTable({
+				"bJQueryUI": true,
+				"sPaginationType": "full_numbers", 
+				"aoColumns":
+							[ null, null,null,{ "bSortable": false,"sType": "html"} ] 
+						}); 
+			});
+		</script>
+		
+	</window>
+</zk>

@@ -1,0 +1,11 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		setPageTitle("Drug", "");
+	</zscript>
+	<window>
+		<screen width="100%" pagetitle="Drug" listtitle="List of Drugs" addpage="addDrugs" entityclass="com.nzion.domain.drug.Drug"
+		advancedsearchpage="gsm" addmodepopup="true" hidedeletebtn="true" 
+		fields="tradeName,genericName" labels="Name,Generic Name" searchfields="tradeName,genericName"/>
+	</window>
+</zk>

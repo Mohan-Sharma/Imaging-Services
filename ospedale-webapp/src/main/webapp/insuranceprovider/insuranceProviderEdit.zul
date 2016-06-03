@@ -1,0 +1,61 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./insuranceProviderEdit"?>
+<?component name="enumeration" class="com.nzion.view.component.EnumerationDropdown"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import com.nzion.zkoss.ext.Navigation;
+	Map insuranceProviderArgs = Executions.getCurrent().getArg();
+	]]></zscript>
+	<window id="insuranceProviderEdit">
+	<tabbox>
+			<tabs>
+				<tab label="Insurance Provider" id="insuranceProvider">
+					<attribute name="onClick">
+					<![CDATA[
+						insuranceProviderArgs.put("displayArea",insuranceProviderArea);
+						Navigation.navigate("insuranceProviderAdd",insuranceProviderArgs,insuranceProviderArea);
+					   ]]>
+					</attribute>				
+				</tab>
+				<tab label="Capitation" id="capitation" visible="false">
+					<attribute name="onClick">
+					<![CDATA[
+					insuranceProviderArgs.put("displayArea",capitationArea);
+					]]>
+				</attribute>
+				</tab>
+				<tab label="Reimbursement Profile" id="reimbursement" visible="false">
+					<attribute name="onClick">
+					<![CDATA[
+					insuranceProviderArgs.put("displayArea",reimbursementArea);
+					]]>
+				</attribute>
+				</tab>
+				<tab label="Configure Eligibility Request" id="eligibilityRequest" visible="false">
+					<attribute name="onClick">
+					<![CDATA[
+					insuranceProviderArgs.put("displayArea",eligibilityRequestArea);
+					]]>
+				</attribute>
+				</tab>
+				<tab label="Third Party Liability Code" id="liabilityCode" visible="false">
+					<attribute name="onClick">
+					<![CDATA[
+					insuranceProviderArgs.put("displayArea",liabilityCodeArea);
+					]]>
+				</attribute>
+				</tab>
+			</tabs>
+		<tabpanels>	
+			<tabpanel id="insuranceProviderArea" />
+			<tabpanel id="capitationArea"></tabpanel>
+			<tabpanel id="reimbursementArea" />
+			<tabpanel id="eligibilityRequestArea"></tabpanel>
+			<tabpanel id="liabilityCodeArea"></tabpanel>
+		</tabpanels>
+		</tabbox>
+		<zscript><![CDATA[
+		Events.postEvent("onClick",insuranceProvider,insuranceProviderArea);
+		]]></zscript>
+	</window>
+</zk>

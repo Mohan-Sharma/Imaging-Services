@@ -1,0 +1,178 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./resultPanel"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	boolean provider = com.nzion.domain.Roles.hasRole(com.nzion.domain.Roles.PROVIDER);
+	com.nzion.zkoss.composer.EncounterController encounterControllerObj = encounterController;
+	boolean resultVisible=Executions.getCurrent().getAttributes().get("showResults")==null?false:true;
+	BindingListModelArray blm = null;
+	com.nzion.view.component.StringAscendingComparator ascendingComparator = new com.nzion.view.component.StringAscendingComparator();
+	com.nzion.view.component.StringDescendingComparator descendingComparator = new com.nzion.view.component.StringDescendingComparator();
+</zscript>
+	<panel title="Results" id="resultPanel" visible="${resultVisible}">
+	<attribute name="onCreate">
+	if(! encounterControllerObj.isShowPanelTitle())
+	self.setTitle("");
+	</attribute>
+		<panelchildren>
+		<div if="${empty encounters}" align="center" style="margin:0.5%">
+		<n:h4>No Results Found</n:h4>
+		</div>
+		<div id="resultDiv" unless="${empty encounters}">
+				<div sclass="grid clr">
+				<n:table>
+					<n:thead>
+						<n:tr>
+							<n:td>
+							<hlayout>
+								<label value="Group By:" />
+								<listbox id="groupByComboBox" mold="select">
+									<listitem />
+									<listitem label="Chief Complaint" value="ChiefComplaint" />
+									<listitem label="Diagnosis" value="ICD" />
+									<listitem label="Procedures" value="CPT" />
+									<listitem label="Lab Test" value="LAB" />
+									<listitem label="Drug" value="DRUG" />
+									<attribute name="onSelect">
+										groupByResultGrid.setVisible(self.getSelectedItem().getValue() != null);
+										searchResultGrid.setVisible(self.getSelectedItem().getValue() == null);
+										gridColumn.setLabel(self.getSelectedItem().getLabel());
+										if (self.getSelectedItem().getValue() != null)
+											encounterControllerObj.groupSoapNotes((String) self.getSelectedItem().getValue());
+											Map m = encounterControllerObj.getPatientSoapNoteMap();
+											Object[] arr = m.keySet().toArray();
+										blm = new BindingListModelArray(arr, false);
+									</attribute>
+								</listbox>
+								</hlayout>	
+							</n:td>
+							<n:td>
+							</n:td>
+						</n:tr>
+					</n:thead>
+				</n:table>
+			</div>
+			<div id="searchResultGrid" sclass="dataTables_scrollBody" style="overflow: auto;" height="400px">
+				<listbox id="encounterListbox" selectedItem="@{encounterControllerObj.selectedSoapNotes,converter='com.nzion.view.component.MultipleListitemBindingConverter'}" model="@{encounters}" checkmark="${encounterControllerObj.showPanelTitle}" multiple="${encounterControllerObj.showPanelTitle}"> 
+					<listhead sizable="true">
+						<listheader width="10%" label="Encountered On" onCreate='encounterControllerObj.enableAscendingSort(self,"date");encounterControllerObj.enableDescendingSort(self,"date")'/>
+						<listheader width="15%" label="Complaint" onCreate='encounterControllerObj.enableAscendingSort(self,"schedule.chiefComplaint");encounterControllerObj.enableDescendingSort(self,"schedule.chiefComplaint")'/>
+						<listheader width="15%" label="Patient" onCreate='encounterControllerObj.enableAscendingSort(self,"patient.firstName");encounterControllerObj.enableDescendingSort(self,"patient.firstName")'/>
+						<listheader width="15%" label="Doctor" onCreate='encounterControllerObj.enableAscendingSort(self,"provider.firstName");encounterControllerObj.enableDescendingSort(self,"provider.firstName")'/>
+						<listheader width="15%" label="Encounter Status" onCreate='encounterControllerObj.enableAscendingSort(self,"schedule.status");encounterControllerObj.enableDescendingSort(self,"schedule.status")'/>
+						<listheader width="15%" label="Location" onCreate='encounterControllerObj.enableAscendingSort(self,"schedule.location.name");encounterControllerObj.enableDescendingSort(self,"schedule.location.name")'/>
+						<listheader width="15%" label="Action" />
+					</listhead>
+					<listitem self="@{each='encounter'}" value="@{encounter}">
+						<listcell label="@{encounter.encounterDate}" />
+						<listcell image="@{encounter,converter='com.nzion.view.component.EncounterChiefComplaintConverter'}" />
+						<listcell>
+							<name object="@{encounter.patient}" style="font-weight:normal" />
+						</listcell>
+						<listcell>
+							<name object="@{encounter.provider}" style="font-weight:normal" />
+						</listcell>
+						<listcell label="@{encounter.schedule.status.description}" />
+						<listcell label="@{encounter.schedule.location}" />
+						<listcell>
+						<hlayout spacing="10px">
+							<a label="View">
+								<attribute name="onClick">
+									com.nzion.domain.emr.soap.PatientSoapNote patientSoapNote = commonCrudService.getById(com.nzion.domain.emr.soap.PatientSoapNote.class, self.getParent().getParent().getParent().getValue().getId());
+									Executions.getCurrent().sendRedirect(
+											"/soap/fullSoapNotePreview.zul?scheduleId=" + patientSoapNote.getSchedule().getId()+"&amp;pageName=SoapNotePreview", "_printSoapNote");
+								</attribute>
+							</a>
+							<a label="Print">
+								<attribute name="onClick">
+									com.nzion.domain.emr.soap.PatientSoapNote patientSoapNote = commonCrudService.getById(com.nzion.domain.emr.soap.PatientSoapNote.class, self.getParent().getParent().getParent().getValue().getId());
+									Executions.getCurrent().sendRedirect(
+											"/soap/soapNotePreviewFull.zhtml?scheduleId=" + patientSoapNote.getSchedule().getId()+"&amp;pageName=SoapNotePreview", "_printSoapNote");
+								</attribute>
+							</a>
+						</hlayout>	
+						</listcell>
+						<attribute name="onDoubleClick">
+							com.nzion.domain.emr.soap.PatientSoapNote patientSoapNote = commonCrudService.getById(com.nzion.domain.emr.soap.PatientSoapNote.class, self.getValue().getId());
+						if (!securityService.hasAuthorizationToViewSoapNote(patientSoapNote))
+							Executions.getCurrent().sendRedirect("/soap/soapUnAuthorizedAccess.zul?soapNoteId=" + String.valueOf(patientSoapNote.getId()), "_soapNote");
+						else
+							if (provider) {
+								Executions.getCurrent().sendRedirect("/soap/soapnote.zul?scheduleId=" + patientSoapNote.getSchedule().getId(),"_soapNote");
+							}
+						</attribute>
+					</listitem>
+				</listbox>
+			</div>
+			<grid id="groupByResultGrid"
+				model="@{blm,load-after='groupByComboBox.onSelect'}" visible="false">
+				<columns>
+					<column width="40px"></column>
+					<column label="Problem" id="gridColumn" sortAscending="${ascendingComparator}"
+						sortDescending="${descendingComparator}">
+					</column>
+				</columns>
+				<rows>
+					<row self="@{each='key'}" value="@{key}">
+						<label value="@{key}"/>
+						<detail open="false">
+								<listbox>
+									<listhead>
+										<listheader width="10%"  label="Encountered On"/>
+										<listheader width="15%" label="Complaint" />
+										<listheader width="15%" label="Patient" />
+										<listheader width="15%" label="Doctor" />
+										<listheader width="15%" label="Encounter Status" />
+										<listheader width="15%" label="Location" />
+										<listheader width="15%" label="Action" />
+									</listhead>
+									<listitem self="@{each='encounter'}" value="@{encounter}">
+										<listcell label="@{encounter.encounterDate}" />
+										<listcell label="@{encounter,converter='com.nzion.view.component.EncounterChiefComplaintConverter'}" />
+										<listcell>
+											<name object="@{encounter.patient}" style="font-weight:normal" />
+										</listcell>
+										<listcell>
+											<name object="@{encounter.provider}" style="font-weight:normal" />
+										</listcell>
+										<listcell label="@{encounter.schedule.status.description}" />
+										<listcell label="@{encounter.schedule.location}" />
+										<listcell>
+											<a label="Print">
+												<attribute name="onClick">
+													com.nzion.domain.emr.soap.PatientSoapNote patientSoapNote = commonCrudService.getById(
+															com.nzion.domain.emr.soap.PatientSoapNote.class, self.getParent().getParent().getValue().getId());
+												Executions.getCurrent().sendRedirect(
+														"/soap/fullSoapNotePreview.zul?scheduleId=" + patientSoapNote.getSchedule().getId()+"&amp;pageName=SoapNotePreview", "_printSoapNote");
+												</attribute>
+											</a>
+										</listcell>
+										<attribute name="onDoubleClick">
+											com.nzion.domain.emr.soap.PatientSoapNote patientSoapNote = commonCrudService.getById(
+													com.nzion.domain.emr.soap.PatientSoapNote.class, self.getValue().getId());
+										if (!securityService.hasAuthorizationToViewSoapNote(patientSoapNote))
+											Executions.getCurrent().sendRedirect(
+													"/soap/soapUnAuthorizedAccess.zul?soapNoteId=" + String.valueOf(patientSoapNote.getId()), "_soapNote");
+										else
+											if (provider) {
+												Executions.getCurrent().sendRedirect("/soap/soapnote.zul?scheduleId=" + patientSoapNote.getSchedule().getId(),
+														"_soapNote");
+											}
+										</attribute>
+									</listitem>
+								</listbox>
+								<attribute name="onOpen">
+										List mapValue = encounterControllerObj.getPatientSoapNoteMap().get(
+												((Row) self.getParent()).getValue());
+										((Listbox) self.getFirstChild()).setModel(new BindingListModelList(
+												mapValue, false));
+								</attribute>
+						</detail>
+					</row>
+				</rows>
+			</grid>
+			</div>
+		</panelchildren>
+	</panel>
+</zk>

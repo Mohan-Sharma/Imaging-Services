@@ -1,0 +1,10 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		setPageTitle("Procedures", "");
+	</zscript>
+	<window>
+		<screen width="100%" pagetitle="Procedures" listtitle="List of Procedures" addpage="addEditCpt" addmodepopup="true"
+			entityclass="com.nzion.domain.emr.Cpt" fields="id,description,price,longDescription" labels="Code,Description,Price,Long Description" hidedeletebtn="true"/>
+	</window>
+</zk>

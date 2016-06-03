@@ -1,0 +1,14 @@
+<?component name="screen" macro-uri="/home-grid-macro.zul"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		setPageTitle("Insurance", "");
+	</zscript>
+	<window>
+		<screen width="100%" listtitle="List of Insurance"	addpage="insuranceProviderAdd"
+				entityclass="com.nzion.domain.pms.InsuranceProvider"	labels="Insurance Code,Insurance Name, Email, City, State, Telephone Number"
+				fields="accountNumber, insuranceProviderName, contacts.email, contacts.postalAddress.city, 
+				contacts.postalAddress.stateProvinceGeo, contacts.officePhone" 
+				hidedeletebtn="true" addmodepopup="true"/>
+	</window>
+</zk>

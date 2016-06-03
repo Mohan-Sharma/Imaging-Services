@@ -1,0 +1,186 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./immunizationSectionnWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+<![CDATA[
+	import com.nzion.zkoss.composer.PatientSoapNoteController;
+	import com.nzion.domain.emr.soap.*;
+	import com.nzion.zkoss.composer.SoapImmunizationComposer;
+	import com.nzion.domain.emr.soap.PatientImmunization;
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	PatientSoapNoteController patientSoapNoteController = (PatientSoapNoteController) arg.get("controller");
+	ImmunizationSection immunizationSoapSection = patientSoapNoteController.getSoapSection(ImmunizationSection.class);
+	SoapImmunizationComposer soapImmunizationComposer = new SoapImmunizationComposer();
+	soapImmunizationComposer.setPatient(patientSoapNoteController.getPatient());
+	soapImmunizationComposer.setPatientSoapNoteController(patientSoapNoteController);
+	PatientImmunization patientImmunization = new PatientImmunization();
+	Set immunizations = new HashSet(); 	
+	
+	immunizations.addAll(immunizationSoapSection.getImmunizations());
+	List dueImmunizations = null;
+	boolean inhouse = false;
+]]>
+</zscript>
+	<window id="immunizationSectionnWindow">
+		<div sclass="chiefComp soapNoteCont curSOAP ui-resizable" style="position:relative;">
+		  <panel title="Administered Vaccines">
+			<panelchildren>
+			<h:table width="100%" cellpadding="0px" cellspacing="0px" style="border:0px">				
+				<h:tr>
+					<h:td class="soapNoteContL">
+					       <div style="width:99%;padding:10px;">
+							<div>
+								<span sclass="linkBtn linkBtnOn">
+									<a id="historyBtn" label="History">
+										<attribute name="onClick">
+										   showHistory();
+										</attribute>
+										</a>
+									<span />
+								</span>
+				  		  </div>
+				  		  <div>
+								<span sclass="linkBtn linkBtnOn">
+								<a id="printBtn">
+									Print
+									<attribute name="onClick">
+										<![CDATA[
+											Executions.getCurrent().sendRedirect("/soap/soapImmunizationPrint.zul?scheduleId=" + patientSoapNoteController.getSoapNote().getSchedule().getId(),"_blank");
+										]]>
+									</attribute>
+								</a>
+								<span />
+								</span>
+							</div>
+				  		  <div>
+							<span sclass="linkBtn linkBtnOn">
+								<a disabled="${patientSoapNoteController.readonly}" id="dueButton" popup="dueImmunizationPopup">Due Vaccines</a>
+								<span />
+							</span>
+							</div>
+				  		  <div>
+							<span sclass="linkBtn linkBtnOn">
+									<a disabled="${patientSoapNoteController.readonly}" id="newBtn" sclass="addBtn" label="New">										
+										<attribute name="onClick">
+											addEdit(null);
+											/*auditInfoInclude.setDynamicProperty("record",patientImmunization);
+											auditInfoInclude.invalidate();
+											inhouseRadioButton.setChecked(true);
+											saveButton.setDisabled(false);
+											Events.postEvent("onCheck",inhouseRadioButton,null);
+											Events.postEvent("onReload", dataSection, null);*/
+										</attribute>
+										<n:i class="icon-plus-sign"></n:i>
+									</a>
+									<span />
+								</span>
+							</div>
+						</div>
+						
+					</h:td>
+				</h:tr>
+				<h:tr>
+					<h:td class="soapNoteContL" >
+							<div style="padding:5px">
+								<n:table id="pastImmunizationListBox" cellpadding="0" cellspacing="0" border="0" class="display" >
+									<n:thead>
+										<n:tr>
+											<n:th>Vaccine Name</n:th>
+											<n:th>Administered On</n:th>
+											<n:th>Administered Amount</n:th>
+											<n:th>Administered Units</n:th>
+											<n:th>Action</n:th>
+										</n:tr>
+									</n:thead>
+									<n:tbody>
+										<n:tr forEach="${immunizations}">
+											<n:td>${each.immunization.shortDescription} - ${each.immunization.fullVaccineName}</n:td>
+											<n:td>${display:fd(each.administeredOn)}</n:td>
+											<n:td>${each.administeredAmount}</n:td>
+											<n:td>${each.administeredUnits}</n:td>	
+											<n:td>
+											<div>
+											<custom-attributes value="${each}"/>
+												<a class="group" onClick="addEdit(self.getId())" disabled="${patientSoapNoteController.readonly}" id="${each.id}">Edit</a> |
+												<a label="Remove" disabled="${patientSoapNoteController.readonly}" onClick='removeImmunization((PatientImmunization)self.getParent().getAttribute("value"),"soapSection","immunizations");'/>
+											</div>
+											</n:td>
+										</n:tr>
+									</n:tbody>
+								</n:table>
+								</div>
+								</h:td>
+				</h:tr>
+			</h:table>
+			</panelchildren>
+		</panel>
+		</div>
+		 <script type="text/javascript">
+			zk.afterMount(function() { 
+				jq("#pastImmunizationListBox").dataTable({
+				"bJQueryUI": true,
+				"sPaginationType": "full_numbers", 
+				"aoColumns":
+							[ null, null, null,null,{ "bSortable": false,"sType": "html"} ] 
+						}); 
+			});
+		</script>
+		<zscript>
+		<![CDATA[
+			void addEdit(String  id){
+				patientImmunization = null;				
+				if(id!=null){
+					com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+					patientImmunization = commonCrudService.getById(PatientImmunization.class, new Long(id));
+				}else{
+					patientImmunization = new PatientImmunization();
+				}
+				Window w =com.nzion.zkoss.ext.Navigation.navigateToModalWindow("/soap/soapAddImmunization",com.nzion.util.UtilMisc.toMap("patientImmunization",patientImmunization,"immunizationSoapSection",immunizationSoapSection,"soapImmunizationComposer",soapImmunizationComposer,"patientSoapNoteController",patientSoapNoteController));				
+				w.addForward("onDetach", (Component)desktop.getAttribute("wkModule"), "onClick");
+			}
+			
+			void showHistory(){
+				Window window = Executions.createComponents("/soap/immunizationHistoryList.zul",immunizationSectionnWindow,
+					com.nzion.util.UtilMisc.toMap("immunizationSoapSection",immunizationSoapSection,"soapImmunizationComposer",soapImmunizationComposer,"patientSoapNoteController",patientSoapNoteController));
+				window.doModal();
+			}
+			
+			void removeImmunization(PatientImmunization record,String section,String fieldName){
+			if(record.isAdministeredAtInhouse() && record.getLotNumber() != null){
+			record.getLotNumber().setDosesRemaining(record.getAdministeredAmount() + record.getLotNumber().getDosesRemaining());
+			commonCrudService.save(record.getLotNumber());
+			}		
+			patientSoapNoteController.removeSoapRecord(record,section,fieldName);	
+			}
+			]]>
+		</zscript>
+		<popup id="dueImmunizationPopup" width="50%">
+			<attribute name="onOpen">
+				dueImmunizations = patientSoapNoteController.getAllDueImmunizations();
+			</attribute>
+			<div height="200px" style="overflow:auto;border:1px">
+				<listbox model="@{dueImmunizations,load-after='dueImmunizationPopup.onOpen'}">
+					<listhead>
+						<listheader label="Vaccine Short Name" width="30%" />
+						<listheader label="Vaccine Full Name" />
+						<listheader label="Expected Date" />
+					</listhead>
+					<listitem self="@{each='dueImmunization'}" value="@{dueImmunization}">
+						<listcell label="@{dueImmunization.shortDescription}" />
+						<listcell label="@{dueImmunization.fullVaccineName}" />
+						<listcell>
+							<label
+								value="@{dueImmunization.expectedDate,converter='com.nzion.view.component.DateConverter'}" />
+						</listcell>
+					</listitem>
+				</listbox>
+			</div>
+		<div sclass="buttonPanel">
+			<button label="Cancel" onClick="dueImmunizationPopup.close();"/>
+	   </div>
+		</popup>
+	</window>
+</zk>

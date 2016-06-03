@@ -1,0 +1,12 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./specialization"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<style>.specialityBox{ display:block; height:16px; margin:0 0 0 10px; text-align:center; width:69px; }</style>
+	<zscript><![CDATA[
+	setPageTitle("Specialities", "");
+		]]></zscript>
+	<window id="specialization">
+			<screen width="100%" pagetitle="Speciality" listtitle="List of Specialities" addpage="addSpeciality" hidedeletebtn="true"
+ 			entityclass="com.nzion.domain.Speciality" fields="description" labels="Speciality" addmodepopup="true" />
+	</window>
+</zk>

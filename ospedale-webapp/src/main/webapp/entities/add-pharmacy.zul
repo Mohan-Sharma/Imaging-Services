@@ -1,0 +1,156 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./pharmacyWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	com.nzion.domain.drug.Pharmacy pharmacy=Executions.getCurrent().getArg().get("entity");
+	String label = pharmacy==null?" New ":" Edit ";
+	if(pharmacy == null) pharmacy = new com.nzion.domain.drug.Pharmacy();
+	com.nzion.domain.Location  location=null;
+	]]>
+	</zscript>
+	<window id="pharmacyWin" title="${label}Pharmacy" mode="modal" width="60%" position="center,top" closable="true">
+	<style>
+		table .z-label {
+		font: 11px normal Tahoma, Geneva, sans-serif;
+		vertical-align: middle;
+		color: #333;
+		padding:0 0 4px;
+		font-weight:bold;
+		}
+	</style>
+	<zscript>
+	<![CDATA[
+	public void locationChanged(){
+	String locationCode=locationNameLookup.getValue();
+	location=commonCrudService.getByAccountNumber(com.nzion.domain.Location.class,locationCode);
+	if(location == null)
+		throw new RuntimeException("Location " + locationCode + " not found ");
+	pharmacy.setLocation(location);
+	}
+	]]>
+	</zscript>
+		<div width="98%" style="padding:5px">
+		<panel title="Pharmacy Details">
+			<panelchildren>
+				<div sclass="panelCont" height="30px">
+					<div>
+						<label value="Pharmacy" style="text-align:right;"/>
+						<textbox cols="40" id="pharmacyName" value="@{pharmacy.name}" constraint="no empty" />
+					</div>
+				</div>
+				<div sclass="panelFoot"></div>
+			</panelchildren>
+		</panel>
+		<separator></separator>
+		<panel title="Contact Details">
+			<panelchildren>
+				<div sclass="panelCont" height="130px">
+					<div sclass="col2">
+						<hbox>
+							<label value="Address1" id="lbladdress1" />
+							<span zclass="labelReq">
+								<html><![CDATA[*]]></html>
+							</span>
+						</hbox>
+						<textbox value="@{pharmacy.address1}"
+							id="address1" constraint="no empty"/>
+					</div>
+					<div sclass="col2">
+						<label value="Address2" id="lbladdress2" />
+						<textbox value="@{pharmacy.address2}"
+							id="address2"/>
+					</div>
+					<div>
+						<hbox>
+							<label value="State" id="lblstate" />
+							<span zclass="labelReq">
+								<html><![CDATA[*]]></html>
+							</span>
+						</hbox>
+						<textbox value="@{pharmacy.state}"
+							id="state" cols="22" constraint="no empty" maxlength="2"/>
+					</div>
+<!--					<div>-->
+<!--						<label value="County" id="lblcountyGeo" />-->
+<!--						<textbox value="@{pharmacy.county}"-->
+<!--							id="countyGeo" />-->
+<!--					</div>-->
+					<div>
+						<hbox>
+							<label value="City" id="lblcity" />
+							<span zclass="labelReq">
+								<html><![CDATA[*]]></html>
+							</span>
+						</hbox>
+						<textbox cols="22" value="@{pharmacy.city}"
+							id="city" constraint="no empty" maxlength="20" onChange="com.nzion.util.UtilDisplay.validateNonDigits(self)"/>
+					</div>
+					<div>
+						<hbox>
+							<label value="Postal code" id="lblpostalCode" />
+							<span zclass="labelReq">
+								<html><![CDATA[*]]></html>
+							</span>
+						</hbox>
+						<textbox value="@{pharmacy.zip}"
+							id="postalCode" constraint="no empty" maxlength="9" onChange="com.nzion.util.UtilDisplay.validateOnlyDigits(self)"/>
+					</div>
+					<div>
+						<label value="e-mail" />
+						<email id="emailAddr" value="@{pharmacy.email}"/>
+					</div>
+						<div>
+							<label value="Phone No" />
+							<phonebox value="@{pharmacy.phone}"
+								cols="10" />
+						</div>
+						<div>
+							<label value="Fax"/>
+							<phonebox value="@{pharmacy.fax}" cols="10" />
+						</div>
+						<div>
+							<label value="Contact Person" />
+							<textbox value="@{pharmacy.contactPersonName}"/>
+						</div>
+						<div>
+							<label value="NCPDP"/>
+							<textbox value="@{pharmacy.ncdp}"/>
+						</div>
+				</div>
+<!--				<div>-->
+<!--				<label value="Location"/>  -->
+<!--				<lookup value="@{pharmacy.location.locationCode}" id="locationNameLookup"  onChange="locationChanged()"-->
+<!--						entity="com.nzion.domain.Location" searchcolumns="locationCode" -->
+<!--						displaycolumns="locationCode,name" requiredcolumn="locationCode" />-->
+<!--				<label id="locationName" value="@{location.name, load-after='locationNameLookup.onChange'}"/>-->
+<!--				</div>-->
+			</panelchildren>
+		</panel>
+			<div sclass="panelFoot"/>
+			<separator/>
+			<div sclass="panelFoot">
+			<button label="Save" id="Save" sclass="btn">
+				<attribute name="onClick">
+					if(com.nzion.util.UtilValidator.isEmpty(address1.getValue()))
+						throw new WrongValueException(address1, "Can not be empty");
+					if(com.nzion.util.UtilValidator.isEmpty(postalCode.getValue()))
+						throw new WrongValueException(postalCode, "Can not be empty");
+						
+					if(com.nzion.util.UtilValidator.isEmpty(state.getValue()))
+						throw new WrongValueException(state, "Can not be empty");
+					if(com.nzion.util.UtilValidator.isEmpty(city.getValue()))
+						throw new WrongValueException(city, "Can not be empty");
+					if(com.nzion.util.UtilValidator.isEmpty(pharmacyName.getValue()))
+						throw new WrongValueException(pharmacyName, "Can not be empty");
+							
+					commonCrudService.save(pharmacy);
+					pharmacyWin.detach();
+					com.nzion.util.UtilMessagesAndPopups.showSuccess();
+				</attribute>
+			</button>
+			<button label="Cancel" forward="onClick=onCancel" sclass="btn" id="Cancel"/>
+		</div>
+</div>		
+	</window>
+</zk>

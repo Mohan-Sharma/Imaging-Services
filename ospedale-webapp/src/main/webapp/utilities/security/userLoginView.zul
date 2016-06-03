@@ -1,0 +1,267 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./winUserLoginView"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?component name="lookup" class="com.nzion.view.component.LookupBox"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	<![CDATA[
+	import com.nzion.zkoss.composer.UserLoginController;
+	import com.nzion.util.*;
+	import com.nzion.domain.*;
+	import com.nzion.service.common.CommonCrudService;
+	import com.nzion.security.SecurityGroup;
+	UserLoginController userLoginController = new UserLoginController();
+	String title = userLoginController.getUserLogin().getId() == null ? "New User Login" : userLoginController.getUserLogin().getUsername();
+	CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	com.nzion.repository.common.CommonCrudRepository commonCrudRepository = com.nzion.util.Infrastructure.getSpringBean("commonCrudRepository");
+	List allLocations = commonCrudService.getAll(com.nzion.domain.Location.class);
+	List secPermiGroups = commonCrudService.getAll(SecurityGroup.class);
+	List emps = commonCrudService.getAll(com.nzion.domain.Employee.class);
+	com.nzion.zkoss.ext.EntityDropdownRenderer dropdownRenderer = new com.nzion.zkoss.ext.EntityDropdownRenderer(new com.nzion.zkoss.ext.EntityDropDownPersonNameAdapter());
+	List labDepartments  = commonCrudService.getAll(com.nzion.domain.emr.lab.LabDepartment.class);
+	List laboratoriessList = commonCrudService.getAll(com.nzion.domain.emr.lab.Laboratories.class);
+	//Set laboratories = com.nzion.util.UtilValidator.isNotEmpty(laboratoriessList)? new HashSet(laboratoriessList):Collections.emptySet();
+	Set laboratories = userLoginController.getUserLogin().getLaboratories() == null ? Collections.emptySet(): userLoginController.getUserLogin().getLaboratories();
+	if(UtilValidator.isNotEmpty(allLocations.get(0)))
+			userLoginController.addOrRemoveLocation((Location)allLocations.get(0), true);
+]]>
+	</zscript>
+	<window apply="${userLoginController}" id="winUserLoginView"     mode="embedded" zclass="boxStyle">
+		<div sclass="boxStyle">
+			<panel title="User Login">
+				<panelchildren>
+					<div sclass="panelCont" if="${userLoginController.userLogin.id == null}">
+						<div>
+							<div>
+								<label value="User Name" />
+								<label value="*" style="color:red" />
+							</div>
+							<textbox id="txtUserName" value="@{userLoginController.userLogin.username}"
+								constraint="no empty"  w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" />
+						</div>
+						<div>
+							<div>
+								<label value="Employee"/>
+								<label value="*" style="color:red" />
+							</div>
+							<combobox constraint="no empty:Employee Required"  w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+								onSelect="enableDisableProviderRole((com.nzion.domain.Employee)self.getSelectedItem().getValue());" readonly="true"
+								model="@{emps}"
+								selectedItem="@{userLoginController.userLogin.person}"
+								itemRenderer="${dropdownRenderer}">
+							</combobox>
+						</div>
+					</div>
+					<div unless="${userLoginController.userLogin.id == null}">
+						<hbox>
+							<checkbox checked="@{userLoginController.userLogin.accountLocked}" label="Account Locked" />
+							<checkbox checked="@{userLoginController.userLogin.accountExpired}" label="Account Expired" />
+							<checkbox checked="@{userLoginController.userLogin.credentialsExpired}"
+								label="Credentials Expired" />
+							<checkbox checked="@{userLoginController.userLogin.requirePasswordChange}"
+								label="Required Password Change" />
+						</hbox>
+						<div style="margin-left:10px">
+							<label value="Successive Failed Logins"></label>
+							<spinner value="@{userLoginController.userLogin.successiveFailedLogins}" cols="1"
+								style="height:30px" />
+						</div>
+					</div>
+				</panelchildren>
+			</panel>
+			<div style="boxStyle">
+				<n:fieldset style="width:100%;border:1px solid #DDDDDD;">
+					<n:legend>
+						<span zclass="subHeading" style="padding:2px;">Select Required Details</span>
+					</n:legend>
+					<h:table style="width:99%">
+						<h:tr style="width:100%;background:#F3F3F3;border:1px solid #DDDDDD;">
+							<h:td width="20%">
+								<label value="User Roles" zclass="labelReqNopad" />
+								<n:strong class="labelReq" style="padding:4px;">*</n:strong>
+								<n:strong>:</n:strong>
+							</h:td>
+							<h:td width="80%">
+								<div>
+									<checkbox label=" Admin" checked="@{userLoginController.rolesVo.admin}"
+										style="padding:6px;" />
+									<!-- <checkbox id="providerCheckBox" label=" Doctor"
+										checked="@{userLoginController.rolesVo.provider}" disabled="true" style="padding:6px;" />
+									 -->	
+									<checkbox label=" Phlebotomist" checked="@{userLoginController.rolesVo.phlebotomist}"
+										style="padding:6px;" id="phlebotomist"
+										onCheck="labDeptBox.setVisible(event.isChecked());ldeptMsgBox.setVisible(!event.isChecked());
+										laboratoriesBox.setVisible(event.isChecked());labtMsgBox.setVisible(!event.isChecked())">
+									</checkbox>	
+									
+									<checkbox label=" Technician" checked="@{userLoginController.rolesVo.technician}"
+										style="padding:6px;" id="technician"
+										onCheck="labDeptBox.setVisible(event.isChecked());ldeptMsgBox.setVisible(!event.isChecked());
+										laboratoriesBox.setVisible(event.isChecked());labtMsgBox.setVisible(!event.isChecked())">
+									</checkbox>
+									<checkbox label=" Reception" checked="@{userLoginController.rolesVo.reception}"
+										style="padding:6px;" id="reception" />
+							     <checkbox label=" Billing" checked="@{userLoginController.rolesVo.billing}"
+										style="padding:6px;" id="billing" />
+								</div>
+							</h:td>
+						</h:tr>
+						<h:tr style="width:100%">
+							<h:td width="15%"></h:td>
+						</h:tr>
+						<h:tr style="width:100%">
+							<h:td width="15%"></h:td>
+						</h:tr>
+						<!--<h:tr style="width:100%;background:#F3F3F3;border:1px solid #DDDDDD;">
+							<h:td width="20%">
+								<label value="Location" zclass="labelReqNopad" />
+								<n:strong class="labelReq" style="padding:4px;">*</n:strong>
+								<n:strong>:</n:strong>
+							</h:td>
+							<h:td width="80%">
+								<div forEach="${allLocations}">
+									<listbox visible="false">
+										<listitem value="${each}" selected="true" />
+									</listbox>
+									<checkbox value="${each}" label="${each.name}" style="padding:6px;"
+										onCreate="self.setChecked(userLoginController.getLocations().contains(((Listbox)self.getPreviousSibling()).getSelectedItem().getValue()))">
+                                        <attribute name="onCheck">
+                                            userLoginController.addOrRemoveLocation(((Listbox) self.getPreviousSibling()).getSelectedItem().getValue(), event.isChecked());
+                                        </attribute>
+									</checkbox>
+								</div>
+							</h:td>
+						</h:tr>-->
+						
+						
+						<h:tr style="width:100%;background:#F3F3F3;border:1px solid #DDDDDD;">
+							<h:td width="20%">
+								<label value="Lab Department" zclass="labelReqNopad" />
+								<n:strong class="labelReq" style="padding:4px;">*</n:strong>
+								<n:strong>:</n:strong>
+							</h:td>
+						<h:td width="80%">
+							<hbox onCreate="self.setVisible(phlebotomist.isChecked() || technician.isChecked())" id="labDeptBox">	
+								<div forEach="${labDepartments}">
+									<listbox visible="false">
+										<listitem value="${each}" selected="true" />
+									</listbox>
+									<checkbox value="${each}" label="${each.department}" style="padding:6px;"
+										onCreate="self.setChecked(userLoginController.getLabDepartments().contains(((Listbox)self.getPreviousSibling()).getSelectedItem().getValue()))">
+										
+										<attribute name="onCheck">
+											userLoginController.addOrRemoveLabDepartment(((Listbox) self.getPreviousSibling()).getSelectedItem().getValue(), event.isChecked());
+											
+											List laboratoryList = null;
+											
+											for (com.nzion.domain.emr.lab.LabDepartment ldept : userLoginController.getLabDepartments()) {
+												String depart = ldept.getDepartment();
+												laboratoryList = commonCrudRepository.findByEquality(com.nzion.domain.emr.lab.Laboratories.class, new String[] { "department" }, new Object[] {depart});
+												laboratories.addAll(laboratoryList);
+											}
+											laboratoriesInc.invalidate();
+											laboratoriesInc.setDynamicProperty("laboratories", laboratories);
+											laboratoriesInc.setDynamicProperty("userLoginController", userLoginController);
+											laboratoriesInc.setSrc("/utilities/security/laboratory-include-userlogin.zul");
+										</attribute>
+										</checkbox>
+									</div>
+								</hbox>	
+								<div id="ldeptMsgBox">
+								<attribute name="onCreate">
+								if(phlebotomist.isChecked() || technician.isChecked()) self.setVisible(false);
+								</attribute>
+									<label style="width:100%;font-size: 10px;">Only When Phlebotomist or Technician Role is Selected</label>
+								</div>
+								</h:td>
+						</h:tr>
+						
+						<h:tr style="width:100%">
+							<h:td width="15%"></h:td>
+						</h:tr>
+						<h:tr style="width:100%">
+							<h:td width="20%">
+								<label value="Laboratories" zclass="labelReqNopad" />
+								<n:strong style="padding:12px;">:</n:strong>
+							</h:td>
+							<h:td width="80%">
+								<div id="laboratoriesBox" onCreate="self.setVisible(phlebotomist.isChecked() || technician.isChecked())">
+									<include id="laboratoriesInc"
+										src="/utilities/security/laboratory-include-userlogin.zul" laboratories="${laboratories}"
+										userLoginController="${userLoginController}" />
+								</div>
+						<div id="labtMsgBox" >
+						<attribute name="onCreate">
+								if(phlebotomist.isChecked() || technician.isChecked()) self.setVisible(false);
+						</attribute>
+									<label style="width:100%;font-size: 10px;">Only When Phlebotomist or Technician Role is Selected</label>
+						</div>
+							</h:td>
+						</h:tr>
+						
+						
+			<!-- 		<h:tr style="width:100%" id="deptBox">
+							<h:td width="20%">
+								<label value="Department" zclass="labelReqNopad" />
+								<n:strong style="padding:12px;">:</n:strong>
+							</h:td>
+							<h:td width="80%" onCreate="self.setVisible(technician.isChecked())">
+							<hbox>
+								<div forEach="${labDepartments}"  >
+								<listbox visible="false">
+										<listitem value="${each}" selected="true" />
+									</listbox>
+								<checkbox value="${each}" label="${each.department}" style="padding:6px;">
+								<attribute name="onCheck">
+									laboratories.addAll(commonCrudRepository.findByEquality(com.nzion.domain.emr.lab.Laboratories.class, 
+									new String[] { "department" }, new Object[] { self.getValue().department }));
+									Events.postEvent("onReload",labtrBox,laboratories);
+								</attribute>
+							</checkbox>
+						</div>
+					
+						<div id="deptMsgBox" onCreate="self.setVisible(!technician.isChecked())">
+									<label style="width:100%;font-size: 10px;">Only When Technician Role is Selected</label>
+						</div>
+						</hbox>
+				</h:td>
+			</h:tr>	
+						
+			<h:tr style="width:100%" >
+							<h:td width="20%">
+								<label value="Laboratory" zclass="labelReqNopad" />
+								<n:strong style="padding:12px;">:</n:strong>
+							</h:td>
+						
+							<h:td width="80%" onCreate="self.setVisible(technician.isChecked())" id="labtrBox">
+							<hbox >
+								<div forEach="${laboratories}"  >
+								<listbox visible="false">
+										<listitem value="${each}" selected="true" />
+									</listbox>
+								<checkbox value="${each}" label="${each.laboratory}">
+								
+							</checkbox>
+						</div>
+						</hbox>
+				</h:td>
+			</h:tr>	 -->			
+		</h:table>
+				</n:fieldset>
+			</div>
+			<div sclass="panelFoot buttonPanel" >
+				<button label="Save" onClick='userLoginController.save();' zclass="btn-success btn" />
+				<button label="Cancel" onClick='appendContent("userLogin")' sclass="cancelBtn" />
+			</div>
+		</div>
+		<zscript>
+		<![CDATA[
+	void enableDisableProviderRole(com.nzion.domain.Person person) {
+	//providerCheckBox.setDisabled(!(person instanceof com.nzion.domain.Provider && !((com.nzion.domain.Provider) person).isProviderAssistant()));
+	}
+if (userLoginController.getUserLogin().getId() != null)
+	enableDisableProviderRole(userLoginController.getUserLogin().getPerson());
+]]>
+		</zscript>
+	</window>
+</zk>

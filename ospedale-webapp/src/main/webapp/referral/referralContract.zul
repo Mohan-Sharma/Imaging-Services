@@ -1,0 +1,216 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./referralContractWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+    <?xel-method prefix="c" name="s" class="com.nzion.util.UtilDisplay"  signature="String clobToString(java.sql.Clob)"?>
+    <zscript>
+            <![CDATA[
+    		import com.nzion.domain.ReferralContract;
+    		import com.nzion.domain.Referral;
+            com.nzion.domain.ReferralContract referralContract = arg.get("entity");
+            Boolean editOperation = (referralContract == null) ? false : true;
+            referralContract = (referralContract == null) ? new com.nzion.domain.ReferralContract() : commonCrudService.getById(ReferralContract.class,referralContract.getId());
+            com.nzion.zkoss.ext.EntityDropdownRenderer dropdownRenderer = new com.nzion.zkoss.ext.EntityDropdownRenderer(new com.nzion.zkoss.ext.EntityDropDownPersonNameAdapter());
+            ]]>
+    </zscript>
+    <window id="referralContractWin" mode="modal"   apply="org.zkoss.bind.BindComposer"  viewModel="@id('vm') @init('com.nzion.zkoss.composer.ReferralContractViewModel')"
+       closable="true" width="50%" position="center,top">
+       <custom-attributes referralContract="${referralContract}"/>
+              <attribute name="onCreate">
+                             <![CDATA[
+                                 if ("PERCENTAGE_OF_BILL".equals(vm.referralContract.paymentMode))  {
+                                     percentageDiv.setVisible(true);
+                                     serviceDetailDiv.setVisible(false);
+                                     submit.setVisible(true);
+                                 } else {
+                                    percentageDiv.setVisible(false);
+                                    serviceDetailDiv.setVisible(true);
+                                    submit.setVisible(false);
+                                 }
+                             ]]>
+              </attribute>
+    <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Referral Contract</h:small>
+                <button type="button" zclass="close" onClick="referralContractWin.detach();">×</button>
+            </h:h1>
+    </div>
+    <div zclass="container-fluid">
+                <div zclass="row-fluid">
+                             <div zclass="span2">
+                                <label mold="required"  value="Referral Type" />
+                                <combobox  width="120px" sclass="span12" readonly="true"
+                                 selectedItem="@bind(vm.referralContract.referralType)"
+                                 constraint="no empty" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+                                        <comboitem label="Clinic" value="CONSULTANT" />
+                                     <!--   <comboitem label="Pharmacy" value="PHARMACY"/>
+                                        <comboitem label="Lab" value="LAB"/> -->
+                                    <attribute name="onSelect">
+                                        String type = self.getSelectedItem().getValue();
+                                        if (type.equals("CONSULTANT")){
+                                            pharmacy.setVisible(false);
+                                            clinic.setVisible(true);
+                                            lab.setVisible(false);
+                                        }
+                                        /* else if(type.equals("PHARMACY")){
+                                            clinic.setVisible(false);
+                                            pharmacy.setVisible(true);
+                                            lab.setVisible(false);
+                                        }
+                                        else if(type.equals("LAB")){
+                                        lab.setVisible(true);
+                                        pharmacy.setVisible(false);
+                                        clinic.setVisible(false);
+                                        } */
+                                    </attribute>
+                                </combobox>
+                             </div>
+                              <div id="clinic" zclass="span2" style="margin-left:30px" visible="true">
+                                         <label mold="required"  value="Clinic" />
+                                              <combobox id="g" constraint="no empty" model="@{vm.referralsClinic}" width="300px" readonly="true"
+                                                     selectedItem="@{vm.referralContract.referral}">
+                                                     <comboitem self="@{each='referralClinic'}" label="@{referralClinic.clinicName}" value="@{referralClinic}"/>
+                                              </combobox>
+
+                              </div>
+                              <div id="pharmacy" zclass="span2" style="margin-left:30px" visible="false">
+                                         <label mold="required"  value="Pharmacy" />
+                                         <combobox id="h" constraint="no empty" model="@{vm.referralsPharmacy}" width="300px" readonly="true"
+                                                    selectedItem="@{vm.referralContract.referral}">
+                                             <comboitem self="@{each='referralpharmacy'}" label="@{referralpharmacy.clinicName}" value="@{referralpharmacy}"/>
+                                            <attribute name="onSelect">
+                                                 com.nzion.util.UtilMessagesAndPopups.showError("Contract can not be created for Pharmacy");
+                                                 return;
+                                             </attribute>
+                                         </combobox>
+
+                              </div>
+                              <div id="lab" zclass="span2" style="margin-left:30px" visible="false">
+                                           <label mold="required"  value="Lab" />
+                                           <combobox id="l" constraint="no empty" model="@{vm.referralsLab}" width="300px" readonly="true"
+                                                      selectedItem="@{vm.referralContract.referral}">
+                                               <comboitem self="@{each='referrallab'}" label="@{referrallab.clinicName}" value="@{referrallab}"/>
+                                              <attribute name="onSelect">
+                                                   com.nzion.util.UtilMessagesAndPopups.showError("Contract can not be created for Lab");
+                                                   return;
+                                               </attribute>
+                                           </combobox>
+
+                              </div>
+                </div>
+                 <div zclass="row-fluid">
+                                     <div zclass="span2" id="contractDateDiv" >
+                                        <label  mold="required"  value="Contract Date"  id="lblcontract" />
+                                        <datebox constraint="no empty,no past"  id="contractDate" value="@bind(vm.referralContract.contractDate)"
+                                                  sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}"
+                                                  w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+                                        </datebox>
+                                    </div>
+
+                                     <div zclass="span2" style="margin-left:60px" id="expiryDateDiv" >
+                                        <label mold="required" value="Expiry Date"  id="lblexpiry" />
+                                        <datebox   constraint="no empty,no past" id="expiryDate" value="@bind(vm.referralContract.expiryDate)"
+                                                  sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}"
+                                                  w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+                                        </datebox>
+                                     </div>
+                                      <div zclass="span2" style="margin-left:30px">
+                                              <label  mold="required"  value="Payment Mode" />
+                                              <combobox  width="120px" sclass="span12" readonly="true" selectedItem="@bind(vm.referralContract.paymentMode)" constraint="no empty" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+                                                      <comboitem label="% of Bill Amount" value="PERCENTAGE_OF_BILL" />
+                                                      <comboitem label="% of each Service" value="PERCENTAGE_SERVICE_ITEM"/>
+                                                      <comboitem label="Fixed Amount for each Service" value="FIX_AMOUNT_PER_SERVICE"/>
+                                                      <attribute name="onSelect">
+                                                              <![CDATA[
+                                                                  if(referralContract.getId() != null)
+                                                                    com.nzion.util.UtilMessagesAndPopups.showError("The existing saved information would be reset to zero on saving the details with the new payment mode.");
+                                                                  String value = self.getSelectedItem().getValue();
+                                                                  if ("PERCENTAGE_OF_BILL".equals(value))  {
+                                                                      percentageDiv.setVisible(true);
+                                                                      submit.setVisible(true);
+                                                                      editOperation = false;
+                                                                  } else {
+                                                                     percentageDiv.setVisible(false);
+                                                                     submit.setVisible(false);
+                                                                     editOperation = true;
+                                                                  }
+                                                      ]]></attribute>
+                                                     </combobox>
+                                      </div>
+                                      <div zclass="span2" style="margin-left:40px">
+                                            <label mold="required" value="Contract Status" />
+                                            <combobox  width="120px" sclass="span12" readonly="true" disabled="true" selectedItem="@bind(vm.referralContract.contractStatus)" constraint="no empty" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+                                                    <comboitem label="In-Progress" value="IN-PROGRESS" />
+                                                    <comboitem label="Submit" value="SUBMIT"/>
+                                                    <comboitem label="Accepted" value="ACCEPTED"/>
+                                                    <comboitem label="Rejected" value="REJECTED"/>
+                                           </combobox>
+                                     </div>
+
+
+                 </div>
+                  <div zclass="row-fluid">
+                                   <div id="percentageDiv" visible="@{vm.percentageRequired}" zclass="span2" >
+                                           <label mold="required" value="Pecentage"  />
+                                           <decimalbox  format="###.###" constraint="no empty" value="@bind(vm.referralContract.percentageOnBill)"/>
+                                    </div>
+                  </div>
+                  <div zclass="row-fluid">
+                  	             <div zclass="row-fluid">
+                  	                <div zclass="span2">
+                  	            		<label value="Upload File" style="font-weight:bold;font-size:14px;" mold="required"/>
+                  	                    <fileupload label="Browse" id="uploadBtn" onUpload="@command('uploadFile')">
+                  						</fileupload>
+                  	                </div>
+                  	                <div zclass="span6">
+                  	                	<a label="@bind(vm.referralContract.documentName)">
+                          				<attribute name="onClick">
+                          					vm.downloadFile();
+                          				</attribute>
+                          				</a>
+                  	                </div>
+                  	            </div>
+                  </div>
+                  <div zclass="row-fluid">
+                         <div zclass="row-fluid">
+                            <div zclass="span12" align="center">
+                                <label value="Referral amount is on base price and not on collected amount." style="font-weight:bold;font-size:14px;" />
+                            </div>
+                         </div>
+                 </div>
+    </div>
+    <div sclass="panelFoot">
+                <button label="Save" id="Save" zclass="btn-success btn" onClick="@command('save')">
+               <attribute name="onClick">
+
+                       String value = referralContract.getPaymentMode();
+                       if ("PERCENTAGE_OF_BILL".equals(value))  {
+                          serviceDetailDiv.setVisible(false);
+                       } else {
+                          serviceDetailDiv.setVisible(true);
+                          contractServiceInclude.invalidate();
+                       }
+
+    	               if(contractServiceInclude.getFellow("referralContractServiceWin") != null){
+    	               	Component comp = contractServiceInclude.getFellow("referralContractServiceWin");
+    	               	Events.postEvent("onReload",comp.getFellowIfAny("serviceContractListBox"),null);
+    	                 if("FIX_AMOUNT_PER_SERVICE".equals(referralContract.getPaymentMode())){
+    	                       comp.getFellowIfAny("percentageDecimalBox").setDisabled(true);
+    	                       comp.getFellowIfAny("amountDecimalBox").setDisabled(false);
+    	                 }else{
+    	                       comp.getFellowIfAny("amountDecimalBox").setDisabled(true);
+    	                       comp.getFellowIfAny("percentageDecimalBox").setDisabled(false);
+    	                 }
+    	               }
+
+               </attribute>
+                </button>
+                <button label="Cancel" onClick='referralContractWin.detach()' sclass="btn"></button>
+                <button label="Submit" id="submit" zclass="btn-success btn" onClick="@command('submit')" visible="false"/>
+    </div>
+    <div id="serviceDetailDiv">
+                 <include id="contractServiceInclude" src="/referral/referralContractService.zul">
+            </include>
+     </div>
+    </window>
+</zk>

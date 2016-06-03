@@ -1,0 +1,5 @@
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<n:div style="color:red;width:100%;text-align:center;">
+		<n:h2>You do not have sufficient privileges to view this.</n:h2>
+	</n:div>
+</zk>

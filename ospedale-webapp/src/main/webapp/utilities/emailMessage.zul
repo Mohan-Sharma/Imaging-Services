@@ -1,0 +1,11 @@
+<zk>
+	<zscript>
+		setPageTitle("Email Message", "");
+	</zscript>
+	<window self="@{define(content)}">
+		<screen width="100%" listtitle="List of Email Message" addpage="addEmailMessage"
+			entityclass="com.nzion.domain.EmailMessageContent" addmodepopup="true" 
+			fields="contentType,messageBody,active"
+			labels="Content Type,Message,Active" hidedeletebtn="true" />
+	</window>
+</zk>

@@ -1,0 +1,200 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./winUserLogin"?>
+<?component name="lookup" class="com.nzion.view.component.LookupBox"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import com.nzion.domain.UserLogin;
+	import com.nzion.domain.Person;
+	import com.nzion.zkoss.composer.UserLoginController;
+	import com.nzion.service.common.CommonCrudService;
+	import com.nzion.domain.Patient;
+	import com.nzion.service.UserLoginService;
+	import com.nzion.util.UtilDateTime;
+	
+	setPageTitle("Emergency Access", "");
+	
+	UserLogin userLogin = arg.get("entity");
+	UserLoginService userLoginService=com.nzion.util.Infrastructure.getSpringBean("userLoginService");
+	UserLoginController userLoginController = new UserLoginController();
+	Person eAccess = null;
+	if(userLogin==null){
+	eAccess = new Person();
+	Date passwordValidThruDate = UtilDateTime.getDayEnd(UtilDateTime.addDaysToDate(new Date(), 1));
+	userLoginController.getUserLogin().setPasswordValidThruDate(passwordValidThruDate);
+	userLoginController.getUserLogin().getAuthorization().setRoles(com.nzion.domain.Roles.EMERGENCY_ACCESS);
+	CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	List locations = commonCrudService.getAll(com.nzion.domain.Location.class);
+	userLoginController.setLocations(new HashSet(locations));
+	}else{
+		eAccess=userLogin.getPerson();
+		userLoginController.setLocations(userLogin.getLocations());
+	}
+	userLoginController.getUserLogin().setPerson(eAccess);
+]]>
+	</zscript>
+
+	<window id="winUserLogin" width="70%" closable="true" title="New Emergency Login">
+		<panel title="Emergency Access Details">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div>
+						<div>
+							<label value="Patient" />
+							<label value="*" style="color:red"/>
+						</div>
+						<patientlookup focus="true" value="${eAccess}"
+							onChange="userLoginController.getUserLogin().setPatient((com.nzion.domain.Patient)event.getOrigin().getData())" />
+					</div>
+					<div sclass="col2">
+						<div>
+							<label value="User Name"></label>
+							<span zclass="labelReq">
+								<html><![CDATA[*]]></html>
+							</span>
+						</div>
+						<div>
+							<textbox value="@{userLoginController.userLogin.username,save-when='Save.onClick'}" id="userLoginBox" constraint="no empty"/>
+						</div>	
+					</div>
+					<h:br/>
+					<div >
+						<div>
+							<label value="Password Valid Till"></label>
+							<span zclass="labelReq">
+								<html><![CDATA[*]]></html>
+							</span>
+						</div>
+						<datebox value="@{userLoginController.userLogin.passwordValidThruDate,save-when='Save.onClick'}"
+							constraint="no past, no today" if="${userLoginController.userLogin.id == null}"/>
+						<datebox value="@{userLoginController.userLogin.passwordValidThruDate,save-when='Save.onClick'}" disabled="true"
+							 if="${userLoginController.userLogin.id != null}"/>
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+		<panel title="User Details">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div>
+						<label value="First Name" style="text-align:right;" id="lblfirstName" />
+						<span zclass="labelReq">
+							<html><![CDATA[*]]></html>
+						</span>
+						<textbox cols="40" value="@{eAccess.firstName,save-when='Save.onClick'}" id="firstName"
+							constraint="no empty" maxlength="50" />
+					</div>
+					<div>
+						<label value="Middle Name" style="text-align:right;" id="lblmiddleName" />
+						<textbox value="@{eAccess.middleName,save-when='Save.onClick'}" id="middleName" maxlength="50" />
+					</div>
+					<div>
+						<div>
+							<label value="Last Name" style="text-align:right;" id="lbllastName" />
+							<span zclass="labelReq">
+								<html><![CDATA[*]]></html>
+							</span>
+						</div>
+						<textbox value="@{eAccess.lastName,save-when='Save.onClick'}" id="lastName"
+							constraint="no empty" maxlength="50"
+							onBlur="com.nzion.util.UtilDisplay.validateOnlyAlphaNumericAndWhiteSpaces(self)" />
+					</div>
+				</div>
+				<separator></separator>
+				<div sclass="panelCont" >
+					<div sclass="col2">
+						<hbox>
+							<label value="Address1" style="font-weight:bold"/>
+							<span zclass="labelReq">
+								<html><![CDATA[*]]></html>
+							</span>
+						</hbox>
+						<textbox cols="50" value="@{eAccess.contacts.postalAddress.address1,save-when='Save.onClick'}"
+							constraint="no empty" id="address1" maxlength="50" />
+					</div>
+					<div sclass="col2">
+						<label value="Address2" style="text-align:right;" id="lbladdress2" />
+						<textbox cols="50" value="@{eAccess.contacts.postalAddress.address2,save-when='Save.onClick'}"
+							id="address2" maxlength="50" />
+					</div>
+					<div>
+						<div>
+							<label value="City"/>
+							<label value="*" style="color:red"/>
+						</div>
+						<textbox cols="22" value="@{eAccess.contacts.postalAddress.city,save-when='Save.onClick'}"
+							id="city" maxlength="50" constraint="no empty"/>
+					</div>
+					<div>
+						<div>
+							<label value="State" />
+							<label value="*" style="color:red"/>
+						</div>
+						<textbox value="@{eAccess.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick'}"
+							cols="22" maxlength="2" constraint="no empty"/>
+					</div>
+					<div>
+						<div>
+							<label value="Zipcode" />
+							<label value="*" style="color:red"/>
+						</div>
+							<zipcodebox value="@{eAccess.contacts.postalAddress.postalCode,save-when='Save.onClick'}" constraint="no empty"/>
+					</div>
+					<div>
+						<div>
+							<label value="e-mail" />
+							<span zclass="labelReq">
+								<html><![CDATA[*]]></html>
+							</span>
+						</div>
+						<email id="emailAddr" value="@{eAccess.contacts.email,save-when='Save.onClick'}"
+							constraint="no empty" />
+					</div>
+
+					<h:fieldset>
+						<h:legend>Phone Details</h:legend>
+						<div>
+							<label value="Home phone" />
+							<phonebox value="@{eAccess.contacts.homePhone,save-when='Save.onClick'}" />
+						</div>
+						<div>
+							<label value="Office phone" />
+							<phonebox value="@{eAccess.contacts.officePhone,save-when='Save.onClick'}" cols="10" />
+						</div>
+						<div>
+							<label value="Office Ext" />
+							<textbox value="@{eAccess.contacts.officeExt,save-when='Save.onClick'}" cols="10"
+								maxlength="5" />
+						</div>
+						<div>
+							<label value="Fax" />
+							<phonebox value="@{eAccess.contacts.faxNumber,save-when='Save.onClick'}" cols="10" />
+						</div>
+					</h:fieldset>
+					<div width="40%">
+						<div>
+							<label value="Emergency Access Reason"/>
+							<label value="*" style="color:red"/>
+						</div>
+						<textbox value="@{userLoginController.userLogin.emergencyAccessReason,save-when='Save.onClick'}" cols="70" rows="2" constraint="no empty"/>
+					</div>
+				</div>
+				
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot">
+			<button label="Save" id="Save" visible="true">
+				<attribute name="onClick">
+					if(userLoginController.getUserLogin().getPatient() == null){
+					com.nzion.util.UtilMessagesAndPopups.showError("Provide Patient");
+					return;
+					}
+					userLoginController.save();
+					winUserLogin.detach();
+				</attribute>
+			</button>
+		</div>
+		
+		
+		
+	</window>
+</zk>

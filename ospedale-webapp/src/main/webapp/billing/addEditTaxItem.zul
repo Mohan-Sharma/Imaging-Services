@@ -1,0 +1,69 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addTaxItemWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:w="http://www.zkoss.org/2005/zk/client">
+    <zscript><![CDATA[
+    com.nzion.domain.billing.TaxItem taxItem =  arg.get("entity");           
+ 	com.nzion.service.common.CommonCrudService service = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	taxItem = taxItem == null ? new com.nzion.domain.billing.TaxItem() : taxItem;
+	com.nzion.domain.billing.TaxItem.TaxItemType[] taxTypes = com.nzion.domain.billing.TaxItem.TaxItemType.values();
+	List cessTaxItems = service.findByEquality(com.nzion.domain.billing.TaxItem.class,new String[]{"taxType"},new Object[]{com.nzion.domain.billing.TaxItem.TaxItemType.CESS_ON_VAT});
+ 	]]></zscript>
+    <window id="addTaxItemWindow" mode="modal" closable="true" sclass="modalStyle" position="center">
+        <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Tax Item</h:small>
+                <button type="button" zclass="close" onClick="addTaxItemWindow.detach();">×</button>
+            </h:h1>
+        </div>
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span6">
+                    <label value="Billing Head"/>
+                    <textbox value="@{taxItem.billingHead,save-when='save.onClick'}" sclass="span12" constraint="no empty"
+                             w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span6">
+                    <label value="Tax Ledger Name"  mold="required"/>
+                    <textbox value="@{taxItem.taxLedgerName,save-when='save.onClick'}" sclass="span12" constraint="no empty"
+                             w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Tax Type" mold="required"/>
+                   <combobox model="@{taxTypes}" selectedItem="@{taxItem.taxType}" constraint="no empty"
+                             w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+                      <comboitem self="@{each='taxType'}" label="@{taxType.description}" value="@{taxType}"/>
+                   </combobox>
+                </div>
+                <div zclass="span3">
+                    <label value="Cess Tax"/>
+                    <combobox model="@{cessTaxItems}" selectedItem="@{taxItem.cessTaxItem}" w:showError_="function(mesg){displayError(this,mesg);}"
+                              w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+                        <comboitem self="@{each='taxItem'}" label="@{taxItem.billingHead}" value="@{taxItem}"/>
+                    </combobox>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span2">
+                    <label value="Tax Percentage" mold="required"/>
+                    <decimalbox value="@{taxItem.taxValue,save-when='save.onClick'}" constraint="no empty"
+                                sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}"
+                                w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                </div>
+            </div>
+        </div>
+        <div sclass="panelFoot">
+            <button label="Save" id="save" zclass="btn-success btn">
+                <attribute name="onClick">
+                    service.save(taxItem);
+                    com.nzion.util.UtilMessagesAndPopups.showSuccess();
+                    addTaxItemWindow.detach();
+                </attribute>
+            </button>
+            <button label="Cancel" id="Cancel" forward="onClick=onCancel"/>
+        </div>
+    </window>
+</zk>

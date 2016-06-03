@@ -1,0 +1,44 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./lastUpdatedsWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+
+	<zscript>
+		com.nzion.view.component.HomeGridMacroController gridController = Executions.getCurrent().getArg().get("gridController");
+		List entities = gridController.getLastUpdatedEntities();
+	</zscript>
+    <window mode="modal" closable="true" style="border: 5px solid #2d2d2d" id="lastUpdatedsWindow" >
+     <listbox model="@{entities}" >
+		<listhead>
+			<listheader label="Id"/>
+			<listheader label="Updated By"/>
+			<listheader label="Updated Time"/>
+			<listheader label="Created By"/>
+			<listheader label="Created Time"/>
+		</listhead>
+		<listitem self="@{each='entity'}" value="@{entity}">
+			<listcell>
+				<a label="@{entity.id}">
+                	<attribute name="onClick">
+                		com.nzion.zkoss.ext.Navigation.navigateToModalWindow("auditlog",com.nzion.util.UtilMisc.toMap("entity", ((Listitem)self.getParent().getParent()).getValue()));
+					</attribute>
+				</a>
+			</listcell>
+			<listcell>
+				<label value="@{entity.updatedBy}"/>
+			</listcell>
+			<listcell>
+				<label value="@{entity.updatedTxTimestamp}"/>
+			</listcell>
+			<listcell>
+				<label value="@{entity.createdBy}"/>
+			</listcell>
+			<listcell>
+				<label value="@{entity.createdTxTimestamp}"/>
+			</listcell>
+		</listitem>
+	  </listbox>
+	  	<button label="Close" onClick="lastUpdatedsWindow.detach();" />
+	  </window>
+</zk>

@@ -1,0 +1,352 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./appointmentDisplayScreen"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<window id="appointmentDisplayScreen" >
+	<zscript>
+		import com.nzion.zkoss.ext.*;
+		com.nzion.service.ScheduleService scheduleService = com.nzion.util.Infrastructure.getSpringBean("scheduleService");
+		com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+		//com.nzion.domain.screen.ScheduleConfig screenDisplay = scheduleService.getAppointmentDisplayScreen();
+		List persons = scheduleService.getSchedulablePersons();
+		com.nzion.domain.Person person = new com.nzion.domain.Person();
+		person.setFirstName("LAB WALKIN");
+		persons.add(person);
+
+		EntityDropdownRenderer dropdownRenderer = new EntityDropdownRenderer(new EntityDropDownPersonNameAdapter());
+		com.nzion.domain.CalendarResourceAssoc association = com.nzion.domain.CalendarResourceAssoc.create();
+		List associations;
+		setPageTitle("Personal Calendar", "");
+		Set locations;
+	</zscript>
+	<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Personal Calendar</h:small>
+            </h:h1>
+         </div>
+			<div class="container-fluid">
+		       <div zclass="row-fluid">
+                 <div zclass="span2">
+						<label value="Person"/>
+						<label value=" *" zclass="labelReq"/>
+						<!--<combobox selectedItem="@{association.person, save-when='saveAssocBtn.onClick', load-after='saveAssocBtn.onClick'}" readonly="true"
+											id="personCombo" constraint="no empty, no past" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" model="@{persons}" itemRenderer="${dropdownRenderer}">
+							<attribute name="onChange">
+								association.setPerson((com.nzion.domain.Person)self.getSelectedItem().getValue());
+								locations  = association.getPerson().getLocations();
+								associations = scheduleService.getAllCalendarAssociationsFor(self.getSelectedItem().getValue());
+								//visitTypeCombo.setSelectedIndex(1);
+							</attribute>
+						</combobox>-->
+					 <combobox selectedItem="@{association.person, save-when='saveAssocBtn.onClick'}" readonly="true"
+							   id="personCombo" constraint="no empty, no past" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" >
+						 <comboitem forEach="${persons}" value="${each}" label="${each.firstName}" >
+							 <!--<attribute name="onCreate">
+								 if(persons.size() == 1) {
+								 self.getParent().setSelectedItem(self);
+								 if(self != null) {
+								 association.setPerson((com.nzion.domain.Person)self.getValue());
+								 associations = scheduleService.getAllCalendarAssociationsFor(self.getValue());
+								 }
+								 locations  = association.getPerson().getLocations();
+								 if(com.nzion.util.UtilValidator.isEmpty(locations)){
+								 List locationsList = commonCrudService.getAll(Location.class, "name");
+								 locations.addAll(locationsList);
+								 }
+								 //visitTypeSoapModules = commonCrudService.findByEquality(VisitTypeSoapModule.class, new String[]{"provider.id"}, new Object[]{association.getPerson().getId()});
+
+								 }
+							 </attribute>-->
+						 </comboitem>
+						 <attribute name="onChange">
+							 if(self.getSelectedItem() != null){
+							 association.setPerson((com.nzion.domain.Person)self.getSelectedItem().getValue());
+							 if(((com.nzion.domain.Person)self.getSelectedItem().getValue()).getId() == null){
+							 //visitTypeDiv.setVisible(true);
+							 visitsPerIntervDiv.setVisible(true);
+							 visitTypeCombo.setSelectedIndex(0);
+							 associations = scheduleService.getAllCalendarAssociationsFor(null);
+							 } else {
+							 //visitTypeDiv.setVisible(false);
+							 visitTypeCombo.setSelectedIndex(1);
+							 visitsPerIntervDiv.setVisible(false);
+							 associations = scheduleService.getAllCalendarAssociationsFor(self.getSelectedItem().getValue());
+							 }
+							 }
+							 locations  = association.getPerson().getLocations();
+							 if(com.nzion.util.UtilValidator.isEmpty(locations)){
+							 List locationsList = commonCrudService.getAll(com.nzion.domain.Location.class);
+							 locations.addAll(locationsList);
+							 }
+							 //visitTypeSoapModules = commonCrudService.findByEquality(VisitTypeSoapModule.class, new String[]{"provider.id"}, new Object[]{association.getPerson().getId()});
+						 </attribute>
+					 </combobox>
+						</div>
+						 <div zclass="span2">
+						<label value="Location"/>				
+						<label value=" *" zclass="labelReq"/>
+						<combobox model="@{locations, load-after='personCombo.onSelect, saveAssocBtn.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" selectedItem="@{association.location, save-when='saveAssocBtn.onClick'}" id="locationCombo" constraint="no empty">
+							<comboitem self="@{each='location'}" label="@{location.name}" value="@{location}"/>
+						</combobox>
+						</div>
+						 <div zclass="span2">
+						<label value="Start time"/>				
+						<label value=" *" zclass="labelReq"/>
+						<timebox value="@{association.startTime, save-when='saveAssocBtn.onClick', load-after='saveAssocBtn.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" id="startTimebox"/>
+						</div>
+						 <div zclass="span2">
+						<label value="End time"/>				
+						<label value=" *" zclass="labelReq"/>
+						<timebox value="@{association.endTime, save-when='saveAssocBtn.onClick', load-after='saveAssocBtn.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" id="endTimebox"/>
+						</div>
+					    <div id="weeklyDetail" visible="true">
+						   <n:br/>
+						   <checkbox label=" Monday">
+							   <attribute name="onClick">
+								   if(self.isChecked()){
+								   association.getWeek().setMonday(true);
+								   } else {
+								   association.getWeek().setMonday(false);
+								   }
+							   </attribute>
+						   </checkbox>
+						   <checkbox label=" Tuesday">
+							   <attribute name="onClick">
+								   if(self.isChecked()){
+								   association.getWeek().setTuesday(true);
+								   } else {
+								   association.getWeek().setTuesday(false);
+								   }
+							   </attribute>
+						   </checkbox>
+						   <checkbox label=" Wednesday">
+							   <attribute name="onClick">
+								   if(self.isChecked()){
+								   association.getWeek().setWednesday(true);
+								   } else {
+								   association.getWeek().setWednesday(false);
+								   }
+							   </attribute>
+						   </checkbox>
+						   <checkbox label=" Thursday">
+							   <attribute name="onClick">
+								   if(self.isChecked()){
+								   association.getWeek().setThursday(true);
+								   } else {
+								   association.getWeek().setThursday(false);
+								   }
+							   </attribute>
+						   </checkbox>
+						   <checkbox label=" Friday">
+							   <attribute name="onClick">
+								   if(self.isChecked()){
+								   association.getWeek().setFriday(true);
+								   } else {
+								   association.getWeek().setFriday(false);
+								   }
+							   </attribute>
+						   </checkbox>
+						   <checkbox label=" Saturday">
+							   <attribute name="onClick">
+								   if(self.isChecked()){
+								   association.getWeek().setSaturday(true);
+								   } else {
+								   association.getWeek().setSaturday(false);
+								   }
+							   </attribute>
+						   </checkbox>
+						   <checkbox label=" Sunday">
+							   <attribute name="onClick">
+								   if(self.isChecked()){
+								   association.getWeek().setSunday(true);
+								   } else {
+								   association.getWeek().setSunday(false);
+								   }
+							   </attribute>
+						   </checkbox>
+					    </div>
+						</div>
+						<div zclass="row-fluid">
+						 <div zclass="span2">
+						<label value="Interval (minutes)"/>				
+						<label value=" *" zclass="labelReq"/>
+						<intbox value="@{association.calendarInterval, save-when='saveAssocBtn.onClick', load-after='saveAssocBtn.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" id="interval"/>
+                          </div>
+                         <div zclass="span2">
+						<label value="Start date"/>				
+						<label value=" *" zclass="labelReq"/>
+						<datebox constraint="no past" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" value="@{association.fromDate, save-when='saveAssocBtn.onClick', load-after='saveAssocBtn.onClick'}" id="startDatebox"/>
+						</div>
+						 <div zclass="span2">
+						<label value="End date" />	
+						<datebox constraint="no past" value="@{association.thruDate, save-when='saveAssocBtn.onClick', load-after='saveAssocBtn.onClick'}" id="endDatebox" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+						</div>
+						<div zclass="span2" id="visitTypeDiv">
+							<label value="Visit Type" mold="required"/>
+							<combobox id="visitTypeCombo" disabled="true">
+								<comboitem value="WalkinAppointment" label="WALKIN APPOINTMENT"/>
+								<comboitem value="HomePhlebotomy" label="HOME PHLEBOTOMY"/>
+							</combobox>
+						</div>
+						<div zclass="span2" id="visitsPerIntervDiv" visible="false">
+							<label value="Visits/Interval"/>
+							<intbox value="@{association.visitsPerInterval, save-when='saveAssocBtn.onClick', load-after='saveAssocBtn.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" id="visitsPerIntervBox"/>
+						</div>
+						</div>
+						</div>
+			<separator></separator>	
+				<div sclass="panelFoot"  align="center">
+		<button label="Save" id="saveAssocBtn" zclass="btn-success btn">
+			<attribute name="onClick">
+			<![CDATA[
+				//association.setLocation(com.nzion.util.Infrastructure.getSelectedLocation());
+				com.nzion.util.UtilDisplay.validateDateRange(startDatebox, endDatebox);
+				com.nzion.util.UtilDisplay.validateTimeRange(startTimebox, endTimebox);
+				if(interval.getValue() < 2){
+					Messagebox.show("The configured value will degrade the performance.Recommended interval should be greater than 2 minutes.","Warning",1,null);
+				}
+				if(association.getWeek() != null){
+				    List selectedDays = association.getWeek().getSelectedDays();
+				    if (com.nzion.util.UtilValidator.isEmpty(selectedDays)){
+				        com.nzion.util.UtilMessagesAndPopups.showError("Atleast Select One day of Week");
+				        return;
+				    }
+				} else {
+				com.nzion.util.UtilMessagesAndPopups.showError("Atleast Select One day of Week");
+				return;
+				}
+				com.nzion.domain.CalendarResourceAssoc oldAssoc = scheduleService.checkCalendarCollision(association);
+				if(oldAssoc != null){
+				String days = "";
+				if(oldAssoc.getWeek() != null){
+                            com.nzion.domain.Week week = oldAssoc.getWeek();
+                            java.util.List list = week.getSelectedDays();
+                            java.util.Iterator itr = list.iterator();
+                            while(itr.hasNext()){
+                            days = days +((String)itr.next()).substring(0,3)+", ";
+                            }
+                            if(days.length() > 2){
+                            days = days.substring(0,days.length()-1);
+                            }
+                            }
+
+					com.nzion.util.UtilMessagesAndPopups.showError("The resource is already engaged in the given period. Below is the slot details \n Start Date - " +com.nzion.util.UtilDateTime.format(oldAssoc.getFromDate()) +" and End Date - "+com.nzion.util.UtilDateTime.format(oldAssoc.getThruDate())+"\n"+
+					" Start Time - "+com.nzion.util.UtilDateTime.format(oldAssoc.getStartTime(), new java.text.SimpleDateFormat("HH:mm"))+" End Time - "+com.nzion.util.UtilDateTime.format(oldAssoc.getEndTime(), new java.text.SimpleDateFormat("HH:mm"))+"\n Days - "+days+"\n At Location - "+oldAssoc.getLocation().getName());
+					//association = com.nzion.domain.CalendarResourceAssoc.create();
+					//association.setPerson((com.nzion.domain.Person)personCombo.getSelectedItem().getValue());
+					return;
+				}
+				//if(interval.getValue() >= 15){
+				if(association.getPerson().getId() != null){
+				commonCrudService.merge(association.getPerson());
+				associations = scheduleService.getAllCalendarAssociationsFor(personCombo.getSelectedItem().getValue());
+				} else {
+				association.setPerson(null);
+				associations = scheduleService.getAllCalendarAssociationsFor(null);
+				}
+				//scheduleService.saveCalendarAssociation(association);
+				association.setCalendarIndividualSlots(association.buildBlankCalendarIndividualSlots());
+				com.nzion.domain.CalendarResourceAssoc calendarResourceAssoc = scheduleService.saveCalendarAssociation(association);
+
+				//associations = scheduleService.getAllCalendarAssociationsFor(personCombo.getSelectedItem().getValue());
+				//association = new com.nzion.domain.CalendarResourceAssoc(association.getPerson(), association.getLocation());
+				//association = com.nzion.domain.CalendarResourceAssoc.create();
+
+				Iterator calenderResIterator = calendarResourceAssoc.getCalendarIndividualSlots().iterator();
+				while(calenderResIterator.hasNext()){
+					com.nzion.domain.CalendarIndividualSlot calendarIndividualSlot = calenderResIterator.next();
+					//calendarIndividualSlot.setVisitTypeSoapModule(visitTypeCombo.getSelectedItem().getValue());
+					calendarIndividualSlot.setVisitType(visitTypeCombo.getSelectedItem().getValue());
+					commonCrudService.save(calendarIndividualSlot);
+				}
+
+				//association.setPerson((com.nzion.domain.Person)personCombo.getSelectedItem().getValue());
+				Events.postEvent("onSelect",personCombo,null);
+				appendContent("individualScheduleConfig");
+				com.nzion.util.UtilMessagesAndPopups.showSuccess();
+				//}
+				]]>
+			</attribute>
+		</button>
+	</div>
+	<separator></separator>
+		<separator></separator>
+				<listbox model="@{associations, load-after='saveAssocBtn.onClick, locationCombo.onChange, personCombo.onChange, self.onReload'}" id="calenderList">
+					<listhead>
+						<listheader label="Location"/>
+						<listheader label="Start Date"/>
+						<listheader label="End Date"/>
+						<listheader label="Start Time"/>
+						<listheader label="End Time"/>
+						<listheader label="Interval"/>
+						<listheader label="Days" width="200px"/>
+						<listheader label="Visits/Interval"/>
+						<listheader label="Action" width="100px"/>
+					</listhead>
+					<listitem self="@{each='assoc'}">
+						<custom-attributes calendarAssoc="@{assoc}"/>
+						<attribute name="onDoubleClick">
+							Executions.createComponents("/appointment/editPersonalCalendarAssociation.zul", null, com.nzion.util.UtilMisc.toMap("calendarAssoc",calendarAssoc));
+						</attribute>
+						<listcell>
+							<label value="@{assoc.location.name}"/>					
+						</listcell>
+						<listcell>
+							<label value="@{assoc.fromDate, converter='com.nzion.view.component.DateConverter'}" />					
+						</listcell>
+						<listcell>
+							<label value="@{assoc.thruDate, converter='com.nzion.view.component.DateConverter'}" />					
+						</listcell>
+						<listcell>
+							<time time="@{assoc.startTime}"/>					
+						</listcell>
+						<listcell>
+							<time time="@{assoc.endTime}" />					
+						</listcell>
+						<listcell>
+							<label value="@{assoc.calendarInterval}"/>					
+						</listcell>
+						<listcell>
+							<attribute name="onCreate">
+								<![CDATA[
+                            String day = "";
+                            if(calendarAssoc instanceof com.nzion.domain.CalendarResourceAssoc){
+                            com.nzion.domain.CalendarResourceAssoc assoc = calendarAssoc;
+                            if(assoc.getWeek() != null){
+                            com.nzion.domain.Week week = assoc.getWeek();
+                            java.util.List list = week.getSelectedDays();
+                            java.util.Iterator itr = list.iterator();
+                            while(itr.hasNext()){
+                            day = day +((String)itr.next()).substring(0,3)+", ";
+                            }
+                            if(day.length() > 2){
+                            day = day.substring(0,day.length()-2);
+                            }
+                            }
+                            }
+                            self.setLabel(day);
+                             ]]>
+							</attribute>
+						</listcell>
+						<listcell>
+							<label value="@{assoc.visitsPerInterval}"/>					
+						</listcell>
+						<listcell>
+							<button label="Delete">
+								<attribute name="onClick">
+									commonCrudService.delete(calendarAssoc);
+									if(personCombo.getSelectedItem().getValue().getId() != null){
+									associations = scheduleService.getAllCalendarAssociationsFor(personCombo.getSelectedItem().getValue());
+									} else {
+									associations = scheduleService.getAllCalendarAssociationsFor(null);
+									}
+									Events.postEvent("onReload",calenderList,null);
+									com.nzion.util.UtilMessagesAndPopups.showSuccess();
+								</attribute>
+							</button>
+						</listcell>
+					</listitem>
+				</listbox>
+			
+</window>
+</zk>

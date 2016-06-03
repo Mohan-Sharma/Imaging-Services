@@ -1,0 +1,129 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./immunizationAlertWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk>
+<zscript>
+<![CDATA[
+         com.nzion.zkoss.composer.PatientSoapNoteController patientController = arg.get("patientController");
+         com.nzion.domain.drug.Drug drug = arg.get("drug");
+         List drugInteractions = arg.get("drugInteractions");
+         List messages = arg.get("messages");
+         Set rxAlerts  = arg.get("rxAlerts");
+         com.nzion.domain.emr.soap.PatientRxAlert patientRxAlert = new com.nzion.domain.emr.soap.PatientRxAlert(com.nzion.util.Infrastructure.getUserLogin(),"Test",patientController.getSoapNote().getId().toString(),drug);
+         Set classificationMessages = new HashSet();
+     	 Set contraIndicationMessages = new HashSet();
+     	 Set interactionMessages = new HashSet();
+     	 Set indicationMessages = new HashSet();
+     	 Set reactionMessages = new HashSet();
+     	
+     	for(int i=0;i<messages.size();i++){
+     		Map messageMap = messages.get(i);
+     		if(org.apache.commons.lang.StringUtils.isNotEmpty((String)messageMap.get("DRUG_ALLERGY")))
+     		classificationMessages.add(messageMap.get("DRUG_ALLERGY"));
+     		if(org.apache.commons.lang.StringUtils.isNotEmpty((String)messageMap.get("CONTRAINDICATION")))
+     			contraIndicationMessages.add(messageMap.get("CONTRAINDICATION"));
+     		if(org.apache.commons.lang.StringUtils.isNotEmpty((String)messageMap.get("ADVERSEREACTION")))
+     			reactionMessages.add(messageMap.get("ADVERSEREACTION"));
+     		if(org.apache.commons.lang.StringUtils.isNotEmpty((String)messageMap.get("INDICATION")))
+     			indicationMessages.add(messageMap.get("INDICATION"));
+     		if(org.apache.commons.lang.StringUtils.isNotEmpty((String)messageMap.get("INTERACTION")))
+     			interactionMessages.add(messageMap.get("INTERACTION"));
+     	}
+	]]>
+</zscript>
+<window id="immunizationAlertWindow" title="Immunization Alert" closable="true" width="50%" height="50%" mode="modal">
+<div sclass="addLocs" style="width:100%;">
+			<div sclass="panelHeadTop panelHead">
+				<a label="Alert"></a>
+			</div>
+			<div>
+			<box forEach="${classificationMessages}">
+				<html>
+					<![CDATA[
+						<ul>
+							<li>Patient has allergy ${each} with ${drugName}.</li>
+						</ul>
+					]]>
+				</html>
+			</box>
+			<box forEach="${contraIndicationMessages}">
+				<html>
+					<![CDATA[
+						<ul>
+							<li>Patient has Contrainidication ${each} with ${drugName}.</li>
+						</ul>
+					]]>
+				</html>
+			</box>
+			<box forEach="${interactionMessages}">
+				<html>
+					<![CDATA[
+						<ul>
+							<li>Patient has interaction ${each} with ${drugName}.</li>
+						</ul>
+					]]>
+				</html>
+			</box>
+			<box forEach="${indicationMessages}">
+				<html>
+					<![CDATA[
+						<ul>
+							<li>Patient has indication ${each} with ${drugName}.</li>
+						</ul>
+					]]>
+				</html>
+			</box>
+			<box forEach="${reactionMessages}">
+				<html>
+					<![CDATA[
+						<ul>
+							<li>Patient has adverse reaction ${each} with ${drugName}.</li>
+						</ul>
+					]]>
+				</html>
+			</box>
+			<box forEach="${reactionMessages}">
+				<html>
+					<![CDATA[
+						<ul>
+							<li>Patient has adverse reaction ${each} with ${drugName}.</li>
+						</ul>
+					]]>
+				</html>
+			</box>
+			<box forEach="${drugInteractions}">
+				<zscript>
+					java.io.Reader is = each.getText().getCharacterStream();
+					StringBuffer sb = new StringBuffer();
+					int length = (int) each.getText().length();
+					if (length > 0) {
+					char[] buffer = new char[length];
+					int count = 0;
+					while ((count = is.read(buffer)) != -1)
+					sb.append(buffer);
+					}
+				</zscript>
+				<html>
+					<![CDATA[
+						<ul>
+							
+							<li>Drug Interaction Message ${sb}</li>
+						</ul>
+					]]>
+				</html>
+			</box>
+			</div>
+		<label value="Overrule Message" style="font-weight:bold;padding:0 0 4px" />
+		<textbox value="@{patientRxAlert.overruleMessage}" />
+		</div>
+		<separator height="10px"/>
+		<div sclass="panelFoot">
+			<button sclass="btn submit" label="Add">
+			<attribute name="onClick">
+			Events.postEvent("onReloadRequest",rxSectionDisplayGrid,null);
+			immunizationAlertWindow.detach();
+			</attribute>
+			</button>
+			<button sclass="btn submit" label="Cancel" forward="onClick=onCancel" />
+		</div>
+</window>
+</zk>

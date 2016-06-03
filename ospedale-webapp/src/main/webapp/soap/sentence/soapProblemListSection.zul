@@ -1,0 +1,44 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+	<![CDATA[
+	
+	import com.nzion.zkoss.composer.SoapSentenceComposer;
+	import com.nzion.domain.emr.soap.ProblemListSection;
+	SoapSentenceComposer sentenceComposer = (SoapSentenceComposer) arg
+			.get("controller");
+	ProblemListSection problemListSection = (ProblemListSection) sentenceComposer
+			.getSoapNoteController().getSoapSection(ProblemListSection.class,
+					false);
+	sentenceComposer.setSelectedSection(problemListSection);
+	
+	boolean noproblems = problemListSection.getNoKnownProblem()==null&&problemListSection.getPatientIcds().size()==0;
+	
+	boolean noKnownProblems = problemListSection.getNoKnownProblem()!=null && problemListSection.getNoKnownProblem().booleanValue();
+	]]>
+</zscript>
+	<div style="margin-left:10px">
+		<style>tr.z-row td.z-row-inner, tr.z-row .z-cell{ border-style:none none none; }</style>
+		<n:h2>${problemListSection.soapModule.moduleDescription}</n:h2>
+		<n:br />
+		
+		<label  if="${noproblems}" value="No Problem List information available for this visit."/>
+		
+		<label if="${noKnownProblems}" value="No Known problems as per Patient statement."/>
+			<div forEach="${problemListSection.patientIcds}">
+				<div if="${not empty each.icdElement}">
+					<label unless="${each.status.enumCode eq 413322009}"  value="${each.icdElement.ccsLabel} with Status ${each.status} and onset date ${display:fd(each.onSetDate)}"></label>
+					<label if="${each.status.enumCode eq 413322009}" value="${each.icdElement.ccsLabel} with Status ${each.status}, onset date ${display:fd(each.onSetDate)} and resolved on ${display:fd(each.resolutionDate)}"/>
+				</div>
+				<div if="${empty each.icdElement}">
+					<label unless="${each.status.enumCode eq 413322009}"  value="${each.description} with Status ${each.status} and onset date ${display:fd(each.onSetDate)}"></label>
+					<label if="${each.status.enumCode eq 413322009}" value="${each.description} with Status ${each.status}, onset date ${display:fd(each.onSetDate)} and resolved on ${display:fd(each.resolutionDate)}"/>
+				</div>
+			</div>
+		<n:br />
+
+	</div>
+</zk>

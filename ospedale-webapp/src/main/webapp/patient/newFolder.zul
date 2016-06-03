@@ -1,0 +1,46 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./newFolderWin" ?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	import com.nzion.zkoss.composer.FileBasedFolderComposer;
+	import com.nzion.domain.Folder;
+	FileBasedFolderComposer folderComposer = (FileBasedFolderComposer) Executions.getCurrent()
+			.getArg().get("folderComposer");
+	Tree folderlist = arg.get("folderlist");
+	Folder folder = new Folder();
+	</zscript>
+	<window id="newFolderWin" mode="modal" closable="true" width="40%">
+	<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Folder</h:small>
+                  <button type="button" zclass="close" onClick="newFolderWin.detach();">×</button>
+            </h:h1>
+         </div>
+			<div class="container-fluid">
+		       <div zclass="row-fluid">
+                 <div zclass="span5">
+			  <label value="Folder Name" mold="required"/>			   
+				<textbox sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" id="folderNameTextbox" value="@{folder.name,save-when='createFolder.onClick'}" constraint="no empty"></textbox>
+		</div>
+		</div>
+		 <div zclass="row-fluid">
+                 <div zclass="span6">
+			<label value="Description" ></label>
+			<textbox rows="2" cols="50" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" id="folderDescTextbox" value="@{folder.description,save-when='createFolder.onClick'}" constraint="no empty"></textbox>
+			</div>
+		</div>
+		
+		</div>
+			<div sclass="panelFoot">
+			<button label="Create" zclass="btn-success btn" id="createFolder">
+			<attribute name="onClick">
+			folderComposer.createFolder(folder);
+			Events.postEvent("onReload",folderlist,null);
+			newFolderWin.detach();
+			</attribute>
+			</button>
+			<button label="Cancel" onClick="newFolderWin.detach();"></button>
+			</div>
+	</window>
+</zk>

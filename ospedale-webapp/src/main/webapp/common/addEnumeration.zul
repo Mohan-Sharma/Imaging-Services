@@ -1,0 +1,48 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addEnumeration"?>
+<zk>
+<zscript><![CDATA[
+	import com.nzion.zkoss.composer.EnumerationComposer;
+	import com.nzion.enums.EnumerationType;
+	
+	EnumerationComposer composer = new EnumerationComposer();
+	List enumerations = new ArrayList();
+	for (EnumerationType enumType : EnumerationType.getPracticeSpecificEnumTypes()) {
+		enumerations.add(enumType.toString());	
+	}
+]]></zscript>
+
+<window  id="addEnumeration"  apply="${composer}" mode="modal" title="Enumeration" width="50%" position="center" closable="true">
+		
+		<zscript>
+		boolean isedit = Executions.getCurrent().getArg().get("entity")!= null;
+		</zscript>
+	<div width="97" style="padding:5px">
+	<panel >
+		<panelchildren>
+			<div sclass="form">
+					<vlayout spacing="5px">
+					<hlayout spacing="5px">
+					<label value="Enum Type" mold="required" sclass="name" style="width:250px;"  ></label>
+					<combobox  model="@{enumerations}" constraint="no empty:Enum Type required" selectedItem="@{composer.enumeration.enumType,save-when='save.onClick'}" disabled="${isedit}" readonly="${isedit}"/>
+				</hlayout>
+				<hlayout spacing="5px">
+					<label value="Enum Code" mold="required" sclass="name" style="width:250px;"></label>
+					<textbox  constraint="no empty:Enum Code Required" value="@{composer.enumeration.enumCode,save-when='save.onClick'}" disabled="${isedit}" readonly="${isedit}"></textbox>
+				</hlayout>
+				<hlayout spacing="5px">
+					<label value="Description" mold="required" sclass="name" style="width:250px;"  ></label>
+					<textbox rows="3" cols="17"  constraint="no empty:Description Required" value="@{composer.enumeration.description,save-when='save.onClick'}"></textbox>
+					</hlayout>
+					</vlayout>
+			</div>
+		</panelchildren>
+	</panel>
+	</div>
+		<div sclass="panelFoot"/>
+		<div sclass="panelFoot">			
+				<button id="save" label="Save" sclass="btn"/>
+				<button  label="Cancel" onClick='addEnumeration.detach()' sclass="btn"/>
+		</div>
+	
+</window>
+</zk>

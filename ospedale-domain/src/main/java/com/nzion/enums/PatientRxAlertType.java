@@ -1,0 +1,5 @@
+package com.nzion.enums;
+
+public enum PatientRxAlertType {
+	CONTRAINDICATION,DRUG_ALLERGY,ADVERSEREACTION,INDICATION,INTERACTION,DRUG_DRUG
+}

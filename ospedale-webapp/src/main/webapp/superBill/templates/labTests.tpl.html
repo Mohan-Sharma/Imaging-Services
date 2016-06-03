@@ -1,0 +1,37 @@
+<ul class="list-group" style="max-height: 550px;">
+    <li class="list-group-item list-group-item-custom" style="background-color: #428bca;color: #ffffff;text-align: center"><span style="font-weight: bold">Lab Tests</span></li>
+    <li class="list-group-item list-group-item-custom">
+        <span class="glyphicon glyphicon-search" style="display: inline-block"></span>
+        <input  class="form-control" style="display: inline-block;width: 90%" type="text" ng-model="selectedItem.lab" typeahead="lab as lab.panelName for lab in laboratoryDetails | filter:{panelName:$viewValue} | arrayFilter :selctedLabDetails">
+    </li>
+    <li class="list-group-item list-group-item-custom" ng-if="selctedLabDetails.items.length>0">
+        <ul class="list-group shadow">
+            <li class="list-group-item list-group-item-custom" ng-repeat="lab in selctedLabDetails.items">
+                <table>
+                    <td style="width: 5%"><input  type="checkbox" ng-checked="true" ng-click="removeSelecetedItem(selctedLabDetails,lab,'panelCode')"></td>
+                    <td style="text-align: left"><span style="font-size: 12px">{{lab.panelName}}</span></td>
+                    <td style="width: 25%"><span class="WebRupee">&#x20B9;</span>
+                        <input class="form-control-custom"  ng-model="lab.amount" placeholder="0" type="text" ng-change="calculateTotal(selctedLabDetails)">
+                    </td>
+                </table>
+            </li>
+        </ul>
+    </li>
+    <li class="list-group-item list-group-item-custom"  ng-repeat="lab in laboratoryDetails | limitTo:10 | arrayFilter :selctedLabDetails.items">
+        <table>
+            <td style="width: 5%"><input  type="checkbox"  ng-click="addToSelectedItem(selctedLabDetails,lab,'panelName','Lab Type')"></td>
+            <td style="text-align: left"><span style="font-size: 12px">{{lab.panelName}}</span></td>
+            <td style="width: 25%">
+                <span class="WebRupee">&#x20B9;</span>
+                <input class="form-control-custom" placeholder="0" ng-model="lab.amount" type="text">
+            </td>
+        </table>
+    </li>
+</ul>
+<ul class="list-group">
+    <li class="list-group-item list-group-item-custom" style="background-color: #428bca;color: #ffffff;text-align: center"><span style="font-weight: bold">Referred By</span></li>
+    <li class="list-group-item list-group-item-custom">
+        <span class="glyphicon glyphicon-search" style="display: inline-block"></span>
+        <input  class="form-control" style="display: inline-block;width: 90%" type="text" ng-model="referral.details" typeahead="ref as ref.firstName+'&nbsp;'+ref.lastName for ref in referralDetails | filter:{firstName : $viewValue}">
+    </li>
+</ul>

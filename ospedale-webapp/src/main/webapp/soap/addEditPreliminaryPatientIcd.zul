@@ -1,0 +1,63 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addEditPatientIcd"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:w="http://www.zkoss.org/2005/zk/client" xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	com.nzion.zkoss.composer.SoapDiagnosisComposer diagnosisComposer = arg.get("diagComposer");
+	com.nzion.zkoss.composer.PatientSoapNoteController controller = diagnosisComposer.getMainCtl();
+	com.nzion.domain.emr.soap.PreliminaryDiagnosisSection preliminaryDiagnosisSection = diagnosisComposer.getPreliminaryDiagnosisSection(); 
+	com.nzion.domain.emr.soap.PatientIcd patientIcd = arg.get("patientIcd") == null ? new com.nzion.domain.emr.soap.PatientIcd() : arg.get("patientIcd");
+	List severities = diagnosisComposer.getIllnessSeveritiesExcludingChronic("ILLNESS_SEVERITY");
+	List statuses = diagnosisComposer.getActiveAndChronicIllnessStatuses("PROBLEM_STATUS_CODE");
+	]]>
+</zscript>
+	<window id="addEditPatientIcd" closable="true" title="Patient Diagnosis" mode="modal" width="50%">	
+   			<div sclass="form">
+					<vlayout spacing="5px">
+					<hlayout spacing="5px">
+						<label value="Diagnosis" sclass="name" style="width:250px;" />
+						<label value="*" style="color:red"/>
+						
+							<textbox id="icdLookupTextBox" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" onChange="patientIcd.setIcdElement((com.nzion.domain.emr.IcdElement)event.getData());"
+							value="@{patientIcd.icdElement.description}" readonly="true" rows="3" style="width:144px;font-size:10px"/>
+							<n:div>
+							<span id="lookUpBtn" sclass="linkBtn linkBtnOn">
+								<a sclass="lookupBtn" disabled="${controller.readonly}">
+									<attribute name="onClick">
+					 Executions.createComponents("/diagnosis/preliminaryIcdSearch.zul",
+						null, com.nzion.util.UtilMisc.toMap("icdLookupTextBox",icdLookupTextBox,"preliminaryDiagnosisSection",preliminaryDiagnosisSection, "controller", controller, "multiple", false));	
+								</attribute>
+									Lookup
+								</a>
+							<span/>
+							</span>
+							</n:div>
+							</hlayout>
+					<hlayout spacing="5px">
+						<label value="Status" sclass="name" style="width:250px;" />
+						<label value="*" style="color:red"/>
+						<combobox id="nameCombobox" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" model="@{statuses}" readonly="true"
+							selectedItem="@{patientIcd.status,save-when='addBtn.onClick'}" constraint="no empty">
+							<comboitem self="@{each='status'}" value="@{status}" label="@{status.description}"/>
+						</combobox>
+			</hlayout>
+						<hlayout spacing="5px">
+						<label value="Severity" sclass="name" style="width:250px;"/>
+						<label value="*" style="color:red"/>
+						<combobox w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"  model="@{severities}" readonly="true"
+							selectedItem="@{patientIcd.severity,save-when='addBtn.onClick'}" constraint="no empty">
+							<comboitem self="@{each='severity'}" value="@{severity}" label="@{severity.description}"/>
+						</combobox>
+					</hlayout>
+					</vlayout>
+				</div>
+					<div sclass="panelFoot">
+						<button disabled="${controller.readonly}" zclass="btn-success btn"  label="Add" id="addBtn">
+							<attribute name="onClick">
+								diagnosisComposer.addPreliminaryPatientIcd(patientIcd,icdLookupTextBox);
+							</attribute>
+						</button>
+					</div>
+</window>
+</zk>

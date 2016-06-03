@@ -1,0 +1,12 @@
+<?component name="screen" macro-uri="/home-grid-macro.zul"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	setPageTitle("Formulary Status", "");
+</zscript>
+	<window>
+		<screen width="100%" pagetitle="Formulary Status" listtitle="List of Formulary Statuses"	addpage="addFormularyStatus" editpage="addFormularyStatus"
+			entityclass="com.nzion.domain.drug.FormularyStatus" fields="startdate,stopdate,drug.tradeName,insuranceProvider.insuranceProviderName"
+			labels="Start Date,End Date,Drug,Insurance Provider" addmodepopup="true" editModePopup="true" hidedeletebtn="true"/>
+	</window>
+</zk>

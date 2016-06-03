@@ -1,0 +1,62 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./newEmergencyContactWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+		import com.nzion.domain.PersonDelegation;
+		import com.nzion.zkoss.composer.PersonDelegationController;
+		PersonDelegationController personDelegationController = (PersonDelegationController) arg.get("personDelegationController");
+		Collection personDelegations = (Collection)arg.get("personDelegations");
+		PersonDelegation personDelegation = (PersonDelegation) arg.get("entity");
+		String windowTitle = "Edit";
+		if (personDelegation == null) {
+			personDelegation = new PersonDelegation();
+			windowTitle = "New";
+		}
+		String personName = com.nzion.util.ViewUtil.getFormattedName(personDelegation.getPersonToBeDelegated());
+		personDelegationController.setPersonDelegation(personDelegation);
+	]]>
+	</zscript>
+	<window id="newEmergencyContactWindow" mode="modal" width="30%" title="${windowTitle} Emergency Access"
+		closable="true">
+		<div sclass="panelCont" height="180px">
+			<div width="80%">
+				<label value="User" />
+				<label value="*" style="color:red" />
+				<hbox style="border:0px">
+					<textbox id="userTextBox" value="${personName}" readonly="true" constraint="no empty:User Required" />
+					<span id="lookUpBtn">
+					<a sclass="lookupBtn">
+						<attribute name="onClick">
+							Executions.createComponents("/person/personLookupHavingProviderRole.zul", null, com.nzion.util.UtilMisc.toMap("userTextBox", userTextBox, "personDelegation", personDelegation));
+						</attribute>
+						Lookup
+					</a>
+					<span/>
+					</span>
+				</hbox>
+			</div>
+			<div sclass="col2">
+				<label value="From Date" />
+				<label value="*" style="color:red" />
+				<datebox value="@{personDelegation.fromDate,save-when='addBtn.onClick'}"
+					constraint="no empty:From Date Required" />
+			</div>
+			<div sclass="col2">
+				<label value="Thru Date" />
+				<label value="*" style="color:red" />
+				<datebox value="@{personDelegation.thruDate,save-when='addBtn.onClick'}"
+					constraint="no empty:Thru Date Required" />
+			</div>
+			<div width="60%">
+				<label value="Comments"/>
+				<textbox value="@{personDelegation.comments,save-when='addBtn.onClick'}" rows="2"/>
+			</div>
+		</div>
+		<div sclass="panelFoot">
+			<button id="addBtn" label="Save" onClick="userTextBox.getValue();personDelegationController.saveProviderDelegation(newEmergencyContactWindow);" />
+			<button label="Cancel" forward="onClick=onCancel" />
+		</div>
+	</window>
+</zk>

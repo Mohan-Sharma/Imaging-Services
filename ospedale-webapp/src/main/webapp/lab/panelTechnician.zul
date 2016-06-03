@@ -1,0 +1,50 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./panelTechnicianWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	         import com.nzion.domain.Person;
+	List persons;
+	com.nzion.zkoss.composer.emr.lab.LabController labController = arg.get("labController");
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService"); 
+]]>
+	</zscript>
+	<window id="panelTechnicianWindow" width="40%" title="Add Technician" closable="true" mode="modal">
+		<div style="margin-left:14px">
+			<div width="30%">
+				<label value="Location" />
+				<combobox id="locationCombobox" model="@{locations}" selectedItem="@{labController.location}">
+					<comboitem self="@{each='location'}" value="@{location}" label="@{location.name}" />
+					<attribute name="onSelect">
+      persons = labController.getPersonForLocation((com.nzion.domain.Location) self.getSelectedItem().getValue());
+      labController.getPanelTechnicianByLocation();
+</attribute>
+				</combobox>
+			</div>
+			<separator />
+			<div>
+				<label value="Technicians" />
+				<div height="200px" style="overflow:auto">
+					<listbox model="@{persons,load-after='locationCombobox.onSelect'}" multiple="true" checkmark="true"
+						selectedItem="@{labController.technicians,converter=com.nzion.view.component.MultipleListitemBindingConverter}">
+						<listhead>
+							<listheader label="Technician" />
+							<listheader label="Email" />
+						</listhead>
+						<listitem self="@{each='person'}">
+							<listcell>
+								<name object="@{person}" />
+							</listcell>
+							<listcell label="@{person.contacts.email}" />
+						</listitem>
+					</listbox>
+				</div>
+			</div>
+		</div>
+		<div sclass="panelFoot">
+			<button label="Add" onClick="labController.buildPanelTechnicianSet();panelTechnicianWindow.detach()" />
+			<button label="Cancel" forward="onClick=onCancel" />
+		</div>
+	</window>
+</zk>

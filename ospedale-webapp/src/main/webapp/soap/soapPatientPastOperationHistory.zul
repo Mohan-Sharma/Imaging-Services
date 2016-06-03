@@ -1,0 +1,139 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./familyHistorySectionDiv"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:w="http://www.zkoss.org/2005/zk/client" xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window id="familyHistorySectionDiv" width="100%">
+	<zscript>
+//	import com.nzion.zkoss.composer.PatientSoapNoteController;
+//	import com.nzion.domain.emr.soap.FamilyHistorySection;
+//	import com.nzion.domain.emr.soap.PatientFamilyIllness;
+//	import com.nzion.zkoss.ext.EntityDropdownRenderer;
+//	import com.nzion.domain.emr.FamilyMember;
+//	PatientSoapNoteController controller = (PatientSoapNoteController)arg.get("controller");
+//	com.nzion.domain.emr.soap.PastHistorySection familyHistorySection = controller.getSoapSection(com.nzion.domain.emr.soap.PastHistorySection.class);
+</zscript>
+		<script type="text/javascript">
+			function showDelButton(comp){ jQuery('#'+comp.uuid).find('img').fadeIn('slow'); } function
+			hideDelButton(comp){ jQuery('#'+comp.uuid).find("img").fadeOut(15); }
+		</script>
+		<div sclass="chiefComp soapNoteCont curSOAP ui-resizable" style="position:relative;">
+			<panel>
+			<caption label="Family History" />
+				<panelchildren>
+			<h:table width="100%" cellpadding="0px" cellspacing="0px" style="border:0px">
+				<h:tr>
+					<h:td class="soapNoteContL">
+							 <div style="width:99%;padding:10px;">
+								<div>
+									<span sclass="linkBtn linkBtnOn">
+										<a disabled="${controller.readonly}" id="historyBtn" label="History">
+											<attribute name="onClick">
+											   showHistory();
+											</attribute>
+											</a>
+										<span />
+									</span>
+					  		  </div>
+					  		  <div>
+								<span sclass="linkBtn linkBtnOn">
+									<a id="addBtn" sclass="addBtn" label="New" disabled="${controller.readonly}">
+									<attribute name="onClick">
+									addEdit(null);							
+									</attribute>
+									</a>
+									<span />
+								</span>
+								</div>
+							</div>
+							<!--<radiogroup id="statusRadioGrp">
+									<radio label="Current" checked="true" id="activeRadioBtn" onCreate='Events.postEvent("onCheck",self,null)'>
+										<attribute name="onCheck">
+											familyHistories.clear();
+											familyHistories.addAll(familyHistorySection.getFamilyIllnesses());
+										
+										</attribute>
+									</radio>
+									<radio label="All" id="inactiveRadioBtn">
+										<attribute name="onCheck">
+											familyHistories.clear();
+											familyHistories.addAll(patientFamilyHistoties);
+										</attribute>
+									</radio>
+							</radiogroup>
+					--></h:td>
+				</h:tr>
+				<h:tr>
+					<h:td class="soapNoteContL">							
+							<div style="padding:5px">
+								<n:table id="familyHistoryDisplayGrid" cellpadding="0" cellspacing="0" border="0" class="display" >
+									<n:thead>
+										<n:tr>
+											<n:th>Procedure Names</n:th>
+											<n:th>Site</n:th>
+											<n:th>Date of Procedure</n:th>
+											<n:th>Location</n:th>
+											<n:th>Action</n:th>
+										</n:tr>
+									</n:thead>
+									<n:tbody>
+										<n:tr forEach="${familyHistories}">
+											<n:td>${each.cptCodes}</n:td>
+											<n:td>${each.site}</n:td>
+											<n:td>${each.occuranceDate}</n:td>
+											<n:td>${each.locationName}</n:td>
+											<n:td>
+												<a class="group" onClick="addEdit(self.getId())" id="${each.id}">Edit</a>
+											</n:td>
+										</n:tr>
+									</n:tbody>
+								</n:table>
+								</div>
+							<div sclass="panelFoot">
+							<button disabled="${controller.readonly}" label="Save" onClick="controller.saveSoapSection();" />
+							<space width="15px" />
+						</div>
+					</h:td>
+				</h:tr>
+			</h:table>
+			</panelchildren>
+		</panel>
+		</div>
+		<script type="text/javascript">
+			zk.afterMount(function() { 
+				jq("#familyHistoryDisplayGrid").dataTable({
+				"bJQueryUI": true,
+				"sPaginationType": "full_numbers", 
+				"aoColumns":
+							[ null, null, null,null,{ "bSortable": false,"sType": "html"} ] 
+						}); 
+			});
+		</script>
+		<zscript>
+		<![CDATA[
+			void addEdit(String  id){
+				PatientFamilyIllness patientFamilyIllness = null;
+				
+				if(id!=null){
+					com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+					patientFamilyIllness = commonCrudService.getById(PatientFamilyIllness.class, new Long(id));
+				}else{
+					patientFamilyIllness = new PatientFamilyIllness();
+				}
+				Window w =com.nzion.zkoss.ext.Navigation.navigateToModalWindow("/soap/soapAddFamilyHistory",com.nzion.util.UtilMisc.toMap("patientFamilyIllness",patientFamilyIllness,"familyHistorySection",familyHistorySection,"controller",controller));				
+			    
+			}
+			
+			void showHistory(){
+				Window window = Executions.createComponents("/soap/familyHxListHistory.zul",familyHistorySectionDiv,
+					com.nzion.util.UtilMisc.toMap("familyHistorySection",familyHistorySection,"controller",controller));
+				window.doModal();
+			}
+	void setStyle(Component cmp) {
+	((A) cmp).setSclass("cur");
+	if (lastSelectedComponent != null && !lastSelectedComponent.equals(cmp)) ((A) lastSelectedComponent).setSclass("");
+	lastSelectedComponent = cmp;
+	}
+	]]>
+		</zscript>
+	</window>
+</zk>

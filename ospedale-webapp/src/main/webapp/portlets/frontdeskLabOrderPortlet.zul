@@ -1,0 +1,136 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./frontDeskLabOrderPortletWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	<![CDATA[
+	         com.nzion.domain.emr.lab.LabOrderRequest labOrderRequest=new com.nzion.domain.emr.lab.LabOrderRequest();
+     com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+     com.nzion.service.billing.BillingService billingService = com.nzion.util.Infrastructure.getSpringBean("billingService");
+     com.nzion.service.emr.lab.LabService labService = com.nzion.util.Infrastructure.getSpringBean("labService");
+     com.nzion.domain.UserLogin login = com.nzion.util.Infrastructure.getUserLogin();
+     List labOrderRequestList = commonCrudService.getAll(com.nzion.domain.emr.lab.LabOrderRequest.class);
+     List statuses = new ArrayList();
+     com.nzion.domain.emr.lab.LabOrderRequest.ORDERSTATUS[] labStatusesArray = com.nzion.domain.emr.lab.LabOrderRequest.ORDERSTATUS.values();
+    // List labOrderRequestList = commonCrudService.findByEquality(com.nzion.domain.emr.lab.LabOrderRequest.class,new String[]{"createdBy"},new Object[]{login.getUsername()});
+	]]>
+	</zscript>
+
+<window id="frontDeskLabOrderPortletWindow">
+<hlayout spacing="20px" sclass="form">
+			<vlayout spacing="10px">
+				<hlayout spacing="6px">
+					<label value="Patient"  sclass="name"/>
+					<div width="280px">
+					<patientlookup onChange="labOrderRequest.setPatient((com.nzion.domain.Patient)event.getOrigin().getData())" />
+					</div>
+				</hlayout>
+				<hlayout spacing="6px">
+					<label value="Refferal"  sclass="name"/>
+					<div width="280px">
+					<referrallookup onChange="labOrderRequest.setReferral((com.nzion.domain.Referral)event.getOrigin().getData())" />
+					</div>
+				</hlayout>
+				 <hlayout spacing="6px">
+					<label value="Doctor"  sclass="name"/>
+					<providerlookup onChange="labOrderRequest.setProvider((com.nzion.domain.Provider)event.getOrigin().getData())" />
+				</hlayout> 
+				</vlayout>
+				<vlayout spacing="10px">
+				 <hlayout spacing="6px">
+		     <label value="${c:l('status')}" sclass="name"/>
+		     <div style="overflow:auto; -moz-box-shadow: 0 2px 6px 0 rgba(147, 147, 202, 0.4) inset;border:1px solid #86A4BE" height="65px"  width="140px" >
+		     <listbox id="bStatus" maxlength="50"   model="@{labStatusesArray}" checkmark="true" multiple="true"  >
+		     <listitem self="@{each='status'}" label="@{status.orderStatus.description}" value="@{status.orderStatus}">
+		      <attribute name="onClick">
+		    if(bStatus.getSelectedItem()!=null)
+		    statuses.add((com.nzion.domain.emr.lab.LabOrderRequest.ORDERSTATUS)bStatus.getSelectedItem().getValue());
+		    </attribute>
+		     </listitem>
+		     </listbox>
+		     </div>
+		     </hlayout>
+			</vlayout> 
+		</hlayout>
+		<div align="center" sclass="panelFoot buttonPanel" onCreate='Events.postEvent("onClick",frontDeskLabOrderPortletWindow.getFellow("Search"),null);'>
+		 <hlayout spacing="10px">
+		 	 <button label="Search" id="Search">
+		 	 <attribute name="onClick">
+		 	 <![CDATA[
+List labOrderList =billingService.getSearchByLabOrder(statuses,labOrderRequest.getPatient(),labOrderRequest.getProvider(),labOrderRequest.getReferral());
+			]]>
+		 	 </attribute>
+		 	 </button>
+		 	 <button label="Add LabOrder Request" id="add">
+		 	<attribute name="onClick"><![CDATA[
+       Executions.createComponents("/portlets/frontDeskLabOrderRequest.zul", null,com.nzion.util.UtilMisc.toMap("labOrderListBox",labOrderRequestGrid));
+      ]]>
+     </attribute>
+		 	 </button>
+		 </hlayout>
+		 </div>
+			<separator></separator>
+<paging id="paging" pageSize="11"/>
+<div style="width:100%;vertical-align:top;float:left;background:#DDDDDD;"> 
+		<panel collapsible="true">
+			<panelchildren>
+				<grid id="labOrderRequestGrid" model="@{labOrderList,load-after='Search.onClick'}" mold="paging" paginal="${paging}">
+					<columns>
+						<column width="40px"></column>	
+						<column label="Lab Test Requested Date"/>
+						<column label="Patient"/>	
+						<column label="Doctor"/>
+						<column label="Refferal"/>	
+						<column label="Request Status"/>
+						<column label="Action"/>
+			        </columns>
+					<rows>
+						<row self="@{each='labOrderRequest'}" value="@{labOrderRequest}">							
+							<detail open="false">
+								<listbox model="@{labOrderRequest.patientLabOrders}" >
+									<listhead>
+										<listheader label="Test Name" />
+										<listheader label="Start Date" />
+										<listheader label="End Date" />
+									</listhead>
+									<listitem self="@{each='labOrder'}" value="@{labOrder}">
+									<listcell label="@{labOrder.testCode}"/>
+									<listcell label="@{labOrder.testName}"/>
+									<listcell label="@{labOrder.startDate,converter='com.nzion.view.component.DateConverter'}"/>
+									<listcell label="@{labOrder.endDate,converter='com.nzion.view.component.DateConverter' }"/>
+									<listcell label="@{labOrder.testNotes}"/></listitem>
+								</listbox>
+							</detail>
+							<label value="@{labOrderRequest.createdTxTimestamp,converter='com.nzion.view.component.DateConverter'}"/>
+							<label value="@{labOrderRequest.patient}"/>
+							<name object="@{labOrderRequest.provider}"/>
+							<name object="@{labOrderRequest.referral}"/>
+							<label value="@{labOrderRequest.orderStatus.description}"/>
+							<div id="requestDisSec" >
+									<a label="Generate Bill">
+										<attribute name="onClick">
+											com.nzion.domain.emr.lab.LabOrderRequest labOrderReq = ((Row)self.getParent().getParent()).getValue();
+											com.nzion.util.Infrastructure.getSpringBean("billingService").generateInvoiceFor(((Row)self.getParent().getParent()).getValue());
+											labOrderReq.setOrderStatus(com.nzion.domain.emr.lab.LabOrderRequest.ORDERSTATUS.BILLING_DONE);
+											commonCrudService.save(labOrderReq);
+											Events.postEvent("onReloadRequest", labOrderRequestGrid,null);	
+										</attribute>
+									</a>									
+							</div>	
+							<div>
+								<a label="Result">
+										<attribute name="onClick">
+											com.nzion.domain.emr.lab.LabOrderRequest labOrderReq = ((Row)self.getParent().getParent()).getValue();
+											Executions.getCurrent().sendRedirect("/lab/viewLabResult.zul?labOrderReqId=" + labOrderReq.getId()+"&amp;pageName=Resultview", "_resultview");
+										</attribute>
+									</a>	
+							</div>
+						</row>
+					</rows>
+				</grid>
+			</panelchildren>
+		</panel>
+		</div>
+		</window>
+</zk>

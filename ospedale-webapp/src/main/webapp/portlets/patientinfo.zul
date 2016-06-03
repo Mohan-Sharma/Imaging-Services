@@ -1,0 +1,100 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientinfowin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	import com.nzion.zkoss.composer.appointment.ScheduleController;
+	com.nzion.domain.Patient patient = arg.get("patient");
+	com.nzion.domain.Schedule schedule = arg.get("slotSchedule");
+	ScheduleController scheduleController = arg.get("scheduleController");
+	Boolean isCloseRequired = arg.get("closeBtn");
+	isCloseRequired = isCloseRequired == null ? false : isCloseRequired;
+	com.nzion.zkoss.composer.appointment.AppointmentListcell sourceComponent = arg.get("sourceComponent");
+	if(scheduleController!=null)
+	scheduleController.setSelectedComponent(sourceComponent);
+	</zscript>
+	<window title="Patient Information" border="none" id="patientinfowin" style="margin-top:10px;width:100%;" visible="${!(empty patient)}">
+		<hbox>
+			<image hover="@{patient,converter='com.nzion.view.component.GenderImageConverter'}" height="100px" width="100px"/>
+			<div zclass="container-fluid">
+				<div zclass="row-fluid">
+					<div zclass="span12">
+						<label value="Patient: " />
+						<name object="@{patient}"/>
+					</div>
+				</div>
+				<div zclass="row-fluid">
+					<div zclass="span12">
+						<label value="MRN: " />
+						<label value="@{patient.accountNumber}" />
+					</div>
+					<div zclass="span12" visible="${schedule ne null}">
+						<label value="Appointment Date: " />
+						<label value="@{schedule.startDate,converter='com.nzion.view.component.DateConverter'}" />
+					</div>
+				</div>
+				<div zclass="row-fluid">
+					<div zclass="span12" visible="${schedule ne null}">
+						<label value="Start Time: " />
+						<label value="@{schedule.startTime,converter='com.nzion.view.component.TimeConverter'}" />
+					</div>
+					<div zclass="span12" visible="${schedule ne null}">
+						<label value="End Time: "/>
+						<label value="@{schedule.endTime,converter='com.nzion.view.component.TimeConverter'}" />
+					</div>
+				</div>
+				<div zclass="row-fluid">
+					<div zclass="span12">
+						<label value="Email: " />
+						<label value="@{patient.contacts.email}" />
+					</div>
+					<div zclass="span12" visible="${schedule ne null}">
+						<label value="Visit Type: " />
+						<label value="@{schedule.visitType}" />
+					</div>
+				</div>
+				<div zclass="row-fluid">
+					<div zclass="span12">
+						<label value="Mobile: " />
+						<label value="@{patient.contacts.mobileNumber}" />
+					</div>
+					<div zclass="span12" visible="${schedule ne null}">
+						<label value="Notes: " />
+						<label value="@{schedule.comments}" multiline="true" />
+					</div>
+				</div>
+				<div zclass="row-fluid">
+					<div zclass="span12">
+						<label value="Home Phone: " />
+						<label value="@{patient.contacts.homePhone}" />
+					</div>
+					<div zclass="span12" if="${!empty schedule.referral}" visible="${schedule ne null}">
+						<label value="Referral: " />
+						<name object="@{schedule.referral}" />
+					</div>
+				</div>
+				<div zclass="row-fluid">
+					<div zclass="span12">
+						<label value="Date of Birth: " />
+						<label value="@{patient.dateOfBirth,converter='com.nzion.view.component.DateConverter'}" />
+					</div>
+					<div zclass="span12" if="${!empty schedule.internalReferral}" visible="${schedule ne null}">
+						<label value="Internal Referral: " />
+						<name object="@{schedule.internalReferral}" />
+					</div>
+				</div>
+				<div zclass="row-fluid">
+					<div zclass="span12">
+						<label value="Postal Address: " />
+						<label value="@{patient.contacts.postalAddress}" multiline="true" />
+					</div>
+				</div>
+			</div>
+		</hbox>
+		<div sclass="panelFoot" if="${isCloseRequired}">
+			<button label="Close" onClick='patientinfowin.detach()' sclass="btn"></button> <button label="Medical History" autodisable="self" onClick='Executions.getCurrent().sendRedirect("/soap/faceSheet.zul?patientId="+patient.getId(),"_clinicalRecords");'/>
+				<button label="Start Encounter" onClick="scheduleController.openSoapNote()" autodisable="self" visible="${sourceComponent ne null}"></button>
+				
+		</div>
+	</window>
+</zk>

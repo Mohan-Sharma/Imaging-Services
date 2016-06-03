@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN"
+   					"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+	<class name="com.nzion.domain.olap.PatientStarSchema" table="PATIENT_STAR_SCHEMA">
+		<composite-id name="starSchemaId">
+			<key-property name="accountNumber" type="string" column="ACCOUNT_NUMBER"></key-property>
+			<key-property name="practiceId" type="long" column="PRACTICE_ID"></key-property>
+		</composite-id>
+		<dynamic-component name="fields">
+			<property name="firstName" column="FIRST_NAME" type="string"></property>
+			<property name="lastName" column="LAST_NAME" type="string"></property>
+			<property name="gender" column="GENDER" type="string"></property>
+			<property name="occupation" column="OCCUPATION" type="string"></property>
+			<property name="ethnicity" column="ETHNICITY" type="string"></property>
+			<property name="maritalStatus" column="MARITAL_STATUS" type="string"></property>
+			<property name="religion" column="RELIGION" type="string"></property>
+			<property name="city" column="CITY" type="string"></property>
+			<property name="stateProvinceGeo" column="STATE" type="string"></property>
+			<property name="postalCode" column="POSTAL_CODE" type="string"></property>
+			<property name="ssnNumber" column="SSN" type="string"></property>
+			<property name="dateOfBirth" column="DATE_OF_BIRTH" type="date" />
+			<property name="emailAddress" column="EMAIL" type="string" />
+			<property name="telephoneNumber" column="TELEPHONE_NUMBER"
+				type="string" />
+
+			<!--
+				These are dummy ones never populated but used in retreiving values
+				in Appointment Schedule Grid and Display of Columns in Display
+				Screen
+			-->
+			<property name="slotType" column="SLOT_TYPE" type="string" />
+			<property name="patientName" column="PATIENT_NAME" type="string"></property>
+			<property name="scheduleStatus" column="SCHEDULE_STATUS"
+				type="string"></property>
+			<property name="insurance" column="INS_PROVIDER" type="string"></property>
+			<property name="patientAccount" column="PAT_ACC" type="string"></property>
+		</dynamic-component>
+		<filter name="PracticeFilter" condition=":practiceId=PRACTICE_ID"></filter>
+	</class>
+	
+	
+	<class name="com.nzion.domain.olap.ProviderStarSchema" table="PROVIDER_STAR_SCHEMA">
+		<composite-id name="starSchemaId">
+			<key-property name="accountNumber" type="string" column="ACCOUNT_NUMBER"></key-property>
+			<key-property name="practiceId" type="long" column="PRACTICE_ID"></key-property>
+		</composite-id>
+		<dynamic-component name="fields">
+			<property name="firstName" column="FIRST_NAME" type="string"></property>
+			<property name="lastName" column="LAST_NAME" type="string"></property>
+			<property name="gender" column="GENDER" type="string"></property>
+			<property name="npiNumber" column="NPINUMBER" type="string"></property>
+			<property name="upinNumber" column="UPINNUMBER" type="string"></property>
+			<property name="stateLicense" column="STATELICENSE" type="string"></property>
+			<property name="registrationId" column="REGISTRATIONID"
+				type="string"></property>
+			<property name="deaNumber" column="DEANUMBER" type="string"></property>
+			<property name="specialities" column="SPECIALITIES" type="string"></property>
+			<property name="city" column="CITY" type="string"></property>
+			<property name="stateProvinceGeo" column="STATE" type="string"></property>
+			<property name="dateOfBirth" column="DATEOFBIRTH" type="date" />
+			<property name="emailAddress" column="EMAIL" type="string" />
+			<property name="telephoneNumber" column="TELEPHONE_NUMBER"
+				type="string" />
+			<property name="ssnNumber" column="SSN" type="string"></property>
+		</dynamic-component>
+		<filter name="PracticeFilter" condition=":practiceId=PRACTICE_ID"></filter>
+	</class>
+
+</hibernate-mapping>

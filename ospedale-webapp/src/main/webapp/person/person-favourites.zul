@@ -1,0 +1,12 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/verticalTemplate.zul"?>
+<zk>
+<div self="@{insert(utilityContent)}">
+	<zscript><![CDATA[
+   	String[] labels = new String[]{"Chief Complaints","Diagnosis"};
+	String[] ids = new String[]{"personChiefComplaints","personIcd"};	                  
+	//String[] labels = new String[]{"Chief Complaints","Diagnosis","Referral Template"};
+	//String[] ids = new String[]{"personChiefComplaints","personIcd","referralTemplate"};
+	renderTabs(labels, ids);
+	]]></zscript>
+</div>
+</zk>

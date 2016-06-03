@@ -1,0 +1,62 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./immunizationLookUpWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	<![CDATA[
+	com.nzion.zkoss.composer.SoapImmunizationComposer soapImmunizationComposer = arg.get("soapImmunizationComposer");
+	com.nzion.zkoss.composer.PatientSoapNoteController patientSoapNoteController = arg.get("patientSoapNoteController");
+	Textbox immunizationTextBox = arg.get("immunizationTextBox");
+	com.nzion.domain.emr.soap.PatientImmunization patientImmunization = arg.get("patientImmunization");
+	Div dataSection = arg.get("dataSection");
+	Collection immunizations;
+	Button saveButton = arg.get("saveButton");
+]]>
+	</zscript>
+	<window id="immunizationLookUpWindow" width="60%" mode="modal" closable="true" title="Vaccine Lookup">
+		<radiogroup>
+			<radio label="Due Immunization" checked="true" id="dueRadio" onCreate='Events.postEvent("onCheck",self,null)'>
+				<attribute name="onCheck">
+					immunizations = patientSoapNoteController.getAllDueImmunizations();
+				</attribute>
+			</radio>
+			<radio label="Pull From Global" id="globalRadio">
+				<attribute name="onCheck">
+					immunizations = commonCrudService.getAll(com.nzion.domain.emr.Immunization.class);
+				</attribute>
+			</radio>
+		</radiogroup>
+		<div height="250px" style="overflow:auto">
+		<listbox model="@{immunizations,load-after='dueRadio.onCheck,globalRadio.onCheck'}">
+			<listhead>
+				<listheader label="Vaccine Short Name" width="30%" />
+				<listheader label="Vaccine Full Name" />
+				<listheader label="Expected Date"/>
+			</listhead>
+			<listitem self="@{each='dueImmunization'}" value="@{dueImmunization}">
+				<listcell label="@{dueImmunization.shortDescription}" />
+				<listcell label="@{dueImmunization.fullVaccineName}" />
+				<listcell>
+					<label value="@{dueImmunization.expectedDate,converter='com.nzion.view.component.DateConverter'}"/>
+				</listcell>
+				<attribute name="onDoubleClick">
+					<![CDATA[
+					com.nzion.domain.emr.Immunization immunization = self.getValue();
+					if(patientImmunization.getId() == null || (patientImmunization.getId()!=null && (patientImmunization.getSoapSection().getSoapNote().equals(patientSoapNoteController.getSoapNote())))){
+					immunizationTextBox.setValue(immunization.getFullVaccineName());
+					soapImmunizationComposer.setImmunization(immunization);
+					patientImmunization.setImmunization(immunization);
+					Events.postEvent("onReload",dataSection,null);
+					saveButton.setDisabled(false);
+					}
+					immunizationLookUpWindow.detach();
+					]]>	
+				</attribute>
+			</listitem>
+		</listbox>
+		</div>
+		<div sclass="panelFoot">
+		<button label="Cancel" forward="onClick=onCancel"/>
+		</div>
+	</window>
+</zk>

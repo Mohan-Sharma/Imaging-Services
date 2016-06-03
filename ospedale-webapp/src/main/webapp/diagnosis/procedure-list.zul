@@ -1,0 +1,13 @@
+<?page title="Location" contentType="text/html;charset=UTF-8"?>
+<?component name="screen" macro-uri="/home-grid-macro.zul"?>
+<zk>
+	<zscript>
+		setPageTitle("Procedure", "");
+	</zscript>
+	<window >
+		<screen width="100%" listtitle="Pms - Procedure Management"	addpage="procedureManagement"
+					addmodepopup="true" entityclass="com.nzion.domain.pms.Procedure" 
+					labels="Procedure Code,Description,Statement Description,Alternate Procedure Code,Gender"
+					fields="id,description,statementDescription,alternateProcedureCode,gender" searchfields="id,description"/>
+	</window>
+</zk>

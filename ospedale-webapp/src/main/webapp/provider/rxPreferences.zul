@@ -1,0 +1,186 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./providerRxPreferences" ?>
+<zk xmlns:h="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+		import com.nzion.domain.emr.ProviderRxPreference;
+		com.nzion.domain.Provider provider = commonCrudService.getById(com.nzion.domain.Provider.class,com.nzion.util.Infrastructure.getUserLogin().getPerson().getId());
+		ProviderRxPreference rxPreference = providerService.getRxPreferenceFor(provider);
+		if(rxPreference == null)
+			 rxPreference = new ProviderRxPreference();
+		rxPreference.setProvider(provider);
+	]]>		
+	</zscript>
+	<style>
+		.subItemClass{
+			padding-left:20px;
+		}
+	</style>
+	<window border="normal" id="providerRxPreferences">
+		<h:table width="100%">
+			<h:tr>
+				<h:td width="25%">
+					<label value="Patient Allergy Check Required"></label>
+				</h:td>
+				<h:td>
+				<div width="15%">
+					<combobox selectedItem="@{rxPreference.preferences.PATIENT_ALLERGY_CHECK_REQUIRED}">
+						<comboitem  />
+						<comboitem value="true" label="Yes" ></comboitem>
+						<comboitem value="false" label="No"></comboitem>
+						<attribute name="onCreate">
+							self.setSelectedItem((Comboitem) self.getItems().get(0));
+						</attribute>
+						<attribute name="onSelect">
+						if(self.getSelectedItem().getValue().equals("true"))
+						rxPreference.getPreferences().put("PATIENT_ALLERGY_CHECK_REQUIRED",Boolean.TRUE);
+						else
+						rxPreference.getPreferences().put("PATIENT_ALLERGY_CHECK_REQUIRED",Boolean.FALSE);
+						</attribute>
+					</combobox>
+				</div>	
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td class="subItemClass" width="25%">
+					<label value="Contraindication Check Required"></label>
+				</h:td>
+				<h:td>
+				<div width="15%">
+						<combobox>
+						<comboitem  />
+						<comboitem value="true" label="Yes" ></comboitem>
+						<comboitem value="false" label="No"></comboitem>
+						<attribute name="onCreate">
+							self.setSelectedItem((Comboitem) self.getItems().get(0));
+						</attribute>
+						<attribute name="onSelect">
+						if(self.getSelectedItem().getValue().equals("true"))
+						rxPreference.getPreferences().put("DRUG_CONTRAINDICATION_CHECK_REQUIRED",Boolean.TRUE);
+						else
+						rxPreference.getPreferences().put("DRUG_CONTRAINDICATION_CHECK_REQUIRED",Boolean.FALSE);
+						</attribute>
+					</combobox>
+					</div>
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td class="subItemClass" width="25%">
+					<label value="Adverse Reaction Check Required"></label>
+				</h:td>
+				<h:td>
+				<div width="15%">
+					<combobox>
+						<comboitem  />
+						<comboitem value="true" label="Yes" ></comboitem>
+						<comboitem value="false" label="No"></comboitem>
+						<attribute name="onCreate">
+							self.setSelectedItem((Comboitem) self.getItems().get(0));
+						</attribute>
+						<attribute name="onSelect">
+						if(self.getSelectedItem().getValue().equals("true"))
+						rxPreference.getPreferences().put("DRUG_ADVERSE_REACTION_CHECK_REQUIRED",Boolean.TRUE);
+						else
+						rxPreference.getPreferences().put("DRUG_ADVERSE_REACTION_CHECK_REQUIRED",Boolean.FALSE);
+						</attribute>
+					</combobox>
+					</div>
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td class="subItemClass" width="25%">
+					<label value="Interaction Check Required"></label>
+				</h:td>
+				<h:td>
+				<div width="15%">
+					<combobox>
+						<comboitem  />
+						<comboitem value="true" label="Yes" ></comboitem>
+						<comboitem value="false" label="No"></comboitem>
+						<attribute name="onCreate">
+							self.setSelectedItem((Comboitem) self.getItems().get(0));
+						</attribute>
+						<attribute name="onSelect">
+						if(self.getSelectedItem().getValue().equals("true"))
+						rxPreference.getPreferences().put("DRUG_INTERACTION_CHECK_REQUIRED",Boolean.TRUE);
+						else
+						rxPreference.getPreferences().put("DRUG_INTERACTION_CHECK_REQUIRED",Boolean.FALSE);
+						</attribute>
+					</combobox>
+					</div>
+				</h:td>
+			</h:tr>
+			
+			<h:tr>
+				<h:td class="subItemClass" width="25%">
+					<label value="Drug Classification Check Required"></label>
+				</h:td>
+				<h:td>
+				<div width="15%">
+					<combobox>
+						<comboitem  />
+						<comboitem value="true" label="Yes" ></comboitem>
+						<comboitem value="false" label="No"></comboitem>
+						<attribute name="onCreate">
+							self.setSelectedItem((Comboitem) self.getItems().get(0));
+						</attribute>
+						<attribute name="onSelect">
+						if(self.getSelectedItem().getValue().equals("true"))
+						rxPreference.getPreferences().put("DRUG_CLASSIFICATION_CHECK_REQUIRED",Boolean.TRUE);
+						else
+						rxPreference.getPreferences().put("DRUG_CLASSIFICATION_CHECK_REQUIRED",Boolean.FALSE);
+						</attribute>
+					</combobox>
+					</div>
+				</h:td>
+			</h:tr>
+			<h:tr>
+				<h:td width="25%">
+					<label value="Drug - Drug Interation Check Required"></label>
+				</h:td>
+				<h:td>
+				<div width="15%">
+					<combobox>
+						<comboitem  />
+						<comboitem value="L" label="Low Severity"></comboitem>
+						<comboitem value="M" label="Medium Severity"></comboitem>
+						<comboitem value="H" label="High Severity"></comboitem>
+						<attribute name="onCreate">
+							self.setSelectedItem((Comboitem) self.getItems().get(0));
+						</attribute>
+						<attribute name="onSelect">
+						rxPreference.getPreferences().put("DRUG_DRUG_INTERACTION_CHECK_REQUIRED",Boolean.TRUE);
+						if(self.getSelectedItem().getValue().equals("L")){
+						if(rxPreference.getId()!=null){
+						rxPreference.getPreferences().remove("LOW_SEVERITY_CHECK_REQUIRED");
+						rxPreference.getPreferences().remove("MEDIUM_SEVERITY_CHECK_REQUIRED");
+						rxPreference.getPreferences().remove("HIGH_SEVERITY_CHECK_REQUIRED");
+						}
+						rxPreference.getPreferences().put("LOW_SEVERITY_CHECK_REQUIRED",Boolean.TRUE);
+						}	
+						if(self.getSelectedItem().getValue().equals("M")){
+						if(rxPreference.getId()!=null)
+						rxPreference.getPreferences().remove("LOW_SEVERITY_CHECK_REQUIRED");
+						rxPreference.getPreferences().remove("MEDIUM_SEVERITY_CHECK_REQUIRED");
+						rxPreference.getPreferences().remove("HIGH_SEVERITY_CHECK_REQUIRED");
+						rxPreference.getPreferences().put("MEDIUM_SEVERITY_CHECK_REQUIRED",Boolean.TRUE);
+						}	
+						if(self.getSelectedItem().getValue().equals("H")){
+						if(rxPreference.getId()!=null)
+							rxPreference.getPreferences().remove("LOW_SEVERITY_CHECK_REQUIRED");
+						rxPreference.getPreferences().remove("MEDIUM_SEVERITY_CHECK_REQUIRED");
+						rxPreference.getPreferences().remove("HIGH_SEVERITY_CHECK_REQUIRED");
+							rxPreference.getPreferences().put("HIGH_SEVERITY_CHECK_REQUIRED",Boolean.TRUE);
+						}			
+						</attribute>
+					</combobox>
+					</div>
+				</h:td>
+			</h:tr>
+		</h:table>
+		<div sclass="panelFoot">
+			<button label="Save" onClick="commonCrudService.save(rxPreference);com.nzion.util.UtilMessagesAndPopups.showSuccess()"/>
+		</div>
+	</window>
+</zk>

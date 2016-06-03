@@ -1,0 +1,63 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window id="soapSectionDetailsWin" width="30%" mode="modal" position="center" closable="true" title="Audit">
+	<zscript>
+		com.nzion.domain.base.BaseEntity baseEntity = arg.get("baseEntity");
+		baseEntity = commonCrudService.getById(baseEntity.getClass(),baseEntity.getId());
+		boolean isActive = baseEntity.isActive();
+	</zscript>
+	
+	<n:table cellspacing="10">
+		<n:tr>
+		   <n:td>
+			<label value="Created By" style="color:#333333;font:11px normal Tahoma,Geneva,sans-serif;font-weight:bold;"/>
+			</n:td>
+			<n:td>
+			<label value="${baseEntity.createdBy}"/>
+		   </n:td>
+		</n:tr>
+		<n:tr>
+		   <n:td>
+			<label value="Created Time Stamp" style="color:#333333;font:11px normal Tahoma,Geneva,sans-serif;font-weight:bold;"/>
+			</n:td>
+			<n:td>
+			<label value="${baseEntity.createdTxTimestamp}"/>
+		   </n:td>
+		</n:tr>
+		<n:tr>
+		   <n:td>
+			<label value="Updated By" style="color:#333333;font:11px normal Tahoma,Geneva,sans-serif;font-weight:bold;"/>
+			</n:td>
+			<n:td>
+			<label value="${baseEntity.updatedBy}"/>
+		   </n:td>
+		</n:tr>
+		<n:tr>
+		   <n:td>
+			<label value="Updated Time Stamp" style="color:#333333;font:11px normal Tahoma,Geneva,sans-serif;font-weight:bold;"/>
+			</n:td>
+			<n:td>
+			<label value="${baseEntity.updatedTxTimestamp}"/>
+		   </n:td>
+		</n:tr>
+		<n:tr>
+		   <n:td>
+			<label value="Deactivated By" style="color:#333333;font:11px normal Tahoma,Geneva,sans-serif;font-weight:bold;" if="${!isActive}"/>
+			</n:td>
+			<n:td>
+			<name object="${baseEntity.deactivatedBy}" if="${!isActive}"/>
+		   </n:td>
+		</n:tr>
+		<n:tr>
+		   <n:td>
+			<label value="Deactivation Reason" style="color:#333333;font:11px normal Tahoma,Geneva,sans-serif;font-weight:bold;" if="${!isActive}"/>
+			</n:td>
+			<n:td>
+			<label value="${baseEntity.deactivationReason}" if="${!isActive}"/>
+		   </n:td>
+		</n:tr>
+	</n:table>
+</window>
+</zk>

@@ -1,0 +1,174 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./cmplIPTxnItemPrintWindow"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:h="http://www.w3.org/1999/xhtml">
+    <zscript><![CDATA[
+		import com.nzion.domain.billing.InvoiceType;
+		com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+        com.nzion.service.billing.BillingService billingService = com.nzion.util.Infrastructure.getSpringBean("billingService");
+        String invId = param.get("invoiceId")[0];
+        com.nzion.zkoss.composer.BillingController billingController  = new com.nzion.zkoss.composer.BillingController();
+        com.nzion.domain.inpatient.PatientAdmission patientAdmission;
+        com.nzion.domain.billing.Invoice invoice;
+        if(com.nzion.util.UtilValidator.isNotEmpty(invId)){
+            invoice= billingController.getInvoice();
+            patientAdmission = invoice.getPatientAdmission();
+        }
+        else{
+            patientAdmission= commonCrudService.getById(com.nzion.domain.inpatient.PatientAdmission.class, new Long(param.get("paId")[0])) ;
+            Map invoiceAndItemsToUpd = billingService.viewInvoiceFor(patientAdmission);
+            invoice = invoiceAndItemsToUpd.get("INVOICE");
+            billingController.extractInvoiceToDisplay(invoice);
+        }
+        
+        Date date=new Date();
+        List invoicePayments ;
+        if(invoice.getInvoicePayments() != null)
+            invoicePayments = new ArrayList(invoice.getInvoicePayments());
+        String paymentMode = "Payment Mode : "; 
+        if(com.nzion.util.UtilValidator.isNotEmpty(invoicePayments)){
+            paymentMode += invoicePayments.size() > 1? "Multiple" : invoicePayments.get(0).getPaymentMethod().getDescription();
+        }
+        com.nzion.domain.emr.UnitOfMeasurement billingCurrency = billingService.getConfiguredCurrency();
+        List decdutibleItems  = billingController.getInvoiceDeductibleItemMap().get(InvoiceType.DEDUCTIBLE.name());
+        List adavanceItems = billingController.getInvoicePrevAdvanceItemMap().get(InvoiceType.IPD_ADVANCE.name());
+        Boolean deductiblesAvailable = com.nzion.util.UtilValidator.isNotEmpty(decdutibleItems);
+        Boolean advanceAvailable = com.nzion.util.UtilValidator.isNotEmpty(billingController.getInvoicePrevAdvanceItemMap().get(InvoiceType.IPD_ADVANCE.name()));
+        boolean isWrittenOff =  billingController.getInvoice().getInvoiceStatus().equals(com.nzion.domain.billing.InvoiceStatusItem.WRITEOFF.toString());
+        billingController.getInvoiceItemMap();
+        com.nzion.domain.Practice practice = com.nzion.util.Infrastructure.getPractice();
+        com.nzion.repository.common.CommonCrudRepository commonCrudRepository = com.nzion.util.Infrastructure.getSpringBean("commonCrudRepository");
+        List userLogins = commonCrudRepository.findByEquality(com.nzion.domain.UserLogin.class,new String[]{"username"},new Object[]{invoice.getCollectedByUser()});
+        com.nzion.domain.UserLogin userlogin = (com.nzion.domain.UserLogin) userLogins.get(0);
+        com.nzion.domain.Person person  = commonCrudRepository.findUniqueByEquality(com.nzion.domain.Person.class, new String[]{"id"}, new Object[]{userlogin.getPerson().getId()});
+        String name = person.getFirstName() + " " + person.getLastName();
+        Date createdTxTimestamp = invoice.getCreatedTxTimestamp();
+        String invoiceDate = com.nzion.util.UtilDateTime.formatDateToDatetimeFormat(createdTxTimestamp);
+        
+        com.nzion.domain.product.common.Money price=new com.nzion.domain.product.common.Money();
+        
+        java.math.BigDecimal advaceAmount=java.math.BigDecimal.ZERO;
+        java.math.BigDecimal paidAmount=java.math.BigDecimal.ZERO;
+        
+        for (com.nzion.domain.billing.InvoicePayment invoicePayment : invoice.getInvoicePayments()) {
+           if (invoicePayment.isAdvance()) {
+               advaceAmount=advaceAmount.add(invoicePayment.getAmount().getAmount());
+             } 
+           else
+               paidAmount=paidAmount.add(invoicePayment.getAmount().getAmount());
+        }
+        
+        java.math.BigDecimal remainingAmount= invoice.getTotalAmount().getAmount().subtract(advaceAmount);
+        
+    ]]></zscript>
+    <style>
+        .notePreview{ bottom: -15px; position: relative; }
+        .summaryHeader{ background-color: #ECECEC; border: 1px solid #A2A2A2; border-radius: 3px 3px 3px 3px; margin-top:10px; padding: 8px; }
+        .footerClass{ font-family: arial,sans-serif; font-size: 11px; font-weigh t: normal; text-align: right; }
+        .mid, .pgTtl {padding: 0 98px; }
+        .rCont { top: -10px; width: 97%; z-index: 1; }
+        .total{ margin-right:19% }
+        .personDet{
+            border: 1px solid #333;
+            align:center;
+            margin : 2px 0px 0px 0px;
+        }
+        .invoiceTable{
+            border: 1px solid #333;
+            align:center;
+        }
+        .invoiceTable th{
+            text-align:left;
+            font-size: 13px;
+            font-weight:bold;
+            border: 1px solid #333;
+            border-collapse:collapsed;
+            padding-left:5px;
+            color:#333;	
+            padding:5px;
+        }
+        .invoiceTable td{
+            text-align:left;
+            font-size: 12px;
+            font-weight:bold;
+            border-right: 1px solid #333;
+            border-left: 1px solid #333;
+            border-collapse:collapsed;
+            padding:0px 2px 4px 5px;
+        }
+        .personDet td{
+            padding:2px;
+        }
+    </style>
+    <window id="cmplIPTxnItemPrintWindow" apply="${billingController}" self="@{define(content)}">
+        <attribute name="onCreate">
+                Clients.print();
+        </attribute>
+        <div style="margin-top:1.3in;">
+            <hbox>
+                <vbox style="margin-left:1.0in;">
+                    <label value="${billingController.invoice.invoiceNumber}"/>
+                    <name object="@{billingController.invoice.patient}"/>
+                    <label value="${invoice.patient.gender.description}"/>
+                </vbox>
+                <vbox style="margin-left:470px;">
+                    <label value="${invoiceDate}"/>
+                    <label value="@{invoice.patient.age}"/>
+                </vbox>
+            </hbox>
+        </div>
+        <div style="margin-left:0.1in;margin-top:0.4in">
+            <div style="margin-top:20px;height:1.8in;height:1.8in;">
+                <hbox>
+                    <div style="width:500px;text-align:left;padding-top:4.5px;">
+                        <label value="Total IP Bill "/>
+                    </div>
+                    <div style="width:80px;margin-left:200px;text-align:right;padding-top:4.5px;"> 
+                        <label value="@{invoice.totalAmount.price,load-after='self.onReload'}"/>
+                    </div>
+                </hbox>
+                <hbox>
+                    <div style="width:500px;text-align:left;padding-top:4.5px;">
+                        <label value="Advance Paid "/>
+                    </div>
+                    <div style="width:80px;margin-left:200px;text-align:right;padding-top:4.5px;"> 
+                        <label value="@{advaceAmount,load-after='self.onReload'}"/>
+                        <label value="@{billingController.invoice.totalAmount.currency.code}"/>
+                    </div>
+                </hbox>
+               </div>
+            <hbox style="margin-top:20px;">
+                <label value="Received By : " style="font-weight:bold;padding-top:4.5px;"/>
+                <label value="@{name}" style="font-weight:bold;"/>
+            </hbox>
+            <hbox>
+                <div style="width:450px;text-align:right;margin-left:250px;padding-top:4.5px;">
+                    <label value="Remaining Bill Amount " style="font-weight:bold;"/>
+                </div>
+                <div style="margin-left:10px;text-align:right;width:100px;padding-top:4.5px;"> 
+                    <label id="overAllAmt" value="@{remainingAmount,load-after='self.onReload'}" style="font-weight:bold;"/>
+                    <label value="@{billingController.invoice.totalAmount.currency.code}"/>
+                </div>
+            </hbox>
+            <hbox>
+                <div style="width:450px;text-align:right;margin-left:250px;padding-top:4.5px;">
+                    <label value="${c:l('collectedAmount')} " style="font-weight:bold;"/>
+                </div>
+                <div style="margin-left:10px;text-align:right;width:100px;padding-top:4.5px;"> 
+                    <label id="overAllCollectedAmt" value="@{paidAmount,load-after='self.onReload'}" style="font-weight:bold;" />
+                    <label value="@{billingController.invoice.totalAmount.currency.code}"/>
+                </div>
+            </hbox>
+            <hbox>
+                <div style="width:450px;text-align:right;margin-left:250px;padding-top:4.5px;">
+                    <label value="${c:l('balanceAmount')}" if='${invoice.invoiceStatus != "WRITEOFF"}' style="font-weight:bold;"/>
+                    <label value="Discounted Amount" if='${invoice.invoiceStatus == "WRITEOFF"}' style="font-weight:bold;"/>
+                </div>
+                <div style="margin-left:10px;text-align:right;width:100px;"> 
+                    <label value="@{invoice.balanceAmount,load-after='self.onReload'}" style="font-weight:bold;"/>
+                    <label value="@{billingCurrency.code}" style="font-weight:bold;"></label>
+                </div>
+            </hbox>
+        </div>
+    </window>
+</zk>

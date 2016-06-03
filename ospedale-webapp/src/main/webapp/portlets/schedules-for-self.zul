@@ -1,0 +1,76 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./signinPortletWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+	import com.nzion.view.component.GenericDescendingCompartor;
+	import com.nzion.domain.Person;
+	import com.nzion.view.component.GenericAscendingComparator;
+	com.nzion.zkoss.composer.appointment.SigninPortletController signinController = new com.nzion.zkoss.composer.appointment.SigninPortletController(true);
+	GenericAscendingComparator ascComp = new GenericAscendingComparator("patient.firstName");
+	GenericDescendingCompartor descComp = new GenericDescendingCompartor("patient.firstName");
+</zscript>
+	<style>
+	.z-datebox{
+		  display:inline-block;
+	 }
+	</style>
+<div id="signinPortletWindow" apply="${signinController}">
+<panel  sclass="gridCont">
+	<panelchildren>
+		<div sclass="grid clr prel">
+			<space height="5px"></space>
+		<hlayout spacing="50px" style="margin-left:10px">
+			<hlayout width="100%" spacing="20px">
+				<label value="Date"/>
+				<datebox width="100%" value="@{signinController.selectedDate}" id="date" constraint="no future" />
+			</hlayout>
+		</hlayout>
+		<space height="5px"></space>
+		<listbox id="schedulesOfTheDayListBox" model="@{signinController.allRelevantSchedules, load-after='date.onChange'}">
+			<listhead>
+				<listheader label="MRN" style="font-weight:bold" width="60px" />
+				<listheader label="Patient Name" style="font-weight:bold" width="23%" sortAscending="${ascComp}" sortDescending="${descComp}"/>
+				<listheader label="To Meet" style="font-weight:bold" width="23%"/>
+				<listheader label="Attended By" style="font-weight:bold" width="23%"/>
+				<listheader label="Room" style="font-weight:bold" />
+				<listheader label="Actions" style="font-weight:bold" />
+			</listhead>
+			<listitem self="@{each='schedule'}" value="@{schedule}" 
+				onDoubleClick='Executions.getCurrent().sendRedirect("/soap/soapnote.zul?scheduleId="+self.getValue().getId(),"_soapNote");'>
+				<attribute name="onReloadRequest">
+					com.nzion.domain.emr.PatientVisit lastVisit = self.getValue().getLastPatientVisit();
+					self.getChildren().get(3).getFirstChild().setObject(lastVisit.getMetWith());
+					self.getChildren().get(4).getFirstChild().setValue(lastVisit.getRoom().getFixedAssetName());
+				</attribute>
+				<listcell>
+					<label value="@{schedule.patient.accountNumber}" />
+				</listcell>
+				<listcell>
+					<name object="@{schedule.patient}" />
+				</listcell>
+				<listcell>
+					<name object="@{schedule.person}" />
+				</listcell>
+				<listcell>
+					<name object="@{schedule.lastPatientVisit.metWith}" />
+				</listcell>
+				<listcell>
+					<label value="@{schedule.lastPatientVisit.room}" />
+				</listcell>
+				<listcell>
+					<button label="Reassign">
+						<attribute name="onClick">
+							Map args = com.nzion.util.UtilMisc.toMap("schedule", self.getParent().getParent().getValue());
+							Window w = Executions.createComponents("/appointment/add-edit-patient-visit.zul", signinPortletWindow, args);
+							w.addForward("onDetach", self.getParent().getParent(),"onReloadRequest");
+						</attribute>
+					</button>
+				</listcell>
+			</listitem>
+		</listbox>
+	</div>
+	</panelchildren>
+</panel>
+</div>
+</zk>

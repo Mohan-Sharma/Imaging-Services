@@ -1,0 +1,28 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./facesheetWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	com.nzion.zkoss.composer.PatientSoapNoteController patientSoapNoteController = arg.get("patientSoapNoteController");
+	com.nzion.domain.Patient patient = patientSoapNoteController.getPatient();
+	List latestRecordedPatientAlleries = soapNoteService.getLatestPatientAllergy(patient, 5);
+</zscript>
+	<div id="facesheetWindow" sclass="soapNoteContL col2">
+		<panel title="Allergies" collapsible="true" height="300px">
+			<panelchildren>
+				<div sclass="dataTables_scrollBody" style="overflow: auto; height: 200px;">
+					<listbox>
+						<listhead>
+							<listheader label="Name" />
+							<listheader label="Severity" />
+						</listhead>
+						<listitem forEach="${latestRecordedPatientAlleries}">
+							<listcell label="${each.allergyName}" />
+							<listcell label="${each.allergySeverityName}" />
+						</listitem>
+					</listbox>
+				</div>
+			</panelchildren>
+		</panel>
+	</div>
+</zk>

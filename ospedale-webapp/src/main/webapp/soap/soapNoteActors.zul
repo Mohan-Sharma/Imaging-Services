@@ -1,0 +1,24 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapNoteActorsWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window id="soapNoteActorsWin" width="20%" mode="modal" position="center" closable="true" title="SOAP Note Actors">
+	<zscript>
+		List soapNoteActors = arg.get("soapactors");
+	</zscript>
+	<div style="padding:10px">
+			<listbox model="@{soapNoteActors}" id="resultBox" rows="5">
+				<listhead>
+					<listheader label="Role"/>
+					<listheader label="Person Name"/>
+				</listhead>
+				<listitem self="@{each='soapNoteActor'}" value="@{soapNoteActor}" >
+					<listcell> <role object="@{soapNoteActor.actingRole}"/> </listcell>
+					<listcell> <name object="@{soapNoteActor.person}"/> </listcell>
+				</listitem>
+			</listbox>	
+			<separator/>
+	</div>
+	</window>
+</zk>

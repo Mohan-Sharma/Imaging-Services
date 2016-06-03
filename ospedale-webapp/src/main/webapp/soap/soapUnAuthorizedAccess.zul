@@ -1,0 +1,50 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/soapnotetemplate.zul"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapUnAuthorizedWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+<![CDATA[
+	import com.nzion.domain.emr.soap.*;
+	import com.nzion.domain.messaging.Message;
+	import com.nzion.view.RolesValueObject;
+	String soapNoteId = Executions.getCurrent().getParameter("soapNoteId");
+	PatientSoapNote patientSoapNote = commonCrudService.getById(PatientSoapNote.class, new Long(soapNoteId));
+	com.nzion.domain.Patient patient = patientSoapNote.getPatient();
+	com.nzion.domain.Provider provider = patientSoapNote.getProvider();
+	String name = patient.getFirstName() + " " + patient.getLastName();
+	Message message = new Message();
+]]>
+</zscript>
+	<window self="@{define(content)}" id="soapUnAuthorizedWindow">
+		<n:div style="color:red;width:100%;text-align:center;">
+			<n:h2>You are restricted to view the soap note of</n:h2>
+			<n:h2>${name}</n:h2>
+		</n:div>
+		<div align="center" style="margin:20px">
+			<button  label="Request For Access" onClick="messageSectionDiv.setVisible(true)" />
+		</div>
+		<separator />
+		<div id="messageSectionDiv" visible="false" style="margin-left:40px">
+			<div align="left" style="margin-left:40px">
+				<label value="To:" />
+				<name object="@{provider}" />
+			</div>
+			<separator />
+			<div align="left" style="margin-left:40px">
+				<label value="Message" />
+				<textbox rows="6" cols="90" value="@{message.messageText}" />
+			</div>
+			<separator />
+			<div align="right" width="127px">
+				<button  label="Send">
+					<attribute name="onClick">
+						message.getPersons().add(patientSoapNote.getSchedule().getProvider());
+						commonCrudService.save(message);
+						com.nzion.util.UtilMessagesAndPopups.showSuccess("Message Sent Successfully");
+					</attribute>
+				</button>
+				<button  label="Cancel" onClick="messageSectionDiv.setVisible(false)" />
+			</div>
+		</div>
+	</window>
+</zk>

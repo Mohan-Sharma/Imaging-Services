@@ -1,0 +1,316 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapGeneralExamWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<window id="soapGeneralExamWin" width="100%">
+		<zscript>
+	import com.nzion.util.UtilMisc;
+	import com.nzion.domain.Patient;
+	import com.nzion.domain.emr.VitalSign;
+	import com.nzion.domain.emr.soap.PatientGeneralExamination;
+	import com.nzion.domain.emr.soap.vitalsign.VitalSignReading;
+	import com.nzion.zkoss.composer.PatientSoapNoteController;
+	import com.nzion.domain.emr.soap.GeneralExaminationSection;
+	PatientSoapNoteController controller = (PatientSoapNoteController) arg
+			.get("controller");
+	int patientAgeInYears = com.nzion.util.UtilDateTime.getIntervalInYears(
+			controller.getPatient().getDateOfBirth(), controller.getSoapNote()
+					.getDate());
+	GeneralExaminationSection generalExaminationSection = (GeneralExaminationSection) controller
+			.getSoapSection(com.nzion.domain.emr.soap.GeneralExaminationSection.class);
+	Set readings = generalExaminationSection.getPatientGeneralExaminations();
+	List allVitalSignReading = new ArrayList();
+</zscript>
+		<panel collapsible="false" border="none">
+			<caption label="Growth Datas" />
+			<panelchildren>
+				<div sclass="action" style="float:right;padding:5px">
+					<hlayout>
+						<radiogroup>
+							<radio label="Metric" checked="true"
+								id="metric" w:onClick="javascript:toggleMetric();" />
+							<radio label="English" id="eng"
+								w:onClick="javascript:toggleEng();" />
+						</radiogroup>
+						<span sclass="linkBtn linkBtnOn">
+							<a label="New" disabled="${controller.readonly}" id="newBtn" sclass="addBtn" >
+								<attribute name="onClick">
+									Window generalExaminationSectionWin = (Window) Executions.createComponents(
+									"/soap/addSoapGeneralExamination.zul", soapGeneralExamWin, UtilMisc
+									.toMap("controller", controller, "soapGeneralExamWin",
+									soapGeneralExamWin));
+									generalExaminationSectionWin.doModal();
+								</attribute>
+								<n:i class="icon-plus-sign"></n:i>
+							</a>
+						<span />
+						</span>
+						<div
+							if="${patientAgeInYears ge 2 &amp;&amp; patientAgeInYears le 20}">
+							<label value="|" />
+							<a label="Weight Graph">
+								<attribute name="onClick">
+	plotGrowthChart(controller, "wtage.csv", VitalSign.WETGHT,
+			"Weight growth for", controller.getPatient());
+	for (com.nzion.domain.emr.soap.PatientGeneralExamination patientExamination : readings) {
+		VitalSignReading vitalSignReading = VitalSignReading
+				.convertToVitalSignReading(patientExamination);
+		allVitalSignReading.add(vitalSignReading);
+	}
+</attribute>
+							</a>
+							<label value="|" />
+							<a label="Height Graph">
+								<attribute name="onClick">
+	plotGrowthChart(controller, "statage.csv", VitalSign.HEIGHT,
+			"Height growth for", controller.getPatient());
+</attribute>
+							</a>
+							<label value="|" />
+							<a label="BMI Graph">
+								<attribute name="onClick">
+	plotGrowthChart(controller, "bmiage.csv", VitalSign.BMI, "BMI growth for",
+			controller.getPatient());
+</attribute>
+							</a>
+						</div>
+					</hlayout>
+				</div>
+				<space height="10px"></space>
+				<zscript>
+	<![CDATA[
+	void plotGrowthChart(
+			com.nzion.zkoss.composer.PatientSoapNoteController controller,
+			String datafile, String vitalsign, String lbl, Patient patient) {
+		if (!"F".equalsIgnoreCase(controller.getPatient().getGender()
+				.getEnumCode())
+				&& !"M".equalsIgnoreCase(controller.getPatient().getGender()
+						.getEnumCode())) {
+			com.nzion.util.UtilMessagesAndPopups
+					.showError("Growth chart is not available: Patient Gender not defined.");
+			return;
+		}
+		session.setAttribute("patientSoapNoteController", controller);
+		session.setAttribute("datafile", datafile);
+		session.setAttribute("vitalsign", vitalsign);
+		session.setAttribute("readings", allVitalSignReading);
+		session.setAttribute("lbl", lbl);
+		execution.sendRedirect("/soap/growthChart.zul", "_blank");
+	}
+]]>
+</zscript>
+				<div>
+					<n:div id="metricDiv">
+						<n:table id="vitalSignReading">
+							<n:thead>
+								<n:tr>
+									<n:th>Recorded On</n:th>
+									<n:th>Height</n:th>
+									<n:th>Weight</n:th>
+									<n:th>Head Circumference</n:th>
+									<n:th>Chest Circumference</n:th>
+									<n:th>BMI</n:th>
+									<n:th>Action</n:th>
+								</n:tr>
+							</n:thead>
+							<n:tbody>
+								<n:tr forEach="${readings}">
+									<n:td>
+										${display:fd(each.dateOfMeasurement)}
+									</n:td>
+									<n:td>
+										<n:label
+											if="${each.height.metricValue!= null}">
+											${each.height.metricValue}
+										</n:label>
+										<n:label
+											if="${each.height.metricValue!= null}">
+											${each.height.metricUnit}
+										</n:label>
+									</n:td>
+									<n:td>
+										<n:label
+											if="${each.weight.metricValue!= null}">
+											${each.weight.metricValue}
+										</n:label>
+										<n:label
+											if="${each.weight.metricValue!= null}">
+											${each.weight.metricUnit}
+										</n:label>
+									</n:td>
+									<n:td>
+										<n:label
+											if="${each.headCircumference.metricValue!= null}">
+											${each.headCircumference.metricValue}
+										</n:label>
+										<n:label
+											if="${each.headCircumference.metricValue!= null}">
+											${each.headCircumference.metricUnit}
+										</n:label>
+									</n:td>
+									<n:td>
+										<n:label
+											if="${each.chestCircumference.metricValue!= null}">
+											${each.chestCircumference.metricValue}
+										</n:label>
+										<n:label
+											if="${each.chestCircumference.metricValue!= null}">
+											${each.chestCircumference.metricUnit}
+										</n:label>
+									</n:td>
+
+									<n:td>
+										<n:label
+											if="${each.weight.metricValue!= null &amp;&amp; each.height.metricValue!= null}">
+											${each.bmiValue}
+											${each.bmiCategory}
+										</n:label>
+									</n:td>
+									<n:td>
+										<div>
+											<custom-attributes
+												value="${each}" />
+											<a class="group"
+												disabled="${controller.readonly}"
+												onClick='addEditGrowths((PatientGeneralExamination)self.getParent().getAttribute("value"))'>
+												Edit
+											</a> |
+											<!-- <a label="Remove" disabled="${controller.readonly}"  onClick='controller.removeSoapRecord(self.getParent().getAttribute("value"),"generalExaminationSection","readings");'/> --> 
+											<a label="Remove" disabled="${controller.readonly}" >
+												<attribute name="onClick">
+													PatientGeneralExamination patientGeneralExamination  =  (PatientGeneralExamination)self.getParent().getAttribute("value");
+													controller.removeSoapRecords(readings,patientGeneralExamination);
+												</attribute>
+											</a>
+										</div>
+									</n:td>
+
+								</n:tr>
+							</n:tbody>
+						</n:table>
+					</n:div>
+					<n:div id="engDiv">
+						<n:table id="vitalSignReadingEng">
+							<n:thead>
+								<n:tr>
+									<n:th>Recorded On</n:th>
+									<n:th>Height</n:th>
+									<n:th>Weight</n:th>
+									<n:th>Head Circumference</n:th>
+									<n:th>Chest Circumference</n:th>
+									<n:th>BMI</n:th>
+									<n:th>Action</n:th>
+								</n:tr>
+							</n:thead>
+							<n:tbody>
+								<n:tr forEach="${readings}">
+									<n:td>
+										${display:fd(each.dateOfMeasurement)}
+									</n:td>
+									<n:td>
+										<n:label
+											if="${each.height.englishValue!= null}">
+											${each.height.englishValue}
+										</n:label>
+										<n:label
+											if="${each.height.englishValue!= null}">
+											${each.height.englishUnit}
+										</n:label>
+									</n:td>
+									<n:td>
+										<n:label
+											if="${each.weight.englishValue!= null}">
+											${each.weight.englishValue}
+										</n:label>
+										<n:label
+											if="${each.weight.englishValue!= null}">
+											${each.weight.englishUnit}
+										</n:label>
+									</n:td>
+									<n:td>
+										<n:label
+											if="${each.headCircumference.englishValue!= null}">
+											${each.headCircumference.englishValue}
+										</n:label>
+										<n:label
+											if="${each.headCircumference.englishValue!= null}">
+											${each.headCircumference.englishUnit}
+										</n:label>
+									</n:td>
+									<n:td>
+										<n:label
+											if="${each.chestCircumference.englishValue!= null}">
+											${each.chestCircumference.englishValue}
+										</n:label>
+										<n:label
+											if="${each.chestCircumference.englishValue!= null}">
+											${each.chestCircumference.englishUnit}
+										</n:label>
+									</n:td>
+
+									<n:td>
+										<n:label
+											if="${each.weight.englishValue!= null &amp;&amp; each.height.englishValue!= null}">
+											${each.bmiValue}
+											${each.bmiCategory}
+										</n:label>
+									</n:td>
+									<n:td>
+										<div>
+											<custom-attributes
+												value="${each}" />
+											<a class="group"
+												disabled="${controller.readonly}"
+												onClick='addEditGrowths((PatientGeneralExamination)self.getParent().getAttribute("value"))'>
+												Edit
+											</a> |
+											<!-- <a label="Remove" disabled="${controller.readonly}"  onClick='controller.removeSoapRecord(self.getParent().getAttribute("value"),"generalExaminationSection","readings");'/>  -->
+											<a label="Remove" disabled="${controller.readonly}" >
+												<attribute name="onClick">
+													PatientGeneralExamination patientGeneralExamination  =  (PatientGeneralExamination)self.getParent().getAttribute("value");
+													controller.removeSoapRecords(readings,patientGeneralExamination);
+												</attribute>
+											</a>
+										</div>
+									</n:td>
+
+								</n:tr>
+							</n:tbody>
+						</n:table>
+					</n:div>
+				</div>
+			</panelchildren>
+		</panel>
+		<script type="text/javascript">
+			zk.afterMount(function() {
+			jq("#vitalSignReading").dataTable({ "bJQueryUI": true,
+			"sPaginationType": "full_numbers" });
+			jq("#vitalSignReadingEng").dataTable({ "bJQueryUI":
+			true,"sPaginationType": "full_numbers"});
+			$("#engDiv").hide(); });
+		</script>
+		<script type="text/javascript">
+			<![CDATA[ function toggleMetric(){ $("#metricDiv").show();
+			$("#engDiv").hide(); } ]]>
+		</script>
+		<script type="text/javascript">
+			<![CDATA[ function toggleEng(){ $("#metricDiv").hide();
+			$("#engDiv").show(); } ]]>
+		</script>
+		
+		
+		<zscript>
+	void addEditGrowths(PatientGeneralExamination patientGeneralExamination) {
+		Window window = Executions.createComponents(
+				"/soap/addSoapGeneralExamination.zul", soapGeneralExamWin,
+				UtilMisc.toMap("controller", controller, "reading",
+						patientGeneralExamination));
+		window.doModal();
+	}
+</zscript>
+	</window>
+</zk>

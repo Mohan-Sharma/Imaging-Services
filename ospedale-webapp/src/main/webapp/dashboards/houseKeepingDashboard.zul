@@ -1,0 +1,13 @@
+<?component name="dashboard" macroURI="/dashboards/dashboard-macro.zul"?>
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/practiceTemplate.zul"?>
+<zk>
+<zscript>
+	setPageTitle("Dashboard", "");
+	List portletDatas = new ArrayList();
+	portletDatas.add(new com.nzion.view.PortletData("Bed Cleaning Requests", "/houseKeeping/clinical-inbox.zul", "../images/housekeeping.png", true));
+	portletDatas.add(new com.nzion.view.PortletData("Messages/Tasks", "/portlets/message-portlet-view.zul",  "../images/mail-message-new-64.png", true));
+</zscript>
+<window self="@{define(applicationContent)}">
+	<dashboard portlets="${portletDatas}" />
+</window>
+</zk>

@@ -1,0 +1,85 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./searchEncounterWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	         import com.nzion.domain.Patient;
+	         com.nzion.view.EncounterSearchValueObject searchObject = new com.nzion.view.EncounterSearchValueObject();
+	         Component component = arg.get("parentComponent");
+	         Set encounters;
+	         Patient patient;
+	]]>
+</zscript>
+	<window width="65%" id="searchEncounterWindow" mode="modal" title="Search Encounter" closable="true" height="75%">
+		<div width="98%" style="padding:5px">
+			<div class="panelHeadTop panelHead">
+				<a href="#" label="Search Criterias" />
+			</div>
+			<div class="panelCont" height="75px">
+				<div>
+					<hbox>
+						<label value="Patient"/>
+						<span zclass="labelReq">
+							<html><![CDATA[*]]></html>
+						</span>
+					</hbox>
+					<lookup id="patientLookUp" entity="com.nzion.domain.Patient" searchcolumns="accountNumber,firstName,lastName"
+						displaycolumns="accountNumber,firstName,lastName" requiredcolumn="accountNumber" onLookedUp="searchObject.setPatient((Patient)self.getResult());patient=(Patient)self.getResult();"/>
+				</div>
+				<div>
+					<label value="Doctor"/>
+					<lookup id="providerLookUp" entity="com.nzion.domain.Provider" searchcolumns="accountNumber,firstName,lastName"
+						displaycolumns="accountNumber,firstName,lastName" requiredcolumn="accountNumber" onLookedUp="searchObject.setProvider((com.nzion.domain.Provider)self.getResult())"/>
+				</div>
+				<div>
+					<label value="From Date"/>
+					<datebox cols="40" value="@{searchObject.fromDate}" />
+				</div>
+				<div>
+					<label value="Thru Date"/>
+					<datebox cols="40" value="@{searchObject.thruDate}" />
+				</div>
+				<div>
+					<label value="Chief Complaint"/>
+					<textbox cols="40" id="chiefCompaintTxtBox"/>
+				</div>
+			</div>
+				<div sclass="panelFoot">
+				<button label="Search" id="search" visible="true" sclass="btn submit">
+				<attribute name="onClick">
+				searchObject.addChiefComplaint(chiefCompaintTxtBox.getValue());
+				if(patientLookUp.getValue().isEmpty())
+				throw new WrongValueException(patientLookUp,"Patient Required");
+				encounters = soapNoteService.searchEncounterFor(searchObject);
+				</attribute>
+				</button>
+			</div>
+			<separator/>
+			<panel title="Results">
+			<panelchildren>
+					<listbox model="@{encounters,load-after='search.onClick'}" rows="10">
+						<listhead>
+							<listheader label="Patient" />
+							<listheader label="Doctor" />
+							<listheader label="Encountered On"/>
+						</listhead>
+						<listitem self="@{each='encounter'}" value="@{encounter}">
+						<listcell label="@{encounter.provider.firstName}"/>
+						<listcell label="@{encounter.provider.firstName}"/>
+						<listcell>
+						<datebox value="@{encounter.date}" buttonVisible="false" readonly="true"/>
+						</listcell>
+						<attribute name="onDoubleClick">
+						com.nzion.domain.emr.soap.PatientSoapNote patientSoapNote = commonCrudService.getById(com.nzion.domain.emr.soap.PatientSoapNote.class,self.getValue().getId());
+						session.setAttribute("entity",patientSoapNote.getSchedule());
+						//desktop.setAttribute("entity",patientSoapNote.getSchedule());
+						Executions.getCurrent().sendRedirect("/soap/soapnote.zul","_blank");
+						</attribute>
+						</listitem>
+					</listbox>
+				</panelchildren>
+			</panel>	
+			</div>		
+	</window>
+</zk>

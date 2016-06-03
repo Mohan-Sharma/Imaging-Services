@@ -1,0 +1,112 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./searchResults"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	com.nzion.zkoss.composer.emr.BillingSearchController billingSearchController1 = billingSearchController;
+	com.nzion.zkoss.ext.DataExporter exporter = new com.nzion.zkoss.ext.CsvDataExporter();
+	List invoiceList=arg.get("invoiceList");
+	billingSearchController1.setInvoices(invoiceList);
+	boolean resultVisible=Executions.getCurrent().getAttributes().get("showResults")==null?false:true;
+</zscript>
+<panel  id="searchResults" title="Patient Bills" visible="${resultVisible}">
+			<caption height="15px">
+				
+			</caption>
+			<panelchildren>
+				<hlayout spacing="20px" style="padding:10px" width="50%">
+					<label value="Group By:" />
+					<listbox id="groupByComboBox" mold="select" sizedByContent="true" style="padding:2px">
+						<listitem/>
+						<listitem label="Procedure" value="Procedure" />
+						<attribute name="onSelect">
+						groupByResultGrid.setVisible(self.getSelectedItem().getValue() != null);
+						searchResultGrid.setVisible(self.getSelectedItem().getValue() == null);
+						gridColumn.setLabel(self.getSelectedItem().getLabel());
+						billingSearchController1.getGroupedItems((String)self.getSelectedItem().getValue());
+						</attribute>
+					</listbox>
+				</hlayout>
+				<!-- <div height="500px" style="overflow:auto" id="searchResultDiv"> -->
+					<paging id="paging" pageSize="10"></paging>
+					<listbox id="searchResultGrid" model="@{invoiceList}"
+						 mold="paging" paginal="${paging}" >
+						<listhead>
+							<listheader label="Patient Name"
+								onCreate='billingSearchController1.setAscendingComparator(self,"patient.firstName");billingSearchController1.setDescendingComparator(self,"patient.firstName")' />
+							<listheader label="Consultant Name"
+								onCreate='billingSearchController1.setAscendingComparator(self,"consultant.firstName");billingSearchController1.setDescendingComparator(self,"consultant.firstName")' />
+							<listheader label="Bill Date"
+								onCreate='billingSearchController1.setAscendingComparator(self,"invoiceDate");billingSearchController1.setDescendingComparator(self,"invoiceDate")' />
+							<listheader label="Bill Status"
+								onCreate='billingSearchController1.setAscendingComparator(self,"invoiceStatus");billingSearchController1.setDescendingComparator(self,"invoiceStatus")' />
+							<listheader label="InPatient #"
+								onCreate='billingSearchController1.setAscendingComparator(self,"ipNumber");billingSearchController1.setDescendingComparator(self,"ipNumber")' />
+							<listheader label="Total Amount"
+								onCreate='billingSearchController1.setAscendingComparator(self,"totalAmount.price");billingSearchController1.setDescendingComparator(self,"totalAmount.price")' />
+								<listheader label="Action" />
+						</listhead>
+						<listitem self="@{each='invoice'}" value="@{invoice}">
+							<listcell>
+								<name object="@{invoice.patient}" />
+							</listcell>
+							<listcell>
+								<name object="@{invoice.consultant}" />
+							</listcell>
+							<listcell label="@{invoice.invoiceDate,converter='com.nzion.view.component.DateConverter'}" />
+							<listcell label="@{invoice.invoiceStatus}" />
+							<listcell label="@{invoice.ipNumber}" />
+							<listcell label="@{invoice.totalAmount.price}" />							
+							<listcell>
+						<button label="View">
+						<attribute name="onClick">
+						Executions.getCurrent().sendRedirect("/billing/billingTxnItem.zul?invoiceId=" + self.getParent().getParent().getValue().getId(),"_BillSoapNote");
+						</attribute>
+						</button>
+						</listcell>
+						</listitem>
+					</listbox>
+					 <grid id="groupByResultGrid" fixedLayout="true" model="@{billingSearchController1.invoiceMap,load-after='groupByComboBox.onSelect'}"
+						visible="false">
+						<columns>
+							<column width="40px"></column>
+ 							<column label="CPT" id="gridColumn" sortAscending="${billingSearchController1.ascendingComparator}"
+								sortDescending="${billingSearchController1.descendingComparator}">
+							</column>
+						</columns>
+ 						<rows>
+							<row self="@{each='invoiceItemGroup'}" value="@{invoiceItemGroup}">
+								<detail open="false">
+									<listbox 
+										model="@{invoiceItemGroup.value}"  mold="paging">
+										<listhead>
+											<listheader label="Patient Name" />
+											<listheader label="Doctor Name" />
+											<listheader label="Bill Status" />
+											<listheader label="Bill#" />
+										</listhead>
+										<listitem self="@{each='invoice'}" value="@{invoice}">
+											<listcell>
+												<name object="@{invoice.patient}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<name object="@{invoice.consultant}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<label value="@{invoice.invoiceStatus}" style="font-weight:normal" />
+											</listcell>
+											<listcell>
+												<label value="@{invoice.id}" style="font-weight:normal" />
+											</listcell>
+											
+										</listitem>
+									</listbox>
+ 								</detail>
+								<label value="@{invoiceItemGroup.key}" />
+							</row>
+						</rows>
+					</grid>
+				<!-- </div> -->
+			</panelchildren>
+		</panel>
+		</zk>

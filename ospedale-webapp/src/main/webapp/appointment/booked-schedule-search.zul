@@ -1,0 +1,166 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./scheduleSearchWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?component name="appointmentMenu" macro-uri="/appointment/appointment-menu.zul" inline="true"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"  	xmlns:w="http://www.zkoss.org/2005/zk/client">
+<window id="scheduleSearchWindow" >
+<zscript>
+	List locations = commonCrudService.getAll(com.nzion.domain.Location.class);
+	com.nzion.view.ScheduleSearchValueObject searchObject = new com.nzion.view.ScheduleSearchValueObject();
+	com.nzion.domain.base.Weekdays weekdays  = com.nzion.domain.base.Weekdays.allSelectedWeekdays();
+	com.nzion.zkoss.composer.appointment.ScheduleController scheduleController = desktop.getAttribute("scheduleController");
+	Listitem selectedListitem;
+	List schedules;
+	com.nzion.domain.Schedule selectedSchedule;
+	com.nzion.domain.Schedule.STATUS[] statuses = com.nzion.domain.Schedule.STATUS.values();
+</zscript>
+
+<script type="text/javascript">
+		<![CDATA[ 
+		          function displayPatientDetails(cellValue){ 
+		        	  jq('#'+cellValue).simpletip(
+		        			  {
+		        				  persistent:true,
+		        				  focus:true,
+								  position:["0", "0"] 
+							  }
+		        	     ).show(); 
+		        	  var api = $('#'+cellValue).eq(0).simpletip();
+					  api.update(jq('#details').html());
+				 }
+		  ]]>
+</script>
+	
+<panel>
+	<panelchildren>
+	<separator/>
+	<vlayout spacing="10px" style="margin:20px">
+		<hlayout spacing="20px">
+			<label value="Resource" mold="required"/>
+			<resourcelookup  onChange="searchObject.setPerson(event.getData())" id="resourceLookup"/>
+			
+			<label value="Location"/>
+			<combobox model="@{locations}" selectedItem="@{searchObject.location}" />
+			
+			<label value="From" mold="required"/>		
+			<datebox  id="fromDateBox" value="@{searchObject.fromDate, save-when='searchBtn.onClick'}" constraint="no empty"/>
+			
+			<label value="From Time"/>
+			<timebox  id="fromTimeBox" value="@{searchObject.fromTime, save-when='searchBtn.onClick'}"/>
+		</hlayout>	
+		<hlayout spacing="20px">
+			<label value="Visit Type"/>
+			<combobox model="@{scheduleService.allSoapNoteTypes}" width="100%" selectedItem="@{searchObject.slotType}">
+				<comboitem self="@{each='slotType'}" label="@{slotType.name}" value="@{slotType}"/>
+			</combobox>
+			<space/><space/>
+			<label value="Status"/>
+			<combobox  selectedItem="@{searchObject.status}">
+				<comboitem forEach="${statuses}" label="${each}" value="${each}"/>
+			</combobox>
+			
+			<label  value="Thru" mold="required"/>		
+			<datebox  id="thruDateBox" value="@{searchObject.thruDate, save-when='searchBtn.onClick'}"  constraint="no empty"/>
+			
+			<label value="Thru Time"/>
+			<timebox id="thruTimeBox" value="@{searchObject.thruTime, save-when='searchBtn.onClick'}"/>
+		</hlayout>
+	</vlayout>	
+	</panelchildren>
+</panel>
+<separator/>
+<div align="center">
+	<button label="Search" id="searchBtn" >
+		<attribute name="onClick">
+			if(searchObject.getPerson() == null)
+				throw new WrongValueException(resourceLookup, "Please select a resource.");
+			com.nzion.util.UtilDisplay.validateDateRange(fromDateBox, thruDateBox);
+//			com.nzion.util.UtilDisplay.validateTimeRange(fromTimeBox, thruTimeBox);
+			schedules = scheduleController.searchBookedSchedules(searchObject);
+		</attribute>
+	</button>
+	<separator/>
+	<n:div class="fr">
+		<n:div id="details" class="form" align="center" style="z-index:999999;display:none">
+									<vlayout spacing="5px">
+										<hlayout>
+											<label sclass="name" value="Patient Name" />
+											<name sclass="z-label"
+												object="@{selectedSchedule.patient, load-after='searchResultListBox.onSelect'}" />
+										</hlayout>
+										<hlayout>
+											<label sclass="name" value="MRN" />
+											<label zclass="none"
+												value="@{selectedSchedule.patient.accountNumber, load-after='searchResultListBox.onSelect'}" />
+										</hlayout>
+										
+										<hlayout>
+											<label sclass="name" value="Date Of Birth" />
+											<label
+												value="@{selectedSchedule.patient.dateOfBirth, load-after='searchResultListBox.onSelect',converter='com.nzion.view.component.DateConverter'}" />
+										</hlayout>
+										<hlayout>
+											<label sclass="name" value="Email" />
+											<label
+												value="@{selectedSchedule.patient.contacts.email, load-after='searchResultListBox.onSelect'}" />
+										</hlayout>
+										<hlayout>
+											<label sclass="name" value="Mobile Phone" />
+											<label
+												value="@{selectedSchedule.patient.contacts.mobileNumber, load-after='searchResultListBox.onSelect'}" />
+										</hlayout>
+										<hlayout>
+											<label sclass="name" value="Home Phone" />
+											<label
+												value="@{selectedSchedule.patient.contacts.homePhone, load-after='searchResultListBox.onSelect'}" />
+										</hlayout>
+										<hlayout>
+											<label sclass="name" value="Office Phone" />
+											<label
+												value="@{selectedSchedule.patient.contacts.officePhone, load-after='searchResultListBox.onSelect'}" />
+										</hlayout>
+										<hlayout>
+											<label sclass="name" value="Address" />
+											<label	value="@{selectedSchedule.patient.contacts.postalAddress, load-after='searchResultListBox.onSelect'}" />
+										</hlayout>
+									</vlayout>
+					</n:div>
+								
+		</n:div>
+</div>
+	<listbox model="@{schedules, load-after='searchBtn.onClick'}" mold="paging" rows="12" id="searchResultListBox" 
+								onSelect="selectedSchedule=(com.nzion.domain.Schedule)self.getSelectedItem().getValue();">
+		<listhead>
+			<listheader label="Date" />
+			<listheader label="Time"/>
+			<listheader label="Patient" />
+			<listheader label="Resource" />
+			<listheader label="Location" />
+			<listheader label="Status" />
+			<listheader label="Visit Type" />
+		</listhead>
+		<listitem self="@{each='schedule'}" value="@{schedule}" onDetach="self.detach();" context="contextMenu">
+			<listcell> <label value="@{schedule.startDate,converter='com.nzion.view.component.DateConverter'}"/> </listcell>
+			<listcell> <time time="@{schedule.slot.startTime}" /> </listcell>
+			<listcell w:onClick='javascript:displayPatientDetails(this.uuid);'>
+				<h:a><name object="@{schedule.patient}"/></h:a></listcell>
+			<listcell> <name object="@{schedule.person}" /> </listcell>
+			<listcell> <label value="@{schedule.location.name}" /> </listcell>
+			<listcell> <label value="@{schedule.status}" /> </listcell>
+			<listcell> <label value="@{schedule.slotType}" /> </listcell>
+		</listitem>
+	</listbox>
+	<menupopup id="contextMenu" onOpen="if(event.isOpen()) selectedListitem = event.getReference()">
+		<menuitem label="Open">
+	    	<attribute name="onClick">
+	    		com.nzion.domain.Schedule schedule = selectedListitem.getValue();
+				Map args = com.nzion.util.UtilMisc.toMap("controller", scheduleController, "schedule", schedule);
+				Executions.createComponents("/appointment/patient-schedule.zul", null, args);
+	    	</attribute>
+	    </menuitem>
+	    <menuitem label="Cancel" onClick="scheduleController.cancelSchedule((com.nzion.domain.Schedule)selectedListitem.getValue());selectedListitem.detach();"/>
+	    <menuitem label="Open SOAP Note" onClick='scheduleController.openSoapNote((com.nzion.domain.Schedule)selectedListitem.getValue());' />
+	</menupopup>
+</window>
+</zk>

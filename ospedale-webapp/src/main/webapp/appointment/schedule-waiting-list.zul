@@ -1,0 +1,116 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./waitingListModalWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+	import com.nzion.zkoss.composer.appointment.ScheduleWaitingListController;
+	import com.nzion.domain.*;
+	
+	ScheduleWaitingListController waitingListController = new ScheduleWaitingListController();
+	Component componentToReceiveWaitingList = Executions.getCurrent().getArg().get("componentToReceiveWaitingList");
+</zscript>
+<window id="waitingListModalWindow" apply="${waitingListController}" mode="modal" width="60%" onReloadForm="reloadRequiredFields()" title="Waitinglist form" 
+	closable="true" position="center,top">
+<zscript>
+	void waitingListSelected(){
+		 ScheduleWaitingList selectedWaitingList = (ScheduleWaitingList)waitingListGrid.getSelectedItem().getValue();
+		 waitingListController.setWaitingList((ScheduleWaitingList)waitingListGrid.getSelectedItem().getValue());
+		 Events.postEvent("onReloadForm",waitingListModalWindow,null);
+	}
+	
+	void reloadRequiredFields(){
+		Provider provider = waitingListController.getWaitingList().getPerson();
+		Patient patient = waitingListController.getWaitingList().getPatient();
+		patientAccountNumber.setDynamicProperty("value", patient);
+		providerAccountNumber.setDynamicProperty("value", provider);
+		patientAccountNumber.recreate();
+		providerAccountNumber.recreate();
+		ScheduleWaitingList waitingList = waitingListController.getWaitingList();
+	}
+	
+	void addToSchedule(Event event){
+	Events.postEvent("onWaitingListReceived", componentToReceiveWaitingList, event.getTarget().getParent().getParent().getValue());
+	}
+</zscript>
+<div sclass="panelCont" height="150px">
+	<div sclass="col2">
+		<div>
+		<label value="MRN"/>
+		<label value=" *" zclass="labelReq"/>
+		</div>
+		<patientlookup onChange="waitingListController.getWaitingList().populatePatient(event.getOrigin().getData())" id="patientAccountNumber"/>
+	</div>
+	<div sclass="col2">
+		<div>
+		<label value="Doctor" />
+		<label value=" *" zclass="labelReq"/>
+		</div>
+		<providerlookup onChange="waitingListController.getWaitingList().setPerson(event.getOrigin().getData())" id="providerAccountNumber" />
+	</div>
+	<div sclass="col2">
+		<label value="Reason" />
+		<textbox value="@{waitingListController.waitingList.comments, load-after='waitingListModalWindow.onReloadForm'}" rows="3"/>			
+	</div>
+	<div>
+		<label value="Phone" />
+		<phonebox value="@{waitingListController.waitingList.preferedContactNumber, load-after='waitingListModalWindow.onReloadForm,patientAccountNumber.onChange'}"/>			
+	</div>
+</div>
+<div sclass="panelFoot">
+	<n:div id="patSearchRes">
+	<n:div>
+			<n:span class="searchBtn">
+					      <a  label="Search" id="searchBtn">
+					      	<attribute name="onClick"><![CDATA[
+								waitingListController.search();
+					      	]]></attribute>
+					      </a>
+					      <n:span/>
+			</n:span>
+		  <n:span class="linkBtn linkBtnOn">
+		      <a  label="Save" id="saveBtn" onClick='waitingListController.save(); Events.postEvent("onReloadForm",waitingListModalWindow,null)' />
+	      <n:span/>
+	    </n:span>
+	    </n:div>
+	</n:div>
+</div>
+<panel>
+<panelchildren>
+<span sclass="linkBtn linkBtnOn" style="margin:5px;border-width:0px">
+	<a id="newBtn" sclass="addBtn" 
+		onClick='waitingListController.startNew(); Events.postEvent("onReloadForm",waitingListModalWindow,null)'>
+	New </a>
+<span/>
+</span>
+<listbox model="@{waitingListController.waitListeds, load-after='saveBtn.onClick, searchBtn.onClick, deleteBtn.onClick'}" 
+					onSelect="waitingListSelected()" id="waitingListGrid" rows="10">
+	<listhead>
+		<listheader label="Patient"/>
+		<listheader label="Doctor"/>
+		<listheader label="Phone"/><!--
+		<listheader label="Reason"/>
+		--><listheader label="Action" />
+	</listhead>
+	<listitem self="@{each='waiting'}" value="@{waiting}">
+		<listcell>
+			<name object="@{waiting.patient}" />
+		</listcell>
+		<listcell>
+			<name object="@{waiting.person}" />
+		</listcell>
+		<listcell>
+			<label value="@{waiting.preferedContactNumber}" />
+		</listcell><!--
+		<listcell>
+			<label value="@{waiting.comments}" />
+		</listcell>
+		--><listcell>
+			<button label="X" id="deleteBtn" onClick='waitingListController.delete(self.getParent().getParent().getValue());'/>
+			<button label="Use" onClick='addToSchedule(event); waitingListModalWindow.detach();' if="${componentToReceiveWaitingList ne null}"/>
+		</listcell>
+	</listitem>
+</listbox>
+</panelchildren>
+</panel>
+</window>
+</zk>

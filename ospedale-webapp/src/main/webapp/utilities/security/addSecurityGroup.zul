@@ -1,0 +1,47 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addEditSecurityGroup"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	        import com.nzion.service.common.CommonCrudService;
+			import com.nzion.util.Infrastructure;
+			import com.nzion.security.PermissionGroup;
+			import com.nzion.security.SecurityGroup;
+			import java.util.*;
+			CommonCrudService commonCrudService = Infrastructure.getSpringBean("commonCrudService");
+			SecurityGroup secGroup = arg.get("entity");
+			Set pgSet = new HashSet();
+			secGroup = secGroup == null ? new SecurityGroup(pgSet)  : secGroup;
+			String label = secGroup.getId()!=null? "Edit Security Group":"New Security Group";
+			Component secGroupComponent =arg.get("securityGroup");
+			List secPermiGroups = arg.get("secPermiGroups");
+	]]>
+	</zscript>
+<window id="addEditSecurityGroup" title="${label}" mode="modal"  width="40%" closable="true">
+	<panel title="${label}" border="normal" collapsible="false">
+			<panelchildren>
+				<div sclass="panelCont" style="width:100%">
+						<label value="Group Name" sclass="labelReqNoPad"/>
+						<label value=" *" zclass="labelReq"/>
+						<textbox value="@{secGroup.securityGroupName,save-when='Save.onClick'}" id="desc" constraint="no empty"/>	
+					
+				</div>
+			</panelchildren>
+	</panel>
+		<separator></separator>
+			<div sclass="buttonPanel">
+			<button label="Save" id="Save" sclass="btn">
+				<attribute name="onClick">
+				<![CDATA[
+					if(secGroup.getId()==null)
+					secPermiGroups.add(secGroup);					
+					commonCrudService.save(secGroup);
+					com.nzion.util.UtilMessagesAndPopups.showSuccess();
+					addEditSecurityGroup.detach();
+					]]>
+				</attribute>
+			</button>
+			
+		</div>
+</window>
+</zk>

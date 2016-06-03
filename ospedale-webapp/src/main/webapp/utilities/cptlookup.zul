@@ -1,0 +1,31 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	String multiple = arg.get("multiple");
+	String txtBoxVisible = arg.get("txtboxvisible") == null ? "true" : arg.get("txtboxvisible");
+	String btnLabel = arg.get("label") == null ? "Look up " : arg.get("label");
+	String btnSclass = arg.get("sclass") == null ? "lookupBtn" : arg.get("sclass");
+	]]>
+	</zscript>
+		<div zclass="form-search" >
+    <div zclass="input-append">
+		 <textbox sclass="search-query" style="height:24px" id="cptTextBox" forward="onChange=onChange" readonly="true"/>			
+		<a zclass="lookupbtn" label="${btnLabel}" >
+			<n:i class="icon-search"></n:i>
+		<attribute name="onClick">
+			Executions.createComponents("/lab/cptLookUp.zul",null,com.nzion.util.UtilMisc.toMap("cptTextBox",cptTextBox,"multiple",multiple,"txtboxvisible",txtBoxVisible));
+		</attribute>
+		</a>
+		
+	</div>
+	</div>
+	<zscript>
+	com.nzion.domain.emr.Cpt cpt = arg.get("cpt");
+	if(cpt!=null)
+		cptTextBox.setValue(cpt.getDescription());
+	if(Boolean.valueOf(multiple))
+		cptTextBox.setValue((String)arg.get("value"));
+	</zscript>
+</zk>

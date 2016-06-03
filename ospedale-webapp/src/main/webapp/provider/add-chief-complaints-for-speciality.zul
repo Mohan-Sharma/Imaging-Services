@@ -1,0 +1,59 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addChiefComplaintsForSpecialityWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript><![CDATA[
+	com.nzion.domain.Speciality speciality = arg.get("speciality");
+	List chiefComplaints;
+	]]></zscript>
+	
+	<window id="addChiefComplaintsForSpecialityWin" mode="modal" position="center,top" width="60%" height="70%" closable="true">
+	<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Chief Complaint</h:small>
+                <button type="button" zclass="close" onClick="addChiefComplaintsForSpecialityWin.detach();">×</button>
+            </h:h1>
+        </div>
+	<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+            <div zclass="span4">
+					<label value="Chief Complaint Name"></label>
+					<textbox id="chiefComplaintTextBox" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty:Chief Complaint Name Required"/>
+				</div>
+			</div>
+			</div>
+			<div sclass="panelFoot">
+				<button label="Search" id="searchButton" zclass="btn btn-primary">
+					<attribute name="onClick">
+						chiefComplaintTextBox.getValue();
+						com.nzion.domain.emr.ChiefComplaint chiefComplaint = new com.nzion.domain.emr.ChiefComplaint();
+						chiefComplaint.setComplainName(chiefComplaintTextBox.getValue());
+						chiefComplaints = providerService.getUnAddedChiefComplaintsFor(speciality,chiefComplaint);
+					</attribute>
+				</button>
+			</div>
+		
+	<div width="97%" style="padding:5px">
+		<panel title="Chief Complaints" id="chiefComplaintsPanel">
+			<attribute name="onAddClick">
+				speciality.getChiefComplaints().addAll(com.nzion.util.ViewUtil.getSelectedItems(specialityChiefComplaintsDisplayGrid));
+				addChiefComplaintsForSpecialityWin.detach();
+			</attribute>
+			<panelchildren>
+				<toolbar listenercomponent="${chiefComplaintsPanel}" hidedelete="true" hidesearch="true" hidecancel="true"/>
+				<listbox multiple="true" checkmark="true" width="100%" id="specialityChiefComplaintsDisplayGrid"  mold="paging"
+					model="@{chiefComplaints,load-after='searchButton.onClick'}" pageSize="10" pagingPosition="top">
+					<listhead>
+						<listheader label="Chief Complaint"/>
+					</listhead>
+					<listitem self="@{each='cc'}" value="@{cc}">
+						<listcell>
+							<label value="@{cc.complainName}" />
+						</listcell>
+					</listitem>
+				</listbox>
+			</panelchildren>
+		</panel>
+		</div>
+	</window>
+</zk>

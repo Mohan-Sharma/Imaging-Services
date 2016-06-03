@@ -1,0 +1,70 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+	import com.nzion.zkoss.composer.appointment.ScheduleCustomViewController;
+	import com.nzion.domain.screen.ScheduleCustomView;
+	
+	ScheduleCustomView choosenView = Executions.getCurrent().getArg().get("choosenView");
+	ScheduleCustomViewController viewController = new ScheduleCustomViewController(choosenView); 
+	List providers = providerRepository.getAll(com.nzion.domain.Provider.class);
+	List fixesdAssets = fixedAssetRepository.getAll(com.nzion.domain.FixedAsset.class);
+	
+	Component victim = Executions.getCurrent().getArg().get("componentToFireEventsOn");
+	 
+	void save(){
+		viewController.save();
+		Events.postEvent("onScheduleViewUpdate", victim, null);
+		scheduleCustomViewWindow.detach();
+	}
+</zscript>
+<window id="scheduleCustomViewWindow" mode="modal" closable="true" apply="${viewController}"  title="Schedule custom view">
+<panel>
+<panelchildren>
+	<div style="margin: 10px;">
+		<label value="Name"/>
+		<textbox value="${viewController.selectedView.name}" onChange="viewController.getSelectedView().setName(self.value)"/>
+		<button label="Save" onClick="save()"/>
+		<button label="Close" onClick="scheduleCustomViewWindow.detach()"/>
+	</div>
+</panelchildren>
+</panel>
+<space height="10px"/>
+<hbox width="100%" widths="50%, 50%">
+<panel title="Choose Doctors" width="100%">
+<panelchildren>
+<listbox multiple="true" checkmark="true" id="providerList" width="100%">
+	<listhead>
+		<listheader label="Code"/>
+		<listheader label="Name"/>
+	</listhead>
+	<listitem checkable="true" forEach="${providers}">
+		<custom-attributes provider="${each}"/>
+		<listcell>
+			<label value="${each.accountNumber}" />
+		</listcell>
+		<listcell>
+			<label value="${each.firstName}" />
+		</listcell>
+	</listitem>
+</listbox>
+</panelchildren>
+</panel>
+<panel title="Choose Resources" width="100%">
+<panelchildren>
+<listbox multiple="true" checkmark="true" id="fixedAssetList" width="100%">
+	<listhead>
+		<listheader label="Name"/>
+	</listhead>
+	<listitem checkable="true" forEach="${fixesdAssets}">
+		<custom-attributes fixedasset="${each}"/>
+		<listcell>
+			<label value="${each.fixedAssetName}" />
+		</listcell>
+	</listitem>
+</listbox>
+</panelchildren>
+</panel>
+</hbox>
+</window>
+</zk>

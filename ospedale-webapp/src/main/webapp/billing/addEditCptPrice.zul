@@ -1,0 +1,47 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./cptPriceWindow"?>
+<?component name="cptlookup" macro-uri="/utilities/cptlookup.zul" inline="false"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript><![CDATA[
+     com.nzion.domain.billing.CptPrice cptPrice = arg.get("entity"); 
+ 	com.nzion.service.common.CommonCrudService service = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+     if(cptPrice == null){
+ 		 com.nzion.domain.screen.BillingDisplayConfig billingDisplayConfig = service.getByPractice(com.nzion.domain.screen.BillingDisplayConfig.class);
+    	 cptPrice = new com.nzion.domain.billing.CptPrice();
+    	 cptPrice.getPrice().setCurrency(billingDisplayConfig.getCurrency());
+     }
+	]]></zscript>
+<window id="cptPriceWindow" mode="modal" closable="true" title="Procedures Price" width="50%"  position="center" >
+			<panel>
+				<panelchildren>
+					<div  sclass="panelCont">
+						<div width="40%">
+							<label value="Procedures"/>
+							<cptlookup onChange="cptPrice.setCpt((com.nzion.domain.emr.Cpt)event.getOrigin().getData())" cpt="${cptPrice.cpt}" id="cptlookupbox"/>
+							</div>
+						<div>
+							<label value="Price"/> 
+							<hbox>
+							<decimalbox value="@{cptPrice.price.amount}"/>
+							<label value="@{cptPrice.price.currency.code}"/>
+							</hbox>
+						</div>
+					</div>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot">					
+			<button label="Save" id="Save">
+				<attribute name="onClick">
+					if(cptPrice.getCpt() == null){
+						com.nzion.util.UtilMessagesAndPopups.showError("Add Procedures");
+						return;
+					}
+					cptPrice.getCpt().setLocation(com.nzion.util.Infrastructure.getSelectedLocation());
+					commonCrudService.save(cptPrice);com.nzion.util.UtilMessagesAndPopups.showSuccess();cptPriceWindow.detach();	
+				</attribute>
+			</button>
+			<button  label="Cancel" id="Cancel" forward="onClick=onCancel"/>
+		</div>
+</window>
+</zk>

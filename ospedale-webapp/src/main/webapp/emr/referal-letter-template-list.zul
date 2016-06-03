@@ -1,0 +1,10 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		setPageTitle("Referral Letters", "");
+	</zscript>
+	<window>
+		<screen width="100%" pagetitle="Referral Letters" listtitle="List of Referral Letters" addpage="addEditReferalLetter" addmodepopup="true" hidedeletebtn="false"
+			entityclass="com.nzion.domain.emr.ReferalLetterTemplate" fields="templateName,active"/>
+	</window>
+</zk>

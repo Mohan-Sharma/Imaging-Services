@@ -1,0 +1,76 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./testHistoryWin"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+		<zscript><![CDATA[
+    import   com.nzion.domain.emr.lab.OBXSegment;
+    com.nzion.domain.emr.soap.PatientSoapNote pSoapNote =  arg.get("pSoapNote");
+    com.nzion.service.emr.lab.LabService labService = com.nzion.util.Infrastructure.getSpringBean("labService");
+    String obxTestName =  arg.get("obxName");
+
+    List labTestResults = commonCrudService.findByEquality(OBXSegment.class,new String[]{"patient","obxName"},new Object[]{pSoapNote.getPatient(),obxTestName});
+    Collections.reverse(labTestResults);
+    int testCount = labTestResults.size();
+]]></zscript>
+
+	<window id="testHistoryWin" mode="modal" closable="true" title="Test Conducted History List" width="70%"  height="80%">
+	 <div style="margin:auto;width:95%">
+	  
+		<div width="98%">
+				<div> Number Of Times <n:b>${obxTestName}</n:b> Test Conducted :  <label value="${testCount}"></label></div>
+				</div>	
+		<div height="330px" style="width:49%;float:left;padding:2px;">
+  				<n:table id="labTestResultsHistoryGrid" cellpadding="0" cellspacing="0" border="0" class="display" >
+				<n:thead>
+						<n:tr>
+							<n:th>Test Performed Date</n:th>
+							<n:th>Observation Value</n:th>
+							<n:th>Unit</n:th>
+							<n:th>Reference Range</n:th>
+							<!-- <n:th>Result Status</n:th> -->
+						</n:tr>
+					</n:thead>
+					<n:tbody>
+						<n:tr forEach="${labTestResults}">
+							<n:td>${each.observationDateTime}</n:td>
+							<n:td>${each.observationValue}</n:td>
+							<n:td>${each.units}</n:td>
+							<n:td>${each.referenceRange}</n:td>
+							<!-- <n:td>${each.resultStatus}</n:td> -->
+						</n:tr>
+					</n:tbody>
+	 		</n:table>
+  		</div>
+  		<div style="width:49%;float:left;padding:2px;">
+  		  <div>
+  		  		<chart id="testHistoryChart" title="Test History Chart" width="400" height="350"
+      				  type="line" threeD="false" fgAlpha="128">
+  		  		</chart>
+  		  		<zscript><![CDATA[ 
+  		  			SimpleCategoryModel	catmodel  = new SimpleCategoryModel();
+	  		  		for( com.nzion.domain.emr.lab.OBXSegment obxObj : labTestResults)
+	  		  		{ 
+	  		  			 if(obxObj.getObservationDateTime() != null && obxObj.getObservationValue() != null)
+	  		  				 catmodel.setValue("Date", com.nzion.util.UtilDateTime.format(obxObj.getObservationDateTime()), new Double(obxObj.getObservationValue()));
+	  		  		}
+  		  			testHistoryChart.setModel(catmodel);
+  		  		]]>
+  		  		</zscript>
+  		  </div>
+  		</div>
+  		</div>
+  		<script type="text/javascript">
+			zk.afterMount(function() { 
+				jq("#labTestResultsHistoryGrid").dataTable({
+				"bJQueryUI": true,
+				"sPaginationType": "full_numbers", 
+				"aoColumns":
+							[ null,null,null,null ] 
+						}); 
+			});
+			
+		</script>		
+		
+    </window>
+</zk>

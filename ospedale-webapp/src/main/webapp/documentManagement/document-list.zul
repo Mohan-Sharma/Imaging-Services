@@ -1,0 +1,11 @@
+<?page title="Document" contentType="text/html;charset=UTF-8"?>
+<zk>
+<zscript>
+setPageTitle("Document", "");
+</zscript>
+	<window self="@{define(content)}">
+		<screen width="100%" pagetitle="Document" listtitle="List of Documents" addpage="newDocument" editpage="newDocument" addmodepopup="true"
+			fields="documentName, documentType, description"
+			entityclass="com.nzion.domain.inpatient.Document" hidedeletebtn="true" labels="document Name, document Type, Description" />
+	</window>
+</zk>

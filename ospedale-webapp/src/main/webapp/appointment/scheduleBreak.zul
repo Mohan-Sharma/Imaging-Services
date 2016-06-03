@@ -1,0 +1,128 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./scheduleBreakWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+	com.nzion.domain.ScheduleBreak brek =  arg.get("brek");
+	String name = com.nzion.util.ViewUtil.getFormattedName(brek.getPerson());
+</zscript>	
+<window id="scheduleBreakWindow" title="Break Recurrence for ${name}" closable="true" mode="modal" width="500px;">
+	<n:div class="panelTop" >
+	<div align="center">
+		<button onClick="" label="Save" id="saveBtn" zclass="btn btn-success">
+			<attribute name="onClick">
+			com.nzion.util.UtilDisplay.validateDateRange(startDatebox, endDatebox);
+			commonCrudService.save(brek);
+			scheduleBreakWindow.detach();
+			</attribute>
+		</button>
+		</div>
+	</n:div>
+	<panel title="Recurrence">
+		<panelchildren style="margin-left:10px;margin-right:10px;">
+			<n:table width="60%">
+				<n:tr>
+					<n:td><label value="Break Name"/><label value=" *" zclass="labelReq"/>	</n:td>
+					<n:td><textbox value="@{brek.name, save-when='saveBtn.onClick'}" width="91%" constraint="no empty" /></n:td>				
+				</n:tr>
+				<n:tr>
+					<n:td><label value="Start"/><label value=" *" zclass="labelReq"/></n:td>
+					<n:td><timebox value="@{brek.recurrence.startTime, save-when='saveBtn.onClick'}" format="hh:mm a" constraint="no empty" style="width:70px;"/></n:td>				
+				</n:tr>
+				<n:tr>
+					<n:td><label value="End"/><label value=" *" zclass="labelReq"/></n:td>
+					<n:td><timebox value="@{brek.recurrence.endTime, save-when='saveBtn.onClick'}" format="hh:mm a" constraint="no empty" style="width:70px;"/></n:td>				
+				</n:tr>
+			</n:table>
+			<n:table style="margin:23px;">
+				<n:tr>
+					<n:td style="border-right:1px solid black;width:100px;" >
+						<radiogroup orient="vertical">
+							<radio label="Dailly" onCheck="changeMode(RecurrenceMode.DAILLY, dailyDetail, self);" id="daillyRadio"
+								onCreate='if(RecurrenceMode.DAILLY.equals(brek.getRecurrence().getMode())) Events.postEvent("onCheck", self, null);'/>
+							<radio label="Weekly" onCheck="changeMode(RecurrenceMode.WEEKLY, weeklyDetail, self);" id="weekllyRadio"
+								onCreate='if(RecurrenceMode.WEEKLY.equals(brek.getRecurrence().getMode())) Events.postEvent("onCheck", self, null);'/>
+							<radio label="Mothly" onCheck="changeMode(RecurrenceMode.MONTHLY,  monthlyDetail, self);" id="monthlyRadio"
+								onCreate='if(RecurrenceMode.MONTHLY.equals(brek.getRecurrence().getMode())) Events.postEvent("onCheck", self, null);'/>
+							<radio label="Yearly" onCheck="changeMode(RecurrenceMode.YEARLY, yearlyDetail, self);" id="yearlyRadio"
+								onCreate='if(RecurrenceMode.YEARLY.equals(brek.getRecurrence().getMode())) Events.postEvent("onCheck", self, null);'/>
+						</radiogroup>
+					</n:td>
+					<n:td>
+						<n:div style="margin-left:23px;">
+							<div id="dailyDetail">
+								Recur every <intbox value="@{brek.recurrence.qualifier, load-after='dailyDetail.onReloadRequest'}" maxlength="3" cols="3"/> day(s)
+							</div>
+							<div id="weeklyDetail" visible="false">
+								Recur every <intbox value="@{brek.recurrence.qualifier, load-after='weeklyDetail.onReloadRequest'}"  maxlength="3" cols="3"/> week(s)
+								<n:br/><n:br/>
+								<checkbox checked="@{brek.recurrence.weekdays.monday, load-after='weeklyDetail.onReloadRequest'}" label="Monday"/>
+								<checkbox checked="@{brek.recurrence.weekdays.tuesday, load-after='weeklyDetail.onReloadRequest'}" label="Tuesday"/>
+								<checkbox checked="@{brek.recurrence.weekdays.wednesday, load-after='weeklyDetail.onReloadRequest'}" label="Wednesday"/>
+								<checkbox checked="@{brek.recurrence.weekdays.thursday, load-after='weeklyDetail.onReloadRequest'}" label="Thursday"/>
+								<checkbox checked="@{brek.recurrence.weekdays.friday, load-after='weeklyDetail.onReloadRequest'}" label="Friday"/>
+								<checkbox checked="@{brek.recurrence.weekdays.saturday, load-after='weeklyDetail.onReloadRequest'}" label="Saturday"/>
+								<checkbox checked="@{brek.recurrence.weekdays.sunday, load-after='weeklyDetail.onReloadRequest'}" label="Sunday"/>
+							</div>
+							<div id="monthlyDetail" visible="false">
+								Day <intbox value="@{brek.recurrence.day, load-after='monthlyDetail.onReloadRequest'}"  maxlength="2" cols="2" /> of every 
+								<intbox value="@{brek.recurrence.qualifier, load-after='monthlyDetail.onReloadRequest'}"  maxlength="2" cols="2"/> month(s)
+							</div>
+							<div id="yearlyDetail" visible="false">
+								Recur every <intbox value="@{brek.recurrence.qualifier, load-after='yearlyDetail.onReloadRequest'}"  maxlength="2" cols="2"/> year(s)
+								<n:br/><n:br/>
+								<hbox> 
+								On
+								<combobox selectedItem="@{brek.recurrence.month, load-after='yearlyDetail.onReloadRequest'}" cols="4">
+									<comboitem label="Jan" value="${0}"/>
+									<comboitem label="Feb" value="${1}"/>
+									<comboitem label="Mar" value="${2}"/>
+									<comboitem label="Apr" value="${3}"/>
+									<comboitem label="May" value="${4}"/>
+									<comboitem label="Jun" value="${5}"/>
+									<comboitem label="Jul" value="${6}"/>
+									<comboitem label="Aug" value="${7}"/>
+									<comboitem label="Sep" value="${8}"/>
+									<comboitem label="Oct" value="${9}"/>
+									<comboitem label="Nov" value="${10}"/>
+									<comboitem label="Dec" value="${11}"/>
+								</combobox>
+								<intbox value="@{brek.recurrence.day, load-after='yearlyDetail.onReloadRequest'}"  maxlength="2" cols="2" style="margin-left:30px;"/>
+								</hbox> 
+							</div>
+						</n:div>
+					</n:td>
+				</n:tr>
+			</n:table>	
+			<groupbox style="margin-bottom:10px;">
+				<caption label="Range of Recurrence" />
+				<n:div class="panelCont">
+					<n:div class="col2">
+						<label value="Start Date"/>	<label value=" *" zclass="labelReq"/>			
+						<datebox value="@{brek.recurrence.startDate, save-when='saveBtn.onClick'}" constraint="no empty" id="startDatebox"/>															
+					</n:div>
+					<n:div class="col2">
+						<label value="End Date"/><label value=" *" zclass="labelReq"/>				
+						<datebox value="@{brek.recurrence.endDate, save-when='saveBtn.onClick'}" id="endDatebox" constraint="no empty"/>															
+					</n:div>
+				</n:div>
+			</groupbox>		
+		</panelchildren>
+	</panel>
+	<zscript>
+		import com.nzion.enums.RecurrenceMode;
+
+		Div currentDiv = dailyDetail;
+		
+		void changeMode(RecurrenceMode mode, Div div, Radio radio ){
+		radio.setChecked(true);
+		brek.getRecurrence().setMode(mode);
+		currentDiv.setVisible(false);
+		div.setVisible(true);
+		currentDiv = div;
+		Events.postEvent("onReloadRequest", div, null);
+		}
+	</zscript>
+</window>
+</zk>

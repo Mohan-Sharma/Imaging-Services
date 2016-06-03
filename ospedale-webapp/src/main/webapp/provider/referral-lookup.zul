@@ -1,0 +1,25 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native">
+<div zclass="form-search" >
+    <div zclass="input-append">
+        <textbox sclass="search-query" style="height:24px;" id="referralLookupTxt" forward="onChange=onChange" readonly="true"/>
+        <a zclass="lookupbtn" >
+        	<n:i class="icon-search"></n:i>
+            <attribute name="onClick">
+                Executions.createComponents("/person/referralLookup.zul",null,com.nzion.util.UtilMisc.toMap("referalNameTextBox", referralLookupTxt,"patientPage",source,"patientOtherContactDetail",contactDetail,"panel",sourcePanel,"component",component));
+            </attribute>
+            Lookup
+        </a>
+    </div>
+</div>
+<zscript>
+    String  source = arg.get("sourcePage");
+    HtmlMacroComponent component = arg.get("component");
+    Panel sourcePanel = arg.get("panel");
+    com.nzion.domain.PatientOtherContactDetail contactDetail = arg.get("entity");
+    com.nzion.domain.Referral referral = arg.get("value");
+    if(referral != null)
+    referralLookupTxt.setValue(referral.getFirstName() + " " + referral.getLastName());
+</zscript>
+</zk>

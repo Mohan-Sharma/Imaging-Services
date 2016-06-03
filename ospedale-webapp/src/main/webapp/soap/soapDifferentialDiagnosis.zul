@@ -1,0 +1,255 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./diagnosisSectionDiv"?>
+<?component name="cptlookup" macro-uri="/utilities/cptlookup.zul" inline="false"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+	<zscript>
+	com.nzion.zkoss.composer.SoapDiagnosisComposer diagComposer = new com.nzion.zkoss.composer.SoapDiagnosisComposer();
+	com.nzion.domain.emr.soap.PatientIcd patientIcd = null;
+	String icdCode = null;	
+	</zscript>
+	<window id="diagnosisSectionDiv" width="100%" apply="${diagComposer}">
+		<panel title="Diagnosis">
+			<panelchildren>
+				<div sclass="chiefComp soapNoteCont curSOAP ui-resizable" style="position:relative;">
+					<hbox>
+						<panel title="Preliminary Diagnosis">
+							<panelchildren>
+							   <div zclass="btn-group" align="right" width="100%">
+								    <a zclass="btn" disabled="${diagComposer.mainCtl.readonly}" id="addPreliminaryCptBtn" label="Add" 
+										onClick='Executions.createComponents("/soap/addEditPreliminaryPatientIcd.zul",diagnosisSectionDiv,
+										com.nzion.util.UtilMisc.toMap("diagComposer",diagComposer));'>
+	                            		<n:i class="icon-plus-sign"></n:i>
+	                        	   </a> 
+	                        	   <!--  <a zclass="btn" disabled="${diagComposer.mainCtl.readonly}" id="addPreliminaryCptBtn" label="Add" 
+										onClick='Executions.createComponents("/diagnosis/preliminaryIcdSearch.zul",diagnosisSectionDiv,
+										com.nzion.util.UtilMisc.toMap("differentialDiagnosisSection",diagComposer.getDifferentialDiagnosisSection(), "multiple", false));'>
+	                            		<n:i class="icon-plus-sign"></n:i>
+	                        	   </a>  -->
+	                        	 
+								</div>
+							<n:table id="preliminaryPatientIcdTable">
+								<n:thead>
+									<n:tr>
+										<n:th>Diagnosis Code</n:th>
+										<n:th>Diagnosis Description</n:th>
+									</n:tr>
+								</n:thead>
+								<n:tbody>
+									<n:tr forEach="${diagComposer.preliminaryDiagnosisSection.icds}">
+										<n:td>${each.icdElement.code}</n:td>
+										<n:td>${each.icdElement.description}</n:td>
+									</n:tr> 
+								</n:tbody>
+							 </n:table>
+							</panelchildren>
+						</panel>
+						<panel title="Differential Diagnosis">
+							<panelchildren>
+							<div zclass="btn-group" align="right" width="100%">
+								<a disabled="${diagComposer.mainCtl.readonly}" id="addDifferentialCptBtn" zclass="btn"
+									label="Add" 
+									onClick='Executions.createComponents("/soap/addEditDifferentialPatientIcd.zul",diagnosisSectionDiv,
+									com.nzion.util.UtilMisc.toMap("diagComposer",diagComposer));'>
+									<n:i class="icon-plus-sign"></n:i>
+									</a>
+							   </div>
+							  <n:table id="differentialPatientIcdTable">
+								<n:thead>
+									<n:tr>
+										<n:th>Diagnosis Code</n:th>
+										<n:th>Diagnosis Description</n:th>
+										<n:th>Action</n:th>
+									</n:tr>
+								</n:thead>
+								<n:tbody>
+									<n:tr forEach="${diagComposer.differentialDiagnosisSection.icds}" >
+										<n:td>${each.icdElement.code}</n:td>
+										<n:td>${each.icdElement.description}</n:td>
+										<n:td>
+										<a disabled="${diagComposer.mainCtl.readonly}"
+													label="Add To Diagnosis" 
+													onClick='Executions.createComponents("/soap/addDifferentialToDiagnosis.zul",diagnosisSectionDiv,
+																com.nzion.util.UtilMisc.toMap("diagComposer",diagComposer,"patientIcd",self.getAttribute("obj")));'>
+													<custom-attributes obj="${each}"/>
+										</a>
+							   			</n:td>
+									</n:tr> 
+								</n:tbody>
+							 </n:table>
+							 
+							</panelchildren>
+						</panel>
+					</hbox>
+					
+					<panel id="activeIcdPanel" title="List of Diagnosis">
+						<panelchildren>
+						<div zclass="btn-group" align="right" width="100%">
+								<a disabled="${diagComposer.mainCtl.readonly}" id="addCptBtn" zclass="btn"
+									label="Add Diagnosis" 
+									onClick='Executions.createComponents("/soap/addEditPatientIcd.zul",diagnosisSectionDiv,
+									com.nzion.util.UtilMisc.toMap("diagComposer",diagComposer));'>
+									<n:i class="icon-plus-sign"></n:i>
+								</a>
+						</div>
+							<n:table id="patientIcdTable">
+								<n:thead>
+									<n:tr>
+										<n:th>Diagnosis Code</n:th>
+										<n:th>Diagnosis Description</n:th>
+										<n:th>Status</n:th>
+										<n:th>Severity</n:th>
+										<n:th>Action</n:th>
+									</n:tr>
+								</n:thead>
+								<n:tbody>
+									<n:tr forEach="${diagComposer.section.icds}">
+										<n:td>${each.icdElement.code}</n:td>
+										<n:td>${each.icdElement.description}</n:td>
+										<n:td>${each.status.description}</n:td>
+										<n:td>${each.severity.description}</n:td>
+										<n:td>
+										<div>
+										<custom-attributes value="${each}"/>
+											<a label="Add To Problem List | " disabled="${diagComposer.mainCtl.readonly}">
+												<attribute name="onClick">
+												diagComposer.addSelectedIcdToProblemList((com.nzion.domain.emr.soap.PatientIcd)self.getParent().getAttribute("value"));
+												</attribute>
+											</a>
+											<a class="group" disabled="${diagComposer.mainCtl.readonly}" label="Edit | " onClick='Executions.createComponents("/soap/addEditPatientIcd.zul",
+											diagnosisSectionDiv,com.nzion.util.UtilMisc.toMap("diagComposer",diagComposer,
+											"patientIcd",self.getParent().getAttribute("value")));' />
+											<a label="Remove" disabled="${diagComposer.mainCtl.readonly}">
+												<attribute name="onClick">
+												com.nzion.domain.emr.soap.PatientIcd  patientIcd=(com.nzion.domain.emr.soap.PatientIcd)self.getParent().getAttribute("value");
+													diagComposer.getSection().getIcds().remove(self.getParent().getAttribute("value"));
+													diagComposer.deleteCrossWalks(patientIcd);
+													diagComposer.getMainCtl().saveSoapSection();
+													Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null);
+													
+												</attribute>
+											</a>
+											<a class="group" if="${each.icdElement.id ne null}"  image="${each.id}" label="| View PE">
+											<attribute name="onClick">
+												patientIcd = commonCrudService.getById(com.nzion.domain.emr.soap.PatientIcd.class,new Long(self.getImage()));
+												icdCode = patientIcd.getIcdElement().getCode();
+												Executions.getCurrent().sendRedirect("http://apps.nlm.nih.gov/medlineplus/services/mpconnect_service.cfm?mainSearchCriteria.v.cs="+"2.16.840.1.113883.6.103"+"&amp;mainSearchCriteria.v.c="+icdCode+"&amp;mainSearchCriteria.v.dn="+"Diabetes%20mellitus%20with%20other%20coma%20type%201%20uncontrolled"+"&amp;informationRecipient.languageCode.c="+"en","_pe");
+											</attribute>
+											</a>
+										</div>
+										</n:td>
+									</n:tr> 
+								</n:tbody>
+							</n:table>
+						</panelchildren>
+					</panel>
+					
+					
+					
+					<panel title="List of Procedures" collapsible="false">
+						<panelchildren>
+							<div zclass="btn-group" align="right" width="100%">
+								<a disabled="${controller.readonly || controller.soapNoteBilled}"  zclass="btn"
+									label="Add Procedures" onClick='Executions.createComponents("/soap/addEditPatientCpt.zul",
+									diagnosisSectionDiv,com.nzion.util.UtilMisc.toMap("diagComposer",diagComposer));'>
+									<n:i class="icon-plus-sign"></n:i>
+								</a>
+							</div>
+							<n:table id="patientCptTable">
+								<n:thead>
+									<n:tr>
+										<n:th>Procedure Code</n:th>
+										<n:th>Procedure Description</n:th>
+										<n:th>Units</n:th>
+										<n:th>Action</n:th>
+									</n:tr>
+								</n:thead>
+								<n:tbody>
+									<n:tr forEach="${diagComposer.section.cpts}">
+										<n:td>${each.cpt.id}</n:td>
+										<n:td>${each.cpt.description}</n:td>
+										<n:td>${each.unit}</n:td>
+										<n:td>
+										<div>
+										<custom-attributes value="${each}"/>
+											<a class="group" label="Edit | " onClick='Executions.createComponents("/soap/addEditPatientCpt.zul",
+											diagnosisSectionDiv,com.nzion.util.UtilMisc.toMap("diagComposer",diagComposer,"patientCpt",
+											self.getParent().getAttribute("value")));' disabled="${diagComposer.mainCtl.readonly}" />
+											<a label="Remove" disabled="${diagComposer.mainCtl.readonly}">
+												<attribute name="onClick">
+													diagComposer.getSection().getCpts().remove(self.getParent().getAttribute("value"));
+													diagComposer.getMainCtl().saveSoapSection();
+													Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null);
+												</attribute>
+											</a>
+										</div>
+										</n:td>
+									</n:tr> 
+								</n:tbody>
+							</n:table>
+						</panelchildren>
+					</panel>
+					<panel title="Patient Death Information">
+						<panelchildren>
+							<div style="margin-left:10px;margin-top:10px">
+								<checkbox label="Declare As Dead"  onCheck="deathDetailsDiv.setVisible(self.isChecked());
+								if(!self.isChecked()){diagComposer.getSection().getSoapNote().getPatient().setDateOfDeath(null);
+								diagComposer.getSection().getSoapNote().getPatient().setCauseOfDeath(null);
+								diagComposer.getSection().getSoapNote().getPatient().setPlaceOfDeath(null);}"
+									checked="${diagComposer.section.soapNote.patient.dateOfDeath != null}" id="deathChkBox"/>
+								<div id="deathDetailsDiv" visible="${diagComposer.section.soapNote.patient.dateOfDeath != null}">
+								<hlayout spacing="5%">
+									<hlayout>
+									<label value="Date Of Death" mold="required"/>
+									<datebox constraint="no future"
+										value="@{diagComposer.section.soapNote.patient.dateOfDeath}" id="dateOfdeathBox">
+										<attribute name="onBlur">
+										<![CDATA[
+											if (self.getValue()!=null && self.getValue().before(diagComposer.getSection().getSoapNote().getPatient().getDateOfBirth()))
+												throw new WrongValueException(self,	"Date of Death Cannot be before Date of Birth");
+											if (self.getValue() == null)
+												causeOfDeathTxtBox.setValue(null);
+											]]>
+										</attribute>
+									</datebox>
+								</hlayout>
+								<hlayout>
+									<label value="Preliminary Cause of Death" />
+									<textbox rows="2"  cols="27"
+										value="@{diagComposer.section.soapNote.patient.causeOfDeath}" id="causeOfDeathTxtBox"/>
+								</hlayout>
+								<hlayout>
+									<label value="Place of Death" />
+									<textbox  value="@{diagComposer.section.soapNote.patient.placeOfDeath}"/>
+								</hlayout>
+								</hlayout>
+								</div>
+							</div>
+						</panelchildren>
+					</panel>
+					<div sclass="buttonPanel">
+						<button disabled="${controller.readonly}" label="Save" id="saveBtn" zclass="btn btn-success"
+						onClick='diagComposer.saveSection(event,dateOfdeathBox);Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null);'/>
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+		<script type="text/javascript">
+			zk.afterMount(function() {
+			jq("#patientIcdTable").dataTable({ "bJQueryUI": true,
+			"sPaginationType": "full_numbers" });
+			
+			jq("#preliminaryPatientIcdTable").dataTable({ "bJQueryUI": true,
+			"sPaginationType": "full_numbers" });
+			
+			jq("#differentialPatientIcdTable").dataTable({ "bJQueryUI": true,
+			"sPaginationType": "full_numbers" }); 
+			
+			jq("#patientCptTable").dataTable({ "bJQueryUI": true,
+			"sPaginationType": "full_numbers" }); 
+			});
+		</script>
+	</window>
+</zk>

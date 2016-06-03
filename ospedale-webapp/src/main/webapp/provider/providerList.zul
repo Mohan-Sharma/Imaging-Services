@@ -1,0 +1,14 @@
+<?page title="Providers" contentType="text/html;charset=UTF-8"?>
+<?component name="screen" macro-uri="/home-grid-macro.zul"?>
+<zk>
+	<zscript>
+		setPageTitle("Doctors", "");
+	</zscript>
+	<div self="@{define(content)}" zclass="container-fluid">
+		<screen width="100%" listtitle="List of Doctors" addpage="newProvider" containername="contentArea"
+			entityclass="com.nzion.domain.Provider" addmodepopup="true"
+			fields="accountNumber,firstName,lastName,gender.description,contacts.email,contacts.corporateEmail,contacts.officePhone"
+			labels="Code,First Name,Last Name,Gender,Email,Corporate Email,Office phone"
+			hidedeletebtn="true" />
+	</div>
+</zk>

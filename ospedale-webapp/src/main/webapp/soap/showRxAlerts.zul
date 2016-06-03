@@ -1,0 +1,35 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./rxAlertsWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	<![CDATA[
+	com.nzion.zkoss.composer.SoapRxComposer soaprxComposer = arg.get("rxComposer");
+	List rxAlerts = soaprxComposer.getRxAlerts();
+]]>
+	</zscript>
+	<window id="rxAlertsWindow" title="Rx Alerts" closable="true" width="55%">
+		<listbox model="@{rxAlerts}">
+			<listhead>
+				<listheader label="Encounter Id" />
+				<listheader label="Drug" />
+				<listheader label="Reaction" />
+				<listheader label="Overrulled By" />
+				<listheader label="Overrulled Reason" />
+				<listheader label="Overrulled On" />
+			</listhead>
+			<listitem self="@{each='rxAlert'}" value="@{rxAlert}">
+				<listcell label="@{rxAlert.encounterId}" />
+				<listcell label="@{rxAlert.drug.tradeName}" />
+				<listcell label="@{rxAlert.drugAllergy}" />
+				<listcell>
+					<name object="@{rxAlert.userLogin.person}" />
+				</listcell>
+				<listcell label="@{rxAlert.overruleMessage}" />
+				<listcell>
+					<datebox buttonVisible="false" readonly="true" value="@{rxAlert.createdTxTimestamp}" />
+				</listcell>
+			</listitem>
+		</listbox>
+	</window>
+</zk>

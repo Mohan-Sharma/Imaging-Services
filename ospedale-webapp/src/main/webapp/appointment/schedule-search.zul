@@ -1,0 +1,103 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./scheduleSearchWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?component name="appointmentMenu" macro-uri="/appointment/appointment-menu.zul" inline="true"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<window id="scheduleSearchWindow">
+<zscript>
+	List locations = commonCrudService.getAll(com.nzion.domain.Location.class);
+	com.nzion.view.ScheduleSearchValueObject searchObject = new com.nzion.view.ScheduleSearchValueObject(true);
+	com.nzion.domain.base.Weekdays weekdays  = com.nzion.domain.base.Weekdays.allSelectedWeekdays();
+	Set searchResult; 
+	//com.nzion.zkoss.composer.appointment.ScheduleController scheduleController = desktop.getAttribute("scheduleController");
+	com.nzion.zkoss.composer.appointment.ScheduleController scheduleController = new com.nzion.zkoss.composer.appointment.ScheduleController();
+	Listitem selectedListitem;
+</zscript>
+<panel>
+<panelchildren>
+	<div sclass="panelCont">
+		<div>
+			<label value="From"/>		
+			<label zclass="labelReq" value="*"/>
+			<datebox id="fromDateBox" value="@{searchObject.fromDate, save-when='searchBtn.onClick'}" constraint="no empty"/>
+		</div>
+		<div>
+			<label value="Thru"/>	
+			<label zclass="labelReq" value="*"/>
+			<datebox id="thruDateBox" value="@{searchObject.thruDate, save-when='searchBtn.onClick'}"  constraint="no empty"/>
+		</div>
+		<div>
+			<label value="From Time"/>
+			<label zclass="labelReq" value="*"/>
+			<timebox id="fromTimeBox" value="@{searchObject.fromTime, save-when='searchBtn.onClick'}" constraint="no empty"/>
+		</div>
+		<div>
+			<label value="Thru Time"/>
+			<label zclass="labelReq" value="*"/>
+			<timebox id="thruTimeBox" value="@{searchObject.thruTime, save-when='searchBtn.onClick'}" constraint="no empty"/>
+		</div>
+		<div>
+			<label value="Resource"/>
+			<label zclass="labelReq" value="*"/>
+			<resourcelookup onChange="searchObject.setPerson(event.getData())" id="resourceLookup"/>
+		</div>
+		<div>
+			<label value="Location"/>
+			<combobox model="@{locations}" selectedItem="@{searchObject.location}" />
+		</div>
+	</div>
+</panelchildren>
+</panel>
+<separator/>
+	<div align="center">
+		<button label="Search" id="searchBtn">
+			<attribute name="onClick">
+				com.nzion.util.UtilDisplay.validateDateRange(fromDateBox, thruDateBox);
+				com.nzion.util.UtilDisplay.validateTimeRange(fromTimeBox, thruTimeBox);
+				if(searchObject.getPerson() == null)
+					throw new WrongValueException(resourceLookup, "Please select a resource.");
+					alert(weekdays);
+								alert(searchObject);
+				searchResult = scheduleController.searchSchedule(searchObject, weekdays);
+				alert(searchResult);
+			</attribute>
+		</button>
+	</div>
+	<separator/>
+		<listbox model="@{searchResult, load-after='searchBtn.onClick'}" rows="15">
+			<listhead>
+				<listheader label="Date" />
+				<listheader label="Start Time"/>
+				<listheader label="End Time"/>
+				<listheader label="Resource" />
+				<listheader label="Location" />
+			</listhead>
+			<listitem self="@{each='vo'}" value="@{vo}" context="freeSlotSearchMenu" onDetach="self.detach();">
+				<listcell> <datebox value="@{vo.on}" disabled="true" readonly="true" buttonVisible="false"/> </listcell>
+				<listcell> <time time="@{vo.slot.startTime}" /> </listcell>
+				<listcell> <time time="@{vo.slot.endTime}"/> </listcell>
+				<listcell> <name object="@{vo.person}" /> </listcell>
+				<listcell> <label value="@{vo.slot.association.location.name}" /> </listcell>
+			</listitem>
+		</listbox>
+	<menupopup id="freeSlotSearchMenu" onOpen="if(event.isOpen()) selectedListitem = event.getReference()">
+	    <menuitem label="Open">
+	    	<attribute name="onClick">
+	    		com.nzion.domain.util.SlotAvailability availability = selectedListitem.getValue();
+	    		com.nzion.domain.Schedule schdl = availability.getSlot().buildSchedule(availability.getOn());
+				Map args = com.nzion.util.UtilMisc.toMap("controller", scheduleController, "schedule", schdl);
+				Window w = (Window)Executions.createComponents("/appointment/patient-schedule.zul", null, args);
+				w.addForward("onDetach", selectedListitem, "onDetach"); 
+	    	</attribute>
+	    </menuitem>
+	    <menuitem label="Block">
+	    	<attribute name="onClick">
+		    	Window w = Executions.createComponents("/appointment/schedule-block.zul", null, 
+		    		com.nzion.util.UtilMisc.toMap("controller", scheduleController, "availability", selectedListitem.getValue()));
+	    		w.addForward("onDetach", selectedListitem, "onDetach"); 
+	    	</attribute>
+	    </menuitem>	    
+	</menupopup>
+</window>
+</zk>

@@ -1,0 +1,207 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./printWindow"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+	xmlns:h="http://www.w3.org/1999/xhtml">
+    <zscript>
+        <![CDATA[
+	        import java.text.*;
+	        import com.nzion.service.common.CommonCrudService;
+	        import com.nzion.domain.ReferralContract;
+
+			String referralContractId = param.get("contractId")[0];
+			CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+			ReferralContract referralContract = commonCrudService.getById(ReferralContract.class, Long.valueOf(referralContractId));
+            boolean isServiceAvailable = com.nzion.util.UtilValidator.isNotEmpty(referralContract.getReferralContractServices()) ? true : false;
+			public void downloadFile(){
+                if(referralContract == null)
+                    return;
+                if(referralContract.getDocument() == null)
+                    return;
+                java.sql.Blob blob = referralContract.getDocument();
+                if(blob != null)
+                    org.zkoss.zul.Filedownload.save(blob.getBytes(1, (int) blob.length()), "", referralContract.getDocumentName());
+
+            }
+        ]]>
+    </zscript>
+
+<style>
+
+.personDet{
+            border: 1px solid #333;
+            align:center;
+            margin : 2px 0px 0px 0px;
+        }
+
+     .personDet td{
+            padding:0px;
+        }
+    .break {
+        page-break-after: always;
+}
+
+@media print {
+        #footerDiv {
+            position: fixed;
+            bottom: 0;
+        }
+
+        #body {
+            margin: x x y x;
+        ( y should reflect the height of the footer );
+        }
+}
+
+</style>
+
+    <window id="printWindow" self="@{define(content)}">
+    		 <attribute name="onCreate">
+    			  Clients.print();
+        	</attribute>
+
+
+    <n:div class="clr" style="width:95%;horizontal-align:center;margin:20px 0px 0px 30px;margin-top:0px">
+         <n:table class="personDet" style="align:center;width:95%;border-color:#C0C0C0"  border="1px">
+               <n:tr>
+                 <n:td style="border-color:#C0C0C0">
+
+                  <div class="z-hlayout" style="width:100%;">
+                        <div style="width:25%" class="z-hlayout-inner" align="left">
+                            <label value="Referral Type" style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px"/>
+                        </div>
+                        <div style="width:5%" class="z-hlayout-inner" align="center">
+                        	 <label value=" : " style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px"/>
+                          </div>
+                          <div style="width:70%" class="z-hlayout-inner" align="left">
+                             <label value="@{referralContract.referralType}" style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+                         </div>
+                  </div>
+                  <div class="z-hlayout" style="width:100%;">
+                        <div style="width:25%" class="z-hlayout-inner" align="left">
+                            <label value="Clinic" style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px"/>
+                        </div>
+                        <div style="width:5%" class="z-hlayout-inner" align="center">
+                             <label value=" : " style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px"/>
+                          </div>
+                          <div style="width:70%" class="z-hlayout-inner" align="left">
+                             <label value="@{referralContract.referral.clinicName}" style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+                         </div>
+                  </div>
+                  <div class="z-hlayout" style="width:100%;">
+                          <div style="width:25%" class="z-hlayout-inner" align="left">
+                              <label value="Payment Mode" style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px"/>
+                          </div>
+                          <div style="width:5%" class="z-hlayout-inner" align="center">
+                             <label value=" : " style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px"/>
+                            </div>
+                            <div style="width:70%" class="z-hlayout-inner" align="left">
+                               <label value="@{referralContract.paymentMode}" style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+                          </div>
+                  </div>
+
+                  </n:td>
+
+                   <n:td style="border-color:#C0C0C0">
+
+                           <div class="z-hlayout" style="width:100%;">
+                                <div style="width:25%" class="z-hlayout-inner" align="left">
+                                    <label value="Contract Status" style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px"/>
+                                </div>
+                                <div style="width:5%" class="z-hlayout-inner" align="center">
+                                     <label value=" : " style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px"/>
+                                  </div>
+                                  <div style="width:70%" class="z-hlayout-inner" align="left">
+                                     <label value="@{referralContract.contractStatus}" style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+                                 </div>
+                           </div>
+
+                           <div class="z-hlayout" style="width:100%;">
+                              <div style="width:25%" class="z-hlayout-inner" align="left">
+                                  <label value="Contract Date" style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px"/>
+                              </div>
+                              <div style="width:5%" class="z-hlayout-inner" align="center">
+                                 <label value=" : " style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px"/>
+                              </div>
+                              <div style="width:70%" class="z-hlayout-inner" align="left">
+                                   <datebox value="@{referralContract.contractDate}" zclass="none" disabled="true"/>
+                              </div>
+                          </div>
+
+                          <div class="z-hlayout" style="width:100%;">
+                              <div style="width:25%" class="z-hlayout-inner" align="left">
+                                  <label value="Expiry Date" style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px"/>
+                              </div>
+                              <div style="width:5%" class="z-hlayout-inner" align="center">
+                                 <label value=" : " style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px"/>
+                              </div>
+                              <div style="width:70%" class="z-hlayout-inner" align="left">
+                                   <datebox value="@{referralContract.expiryDate}" zclass="none" disabled="true"/>
+                              </div>
+                          </div>
+                          <div class="z-hlayout" style="width:100%;">
+                              <div style="width:25%" class="z-hlayout-inner" align="left">
+                                  <label value="Document" style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px"/>
+                              </div>
+                              <div style="width:5%" class="z-hlayout-inner" align="center">
+                                 <label value=" : " style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px"/>
+                                </div>
+                                <div style="width:70%" class="z-hlayout-inner" align="left">
+                                   <a label="${referralContract.documentName}">
+                                    <attribute name="onClick">
+                                        downloadFile();
+                                    </attribute>
+                                </a>
+                               </div>
+                          </div>
+                   </n:td>
+               </n:tr>
+         </n:table>
+    </n:div>
+
+    <separator></separator><separator></separator>
+
+                            <div style="text-align:left;width:90%;">
+                                        <label style="font-size:12px;font-weight:bold;font-family:Calibri; margin:20px 0px 0px 30px;"
+                                               value="Referral amount is on base price and not on collected amount." />
+                            </div>
+      <div style="text-align:left;width:90%;" visible="${isServiceAvailable}">
+         <label style="font-size:12px;font-weight:bold;font-family:Calibri; margin:20px 0px 0px 30px;" value="Service Contract List:" />
+          <n:table class="personDet" style="align:center;width:100%;margin-left:30px " align="center" border="1px">
+                                <n:tr >
+                                                 <n:td style="width:30%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
+                                                    Type
+                                                 </n:td>
+                                                 <n:td style="width:20%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
+                                                    Service Name
+                                                 </n:td>
+
+                                                 <n:td style="width:20%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
+                                                     Payment Percentage
+                                                 </n:td>
+
+                                                 <n:td style="width:20%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
+                                                     Payment Amount
+                                                 </n:td>
+
+                                </n:tr>
+                                <n:tr forEach="${referralContract.referralContractServices}">
+                                                <n:td style="width:30%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
+                                                    ${each.serviceSubGroupDescription}
+                                                </n:td>
+                                                <n:td style="width:20%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
+                                                    ${each.serviceName}
+                                                </n:td>
+                                                <n:td style="width:20%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
+                                                    ${each.paymentPercentage}
+                                                </n:td>
+                                                <n:td style="width:20%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
+                                                    ${each.paymentAmount}
+                                                </n:td>
+                                </n:tr>
+
+          </n:table>
+   <separator></separator><separator></separator>
+      </div>
+
+    </window>
+</zk>

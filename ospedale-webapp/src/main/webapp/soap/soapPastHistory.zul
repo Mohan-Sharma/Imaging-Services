@@ -1,0 +1,424 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./pastHistorySectionDiv"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:w="http://www.zkoss.org/2005/zk/client"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:c="client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+	com.nzion.zkoss.composer.PastHistorySectionController pastHistorySectionController = new com.nzion.zkoss.composer.PastHistorySectionController();
+</zscript>
+	<window id="pastHistorySectionDiv" width="100%"
+		apply="${pastHistorySectionController}">
+		<zscript>
+	Component lastSelectedComponent;
+</zscript>
+		<script type="text/javascript">
+			function showDelButton(comp){
+			jQuery('#'+comp.uuid).find('img').fadeIn('slow'); } function
+			hideDelButton(comp){
+			jQuery('#'+comp.uuid).find("img").fadeOut(15); }
+		</script>
+		<div sclass="chiefComp soapNoteCont curSOAP ui-resizable"
+			style="position:relative;">
+			<panel>
+				<caption label="Past History" />
+				<panelchildren>
+					<n:div class="subTabs" id="tabSection">
+						<n:ul>
+							<n:li>
+								<a id="operationButton" class="cur"
+									w:onClick='javascript:toggleSurgery();'
+									onClick="setStyle(self)">
+									Surgery
+								</a>
+							</n:li>
+							<n:li>
+								<a id="treatmentButton" class="cur"
+									w:onClick='javascript:toggleTreatment();'
+									onClick="setStyle(self)">
+									Treatments
+								</a>
+							</n:li>
+							<n:li>
+								<a id="chronicDiseaseButton" sclass=""
+									w:onClick='javascript:toggleChronicDisease();'
+									onClick="setStyle(self)">
+									Chronic Diseases
+								</a>
+							</n:li>
+						</n:ul>
+					</n:div>
+					<n:div id="surgeriesDiv">
+						<h:table width="100%" cellpadding="0px"
+							cellspacing="0px" style="border:0px">
+							<h:tr>
+								<h:td class="soapNoteContL">
+									<div
+										style="width:99%;padding:10px;">
+										<span
+											sclass="linkBtn linkBtnOn">
+											<a sclass="addBtn"
+												label="New" disabled="${controller.readonly}">
+												<attribute name="onClick">
+													pastHistorySectionController.addEditPastOperation(null);
+												</attribute>
+												<n:i class="icon-plus-sign"></n:i>
+											</a>
+											<span />
+										</span>
+									</div>
+								</h:td>
+							</h:tr>
+							<h:tr>
+								<h:td class="soapNoteContL">
+									<div style="padding:5px">
+										<n:table
+											id="pastOperationDisplayGrid" cellpadding="0" cellspacing="0"
+											border="0" class="display">
+											<n:thead>
+												<n:tr>
+													<n:th>
+														Procedure Names
+													</n:th>
+													<n:th>Site</n:th>
+													<n:th>
+														Date of
+														Procedure
+													</n:th>
+													<n:th>
+														Location
+													</n:th>
+													<n:th>Action</n:th>
+												</n:tr>
+											</n:thead>
+											<n:tbody>
+												<n:tr
+													forEach="${pastHistorySectionController.operationHistories}">
+													<n:td>
+														${each.cptDescription}
+													</n:td>
+													<n:td>
+														${each.site}
+													</n:td>
+													<n:td>
+														${display:fd(each.occuranceDate)}
+													</n:td>
+													<n:td>
+														${each.locationName}
+													</n:td>
+													<n:td>
+														<div>
+															<custom-attributes
+																value="${each}" />
+															<a
+																class="group" disabled="${controller.readonly}"
+																onClick='pastHistorySectionController.addEditPastOperation((com.nzion.domain.emr.soap.PatientPastOperationHistory)self.getParent().getAttribute("value"))'>
+																Edit
+															</a>
+															|
+															<a
+																disabled="${controller.readonly}"
+																onClick='pastHistorySectionController.removeSurgery((com.nzion.domain.emr.soap.PatientPastOperationHistory)self.getParent().getAttribute("value"))'>
+																Remove
+															</a>
+														</div>
+													</n:td>
+												</n:tr>
+											</n:tbody>
+										</n:table>
+									</div>
+									<div sclass="panelFoot">
+										<button
+											disabled="${pastHistorySectionController.soapNoteController.readonly}"
+											label="Save" zclass="btn btn-success"
+											onClick="pastHistorySectionController.getSoapNoteController().saveSoapSection();" />
+										<space width="15px" />
+									</div>
+								</h:td>
+							</h:tr>
+						</h:table>
+					</n:div>
+					<n:div id="treatmentsDiv">
+						<h:table width="100%" cellpadding="0px"
+							cellspacing="0px" style="border:0px">
+							<h:tr>
+								<h:td class="soapNoteContL">
+									<div
+										style="width:99%;padding:10px;">
+										<span
+											sclass="linkBtn linkBtnOn">
+											<a sclass="addBtn"
+												label="New" disabled="${controller.readonly}">
+												<attribute name="onClick">
+													pastHistorySectionController.addEditPastTreatment(null);
+												</attribute>
+												<n:i class="icon-plus-sign"></n:i>
+											</a>
+											<span />
+										</span>
+									</div>
+								</h:td>
+							</h:tr>
+							<h:tr>
+								<h:td class="soapNoteContL">
+									<div style="padding:5px">
+										<n:table id="treatmentGrid"
+											cellpadding="0" cellspacing="0" border="0" class="display">
+											<n:thead>
+												<n:tr>
+													<n:th>
+														Admit Date
+													</n:th>
+													<n:th>
+														Admission Type
+													</n:th>
+													<n:th>Reason</n:th>
+													<n:th>
+														Hospital
+													</n:th>
+													<n:th>Action</n:th>
+												</n:tr>
+											</n:thead>
+											<n:tbody>
+												<n:tr
+													forEach="${pastHistorySectionController.treatmentHistories}">
+													<n:td>
+														${display:fd(each.admissionDate)}
+													</n:td>
+													<n:td>
+														${each.admissionType.description}
+													</n:td>
+													<n:td>
+														${each.admissionReason}
+													</n:td>
+													<n:td>
+														${each.hospitalName}
+													</n:td>
+													<n:td>
+														<div>
+															<custom-attributes
+																value="${each}" />
+															<a
+																class="group" disabled="${controller.readonly}"
+																onClick='pastHistorySectionController.addEditPastTreatment((com.nzion.domain.emr.soap.PatientPastTreatmentHistory)self.getParent().getAttribute("value"));'>
+																Edit |
+															</a>
+															<a
+																disabled="${controller.readonly}"
+																onClick='pastHistorySectionController.removeTreatment((com.nzion.domain.emr.soap.PatientPastTreatmentHistory)self.getParent().getAttribute("value"));'>
+																Remove
+															</a>
+														</div>
+													</n:td>
+												</n:tr>
+											</n:tbody>
+										</n:table>
+									</div>
+									<div sclass="panelFoot">
+										<button
+											disabled="${pastHistorySectionController.soapNoteController.readonly}"
+											label="Save" zclass="btn btn-success"
+											onClick="pastHistorySectionController.getSoapNoteController().saveSoapSection();" />
+										<space width="15px" />
+									</div>
+								</h:td>
+							</h:tr>
+						</h:table>
+					</n:div>
+			<div style="width:99%;padding:10px;" >
+							<span sclass="linkBtn linkBtnOn">
+								<a sclass="addBtn" label="Edit"
+									onClick="diseaseDiv.setVisible(true);displayDiv.setVisible(false);pastHistorySectionController.enableEdit();"
+									id="editBtn">
+								</a>
+								<span />
+							</span>
+						</div>
+		
+					<n:div id="chronicDiseaseDisplayDiv">
+						<h:table width="100%" cellpadding="0px"
+							cellspacing="0px" style="border:0px">
+							
+							<h:tr>
+								<h:td class="soapNoteContL">
+									<div style="padding:20px" visible="true" id="displayDiv">
+										<n:table id="chronicDisGrid"
+											cellpadding="0" cellspacing="0" border="0" class="display">
+											<n:thead>
+												<n:tr>
+													<n:th>
+													</n:th>
+													<n:th>
+														Chronic Diseases
+													</n:th>
+													<n:th>Durations</n:th>
+													<n:th>
+														Mantained By  
+													</n:th>
+													<n:th>
+													Treated For How Long
+													</n:th>
+												</n:tr>
+											</n:thead>
+											<n:tbody>
+												<n:tr
+													forEach="${pastHistorySectionController.patientChronicDiseases}">
+													<n:td>
+													<checkbox
+										             checked="${each.diseaseSelected}">
+									               </checkbox>
+													</n:td>
+													<n:td>
+														${each.chronicDisease.name}
+													</n:td>
+													<n:td>
+														${each.duration} ${each.durationType}
+													</n:td>
+													<n:td>
+														  ${each.mantainedProcess}
+													</n:td>
+													<n:td>
+														${each.treatedForHowLong} ${each.treatedForHowLongType} 
+													</n:td>
+												</n:tr>
+											</n:tbody>
+										</n:table>
+									</div>
+									
+								</h:td>
+							</h:tr>
+						</h:table>
+					</n:div>
+					<n:div id="chronicDiseaseDiv" >
+					  <div id="diseaseDiv" visible="false">
+						<listbox
+							model="@{pastHistorySectionController.patientChronicDiseases,load-after='editBtn.onClick'}">
+							<listhead>
+								<listheader label="Chronic Diseases" />
+								<listheader label="Durations" />
+								<listheader label="Mantained By" />
+								<listheader
+									label="Treated For How Long" />
+							</listhead>
+							<listitem
+								self="@{each='patientChronicDisease'}"
+								value="@{patientChronicDisease}">
+								<listcell>
+									<checkbox
+										label="@{patientChronicDisease.chronicDisease.name}"
+										checked="@{patientChronicDisease.diseaseSelected}">
+									</checkbox>
+								</listcell>
+								<listcell>
+									<hbox  width="50%">
+										<intbox
+											value="@{patientChronicDisease.duration}"/>
+										<combobox
+											readonly="true"
+											value="@{patientChronicDisease.durationType}">
+											<comboitem label="Years" />
+											<comboitem label="Year" />
+											<comboitem label="Months" />
+											<comboitem label="Month" />
+											<comboitem label="Days" />
+											<comboitem label="Day" />
+											<comboitem label="Weeks" />
+										    <comboitem label="Week" />
+										</combobox>
+									</hbox>
+								</listcell>
+								<listcell>
+									<radiogroup
+										selectedItem="@{patientChronicDisease.mantainedBy,converter='com.nzion.view.component.RadioGroupBinder'}">
+										<radio label="Excercise"
+											value="Exercise"
+											onCheck="self.getParent().getParent().getFirstChild().getNextSibling().setVisible(true)">
+										</radio>
+										<radio label="Treatment"
+											value="Treatment"
+											onCheck="self.getParent().getParent().getFirstChild().getNextSibling().setVisible(true)">
+										</radio>
+									</radiogroup>
+									<textbox
+										value="@{patientChronicDisease.mantainedProcess}" rows="2"
+										visible="false" onCreate="self.setVisible(self.getParent().getParent().getValue().getMantainedBy()!=null);self.setDisabled(self.getParent().getParent().getValue().disableEdit)"
+										 />
+								</listcell>
+								<listcell>
+										<hbox  width="50%">
+										<intbox
+											value="@{patientChronicDisease.treatedForHowLong}"
+											 />
+										<combobox
+											readonly="true"
+											value="@{patientChronicDisease.treatedForHowLongType}">
+											<comboitem label="Years" />
+											<comboitem label="Year" />
+											<comboitem label="Months" />
+											<comboitem label="Month" />
+											<comboitem label="Days" />
+											<comboitem label="Day" />
+											<comboitem label="Weeks" />
+										    <comboitem label="Week" />
+										</combobox>
+									</hbox>
+								</listcell>
+							</listitem>
+						</listbox>
+						<div sclass="panelFoot">
+							<button
+								disabled="${pastHistorySectionController.soapNoteController.readonly}"
+								label="Save" zclass="btn btn-success"
+								onClick="pastHistorySectionController.saveDiseaseSection();" />
+							<space width="15px" />
+						</div>
+					</div>
+					</n:div>
+				</panelchildren>
+			</panel>
+		</div>
+
+		<script type="text/javascript">
+			zk.afterMount(function() {
+			jq("#pastOperationDisplayGrid").dataTable({ "bJQueryUI":
+			true, "sPaginationType": "full_numbers", "aoColumns": [
+			null, null, null,null,{ "bSortable": false,"sType": "html"}
+			] });jq("#chronicDisGrid").dataTable({ "bJQueryUI":
+			true, "sPaginationType": "full_numbers", "aoColumns": [
+			null, null, null,null,{ "bSortable": false,"sType": "html"}
+			] });jq("#treatmentGrid").dataTable({ "bJQueryUI": true,
+			"sPaginationType": "full_numbers", "aoColumns": [ null,
+			null, null,null,{ "bSortable": false,"sType": "html"} ] });
+			jq("#observationsGrid").dataTable({ "bJQueryUI": true,
+			"sPaginationType": "full_numbers", "aoColumns": [ null,
+			null, null,null,{ "bSortable": false,"sType": "html"} ] });
+			$("#treatmentsDiv").hide();$("#chronicDiseaseDiv").hide();$("#chronicDiseaseDisplayDiv").hide();
+			$("#surgeriesDiv").show(); });
+		</script>
+		<script type="text/javascript">
+			function toggleTreatment(){ $("#treatmentsDiv").show();
+			$("#surgeriesDiv").hide(); $("#chronicDiseaseDiv").hide();
+			};
+		</script>
+		<script type="text/javascript">
+			function toggleSurgery(){ $("#treatmentsDiv").hide();
+			$("#surgeriesDiv").show(); $("#chronicDiseaseDiv").hide();
+			};
+		</script>
+		<script type="text/javascript">
+			function toggleChronicDisease(){ $("#treatmentsDiv").hide();
+			$("#surgeriesDiv").hide(); $("#chronicDiseaseDiv").show();$("#chronicDiseaseDisplayDiv").show()
+			};
+		</script>
+		<zscript>
+		<![CDATA[
+	void setStyle(Component cmp) {
+	((A) cmp).setSclass("cur");
+	if (lastSelectedComponent != null && !lastSelectedComponent.equals(cmp)) ((A) lastSelectedComponent).setSclass("");
+	lastSelectedComponent = cmp;
+	}
+]]>
+		</zscript>
+	</window>
+</zk>

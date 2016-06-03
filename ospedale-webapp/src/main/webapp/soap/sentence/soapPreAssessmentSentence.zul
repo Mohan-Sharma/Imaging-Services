@@ -1,0 +1,16 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	import com.nzion.zkoss.composer.SoapSentenceComposer;
+	import com.nzion.domain.emr.soap.PreAdmissionSection;
+	SoapSentenceComposer sentenceComposer = (SoapSentenceComposer) arg.get("controller");
+	PreAdmissionSection preAdmissionSection = (PreAdmissionSection) sentenceComposer.getSoapNoteController().getSoapSection(PreAdmissionSection.class, false);
+	String sentence = preAdmissionSection.getSentence();
+</zscript>
+	<div style="margin-left:10px" if="${not empty sentence}" >
+		<n:h2>PreAssessment</n:h2>
+		<n:br />
+		<label value="${sentence}" />
+	</div>
+</zk>

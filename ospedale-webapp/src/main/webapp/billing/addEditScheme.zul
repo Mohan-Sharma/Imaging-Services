@@ -1,0 +1,112 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addEditScheme"?>
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<window id="addEditScheme"  mode="modal" closable="true"  width="50%">
+<zscript><![CDATA[
+                import com.nzion.util.UtilMessagesAndPopups;
+                com.nzion.zkoss.composer.emr.StateRenderer stateRenderer = new com.nzion.zkoss.composer.emr.StateRenderer();
+                  com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");	
+                  com.nzion.domain.pms.Scheme  scheme = arg.get("entity");
+                  if(scheme == null){
+                	  scheme = new com.nzion.domain.pms.Scheme();
+                	  com.nzion.domain.screen.BillingDisplayConfig billingDisplayConfig = commonCrudService.getByPractice(com.nzion.domain.screen.BillingDisplayConfig.class);             	 	  
+                	  scheme.getAllowedPrice();
+                  }
+                 com.nzion.domain.pms.Scheme.DISCOUNTTYPE[] schemeArray =   com.nzion.domain.pms.Scheme.DISCOUNTTYPE.values();
+]]>
+</zscript>
+<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Scheme</h:small>
+                  <button type="button" zclass="close" onClick="addEditScheme.detach();">×</button>
+            </h:h1>
+        </div>
+	<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+             <div zclass="span5">
+             <label value="${c:l('schemeName')}" mold="required" />
+        	<textbox value="@{scheme.schemeName,save-when='send.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"   constraint="no empty"/>
+        	</div>
+        	 <div zclass="span5">
+            <label value="${c:l('organizationName')}"  mold="required"/>
+	        <textbox value="@{scheme.organizationName,save-when='send.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"   constraint="no empty" />
+	        </div>
+	        </div>
+	   <div zclass="row-fluid">
+             <div zclass="span5">
+          <label value="${c:l('discountType')}"  mold="required"/>
+           <combobox id="discoundStatus" maxlength="50" model="@{schemeArray}" selectedItem="@{scheme.discountType,save-when='send.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"  constraint="no empty">
+		     <comboitem self="@{each='discount'}" label="@{discount.discountType}" value="@{discount.discountType}">
+          </comboitem>
+          </combobox>
+          </div>
+         <div zclass="span5">
+            <label value="${c:l('discountValue')}"  mold="required"/>
+            <doublebox value="@{scheme.discountPercentage,save-when='send.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"  />
+            </div>
+            </div>
+            
+            <div zclass="row-fluid">
+              <div zclass="span5">
+            <label value="${c:l('dateFrom')}"  mold="required"/>
+            <datebox id="fromDate" value="@{scheme.fromDate,save-when='send.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"    />
+        </div>
+        <div zclass="span5">
+            <label value="${c:l('thruDate')}"  />
+            <datebox id="thruDate" value="@{scheme.thruDate,save-when='send.onClick'}" sclass="span12"/>
+            </div>
+            </div>
+               <div zclass="row-fluid">
+              <div zclass="span5">
+          <label value="${c:l('contactPerson')}"  />
+          <textbox value="@{scheme.contactPerson,save-when='send.onClick'}" sclass="span12" ></textbox>
+         </div>
+          <div zclass="span4">
+          <label value="${c:l('contactNumber')}"  mold="required"/>
+          <textbox value="@{scheme.contacts.mobileNumber,save-when='send.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"   constraint="no empty"  ></textbox>
+          </div>
+          </div>
+           <div zclass="row-fluid">
+          <div zclass="span3">
+          <label value="${c:l('city')}"  />
+          <textbox sclass="span12" value="@{scheme.contacts.postalAddress.city,save-when='send.onClick'}"   ></textbox>
+          </div>
+          <div zclass="span4">
+          <label value="${c:l('email')}"  />
+          <textbox sclass="span12" value="@{scheme.contacts.email,save-when='send.onClick'}" ></textbox>
+          </div>
+          <div zclass="span2">
+          <label value="${c:l('state')}" />
+						<enumeration  sclass="span12" id="state" enumType="STATE" itemRenderer="${stateRenderer}"
+							value="@{scheme.contacts.postalAddress.stateProvinceGeo,save-when='send.onClick'}" />
+							</div>
+							</div>
+      
+     	 </div>
+     <div align="center">
+      <button label="Save" id="send" zclass="btn-success btn">
+     	 <attribute name="onClick"><![CDATA[
+    if(thruDate.getValue()!=null){	                                    
+    if(thruDate.getValue().before(fromDate.getValue())){
+    com.nzion.util.UtilMessagesAndPopups.showError("Thru Date must be greater than from date");
+    return;
+                       }
+                   
+                 }
+    
+     	  scheme.getAllowedPrice().setAmount(new java.math.BigDecimal(scheme.getDiscountPercentage()));
+          commonCrudService.save(scheme);
+          UtilMessagesAndPopups.displaySuccess();
+          addEditScheme.detach();
+      	]]> </attribute>
+      </button>
+       <button label="Cancel" id="cancelBtn" sclass="cancelBtn">
+			<attribute name="onClick">
+				 addEditScheme.detach();
+			</attribute>
+	 </button>
+    </div>
+</window>
+</zk>

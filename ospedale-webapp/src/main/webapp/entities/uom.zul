@@ -1,0 +1,13 @@
+<?component name="masterEntity" macroURI="../entities/master-entity.zul" inline="true"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk>
+	<zscript><![CDATA[
+        import com.nzion.domain.emr.UnitOfMeasurement;      
+        UnitOfMeasurement uom = (UnitOfMeasurement)Executions.getCurrent().getArg().get("entity");
+    	uom = (uom == null) ? new UnitOfMeasurement() : uom;
+    	String str="Add/Edit Uom";    	
+	]]></zscript>
+
+	<masterEntity entityvalue="${uom}" panelvalue="${str}"/>
+
+</zk>

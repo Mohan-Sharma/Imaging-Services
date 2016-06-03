@@ -1,0 +1,71 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./visInformationWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+		import com.nzion.domain.emr.soap.PatientImmunization;
+		import com.nzion.zkoss.composer.SoapImmunizationComposer;
+		PatientImmunization patientImmunization = (PatientImmunization) arg.get("patientImmunization");
+		SoapImmunizationComposer soapImmunizationComposer = (SoapImmunizationComposer)arg.get("soapImmunizationComposer");
+	</zscript>
+	<window id="visInformationWindow" mode="modal" width="50%" title="VIS Information" closable="true">
+		<div sclass="panelCont" height="300px">
+			<div sclass="col2">
+				<label value="VIS Given" />
+				<datebox value="@{patientImmunization.vis}" />
+			</div>
+			<div sclass="col2">
+				<label value="VIS Received" />
+				<datebox value="@{patientImmunization.visGiven}" />
+			</div>
+			<div width="80%">
+				<checkbox checked="@{patientImmunization.hasAllergicReaction}" id="chk1" />
+				<label value="Patient denies history of allergic reactions to this Vaccine" />
+			</div>
+			<div width="80%">
+				<checkbox checked="@{patientImmunization.hasIllNess}" id="chk2" />
+				<label value="Patient is not moderately or severly ill" />
+			</div>
+			<div width="80%">
+				<checkbox checked="@{patientImmunization.qasPerformed}" id="chk3" />
+				<label value="Vaccine information given and questions answered" />
+			</div>
+			<div width="80%">
+				<checkbox checked="@{patientImmunization.authorizationOnFile}" />
+				<label value="Consent and authorization on file" />
+			</div>
+			<div width="50%">
+				<label value="Upload Consent Form:"/>
+				<hbox>
+					<textbox id="fileNameTextBox" readonly="true" cols="30"/>
+					<div>
+					<fileupload label="Browse" sclass="btn" id="uploadBtn">
+						<attribute name="onUpload">
+							fileNameTextBox.setValue(soapImmunizationComposer.uploadConsentDocument(event));
+						</attribute>
+					</fileupload>
+					</div>
+				</hbox>
+			</div>
+			<div width="80%">
+				<a disabled="${controller.readonly}" label="Vaccine Education">
+					<attribute name="onClick">
+						String immUrl = patientImmunization.getImmunization().getInformationUrl();
+						Executions.getCurrent().sendRedirect(immUrl, "_blank");
+					</attribute>
+				</a>
+				<a label="Print Consent Form">
+					<attribute name="onClick">
+						<![CDATA[
+							Executions.getCurrent().sendRedirect("/soap/soapPrintConsentForm.zul?scheduleId=" + soapImmunizationComposer.getPatientSoapNoteController().getSoapNote().getSchedule().getId()	+ "&chk1=" + chk1.isChecked() + "&chk2=" + chk2.isChecked() + "&chk3=" + chk3.isChecked(), "_blank");
+						]]>
+					</attribute>
+				</a>
+			</div>
+		</div>
+		<div sclass="panelFoot">
+			<button label="Add" forward="onClick=onCancel"/>
+			<button label="Cancel" forward="onClick=onCancel"/>
+		</div>
+	</window>
+</zk>

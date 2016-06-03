@@ -1,0 +1,92 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./billingPreferenceWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	com.nzion.domain.screen.BillingDisplayConfig billingDisplayConfig = commonCrudService.getByPractice(com.nzion.domain.screen.BillingDisplayConfig.class);
+	com.nzion.enums.ROUNDING_MODE[] roundingModes = com.nzion.enums.ROUNDING_MODE.values();
+	List uoms = commonCrudService.findByEquality(com.nzion.domain.emr.UnitOfMeasurement.class,new String[]{"uomType"},new String[]{"CURRENCY_TYPE"});
+	List taxItems = commonCrudService.getAll(com.nzion.domain.billing.TaxItem.class);
+</zscript>
+	<window id="billingPreferenceWindow">
+	  <attribute name="onCreate">
+	     if(afterPatientMeetsDocRadioButton.isSelected())
+         collectConsultationPatientVisitButton.setVisible(false);
+      </attribute>
+	<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Billing Preference</h:small>
+            </h:h1>
+         </div>
+         <div class="container-fluid">
+		       <div zclass="row-fluid">
+                 <div zclass="span3">
+              <label value="Company Currency"  />
+        	<combobox model="@{uoms}" selectedItem="@{billingDisplayConfig.currency}" sclass="span12" >
+			 <comboitem self="@{each='uom'}" label="@{uom.name}" value="@{uom}"/>
+			</combobox>
+			</div>
+			
+			 <div zclass="span2">
+        <label value="Rounding Mode" />
+	    <combobox model="@{roundingModes}" selectedItem="@{billingDisplayConfig.roundingMODE}" sclass="span12" >
+		 <comboitem self="@{each='roundingMode'}" label="@{roundingMode}" value="@{roundingMode}"/>
+	   </combobox>
+	   </div>
+	    <div zclass="span3">
+          <label value="Decimal Point"/>
+          <spinner value="@{billingDisplayConfig.decimalPoints}" style="margin-top:8px"/>
+          </div>
+          
+		   <div zclass="span2">
+         <label value="Registration Fee"  />
+         <decimalbox value="@{billingDisplayConfig.registrationFee}" sclass="span12" />
+         </div>
+         
+          <div zclass="span2">
+         <label value="No Show Fee" />
+         <decimalbox value="@{billingDisplayConfig.noShowFee}" sclass="span12" />
+         </div>
+         
+         <div zclass="span12" style="margin-top:15px;text-align:left">
+          <radiogroup id="consultationWhenToTriggeredRadioGrp" selectedItem="@{billingDisplayConfig.isConsultationPriceTriggered,converter='com.nzion.view.component.RadioGroupBinder'}">
+           <hbox>
+             <label value="Consultation Price to be triggered at :"  />
+             <radio style="vertical-align: middle" id="patientVisitRadioButton" label="Patient Visit's Hospital" value="patientVisit" checked="true">
+             <attribute name="onCheck">
+             collectConsultationPatientVisitButton.setVisible(true);
+             collectConsultationAfterPatientMeetsDocRadioButton.setVisible(true);
+             </attribute>
+             </radio>
+             <radio style="vertical-align: middle" id="afterPatientMeetsDocRadioButton" label="After Patient meets Doctor" value="general">
+             <attribute name="onCheck">
+             collectConsultationPatientVisitButton.setVisible(false);
+             collectConsultationAfterPatientMeetsDocRadioButton.setVisible(true);
+             billingDisplayConfig.setIsPromptReceptionistToCollectConsultation("no");
+             </attribute>
+             </radio>
+            </hbox>
+          </radiogroup>
+         </div>
+         <separator></separator>
+         <div zclass="span12" >
+          <radiogroup  id="promptToReceptionistToCollectConsultationRadioGrp" selectedItem="@{billingDisplayConfig.isPromptReceptionistToCollectConsultation,converter='com.nzion.view.component.RadioGroupBinder'}">
+           <hbox>
+             <label value="Prompt Receptionist to collect Consultation :"  />
+             <radio style="vertical-align: middle" id="collectConsultationPatientVisitButton" label="Yes" value="yes" checked="true"/>
+             <radio style="vertical-align: middle"  id="collectConsultationAfterPatientMeetsDocRadioButton" label="No" value="no"/>
+            </hbox>
+          </radiogroup>
+         </div>
+         </div>
+         </div>
+    	<div sclass="panelFoot"  align="center">
+      <button label="Save" id="send"  zclass="btn-success btn">
+      	<attribute name="onClick">
+			com.nzion.domain.product.common.Money.init(Currency.getInstance(billingDisplayConfig.getCurrency().getCode()),java.math.RoundingMode.HALF_DOWN);
+      		commonCrudService.save(billingDisplayConfig);com.nzion.util.UtilMessagesAndPopups.showSuccess();
+      	</attribute>
+	 </button>
+    </div>
+	</window>
+</zk>

@@ -1,0 +1,86 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientIdCardPrint"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+	xmlns:h="http://www.w3.org/1999/xhtml">
+<zscript>
+ com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+ com.nzion.domain.Practice practice=com.nzion.util.Infrastructure.getPractice();
+ Long patientId = new Long(param.get("patientId")[0]);
+ com.nzion.domain.Patient patient= commonCrudService.getById(com.nzion.domain.Patient.class,patientId);
+ com.nzion.domain.inpatient.PatientAdmission patientAdmission = commonCrudService.findUniqueByEquality(com.nzion.domain.inpatient.PatientAdmission.class,new String[]{"patient"}, new Object[]{patient});
+</zscript>
+
+<window id="patientIdCardPrint" style="width:85%;margin:auto; padding:10px; border : 3px solid #999; border-radius:4px" self="@{define(content)}" width="50%">
+
+		 <attribute name="onCreate">
+			     Clients.print();
+    	</attribute>
+    	
+    	
+   <n:div class="clr patDetCont" style="margin-top:10px;">
+		<div align="center">
+			<n:table>
+				<n:tr>
+					<h:td align="center"><n:strong style="font-size:20px">${practice.practiceName}</n:strong></h:td>
+				</n:tr>
+				<n:tr>
+					<h:td align="center">
+									<n:strong style="font-size:15px;margin-right:2px;padding:10px">${patient.contacts.postalAddress.address1}</n:strong>
+									<n:strong style="font-size:15px;margin-right:2px;padding:10px">${patient.contacts.postalAddress.city}</n:strong>
+									<n:strong style="font-size:15px;margin-right:2px;padding:10px">${patient.contacts.postalAddress.stateProvinceGeo}</n:strong>
+									<n:strong style="font-size:15px;margin-right:2px;padding:10px">${patient.contacts.postalAddress.zipCode}</n:strong>
+					</h:td>
+				</n:tr>
+				<n:tr>
+					<h:td align="center">
+						<n:strong style="font-size:12px;margin-right:2px;padding:10px" >Tel :${patient.contacts.officePhone}</n:strong>
+						<n:strong style="font-size:12px;margin-right:2px;padding:10px">Fax :${patient.contacts.faxNumber}</n:strong>
+					</h:td>
+				</n:tr>
+			</n:table> 
+		</div>								
+	</n:div>
+			<div style="width:49%;float:left;">
+				<vlayout spacing="8%" >
+						<div><label value="MRN : " style="font-weight:bold;"></label> 
+						  <label value="@{patient.accountNumber}" style="font-weight:normal;" />
+						</div>
+					    <div>
+						 <label value="Name : " style="font-weight:bold;"></label>
+						  <name object="@{patient}"  />
+						</div>							   	      
+						<div>
+						  <label value="Age : " style="font-weight:bold;"></label>							   	       
+						  <label value="@{patient.age}"  style="font-weight:normal;"/>
+					   </div>	   	      
+					<div>
+					 <label value="Gender : " style="font-weight:bold;"></label>							   	       
+					 <label value="@{patient.gender}"  style="font-weight:normal;"/>
+					</div>
+					<div>
+					 <label value="Address : " style="font-weight:bold;"></label>							   	       
+					 <label value="@{patient.contacts.postalAddress}"  style="font-weight:normal;"/>
+				  </div>							   	     
+				</vlayout>
+			</div>
+		<div  style="width:49%;float:left;"  >
+		 <n:table>
+				 	<n:tr>
+				   <n:td> <label value="Date Of Admission" style="font-weight:bold;"></label></n:td>	
+	                <n:td>  <label value=":" /></n:td>   
+				   	<n:td><label value="@{patientAdmission.admittedDate,converter='com.nzion.view.component.DateConverter'}" /> </n:td></n:tr>
+				   	<n:tr></n:tr>
+				   	 <n:tr></n:tr>
+				   <n:tr>
+				   	   <h:td style="vertical-align:top;width:20%">
+					   <image id="patientImage" sclass="patImg" width="100px" height="70px"
+							hover="@{patient,converter='com.nzion.view.component.GenderImageConverter'}" style="display:block" /></h:td>
+				  </n:tr>
+				   	 <n:tr></n:tr>
+				   	 <n:tr></n:tr>
+	</n:table>
+     </div>
+		
+	</window>
+                     </zk>

@@ -1,0 +1,191 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./proceeLabTestRequestWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	import com.nzion.domain.emr.lab.*;
+	import java.util.*;
+	import com.nzion.domain.Patient;
+	import com.nzion.domain.Provider;
+	LabOrder labTestRequest = (LabOrder) Executions.getCurrent().getSession().getAttribute("labOrder");
+	LabRequest labRequest =(LabRequest)Executions.getCurrent().getArg().get("labRequest");
+	if(labRequest!=null)
+		labTestRequest =  commonCrudService.getById(LabOrder.class, labRequest.getId().toString());
+	if(labTestRequest == null)
+		return;
+	Provider provider;
+	Patient patient; 
+	patient = commonCrudService.getById(Patient.class, new Long(labTestRequest.getPatientId()));
+	provider = commonCrudService.getById(com.nzion.domain.Provider.class, new Long(labTestRequest.getProviderId()));
+	LabTestPanel labTestPanel;
+	LabTestResult labTestResult;
+	LabTest labTest;
+	boolean hasUnit = false;
+	List labReferenceRanges = new ArrayList();
+	com.nzion.zkoss.composer.emr.lab.LabTestResultController labTestResultController = new com.nzion.zkoss.composer.emr.lab.LabTestResultController();
+	boolean isCompleted = false;
+	if("Completed".equalsIgnoreCase(labTestRequest.getStatus()))
+		isCompleted = true;
+	boolean isSent = true;
+	if("Sent".equalsIgnoreCase(labTestRequest.getStatus()))
+		isSent = false;
+]]>
+	</zscript>
+	<window id="proceeLabTestRequestWindow" title="Lab Result" apply="${labTestResultController}" width="60%" closable="true">
+		<div sclass="addLocs" style="width:100%;">
+			<div sclass="panelHeadTop panelHead">
+				<a label="Person Detail"></a>
+			</div>
+			<div style="border-color:#C9D2D7;border-style:solid;border-width:0 1px">
+				<h:table width="100%">
+					<h:tr>
+						<h:td width="50%">
+							<n:h2 class="fl SNHeader">Patient Detail</n:h2>
+
+							<div class="clr patDetCont">
+								<image id="patientImage" sclass="patImg" width="46px" height="50px" hover="@{patient,converter='com.nzion.view.component.GenderImageConverter'}"></image>
+						           <div class="patDet">
+									<n:strong>MRN :</n:strong>
+									<span>
+										<label value="@{patient.accountNumber}" />
+									</span>
+									<n:br />
+									<n:strong>Name :</n:strong>
+									<span>
+										<name object="@{patient}" />
+									</span>
+									<n:br />
+									<n:strong class="fl">Encounter Id:</n:strong>
+									<span>
+										<label value="@{labTestRequest.encounterId}" />
+									</span>
+									<n:br />
+								</div>
+							</div>
+						</h:td>
+						<h:td width="50%">
+							<div class="wrapper">
+								<div class="mid">
+									<div>
+										<n:h2 class="fl SNHeader">Provider Detail</n:h2>
+										<div class="clr patDetCont">
+											<image id="providerImage" sclass="patImg" width="46px" height="50px" hover="@{provider,converter='com.nzion.view.component.GenderImageConverter'}"></image>
+											<div class="patDet">
+												<n:strong>Provider Account :</n:strong>
+												<span>
+													<label value="@{provider.accountNumber}" />
+												</span>
+												<n:br />
+												<n:strong>Name :</n:strong>
+												<span>
+													<name object="@{provider}" />
+												</span>
+												<n:br />
+											</div>
+											<div class="patDet">
+												<n:strong>NPI Number :</n:strong>
+												<span>
+													<label value="@{provider.detail.npiNumber}" />
+												</span>
+												<n:br />
+												<n:strong>DEA Number</n:strong>
+												<span>
+													<label value="@{provider.detail.deaNumber}" />
+												</span>
+												<n:br />
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</h:td>
+					</h:tr>
+				</h:table>
+			</div>
+			<div sclass="panelFoot" />
+			<separator height="10px" />
+			<div sclass="panelHeadTop panelHead">
+				<a label="Order Detail"></a>
+			</div>
+			<div style="border-color:#C9D2D7;border-style:solid;border-width:0 1px">
+				<tree id="labItemTree" model="@{labTestResultController.labOrderItemTreeModel}" zclass="z-dottree">
+					<attribute name="onSelect">
+						<![CDATA[
+						         if(labTestRequest == null)
+						        	 return;
+							Object data = self.getSelectedItem().getValue();
+							Object object;
+						if (!(data instanceof LabTest))
+							object = (Object) ((DefaultTreeNode) data).getData();
+						else
+							object = data;
+						if (object instanceof LabTest) {
+							labTest = (LabTest) object;
+							labReferenceRanges.clear();
+							if (com.nzion.util.UtilValidator.isNotEmpty(labTest.getLabReferenceRanges())) hasUnit = true;
+							labReferenceRanges.addAll(labTest.getLabReferenceRanges());
+							String description = labTest.getUom() != null ? labTest.getUom().getDescription() : "";
+							labTestResult = labService.getLabTestResult(labTestRequest,labTest.getTestName());
+							if(labTestResult == null)
+							labTestResult = new LabTestResult(labTestResultController.getLabOrder(), labTest.getTestName(), description,labTest.getReferenceRange());
+						}
+						if (object instanceof Loinc) {
+							Loinc loinc = (Loinc) object;
+						labTestResult =labService.getLabTestResult(labTestRequest,loinc.getLoincNumber());
+						if(labTestResult == null)
+							labTestResult = new LabTestResult(labTestResultController.getLabOrder(), loinc.getLoincNumber(), null, null);
+						}
+						testResultPanel.setVisible(true);
+						Events.postEvent("onReloadRequest", testResultPanel, null);
+					]]>
+				</attribute>
+				</tree>
+			</div>
+			<div sclass="panelFoot" />
+			<separator height="10px" />
+			<div sclass="panelHeadTop panelHead">
+				<a label="Observation"></a>
+			</div>
+			<div id="testResultPanel" sclass="panelCont" height="140px" visible="false"
+				style="border-color:#C9D2D7;border-style:solid;border-width:0 1px">
+				<div>
+					<label style="font-weight:bold;padding:0 0 4px" value="Test Name" />
+				</div>
+				<div>
+					<label value="Reference Range" style="font-weight:bold;padding:0 0 4px" />
+				</div>
+				<div>
+					<label value="Unit" style="font-weight:bold;padding:0 0 4px" />
+				</div>
+				<div>
+					<label value="Result" style="font-weight:bold;padding:0 0 4px" />
+				</div>
+				<div>
+					<label value="@{labTest.testName,load-after='testResultPanel.onReloadRequest'}" />
+				</div>
+				<div>
+					<label value="@{labTest.referenceRange,load-after='testResultPanel.onReloadRequest'}" if="${hasUnit}" />
+					<textbox value="@{labTest.referenceRange,load-after='testResultPanel.onReloadRequest'}" if="${!hasUnit}" />
+				</div>
+				<div>
+					<textbox value="@{labTest.uom.description,load-after='testResultPanel.onReloadRequest'}" />
+				</div>
+				<div>
+					<textbox value="@{labTestResult.observationValue,load-after='testResultPanel.onReloadRequest'}"
+						style="border:1px solid #A8A8A81px solid #A8A8A8" readonly="true"/>
+				</div>
+				<div sclass="col2">
+					<label value="Test Note" style="font-weight:bold;padding:0 0 4px" />
+					<textbox value="@{labTestResult.notes,load-after='testResultPanel.onReloadRequest'}" rows="2"
+						style="border:1px solid #A8A8A8" />
+				</div>
+			</div>
+		</div>
+		<div sclass="panelFoot" />
+		<separator height="20px" />
+		<div sclass="panelFoot">
+			<button label="Cancel" forward="onClick=onCancel"/>
+		</div>
+	</window>
+</zk>

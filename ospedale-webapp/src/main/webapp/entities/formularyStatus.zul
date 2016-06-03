@@ -1,0 +1,52 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addFormularyStatus"?>
+<?component name="screen" macro-uri="/home-grid-macro.zul"?>
+<?component name="lookup" class="com.nzion.view.component.LookupBox"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+
+	<zscript><![CDATA[
+	import com.nzion.zkoss.ext.EntityDropdownRenderer;
+	com.nzion.domain.drug.FormularyStatus formularyStatus = arg.get("entity");
+	if (formularyStatus == null) formularyStatus = new com.nzion.domain.drug.FormularyStatus();
+	List insuranceProviders = commonCrudService.getAll(com.nzion.domain.pms.InsuranceProvider.class);
+	EntityDropdownRenderer drugsDropdownRenderer = new EntityDropdownRenderer("tradeName");
+	EntityDropdownRenderer insuranceProvidersDropdownRenderer = new EntityDropdownRenderer("insuranceProviderName");
+]]></zscript>
+
+	<window id="addFormularyStatus" width="30%" position="center,top" title="${label}Formulatory Status" closable="true" mode="modal">
+		<panel title="Formulatory Status">
+			<panelchildren>
+				<div sclass="panelCont">
+					<div sclass="col2">
+						<label value="Drug" id="drugLookUpLabel"/>
+						<lookup  id="drugLookUp" entity="com.nzion.domain.drug.Drug"
+							searchcolumns="tradeName,description" displaycolumns="tradeName, description" requiredcolumn="id"
+							onChange="drugChanged();" readonly="true" >
+						</lookup>
+					</div>
+					<zscript>
+					<![CDATA[
+						void drugChanged() {
+						com.nzion.domain.drug.Drug drug = commonCrudService.getById(com.nzion.domain.drug.Drug.class,Long.valueOf(drugLookUp.getValue()));
+						if (drug == null) {
+							throw new WrongValueException(drugLookUp, "Drug Not Exist For This Id");
+						}
+						formularyStatus.setDrug(drug);
+						drugLookUpLabel.setValue("Drug (" +drug.getTradeName()+ ")");
+						}
+					]]>
+					</zscript>
+					<div sclass="col2">
+						<label value="Insurance Providers" />
+						<combobox model="@{insuranceProviders}" itemRenderer="${insuranceProvidersDropdownRenderer}"
+							selectedItem="@{formularyStatus.insuranceProvider}" />
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot">
+			<button sclass="btn" label="Save" id="Save" onClick="commonCrudService.save(formularyStatus);addFormularyStatus.detach();" />
+			<button sclass="btn" label="Cancel" forward="onClick=onCancel" />
+		</div>
+	</window>
+</zk>

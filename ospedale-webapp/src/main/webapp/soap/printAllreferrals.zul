@@ -1,0 +1,22 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+	<![CDATA[
+	com.nzion.domain.emr.soap.PatientSoapNote patientSoapNote;
+	Long patientScheduleId = new Long(param.get("scheduleId")[0]);
+	com.nzion.domain.Schedule selectedSchedule = commonCrudService.getById(com.nzion.domain.Schedule.class, patientScheduleId);
+	patientSoapNote = soapNoteService.getPatientSoapNote(selectedSchedule);
+	com.nzion.domain.emr.soap.ReferralSection referralSection = soapNoteService.getSoapSection(patientSoapNote,com.nzion.domain.emr.soap.ReferralSection.class);
+	List patientReferrals =  new ArrayList(referralSection.getPatientReferrals());
+	]]>
+	</zscript>
+ <div forEach="${patientReferrals}" onCreate="Clients.print();">
+    <n:div style="page-break-after:always">
+ 	<label value="${each.referral.firstName}"/>
+ 	<include src='/soap/soapPreviewReferralTemplate.zul' rlt="${selectedSchedule.person.referalLetterTemplate}"
+ 	  person="${selectedSchedule.person}" referralId="${each.referral.id}" soapNote="${patientSoapNote}"/>
+ 	</n:div>
+</div>  
+</zk>
+

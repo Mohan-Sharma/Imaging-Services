@@ -1,0 +1,10 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		setPageTitle("Observations", "");
+	</zscript>
+	<window>
+		<screen width="100%" pagetitle="Observations" listtitle="List of Observations" addpage="addEditObservations" addmodepopup="true"
+			entityclass="com.nzion.domain.emr.Observation" fields="name" label="Name" hidedeletebtn="true"/>
+	</window>
+</zk>

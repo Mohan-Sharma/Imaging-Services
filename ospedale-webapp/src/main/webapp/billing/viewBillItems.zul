@@ -1,0 +1,179 @@
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+	xmlns:h="http://www.w3.org/1999/xhtml">
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+	<zscript><![CDATA[
+		import com.nzion.domain.billing.InvoiceType;
+        Row invGridRow  = (Row)self.getParent(); 
+        com.nzion.domain.billing.Invoice tmpInvoice  =  (com.nzion.domain.billing.Invoice)invGridRow.getValue();        
+        com.nzion.zkoss.composer.BillingController billingController=new com.nzion.zkoss.composer.BillingController();
+        billingController.extractInvoiceToDisplay(tmpInvoice);
+        Boolean isUnBilledAmtInvoice = invGridRow.getId().equals("outStandingBill");
+        
+        com.nzion.domain.billing.Invoice invoice= billingController.getInvoice();
+        List decdutibleItems  = billingController.getInvoiceDeductibleItemMap().get(InvoiceType.DEDUCTIBLE.name());
+    	
+        boolean isWrittenOff =  billingController.getInvoice().getInvoiceStatus().equals(com.nzion.domain.billing.InvoiceStatusItem.WRITEOFF.toString());
+        billingController.getInvoiceItemMap();
+        boolean isInsurance = false;
+    	Map invoiceItemMap;	
+    	Map invoiceDeductibleItemMap ;    	
+    	String billedItemType = billingController.getInvoice().getItemType();
+    	List invPrevBalanceItems  = billingController.getInvPrevBalanceItemMap().get("PREVIOUSBALANCE");
+    	Boolean invPrevBalanceAvailable = com.nzion.util.UtilValidator.isNotEmpty(invPrevBalanceItems);  
+        Boolean deductiblesAvailable = com.nzion.util.UtilValidator.isNotEmpty(billingController.getInvoiceDeductibleItemMap().get(InvoiceType.DEDUCTIBLE.name()));
+        Boolean advanceAvailable = com.nzion.util.UtilValidator.isNotEmpty(billingController.getInvoicePrevAdvanceItemMap().get(InvoiceType.IPD_ADVANCE.name()));
+    ]]>
+</zscript>
+	<style>
+		.notePreview{ bottom: -10px; position: relative; } .summaryHeader{ background-color: #ECECEC; border: 1px solid
+		#A2A2A2; border-radius: 3px 3px 3px 3px; margin-top:10px; padding: 8px; } .footerClass{ font-family:
+		arial,sans-serif; font-size: 11px; font-weigh t: normal; text-align: right; } .mid, .pgTtl {padding: 0 98px; } .rCont
+		{ top: -10px; width: 97%; z-index: 1; } .total{ margin-right:19% }
+	</style>
+	<window >	
+		<div width="100%" sclass="clr chiefComp soapNoteCont curSOAP ui-resizable">
+		<n:br />
+		<listbox oddRowSclass="false" style="margin-left:20px;">
+			<listhead>
+				<listheader label="${c:l('item')}" />
+				<listheader label="${c:l('price')}" />
+				<listheader label="${c:l('quantity')}" />
+				<listheader label="${c:l('amount')}" />
+			</listhead>
+		</listbox>
+		<grid forEach="${billingController.invoiceItemMap}">
+			<rows>
+				<row  value="${each}">
+					<label value="${each.key}" style="font-weight:bold" />
+					<detail open="true">
+						<listbox oddRowSclass="false" forEach="${each.value}" checkmark="${isUnBilledAmtInvoice}" multiple="${isUnBilledAmtInvoice}">
+							<listitem  value="${each}">
+								<listcell label="${each.description}">
+								</listcell>
+								<listcell>
+										<label value="${each.factor}"/>
+										<label value="${each.factorDescription}"/>
+								</listcell>
+								<listcell>
+									<hlayout spacing="3px">
+										<label value="${each.quantity}"/>
+										<label value="${each.quanityDesc}"/>
+									</hlayout>
+								</listcell>
+								<listcell>
+									<label value="${each.priceValue}" />
+									<label value="${each.price.currency.code}"></label>
+								</listcell>
+							</listitem>
+						</listbox>
+					</detail>
+				</row>	
+			</rows>
+		</grid>	
+		<grid forEach="${billingController.invPrevBalanceItemMap}">
+			<rows>
+				<row  value="${each}">
+					<label value="${each.key}" style="font-weight:bold" />
+					<detail open="true">
+						<listbox oddRowSclass="false" forEach="${each.value}" checkmark="${isUnBilledAmtInvoice}" multiple="${isUnBilledAmtInvoice}">
+							<listitem  value="${each}">
+								<listcell label="${each.description}">
+								</listcell>
+								<listcell>
+										<label value="${each.factor}"/>
+										<label value="${each.factorDescription}"/>
+								</listcell>
+								<listcell>
+									<hlayout spacing="3px">
+										<label value="${each.quantity}"/>
+										<label value="${each.quanityDesc}"/>
+									</hlayout>
+								</listcell>
+								<listcell>
+									<label value="${each.priceValue}" />
+									<label value="${each.price.currency.code}"></label>
+								</listcell>
+							</listitem>
+						</listbox>
+					</detail>
+				</row>	
+			</rows>
+		</grid>	
+		<div align="right" sclass="total">
+			<label value="Total Amount:" />
+			<label value="${billingController.invoice.totalAmount}" style="font-weight:bold" />
+		</div>
+		
+		<grid forEach="${billingController.invoicePrevAdvanceItemMap}">
+			<rows>
+				<row  value="${each}">
+					<label value="${each.key}" style="font-weight:bold" />
+					<detail open="true">
+						<listbox oddRowSclass="false" forEach="${each.value}" checkmark="${isUnBilledAmtInvoice}" multiple="${isUnBilledAmtInvoice}">
+							<listitem  value="${each}">
+								<listcell label="${each.description}">
+								</listcell>
+								<listcell>
+										<label value="${each.factor}"/>
+										<label value="${each.factorDescription}"/>
+								</listcell>
+								<listcell>
+									<hlayout spacing="3px">
+										<label value="${each.quantity}"/>
+										<label value="${each.quanityDesc}"/>
+									</hlayout>
+								</listcell>
+								<listcell>
+									<label value="${each.priceValue}" />
+									<label value="${each.price.currency.code}"></label>
+								</listcell>
+							</listitem>
+						</listbox>
+					</detail>
+				</row>	
+			</rows>
+		</grid>		
+		<separator></separator>
+		<grid forEach="${billingController.invoiceDeductibleItemMap}">
+			<rows>
+				<row  value="${each}">
+					<label value="${each.key}" style="font-weight:bold" />
+					<detail open="true">
+						<listbox oddRowSclass="false" forEach="${each.value}" checkmark="${isUnBilledAmtInvoice}" multiple="${isUnBilledAmtInvoice}">
+							<listitem  value="${each}">
+								<listcell label="${each.description}">
+								</listcell>
+								<listcell>
+										<label value="${each.factor}"/>
+										<label value="${each.factorDescription}"/>
+								</listcell>
+								<listcell>
+									<hlayout spacing="3px">
+										<label value="${each.quantity}"/>
+										<label value="${each.quanityDesc}"/>
+									</hlayout>
+								</listcell>
+								<listcell>
+									<label value="${each.priceValue}" />
+									<label value="${each.price.currency.code}"></label>
+								</listcell>
+							</listitem>
+						</listbox>
+					</detail>
+				</row>	
+			</rows>
+		</grid>	
+			
+		<div align="right" sclass="total" >
+			<label value="${c:l('amountToBePaid')}" />
+			<label id="amountToBePaidLabel" 
+				value="${billingController.invoice.amountToBePaid}" style="font-weight:bold" />
+		</div>
+		<div align="right" sclass="total">
+			<label value="${c:l('collectedAmount')}" />
+			<label										
+				value="${billingController.invoice.collectedAmount}" style="font-weight:bold" />
+		</div>
+	</div>
+	</window>
+</zk>

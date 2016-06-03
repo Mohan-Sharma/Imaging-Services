@@ -1,0 +1,76 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./immunizationSearchWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+		<![CDATA[
+	
+	 com.nzion.domain.emr.VaccineCodeSet vaccineCodeSet = arg.get("VaccineCodeSet");
+	 List immunizations;
+	
+	]]>
+	</zscript>
+	<window id="immunizationSearchWindow" title="Search Immunizations" closable="true" mode="modal" width="50%">
+	<zscript>
+	public void addImmunizations(){
+	vaccineCodeSet.getImmunizations().addAll(com.nzion.util.ViewUtil.getSelectedItems(immunizationListBox));
+	}
+	</zscript>
+		<panel border="none">
+			<panelchildren>
+				<div sclass="panelCont" height="40px">
+					<div sclass="col2">
+						<label value="Vaccine Short Name" />
+						<textbox id="shortNameTextBox" />
+					</div>
+					<div sclass="col2">
+						<label value="Vaccine Full Name" />
+						<textbox id="fullNameTextBox" />
+					</div>
+				</div>
+				<div sclass="panelFoot">
+					<button label="Search" id="searchBtn">
+						<attribute name="onClick">
+						<![CDATA[
+							if (shortNameTextBox.getValue().isEmpty() && fullNameTextBox.getValue().isEmpty()) {
+								com.nzion.util.UtilMessagesAndPopups.showError(org.zkoss.util.resource.Labels.getLabel("nosearchcondition"));
+								return;
+							}
+							immunizations = vaccineService.searchImmunizationsBy(shortNameTextBox.getValue(),fullNameTextBox.getValue());
+							noresultLabel.setVisible(com.nzion.util.UtilValidator.isEmpty(immunizations));
+							panelFootDiv.setVisible(!com.nzion.util.UtilValidator.isEmpty(immunizations));
+							searchResultPanel.setVisible(true);
+						]]>
+						</attribute>
+					</button>
+				</div>
+			</panelchildren>
+		</panel>
+		<separator height="10px" />
+		<panel title="Search Result" id="searchResultPanel" visible="false" collapsible="true">
+			<panelchildren>
+				<label value="No Record Found" id="noresultLabel" visible="false" style="font-weight:bold" />
+				<listbox model="@{immunizations,load-after='searchBtn.onClick'}"  multiple="true" rows="10"
+					checkmark="true" id="immunizationListBox">
+					<listhead>
+						<listheader label="Vaccine Short Name" />
+						<listheader label="Vaccine Full Name" />
+					</listhead>
+					<listitem self="@{each='immunization'}" value="@{immunization}">
+						<listcell label="@{immunization.shortDescription}" />
+						<listcell label="@{immunization.fullVaccineName}" />
+					</listitem>
+				</listbox>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot" id="panelFootDiv" visible="false">
+			<button label="Add">
+				<attribute name="onClick">
+					addImmunizations();
+					immunizationSearchWindow.detach();
+				</attribute>
+			</button>
+			<button label="Cancel" forward="onClick=onCancel" />
+		</div>
+	</window>
+</zk>

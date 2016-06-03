@@ -1,0 +1,207 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientOtherDetailWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	<![CDATA[
+	        
+	import com.nzion.domain.Patient;
+	import com.nzion.domain.PatientOtherContactDetail;
+	import com.nzion.domain.Referral;
+	import com.nzion.util.UtilValidator;
+	Patient patient = (Patient) arg.get("patient");
+	PatientOtherContactDetail patientOtherContactDetail = (PatientOtherContactDetail) patientService
+			.getPatientOtherContactDetailFor(patient);
+	Referral referral = patientOtherContactDetail.getReferral();
+	patientOtherContactDetail.setReferral(referral);
+	void saveOtherDetail() {
+		referral = patientOtherContactDetail.getReferral();
+		patientOtherContactDetail
+				.setReferral((commonCrudService.save(referral)));
+		commonCrudService.save(patientOtherContactDetail);
+		com.nzion.util.UtilMessagesAndPopups.showSuccess();
+	}
+	boolean referralDetailsVisible = patientOtherContactDetail.getId() != null;
+]]>
+	</zscript>
+	<window id="patientOtherDetailWindow">
+		<panel id="referralDetailSection" title="Referral" height="130px">
+			<panelchildren>
+				<div if="${!referralDetailsVisible}" id="noReferral">
+					<hlayout spacing="15px" style="margin-top:10px;margin-left:10px">
+						<label value="No Referral Found."></label>
+							<a sclass="btn" label="Add"
+								onClick='patientReferralDiv.setVisible(true);referralLabel.setVisible(true);referralLookUpId.setVisible(true);' >
+								 <n:i class="icon-plus-sign"></n:i>
+								</a>
+					</hlayout>
+				</div>
+				<div style="margin-left:25px;margin-top:10px" visible="${referralDetailsVisible}"
+					id="patientReferralDiv">
+					<label value="Referral" id="referralLabel" visible="${patientOtherContactDetail.id==null}" />
+					<referrallookup sourcePage='${"PatientPage"}' visible="${patientOtherContactDetail.id==null}"
+						panel="${referralDetailSection}" 
+						entity="${patientOtherContactDetail}" id="referralLookUpId" component="${self}">
+						<attribute name="onChange">
+							if (event.getOrigin() != null)
+								patientOtherContactDetail.setReferral(event.getOrigin().getData());
+							Events.postEvent("onReload", referralDetailSection, null);
+							self.setVisible(false);
+							if(referralDetailSection.getFellowIfAny("noReferral")!=null){
+								noReferral.setVisible(false);
+							}
+							referralLabel.setVisible(false);
+					</attribute>
+					</referrallookup>
+					<space orient="horizontal" />
+					<hbox style="border:0px" id="referralDetailsbox">
+						<vbox>
+							<hbox>
+								<name
+									object="@{patientOtherContactDetail.referral,load-after='referralDetailSection.onReload'}" />
+								<space orient="vertical" />
+								<a label="Change Referral" onClick="referralLookUpId.setVisible(true);self.setVisible(false);"
+									if="${patientOtherContactDetail.id!=null}" id="changeReferral"/>
+							</hbox>
+							<hbox>
+								<label
+									value="@{patientOtherContactDetail.referral.contacts.postalAddress.address1,load-after='referralDetailSection.onReload'}" />
+								<label
+									value="@{patientOtherContactDetail.referral.contacts.postalAddress.address2,load-after='referralDetailSection.onReload'}" />
+								<label
+									value="@{patientOtherContactDetail.referral.contacts.postalAddress.city,load-after='referralDetailSection.onReload'}" />
+								<label
+									value="@{patientOtherContactDetail.referral.contacts.postalAddress.stateProvinceGeo,load-after='referralDetailSection.onReload'}" />
+							</hbox>
+							<label
+								value="@{patientOtherContactDetail.referral.contacts.officePhone,load-after='referralDetailSection.onReload'}" />
+							<listbox
+								model="@{patientOtherContactDetail.referral.specialities,load-after='referralDetailSection.onReload'}"
+								oddRowSclass="white" style="border:none">
+								<listitem self="@{each='speciality'}" value="@{speciality}" style="border:none">
+									<listcell style="border:none">
+										<label value="@{speciality.description}" style="border:none" />
+									</listcell>
+								</listitem>
+							</listbox>
+						</vbox>
+					</hbox>
+					<div></div>
+				</div>
+			</panelchildren>
+		</panel>
+		<panel id="alternateContatcDetailSection" title="Alternate Mailing Address" collapsible="true">
+			<panelchildren>
+			<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span3">
+						<label value="Address1" />
+						<textbox  sclass="span12" value="@{patientOtherContactDetail.alternateContactFields.address1}" />
+					</div>
+					<div zclass="span3">
+						<label value="Address3" />
+						<textbox  sclass="span12" value="@{patientOtherContactDetail.alternateContactFields.address2}" />
+					</div>
+					<div zclass="span2">
+						<label value="City" />
+						<textbox sclass="span12" value="@{patientOtherContactDetail.alternateContactFields.city}" />
+					</div>
+					<div zclass="span2">
+						<label value="State" />
+						<textbox sclass="span12" value="@{patientOtherContactDetail.alternateContactFields.stateProvinceGeo}"
+							maxlength="2" />
+					</div>
+					<div zclass="span2">
+						<label value="Zipcode" />
+						<zipcodebox sclass="span12" value="@{patientOtherContactDetail.alternateContactFields.postalCode}" />
+					</div>
+				</div>
+				</div>
+			</panelchildren>
+		</panel>
+		<panel title="Emergency Contact" collapsible="true">
+			<panelchildren>
+				<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span2">
+						<label value="Address1" />
+						<textbox sclass="span12" value="@{patientOtherContactDetail.emergencyContactFields.postalAddress.address1}" />
+					</div>
+					<div zclass="span2">
+						<label value="Address2" />
+						<textbox  sclass="span12" value="@{patientOtherContactDetail.emergencyContactFields.postalAddress.address2}" />
+					</div>
+					<div zclass="span2">
+						<label value="City" />
+						<textbox value="@{patientOtherContactDetail.emergencyContactFields.postalAddress.city}" sclass="span12" />
+					</div>
+					</div>
+					 <div zclass="row-fluid">
+					<div zclass="span2">
+						<label value="State" />
+						<textbox
+							value="@{patientOtherContactDetail.emergencyContactFields.postalAddress.stateProvinceGeo}" maxlength="2" sclass="span12" />
+					</div>
+					<div zclass="span2">
+						<label value="Zipcode" />
+						<zipcodebox
+							value="@{patientOtherContactDetail.emergencyContactFields.postalAddress.postalCode}" sclass="span12" />
+					</div>
+					<div zclass="span2">
+						<label value="Phone" />
+						<phonebox
+							value="@{patientOtherContactDetail.emergencyContactFields.postalAddress.stateProvinceGeo}" sclass="span12" />
+					</div>
+					</div>
+					 <div zclass="row-fluid">
+					<div zclass="span2">
+						<label value="Work Phone" />
+						<phonebox value="@{patientOtherContactDetail.emergencyContactFields.officePhone}" sclass="span12" />
+					</div>
+					<div zclass="span2">
+						<label value="Mobile Phone" />
+						<phonebox value="@{patientOtherContactDetail.emergencyContactFields.mobileNumber}" sclass="span12" />
+					</div>
+					<div zclass="span2">
+						<label value="Alternate Phone" />
+						<phonebox value="@{patientOtherContactDetail.emergencyContactFields.alternatePhone}" sclass="span12" />
+					</div>
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+		<panel id="internationalContatcDetailSection" title="International Address" collapsible="true">
+			<panelchildren>
+					<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span3">
+						<label value="Address1" />
+						<textbox sclass="span12" value="@{patientOtherContactDetail.internationalContactFields.address1}" />
+					</div>
+					 <div zclass="span3">
+						<label value="Address2" />
+						<textbox sclass="span12" value="@{patientOtherContactDetail.internationalContactFields.address2}" />
+					</div>
+					 <div zclass="span2">
+						<label value="City" />
+						<textbox sclass="span12" value="@{patientOtherContactDetail.internationalContactFields.city}" />
+					</div>
+					 <div zclass="span2">
+						<label value="State" />
+						<textbox sclass="span12" value="@{patientOtherContactDetail.internationalContactFields.stateProvinceGeo}"
+							maxlength="2" />
+					</div>
+					 <div zclass="span2">
+						<label value="Country" />
+						<textbox sclass="span12" value="@{patientOtherContactDetail.internationalContactFields.countryGeo}" />
+					</div>
+				</div>
+				</div>
+				
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot">
+			<button label="Save"  onClick="saveOtherDetail()" zclass="btn-success btn" />
+		</div>
+	</window>
+</zk>

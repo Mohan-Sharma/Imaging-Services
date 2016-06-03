@@ -1,0 +1,59 @@
+<?component name="enumeration" class="com.nzion.view.component.EnumerationDropdown"?>
+<zk xmlns:h="http://www.zkoss.org/2005/zk/native" xmlns:a="http://www.zkoss.org/2005/zk/annotation">
+
+			<groupbox>
+				<caption label="Demographics"></caption>
+				<h:table width="100%">
+					<h:tr>
+						<h:td width="30%">
+							<label value="Gender" />
+							<enumeration enumType="GENDER" selectedItem="@{patientVO.patient.gender}" />
+						</h:td>
+						<h:td width="30%">
+							<label value="Marital Status" />
+							<enumeration enumType="MARITAL_STATUS"
+								selectedItem="@{patientVO.patient.maritalStatus}" />
+						</h:td>
+						<h:td width="30%">
+							<checkbox checked="@{patientVO.patient.veterian}" label="Veteran" />
+						</h:td>
+					</h:tr>
+					<h:tr>
+						<h:td width="30%">
+							<label value="Ethnicity" />
+							<enumeration enumType="ETHNICITY" selectedItem="@{patientVO.patient.ethnicity}" />
+						</h:td>
+						<h:td width="30%">
+							<label value="Race" />
+							<enumeration enumType="RACE" selectedItem="@{patientVO.patient.race}" id="race" />
+							<toolbarbutton label="New" onClick="" style="border:1px solid black" id="newRace">
+								<attribute name="onClick">
+								Map map = new HashMap();
+								map.put("enumType","RACE");
+								map.put("compToRefresh",race);
+								Window win = (Window) Executions.createComponents("/common/enumeration.zul",(Component)self.getSpaceOwner(), map);
+								win.setId("raceWindow");
+								win.doModal();	
+								</attribute>
+							</toolbarbutton>
+						</h:td>
+						
+						
+						<h:td width="30%">
+							<label value="Occupation"/>
+							<enumeration id="occupation" enumType="OCCUPATION" selectedItem="@{patientVO.patient.occupation}" />
+							<toolbarbutton label="New" style="border:1px solid black" id="newOccupation">
+								<attribute name="onClick">
+								Map map = new HashMap();
+								map.put("enumType","OCCUPATION");
+								map.put("listboxId","occupation");
+								Window win = (Window) Executions.createComponents("/common/enumeration.zul",(Component)self.getSpaceOwner(), map);
+								win.doModal();
+								</attribute>
+							</toolbarbutton>
+						</h:td>
+					</h:tr>
+
+				</h:table>
+			</groupbox>
+</zk>

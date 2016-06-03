@@ -1,0 +1,60 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./patientLabOrderWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	        import com.nzion.domain.emr.soap.PatientLabOrder;
+	        import com.nzion.domain.emr.lab.*;
+	    	Collection patientLabOrders=arg.get("patientLabOrders");
+	    	List labTests;
+	    	Class klass = LabTest.class;
+	]]></zscript>
+	<window id="patientLabOrderWin" style="border: 5px solid #2d2d2d" mode="modal" width="60%">
+<zscript><![CDATA[
+           
+   	void addLabTests(){
+   	List selectedTestItems = com.nzion.util.ViewUtil.getSelectedItems(labTestDisplayGrid);
+   	for(int i = 0; i < selectedTestItems.size(); ++i)
+		patientLabOrders.add(new PatientLabOrder(((PatientLabOrder.PatientLabOrderAdapter)selectedTestItems.get(i))));
+ 	patientLabOrderWin.detach();
+ 	}
+		]]></zscript>
+		<div sclass="panelTop">
+			<button  label="Add" id="Save" onClick="addLabTests();"/>
+			<button  label="Cancel" forward="onClick=onCancel"/>
+		</div>
+	<panel title="Add Lab Orders">
+		<panelchildren>
+			<space width="10px"/>
+			<hbox>	
+				<hbox>
+					<label value="Search test" />
+					<textbox id="nameTxt" />
+				</hbox>	
+				<button  label="Search" id="searchBtn" onClick='labTests=labService.findLabTests(klass, (klass.equals(LabTest.class) ? "testName" : "shortName"), nameTxt.getValue());'/>
+				<space width="20px"/>
+				<radiogroup orient="horizontal">
+					<radio label="In House"  id="inHouseRadioBtn" checked="true" onCheck="klass = LabTest.class;"/>
+					<space width="20px"/>
+					<radio label="Loinc"   id="loincRadioBtn" onCheck="klass = Loinc.class;"/>
+				</radiogroup>
+			</hbox>
+			<listbox model="@{labTests,load-after='self.onReloadRequest,searchBtn.onClick'}" rows="10" checkmark="true" multiple="true" id="labTestDisplayGrid"> 
+				<listhead>
+					<listheader label="Test Name"/>
+					<listheader label="Test Code"/>
+				</listhead>
+				<listitem self="@{each='test'}" value="@{test}">
+					<listcell>
+						<label value="@{test.testName}"/>
+					</listcell>
+					<listcell>
+						<label value="@{test.testCode}"/>
+					</listcell>
+				</listitem>
+			</listbox>
+		</panelchildren>
+	</panel>
+	<checkbox id="chkbx"/>
+</window>
+</zk>

@@ -1,0 +1,188 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./createReferral"?>
+<?component name="enumeration" class="com.nzion.view.component.EnumerationDropdown"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript><![CDATA[
+	import java.util.regex.Pattern;
+	import com.nzion.util.RestServiceConsumer;
+	com.nzion.domain.Referral referal = arg.get("entity");
+	if(referal == null)
+	   referal = new com.nzion.domain.Referral();
+	Panel panel = arg.get("panel");
+	Textbox textbox = arg.get("referalNameTextBox");
+	com.nzion.domain.PatientOtherContactDetail patientOtherContactDetail = arg.get("patientOtherContactDetail");
+	com.nzion.zkoss.ext.EntityDropdownRenderer entityDropdownRenderer = new com.nzion.zkoss.ext.EntityDropdownRenderer("description");
+	List specialities = commonCrudService.getAll(com.nzion.domain.Speciality.class);
+	List allCities = RestServiceConsumer.getAllCities();
+	]]></zscript>
+	<window id="createReferral" apply="${entityReferralController}" mode="modal" width="50%" position="center,top">
+	
+		<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Referral</h:small>
+                <button type="button" zclass="close" onClick="createReferral.detach();">×</button>
+            </h:h1>
+    </div>
+	<div zclass="container-fluid">
+	     <div zclass="row-fluid">
+                         <div zclass="span4">
+                             <label value="Referral Type" style="text-align:right;" mold="required" />
+                             <combobox sclass="span12" id="referralType" selectedItem="@{referal.referralType,save-when='Save.onClick'}"  disabled="${referal.isAfyaRegistered()}"
+                                       w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" >
+                                 <comboitem value="CLINIC" label="CLINIC"></comboitem>
+                                 <comboitem value="PHARMACY" label="PHARMACY"></comboitem>
+                                  <comboitem value="LAB" label="LAB"></comboitem>
+                             </combobox>
+                         </div>
+                         <div zclass="span4">
+                             <label value="Name" style="text-align:right;" mold="required" />
+                             <textbox value="@{referal.clinicName,save-when='Save.onClick'}" constraint="no empty"  disabled="${referal.isAfyaRegistered()}"
+                             sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}"
+                             w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                         </div>
+
+		 </div>
+		 <div zclass="row-fluid">
+				<div zclass="span4">
+						<label value="First Name" style="text-align:right;" id="lblfirstName" mold="required" />
+						<textbox cols="40" value="@{referal.firstName,save-when='Save.onClick'}" id="firstName" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"
+							 disabled="${referal.isAfyaRegistered()}" maxlength="50" onBlur="com.nzion.util.UtilDisplay.validateOnlyAlphaNumericAndWhiteSpaces(self)"/>
+				</div>
+				<div zclass="span4">
+						<label value="Last Name" style="text-align:right;" id="lbllastName" mold="required" />
+						<textbox value="@{referal.lastName,save-when='Save.onClick'}" id="lastName" constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+					       disabled="${referal.isAfyaRegistered()}"	maxlength="50" onBlur="com.nzion.util.UtilDisplay.validateOnlyAlphaNumericAndWhiteSpaces(self)"/>
+				</div>
+				 <div zclass="span4">
+					  <label value="Afya Registered ?" style="text-align:right;" />
+					  <textbox readonly="true" disabled="${referal.isAfyaRegistered()}">
+					  <attribute name="onCreate">
+						if(referal.isAfyaRegistered()){
+						  self.setValue("Yes");
+						}
+						else {
+						  self.setValue("No");
+						}
+					  </attribute>
+					  </textbox>
+				 </div>
+		 </div>
+					
+		 <div zclass="row-fluid">
+					  <div zclass="span6">
+						<label value="e-mail" />
+						<email id="emailAddr" value="@{referal.contacts.email,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"  disabled="${referal.isAfyaRegistered()}" />
+					 </div>
+				<!--	<div zclass="span6">
+							  <label value="Specialities"/>
+							  <listbox model="@{specialities}" width="100%" multiple="true" checkmark="true" id="specialityListbox" sclass="span12" 
+							  	 rows="5" mold="select"  sizedByContent="true" vflex="true"
+										selectedItem="@{referal.specialities, converter=com.nzion.view.component.MultipleListitemBindingConverter}">
+ 									<listitem self="@{each}" value="@{each}" label="@{each.description}">
+									</listitem>
+								</listbox>
+					</div> -->
+					<div zclass="span6">
+						<label value="Mobile Phone" />
+						<email id="phoneNo." value="@{referal.contacts.mobileNumber,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"  disabled="${referal.isAfyaRegistered()}" />
+					</div>
+		 </div>
+				
+				
+				
+			
+	<!--	<popup id="specialityPopup" width="300px">
+				<include src="/provider/provider-speciality.zul" p="${referal}" id="referralSpeciality"/>
+		</popup> -->
+		
+		
+		 <div zclass="row-fluid">
+					<div zclass="span6">
+						<label value="Address1" id="lbladdress1" mold="required"/>
+						<textbox rows="2" cols="50" value="@{referal.contacts.postalAddress.address1,save-when='Save.onClick'}" constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+						 disabled="${referal.isAfyaRegistered()}"	id="address1" maxlength="50"/>
+					</div>
+					<div zclass="span6">
+						<label value="Address2" style="text-align:right;" id="lbladdress2" />
+						<textbox rows="2" cols="50" value="@{referal.contacts.postalAddress.address2,save-when='Save.onClick'}" sclass="span12" 
+							 disabled="${referal.isAfyaRegistered()}" id="address2" maxlength="50"/>
+					</div>
+			</div>
+				<div zclass="row-fluid">
+					<div zclass="span4">
+						<label value="City" id="lblcity" mold="required"/>
+					<!--	<textbox  value="@{referal.contacts.postalAddress.city,save-when='Save.onClick'}"
+						 disabled="${referal.isAfyaRegistered()}"	id="city" onBlur="com.nzion.util.UtilDisplay.validateNonDigits(self)" constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/> -->
+
+						  <combobox sclass="span12" id="city" selectedItem="@{referal.contacts.postalAddress.city,save-when='Save.onClick'}" disabled="${referal.isAfyaRegistered()}"
+								   w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty">
+							 <attribute name="onBlur">
+								 <![CDATA[
+									 String city = self.getValue();
+									 if(city != null){
+									 Map stateCountry = RestServiceConsumer.getStateCountryBasedOnCity(city);
+									 if(!stateCountry.isEmpty()){
+										 if(stateCountry.get("state") != null)
+										 state.setValue((String)stateCountry.get("state"));
+									  }
+								  }
+								 ]]>
+							 </attribute>
+							 <comboitem forEach="${allCities}" value="${each.city}" label="${each.city}"></comboitem>
+						  </combobox>
+					</div>
+				<div zclass="span4">
+						<label value="Governorate" id="lblstate" mold="required"/>
+						<!--	<enumeration id="state" enumType="STATE" itemRenderer="${stateRenderer}"  disabled="${referal.isAfyaRegistered()}"
+							value="@{referal.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick'}" constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" /> -->
+
+                           <textbox value="@{referal.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick'}" id="state" sclass="span12" readonly="true" disabled="${referal.isAfyaRegistered()}"
+												w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"/>
+				</div>
+					<div zclass="span4">
+						<label value="Postal code" id="lblpostalCode"  mold="required"/>
+						<zipcodebox value="@{referal.contacts.postalAddress.postalCode,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+						 disabled="${referal.isAfyaRegistered()}"	id="postalCode" constraint="no empty"/>
+					</div>
+					</div>
+					 <div zclass="row-fluid">
+				    
+					
+					<div zclass="span4">
+							<label value="Home phone" />
+							<phonebox value="@{referal.contacts.homePhone,save-when='Save.onClick'}" sclass="span12"  disabled="${referal.isAfyaRegistered()}" />
+						</div>
+						<div zclass="span4">
+							<label value="Office phone" />
+							<phonebox value="@{referal.contacts.officePhone,save-when='Save.onClick'}" sclass="span12" 
+							 disabled="${referal.isAfyaRegistered()}"	cols="10" />
+						</div>
+						<div zclass="span4">
+							<label value="Fax" />
+							<phonebox value="@{referal.contacts.faxNumber,save-when='Save.onClick'}" cols="10" sclass="span12"  disabled="${referal.isAfyaRegistered()}"  />
+						</div>
+						</div>
+			</div>
+		<separator></separator>
+		<div sclass="panelFoot">
+			<button label="Save" id="Save" zclass="btn-success btn" visible="true" disabled="${referal.isAfyaRegistered()}" >
+				<attribute name="onClick">
+				
+					try{
+						commonCrudService.save(referal);
+						if(patientOtherContactDetail!=null)
+							patientOtherContactDetail.setReferral(referal);
+						if(panel!=null)	
+							Events.postEvent("onReload",panel,null);
+						if(textbox!=null)
+							textbox.setValue(com.nzion.util.ViewUtil.getFormattedName(patientOtherContactDetail.getReferral()));
+					}catch(org.springframework.dao.DataIntegrityViolationException e){
+						throw new RuntimeException("Referral code " + referal.getAccountNumber() + " already exists.", e);
+					}
+						createReferral.detach();
+				</attribute>
+			</button>
+			<button label="Cancel" id="Close" onClick='createReferral.detach()'/>
+		</div>
+	</window>
+</zk>

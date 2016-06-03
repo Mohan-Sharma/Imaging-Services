@@ -1,0 +1,43 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./answerOptionsWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+
+	<zscript><![CDATA[
+		import com.nzion.enums.AnswerType;
+		import com.nzion.domain.emr.*;
+		import com.nzion.zkoss.composer.emr.*;
+		
+		TemplateSetupController templateSetupController = (TemplateSetupController) Executions.getCurrent().getArg().get("controller");
+		List options = (List)Executions.getCurrent().getArg().get("options");
+		boolean multiSelect = (Boolean)Executions.getCurrent().getArg().get("multiSelect");
+	]]></zscript>
+	
+	<window id="answerOptionsWindow" width="30%" height="40%" style="border: 5px solid #2d2d2d" 
+		apply="${templateSetupController}">
+		<div sclass="panelFoot">
+			<button label="Ok" onClick="answerOptionsWindow.detach()"/>
+			<button label="Close" onClick="answerOptionsWindow.detach()"/>
+		</div>
+		<div>
+			<label value="Options:" />
+			<combobox id="OptionsComboBox" model="@{options}" 
+				selectedItem="@{templateSetupController.selectedAnswerOption}"
+				visible="false">
+				<comboitem self="@{each='option'}" label="@{option}" value="@{option}"/>
+			</combobox>
+			<listbox id="OptionsMultiSelectBox" model="@{options}" 
+				selectedItem="@{templateSetupController.selectedAnswerOptions}"
+				multiple="true" checkmark="true" visible="false">
+				<listitem self="@{each='option'}" label="@{option}" value="@{option}"/>
+			</listbox>
+			<zscript>
+				if (multiSelect) {
+					OptionsMultiSelectBox.setVisible(true);
+				} else {
+					OptionsComboBox.setVisible(true);
+				}
+			</zscript>
+		</div>
+	</window>
+	
+</zk>

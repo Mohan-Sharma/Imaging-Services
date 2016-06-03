@@ -1,0 +1,93 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addSpeciality"?>
+<?component name="enumeration" class="com.nzion.view.component.EnumerationDropdown"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript><![CDATA[
+	import com.nzion.domain.Speciality;
+	import com.nzion.util.UtilValidator;
+	com.nzion.zkoss.ext.EntityDropdownRenderer qaTemplateDropdownRenderer = new com.nzion.zkoss.ext.EntityDropdownRenderer("name");
+	Map arguments = Executions.getCurrent().getArg();
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	Speciality speciality =UtilValidator.isEmpty(arguments)? new Speciality() : commonCrudService.getById(Speciality.class,arguments.get("entity").getCode()) ;
+	List chiefComplaints = commonCrudService.getAll(com.nzion.domain.emr.ChiefComplaint.class);
+	]]></zscript>
+	
+	<window id="addSpeciality" mode="modal" closable="true"  width="50%"  position="center,top">
+		<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Speciality</h:small>
+                <button type="button" zclass="close" onClick="addSpeciality.detach();">×</button>
+            </h:h1>
+        </div>
+	<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span4">
+						<label value="Speciality Code" mold="required" />
+						<textbox value="@{speciality.code,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" />
+					</div>
+					</div>
+					 <div zclass="row-fluid">
+					<div zclass="span6">
+						<label value="Description" mold="required" />
+						<textbox rows="2" cols="50" value="@{speciality.description,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" />
+					</div>
+					</div>
+					</div>
+			
+			<n:table border="0" cellspacing="5" cellpadding="0">
+				<n:thead>
+					<n:tr>
+						<n:td>
+						<a label="Add Chief Complaints" zclass="btn btn-mini" onClick='Executions.createComponents("/provider/add-chief-complaints-for-speciality.zul", null,com.nzion.util.UtilMisc.toMap("speciality",speciality));'>
+							<attribute name="onClick">
+								Window w = Executions.createComponents("/provider/add-chief-complaints-for-speciality.zul",addSpeciality,com.nzion.util.UtilMisc.toMap("speciality",speciality));
+								w.addForward("onDetach",chiefComplaintListBox, "onReloadRequest");
+							</attribute>
+						</a>
+						</n:td>
+					</n:tr>
+				</n:thead>
+			</n:table>
+			<listbox  model="@{speciality.chiefComplaints,load-after='self.onReloadRequest'}" id="chiefComplaintListBox" rows="5">
+				<listhead>
+					<listheader label="Chief Complaints"/>
+				</listhead>
+				<listitem self="@{each='chiefComplaint'}" value="@{chiefComplaint}">
+					<listcell style="border:0px;">
+						<label value="@{chiefComplaint.complainName}" />
+					</listcell>
+				<listcell>
+						<image src="/images/cross.png" style="margin-left:350px">
+							<attribute name="onClick">
+							speciality.getChiefComplaints().remove(self.getParent().getParent().getValue());
+							Events.postEvent("onReloadRequest",chiefComplaintListBox,null);
+							</attribute>
+						</image>
+				</listcell>
+				</listitem>
+			</listbox>
+		<div sclass="panelFoot" ></div>
+		<separator/>		
+		<div sclass="panelFoot">
+			<button label="Save" id="Save" zclass="btn-success btn" >
+				<attribute name="onClick">
+				<![CDATA[
+						try{
+							commonCrudService.save(speciality);
+							com.nzion.util.UtilMessagesAndPopups.showSuccess();
+							addSpeciality.detach();
+						}catch(org.springframework.dao.DataIntegrityViolationException e){
+							if(e.getCause()!=null && e.getCause() instanceof org.hibernate.exception.ConstraintViolationException){
+							int code = org.hibernate.exception.JDBCExceptionHelper.extractErrorCode(((org.hibernate.exception.ConstraintViolationException)(e.getCause())).getSQLException());
+								if(1062==code){
+									com.nzion.util.UtilMessagesAndPopups.showError("Speciality '"+speciality.getDescription()+"' already exists.");
+								}
+							}
+						}
+				]]>
+				</attribute>
+			</button>
+			<button label="Cancel" onClick="addSpeciality.detach()"/>
+		</div>
+	</window>
+</zk>

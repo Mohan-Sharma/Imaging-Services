@@ -1,0 +1,77 @@
+<?page title="SOAP Note"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./sentencePanel"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	<![CDATA[
+			import com.nzion.zkoss.composer.*;
+			import com.nzion.domain.emr.*;
+			import com.nzion.enums.*;
+			import com.nzion.domain.person.*;
+			import com.nzion.util.*;
+			import com.nzion.domain.emr.soap.*;
+			SoapSentenceComposer sentenceComposer = new SoapSentenceComposer();
+			]]>	
+	</zscript>
+	<window id="sentencePanel" apply="${sentenceComposer}"  style="overflow:auto">
+		<div sclass="panelHead">
+		<a onClick='Executions.getCurrent().sendRedirect("/soap/soapNotePreviewFull.zhtml?scheduleId="+sentenceComposer.getSoapNoteController().getSchedule().getId()+"&amp;pageName=SoapNotePreview", "_soapPreview");'>Encounter Note Preview</a>
+			<span sclass="popout"><image width="5px"/></span>
+              <label sclass="fr goto" value="Go To">
+               	<attribute w:name="onClick">
+							jQuery('#'+this.uuid).parent().find('div[class=\"gotoList\"]').slideToggle();
+				</attribute>       
+              	</label>
+              
+				<div id="gotoDiv" sclass="gotoList">
+					<a href="#chiefComplaint" id="soapChiefComplaints">Chief Complaint |
+						<custom-attributes value="cc"/>
+						<attribute name="onClick">
+	            			sentenceComposer.showPreviewNote(event);
+	            		</attribute>
+	            		<attribute w:name="onClick">
+							jQuery('#'+this.uuid).parent().parent().find('div[class=\"gotoList\"]').slideToggle();
+						</attribute>       
+					</a>	
+	            	<a  href="#${each.moduleName}" forEach="${sentenceComposer.soapNoteController.modules}" id='${display:getId("soap", each.moduleName)}'>
+	            		${each.moduleName}&#160;&#160;|
+	            		<custom-attributes value="${each}"/>
+	            		<attribute name="onClick">
+	            			sentenceComposer.showPreviewNote(event);
+	            			Save.setDisabled(sentenceComposer.getSoapNoteController().isReadonly());
+	            		</attribute>
+	            		<attribute w:name="onClick">
+							jQuery('#'+this.uuid).parent().parent().find('div[class=\"gotoList\"]').slideToggle();
+						</attribute>       
+	            	</a>
+				</div>
+		</div>
+		<div  sclass="previewBox" height="200px" style="overflow:auto" ><!--
+		<div style="background-color:grey;">
+		-->
+		<button  label="Save Preview" id="Save" disabled="true" visible="false">
+			<attribute name="onClick">
+				sentenceComposer.saveSelectedSection();
+				UtilMessagesAndPopups.showSuccess();
+			</attribute>
+		</button>
+		<!--
+		<label value="(You can type to make changes to the preview here.)" style="color:white;"/>
+		</div>
+		--><div id="previewDiv"/>
+		</div>
+		<style>
+			jQuery(function(){
+			  jQuery('.panelHeadTop .fr').click(function(){
+			    jQuery(this).closest('.panelHeadTop').next().slideToggle();
+			  });
+			  
+			  jQuery('.panelHead>a').click(function(){
+			    jQuery(this).closest('.panelHead').next().slideToggle();
+			  });
+		</style>
+	</window>
+</zk>

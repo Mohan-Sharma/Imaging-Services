@@ -1,0 +1,19 @@
+<?page title="Afya Lab" contentType="text/html;charset=UTF-8"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?xel-method prefix="d" name="format"  class="com.nzion.util.UtilDateTime"  signature="java.lang.String format(java.util.Date)"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		Component patientAccountNumber = arg.get("patientAccountNumber");
+	</zscript>
+	<window id="patientSearchWindow" width="75%" sclass="modalStyle" title="Patient Lookup In Afya ( Double Click to Select )" closable="true" mode="modal"  >
+    		<include src="/patient/patient-search-in-portal.zul" width="100%">
+    			<attribute name="onPatientSelect">
+    				com.nzion.dto.PatientDto p = event.getOrigin().getTarget().getValue();
+    				Events.postEvent("onDetailsPopulate", patientAccountNumber, p);
+    				patientSearchWindow.detach();
+    			</attribute>
+    		</include>
+    </window>
+</zk>

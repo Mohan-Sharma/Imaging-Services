@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:jee="http://www.springframework.org/schema/jee"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+    <import resource="classpath:repositoryContext.xml"/>
+    <import resource="cqrs-infrastructure-context.xml"/>
+    <context:component-scan
+            base-package="com.nzion.service.common.impl,com.nzion.service.impl,
+            com.nzion.service.emr.lab.impl,
+            com.nzion.hibernate.ext,com.nzion.service.emr.impl,com.nzion.service.meaningful.impl,
+            com.nzion.service.billing, com.nzion.util,com.nzion.service"/>
+   
+    <aop:aspectj-autoproxy/>
+    <context:annotation-config/>
+    <context:spring-configured/>
+    <!--	<bean id="loggingAspect" class="com.nzion.aspects.LoggingAspect" />-->
+
+    <bean id="practiceService" class="com.nzion.service.impl.PracticeServiceImpl">
+        <property name="defaultSecretQuestion">
+            <set>
+                <value>What is your pets name?</value>
+                <value>What was the name of your first school?</value>
+                <value>What was your childhood hero?</value>
+                <value>What is your past-time?</value>
+                <value>What is your all-time favorite sports team?</value>
+                <value>What is your fathers middle name?</value>
+                <value>What was your high school mascot?</value>
+                <value>What make was your first car or bike?</value>
+                <value>Where did you first meet your spouse?</value>
+                <value>What is your favorite movie?</value>
+            </set>
+        </property>
+    </bean>
+
+    <!-- <bean id="diagnosisService" class="com.nzion.service.emr.impl.DiagnosisServiceImpl">
+        <property name="diagnosisRepository" ref="diagnosisRepository"/>
+    </bean>
+ -->
+ <!--    <bean name="signinService" class="com.nzion.service.impl.SigninServiceImpl">
+        <property name="scheduleRepository" ref="scheduleRepository"/>
+    </bean>
+ -->
+    <bean name="commonCrudService" class="com.nzion.service.common.impl.CommonCrudServiceImpl">
+        <property name="commonCrudRepository" ref="commonCrudRepository"/>
+    </bean>
+    <alias name="commonCrudService" alias="genericHomeScreenService"/>
+    <bean id="abstractInvoiceManager" abstract="true" class="com.nzion.service.billing.AbstractInvoiceManager">
+        <property name="billingService" ref="billingService"/>
+        <property name="commonCrudService" ref="commonCrudService"/>
+    </bean>
+    <bean id="labService" class="com.nzion.service.emr.lab.impl.LabServiceImpl">
+    </bean>
+    <bean id="patientService" class="com.nzion.service.impl.PatientServiceImpl">
+    </bean>
+
+    <bean class="com.nzion.service.billing.LabInvoiceManager" parent="abstractInvoiceManager" id="labInvoiceManager"/>
+   
+    <bean id="billingService" class="com.nzion.service.billing.impl.BillingServiceImpl">
+        <property name="billingManagers">
+            <map key-type="java.lang.String">
+                <!-- <entry key="com.nzion.domain.emr.soap.PatientSoapNote">
+                    <bean class="com.nzion.service.billing.SOAPInvoiceManager" parent="abstractInvoiceManager">
+                        <property name="soapNoteService" ref="soapNoteService"/>
+                    </bean>
+                </entry>
+ -->              
+ 			<entry key="com.nzion.domain.emr.lab.LabOrderRequest" value-ref="labInvoiceManager">
+                </entry>
+            </map>
+        </property>
+    </bean>
+</beans>

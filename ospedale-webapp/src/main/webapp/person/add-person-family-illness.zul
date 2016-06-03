@@ -1,0 +1,35 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addFamilyIllnessWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window id="addFamilyIllnessWin" mode="modal" position="center,top" width="60%" height="70%"
+	title="Add Family Illness" closable="true">
+	<div width="97%" style="padding:5px">
+	<zscript><![CDATA[
+	com.nzion.zkoss.composer.PersonProfileController profileController = desktop.getAttribute("profileController");
+	List list=arg.get("list");
+	List familyIllness = personService.getUnAddedFamilyIllness(profileController.getPerson());
+]]></zscript>
+	<panel title="Family Members" id="familyIllnessPanel"
+		onAddClick="profileController.addPersonFavourites(personFamilyIllnessDisplayGrid,addFamilyIllnessWin,list,com.nzion.domain.person.PersonFamilyIllness.class,com.nzion.domain.emr.FamilyIllness.class);"
+		onCancelClick="addFamilyIllnessWin.detach();">
+		<panelchildren>
+			<toolbar listenercomponent="${familyIllnessPanel}"
+				hidedelete="true" hidesearch="true" />
+			<listbox multiple="true" checkmark="true" width="100%"
+				id="personFamilyIllnessDisplayGrid" model="@{familyIllness}">
+				<listhead>
+					<listheader label="Family Illness" />
+				</listhead>
+				<listitem self="@{each='familyIllness'}"
+					value="@{familyIllness}">
+					<listcell>
+						<label value="@{familyIllness.illnessDesc}" />
+					</listcell>
+				</listitem>
+			</listbox>
+		</panelchildren>
+	</panel>
+	</div>
+	</window>
+</zk>

@@ -1,0 +1,22 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<div zclass="form-search"  >
+    <div zclass="input-append">
+	<textbox  sclass="search-query" style="height:24px"  id="textBoxToPerson" forward="onChange=onChange" readonly="true" value="${arg.value}"/>
+	<a zclass="btn">
+				 <n:i class="icon-search"></n:i>
+			<attribute name="onClick">
+				Executions.createComponents("/utilities/alphabetic-employee-search.zul",null,com.nzion.util.UtilMisc.toMap("textBoxToPerson", textBoxToPerson)).doModal();
+			</attribute>
+			Lookup
+		</a>
+		</div>
+		</div>
+	
+	<zscript>
+	com.nzion.domain.Person person = arg.get("value");
+	if(person != null)
+		textBoxToPerson.setValue(com.nzion.util.ViewUtil.getFormattedName(person));
+	</zscript>
+</zk>

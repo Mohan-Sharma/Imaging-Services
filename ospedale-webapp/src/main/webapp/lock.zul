@@ -1,0 +1,60 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native">
+<window title="Locked" mode="modal" position="center" width="30%" use="org.zkoss.zul.Window">
+	<zscript>
+		void unlock(Component comp){
+			if(userLoginService.unLockUserLogin(password.getValue()))	
+				comp.getSpaceOwner().detach();
+			else 
+				message.setVisible(true);
+		}
+	String userName = com.nzion.util.Infrastructure.getUserName();	
+		
+	</zscript>
+	<style>
+.z-modal-mask {
+    background: none repeat scroll 0 0 #000;
+    height: 80%;
+    left: 0;
+    opacity: 0.95;
+    position: absolute;
+    top: 0;
+    width: 80%;
+}
+	</style>
+	<div align="center">
+		<space orient="vertical"/>
+		<n:table>
+			<n:tr>
+			<n:td></n:td>
+			<n:td>
+			<label id="message" value="Password Mismatch" style="color: #f00; font-size: 12px; font-weight: bold; text-align: center;" visible="false"/>
+			</n:td>
+			</n:tr>
+			<n:tr>
+			<n:td>
+			<label value="Username" style="margin:8px 8px 8px 0px" />
+			</n:td>
+			<n:td>
+			<label value="${userName}"/>
+			</n:td>
+			</n:tr>
+			<n:tr>
+			<n:td>
+			<label value="Password" style="margin:8px 8px 8px 0px" />
+			</n:td>
+			<n:td>
+			<textbox type="password" id="password" onOK="unlock(self);" style="margin:8px 8px 8px 0px"/>
+			</n:td>
+			</n:tr>
+			<n:tr>
+			<n:td></n:td>
+			<n:td>
+			<button sclass="signIn" label="Unlock" onClick="unlock(self);" id="unlockBtn"/>
+			</n:td>
+			</n:tr>
+		</n:table>
+	<space orient="vertical"/>
+	</div>
+</window>
+</zk>

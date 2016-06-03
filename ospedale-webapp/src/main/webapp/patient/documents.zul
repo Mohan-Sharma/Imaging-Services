@@ -1,0 +1,118 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./docmgmtWindow" ?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:a="http://www.zkoss.org/2005/zk/annotation">
+	<zscript>
+<![CDATA[
+	import com.nzion.zkoss.composer.*;
+	import com.nzion.domain.Folder;
+	FileBasedFolderComposer folderComposer = new com.nzion.zkoss.composer.FileBasedFolderComposer();
+	com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+]]>
+</zscript>
+
+	<window border="none" id="docmgmtWindow" apply="${folderComposer}">
+		<zscript>
+	class FolderTreeRenderer implements TreeitemRenderer {
+		public FolderTreeRenderer() {
+		}
+
+		public void render(Treeitem treeItem, Object node) {
+			Folder f = (Folder) ((DefaultTreeNode) node).getData();
+			Treecell tc = new Treecell();
+			Label l = new Label(f.getName());
+			l.setParent(tc);
+			l.setMultiline(true);
+			Treerow tr = null;
+			if (treeItem.getTreerow() == null) {
+				tr = new Treerow();
+				tr.setParent(treeItem);
+				treeItem.addEventListener("onClick",
+						new org.zkoss.zk.ui.event.EventListener() {
+							public void onEvent(Event event) throws Exception {
+								Folder selectedFolder = (Folder)((DefaultTreeNode) ((Treeitem) event
+										.getTarget()).getValue()).getData();
+								selectedFolder = commonCrudService.getById(Folder.class,selectedFolder.getId());		
+								folderComposer
+										.setSelectedFolder(selectedFolder);
+								refershInclude();
+							}
+						});
+			} else {
+				tr = item.getTreerow();
+				tr.getChildren().clear();
+			}
+			tc.setParent(tr);
+			treeItem.setOpen(true);
+			treeItem.setValue(node);
+		}
+	}
+	FolderTreeRenderer treeRenderer = new FolderTreeRenderer();
+</zscript>
+		<div sclass="chiefComp soapNoteCont curSOAP ui-resizable" style="position:relative;">
+			<n:table>
+				<n:tr>
+					<n:td class="soapNoteContL" style="width:35%">
+						<panel border="normal">
+							<panelchildren>
+								<a sclass="btn" label="New Folder" onClick="newFolder();" >
+								 <n:i class="icon-plus"></n:i>
+								</a>
+								<a id="removeBtn" sclass="btn" label="Delete Folder">
+								<n:i class="icon-cross"></n:i>
+									<attribute name="onClick">
+									if(folderComposer.getSelectedFolder() == null){
+				com.nzion.util.UtilMessagesAndPopups.showError("Select a folder to delete");
+				return;
+			}	
+com.nzion.util.UtilMessagesAndPopups.confirm("Are You Sure? You Want to Delete " + folderComposer.getSelectedFolder().getName(), "Information", Messagebox.YES | Messagebox.NO,
+			Messagebox.QUESTION, new org.zkoss.zk.ui.event.EventListener() {
+	public void onEvent(Event event) {
+		if ("onYes".equals(event.getName())) {
+			removeFolder();
+			Events.postEvent("onReload", folderlist, null);
+		}
+	}
+});
+</attribute>
+								</a>
+								<tree id="folderlist" model="@{folderComposer.treeModel,load-after='self.onReload'}"
+									treeitemRenderer="${treeRenderer}" zclass="z-dottree" height="300px" style="overflow:auto">
+									<treecols>
+										<treecol label="Name"></treecol>
+										<treecol label="Description"></treecol>
+									</treecols>
+								</tree>
+							</panelchildren>
+						</panel>
+					</n:td>
+					<n:td class="soapNoteContR" style="width:65%">
+						<div id="contentPane" height="400px"></div>
+					</n:td>
+				</n:tr>
+			</n:table>
+		</div>
+		<zscript>
+					public void refershInclude(){
+						contentPane.getChildren().clear();
+						Include fileList = new Include();
+						fileList.setDynamicProperty("folderComposer",folderComposer);
+						fileList.setSrc("/patient/documentList.zul");
+						fileList.setParent(contentPane);
+					}
+			</zscript>
+			
+		<div id="displayarea"></div>
+
+		<zscript>
+	void newFolder() {
+		Map m = new HashMap();
+		m.put("folderComposer", folderComposer);
+		m.put("folderlist", folderlist);
+		Executions.createComponents("/patient/newFolder.zul", null, m);
+	}
+	void removeFolder() {
+		folderComposer.deleteFolder();
+	}
+</zscript>
+	</window>
+</zk>

@@ -1,0 +1,84 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./newMiscellaneousWin"?>
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<window id="newMiscellaneousWin" apply="org.zkoss.bind.BindComposer"
+		viewModel="@id('vm') @init('com.nzion.zkoss.composer.MiscellaneousChargesController')"
+		title="Patient Bill" width="70%" closable="true" 
+		mode="modal" border="normal">
+		<div zclass="container-fluid">
+		   <div zclass="row-fluid">
+                <div zclass="span2">
+				<label value="Patient" mold="required" />
+				<quickpatientlookup id="patientLookupId"
+					value="${vm.invoice.patient}"
+					onChange='vm.invoice.setPatient(event.getOrigin().getData());' />
+				</div>
+		  </div>
+			 <div zclass="row-fluid">
+                <div zclass="span2">
+				<label value="Provider" id="providerLbl" />
+				<combobox model="@load(vm.providers)"
+					selectedItem="@bind(vm.invoice.consultant)">
+					<template name="model" var="provider">
+						<comboitem label="@load(provider.firstName)"
+							value="@bind(provider)" />
+					</template>
+				</combobox>
+				</div>
+				</div>
+			<separator></separator>
+
+			<separator></separator>
+			<a id="addBtn" zclass="btn" label="Add"
+				onClick="@command('addInvoiceItems')">
+				<n:i class="icon-plus-sign"></n:i>
+			</a>
+		</div>
+		<separator></separator>
+		<listbox model="@bind(vm.invoiceItems)">
+			<listhead>
+				<listheader label="Item" width="40%" />
+				<listheader label="Quantity" />
+				<listheader label="Price" />
+				<listheader label="Amount" />
+				<listheader label="Action" />
+			</listhead>
+			<template name="model" var="invoiceItem">
+				<listitem value="@bind(invoiceItem)">
+					<listcell>
+						<textbox value="@bind(invoiceItem.miscellaneousChargeName)"  />
+					</listcell>
+					<listcell>
+						<intbox constraint="no zero" value="@bind(invoiceItem.quantity)" onChange="@command('computeTotal')"/>
+					</listcell>
+					<listcell >
+						<decimalbox value="@bind(invoiceItem.price)" onChange="@command('computeTotal')"/>
+					</listcell>
+				 	<listcell>
+                          <label value="@bind(invoiceItem.totalAmount)" /> 
+					</listcell>
+					<listcell>
+						<a zclass="btn" label="Remove"
+							onClick="@command('removeInvoiceItem',invoiceItemObj=invoiceItem)" />
+					</listcell>
+				</listitem>
+			</template>
+		</listbox>
+		<separator></separator>
+		
+		<separator></separator>
+		 <div sclass="panelFoot">
+			<button label="Save" sclass="btn" disabled="@bind(vm.invoice.id ne null)"  onClick="@command('MarkSave')" id="saveBtn" zclass="btn-success btn"/>
+			<button label="Receive Payment" disabled="@bind(vm.invoice.id eq null)" sclass="btn"  onClick="@command('receivePayment')" zclass="btn-success btn">
+			</button>
+			<button label="Cancel"
+				onClick='newMiscellaneousWin.detach()' sclass="btn" />
+		</div> 
+		<attribute name="onCreate">
+		saveBtn.setDisabled(false);
+		</attribute>
+	</window>
+</zk>

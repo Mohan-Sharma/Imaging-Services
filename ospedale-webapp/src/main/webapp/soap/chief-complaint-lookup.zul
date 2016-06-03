@@ -1,0 +1,62 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./chiefComplaintLookUpWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<window  mode="modal" id="chiefComplaintLookUpWin" closable="true" title="Chief Complaints" style="width:45%;">
+<zscript><![CDATA[
+	import com.nzion.util.Constants;
+	import com.nzion.domain.Provider;
+	import com.nzion.zkoss.composer.PatientSoapNoteController;
+	import com.nzion.domain.emr.ChiefComplaint;
+	
+	Textbox component=arg.get("chiefComplaintTxt");
+	char[] ALPHABETS = Constants.ALPHABETS;
+	char[] DIGITS = Constants.DIGITS;
+	PatientSoapNoteController controller=arg.get("controller");
+	Provider provider = commonCrudService.getById(Provider.class,controller.getProvider().getId());
+	List specialities = new ArrayList(provider.getSpecialities());
+	List chiefComplaints;
+	for(int  i = 0 ; i < specialities.size() ; ++i )
+		chiefComplaints.addAll(specialities.get(i).getChiefComplaints());
+		
+//	Collection masterData = chiefComplaints;
+//		providerRepository.getChiefComplaintsStartingWith(provider,"A");
+	
+	
+//	public void getFavouriteChiefComplaints(){
+//		masterData=personService.getPersonChiefComplaints(com.nzion.util.Infrastructure.getUserLogin().getPerson());
+//		Events.postEvent("onReloadRequest",masterDataDisplayGrid,null);
+//	}
+	]]></zscript>
+	<div sclass="panelTop">
+		<button label="Cancel" forward="onClick=onCancel"/>
+	</div>
+		<vbox><!--
+			<hbox><toolbarbutton forEach="${ALPHABETS}" label="${each}" width="15px;"
+				onClick='masterData=providerRepository.getChiefComplaintsStartingWith(provider,self.label);Events.postEvent("onReloadRequest",masterDataDisplayGrid,null)'/></hbox>
+			<hbox width="100%" widths="60%, 40%">
+				<div width="100%"> 
+				<toolbarbutton forEach="${DIGITS}" label="${each}" width="15px;"
+				onClick='masterData=providerRepository.getChiefComplaintsStartingWith(provider,self.label);Events.postEvent("onReloadRequest",masterDataDisplayGrid,null)'/>
+				</div>
+				<div align="right" width="100%" style="display: block;">
+				</div>
+			</hbox>
+				--><!--
+				<toolbarbutton label="Pull from favourites" onClick="getFavouriteChiefComplaints();" style="margin-right:10px;"/>
+		--></vbox>	
+			
+			<listbox model="@{chiefComplaints}" id="masterDataDisplayGrid"  rows="10" > 
+			
+				<listitem self="@{each='chiefComplaint'}" value="@{chiefComplaint}">
+					<attribute name="onClick">
+						component.setValue(self.getValue().getComplainName());
+						Events.postEvent("onChange", component, null);
+						chiefComplaintLookUpWin.detach();
+					</attribute>
+					<listcell label="@{chiefComplaint.chiefComplaint.complainName}"/>
+				</listitem>
+			</listbox>
+</window>
+</zk>

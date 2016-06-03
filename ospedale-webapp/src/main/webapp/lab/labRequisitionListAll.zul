@@ -1,0 +1,159 @@
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:n="http://www.zkoss.org/2005/zk/native"
+    xmlns:h="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+
+    <window apply="org.zkoss.bind.BindComposer"
+            viewModel="@id('vm') @init('com.nzion.zkoss.composer.emr.lab.LabRequisitionViewModel')">
+            <div class="container-fluid">
+            <div zclass="row-fluid">
+               
+                <div zclass="span3">
+                    <label value="Patient"/>
+                    <patientlookup id="patientLookUpBox"
+                            onChange="vm.setPatient(event.getOrigin().getData())" sclass="span12"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Lab From Date"/>
+                    <datebox id="fromDate" sclass="span12"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Lab Thru Date"/>
+                    <datebox id="thruDate" sclass="span12"/>
+                </div>
+              
+              <div zclass="span2">
+                    <label value="Specimen Label"/>
+                    <textbox id="specimenLabel" sclass="span12"/>
+                </div>
+ 
+          <!--     
+               <div zclass="span2">
+                    <label value="IP Number"/>
+                    <textbox id="ipNumber" sclass="span12"/>
+                </div>
+ 
+  -->
+            </div>
+        </div>
+        <div align="center" sclass="panelFoot">
+            <button label="Search" zclass="btn btn-primary" onClick="@command('OPDPATIENTSCOMPLETED',fromDate=fromDate,thruDate=thruDate,specimenLabel=specimenLabel,ipNumber=ipNumber)">
+            </button>
+        </div>
+          
+
+        <tabbox width="100%" sclass="nav_tabs">
+        <tabs id="tabs">
+            <tab label="Lab Results" onSelect="@command('OPDPATIENTSCOMPLETED')" />
+           <!--  <tab label="In Patient Lab Results" onSelect="@command('INPATIENT_LAB_COMPLETED')" /> -->
+        </tabs>
+        
+         <tabpanels>
+            <tabpanel>
+                <listbox model="@bind(vm.completedRequisitionList)" mold="paging" autopaging="false" pageSize="10">
+             
+                    <listhead>
+                        <listheader label="Date"/>
+                        <listheader label="MRN"/>
+                        <listheader label="Patient Name"/>
+                        <listheader label="Specimen Label"/>
+                        <listheader label="Invoice Number"/>
+                        <listheader label="Action"/>
+                    </listhead>
+                    <template name="model" var="requisition">
+                        <listitem value="@bind(requisition)">
+                           <listcell >
+                            <label value="@load(requisition.createdTxTimestamp)@converter('formatedDate', format='dd/MM/yyyy')"/>
+                            </listcell>
+                            <listcell label="@load(requisition.patient.accountNumber)"></listcell>
+                            
+                            <listcell>
+                                <name value="@load(requisition.patient.firstName)"/>
+                            </listcell>
+                            <listcell >
+                            <label>
+                             <attribute name="onCreate">
+                            com.nzion.domain.emr.lab.LabRequisition labRequisition = self.getParent().getParent().getValue();
+                            List specimenModelList=labRequisition.getSpecimenModelList();
+                            if(com.nzion.util.UtilValidator.isNotEmpty(specimenModelList)){
+                              com.nzion.domain.emr.lab.SpecimenModel specimenModel=(com.nzion.domain.emr.lab.SpecimenModel)specimenModelList.get(0);
+                               self.setValue(specimenModel.getSpecimenLabel());
+                            }  else
+                            self.setValue("");
+
+                           	</attribute>
+                            </label>
+                            </listcell>
+                           <listcell label="@load(requisition.invoiceNumber)"></listcell>
+                            <listcell>
+                             <a  label="Print" >
+                <attribute name="onClick"><![CDATA[
+                   com.nzion.repository.common.CommonCrudRepository commonCrudRepository = com.nzion.util.Infrastructure.getSpringBean("commonCrudRepository");
+                   com.nzion.domain.emr.lab.LabRequisition labRequisition = self.getParent().getParent().getValue();
+                    Executions.getCurrent().sendRedirect("/lab/labResultEnrtyPrint.zul?obrId=" +labRequisition.getId(),"_blank");
+                	]]> </attribute>
+        </a>
+                            
+                            </listcell>
+                        </listitem>
+                    </template>
+            
+             
+               </listbox>
+            </tabpanel>
+             <tabpanel>
+                <listbox id="inPatientListBox" model="@bind(vm.completedInPatientRequisitionList)" mold="paging" autopaging="false" pageSize="10">
+                      
+                    <listhead>
+                        <listheader label="Date"/>
+                        <listheader label="MRN"/>
+                        <listheader label="Patient Name"/>
+                        <listheader label="IP Number"/>
+                        <listheader label="Specimen Label"/>
+                        <listheader label="Action"/>
+                    </listhead>
+                    <template name="model" var="requisition">
+                        <listitem value="@bind(requisition)">
+                            <listcell >
+                            <label value="@load(requisition.createdTxTimestamp)@converter('formatedDate', format='dd/MM/yyyy')"/>
+                            </listcell>
+                            <listcell label="@load(requisition.patient.accountNumber)"></listcell>
+                            <listcell>
+                                <name value="@load(requisition.patient)"/>
+                            </listcell>
+                           <!--  <listcell label="@load(requisition.patientAdmission.accountNumber)"></listcell> -->
+                            <listcell>
+                            <label>
+                             <attribute name="onCreate">
+                            com.nzion.domain.emr.lab.LabRequisition labRequisition = self.getParent().getParent().getValue();
+                            List specimenModelList=labRequisition.getSpecimenModelList();
+                            if(com.nzion.util.UtilValidator.isNotEmpty(specimenModelList)){
+                            com.nzion.domain.emr.lab.SpecimenModel specimenModel=(com.nzion.domain.emr.lab.SpecimenModel)specimenModelList.get(0);
+                             self.setValue(specimenModel.getSpecimenLabel());
+                             }  else
+                             self.setValue("");
+
+                                                 	</attribute>
+                            </label>
+                           </listcell>
+                          <listcell>
+                             <a  label="Print" >
+               					 <attribute name="onClick">	
+               					 <![CDATA[
+                   com.nzion.repository.common.CommonCrudRepository commonCrudRepository = com.nzion.util.Infrastructure.getSpringBean("commonCrudRepository");
+                   com.nzion.domain.emr.lab.LabRequisition labRequisition = self.getParent().getParent().getValue();
+                    Executions.getCurrent().sendRedirect("/lab/labResultEnrtyPrint.zul?obrId=" +labRequisition.getId(),"_blank");
+                	]]> </attribute>
+        					</a>
+        	            </listcell>
+    </listitem>
+                    </template>
+                </listbox>
+            </tabpanel>
+        </tabpanels>
+        </tabbox>
+    </window>
+
+</zk>

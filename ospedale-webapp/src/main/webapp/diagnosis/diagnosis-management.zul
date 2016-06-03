@@ -1,0 +1,86 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./diagnosisManagementWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+com.nzion.domain.pms.DiagnosisCode diagnosisCode =  (com.nzion.domain.pms.DiagnosisCode)Executions.getCurrent().getArg().get("entity");
+boolean editMode = diagnosisCode != null;
+
+void icdCodeChanged(String code){
+	if(com.nzion.util.UtilValidator.isEmpty(code))
+		return;
+	diagnosisCode = diagnosisService.getDiagnosisCodeForIcdCode(code);
+}
+
+void save(){
+	if(diagnosisCode == null){
+		com.nzion.util.UtilMessagesAndPopups.showError("Choose diagnosis code first");
+		return;
+	}
+	commonCrudService.save(diagnosisCode); 
+ 	com.nzion.util.UtilMessagesAndPopups.showSuccess();	
+	diagnosisManagementWindow.detach();
+}
+</zscript>
+<window id="diagnosisManagementWindow" mode="modal" title="Diagnosis Code" width="60%" position="center,top" closable="true">
+	<div width="97%" style="margin:5px">
+	<panel title="Diagnosis Code Details">
+		<panelchildren>
+		<div  sclass="panelCont">
+			<div>
+				<label value="Diagnosis Details" /> 
+				<lookup id="diagnosisLookup" entity="com.nzion.domain.emr.IcdElement" onChange="icdCodeChanged(self.value)" 
+						value="@{diagnosisCode.icd.code}" disabled="${editMode}"	searchcolumns="code, description" 
+						displaycolumns="code, description" requiredcolumn="code" width="143px" buttonVisible="${!editMode}" />
+			</div>
+			<div>
+				<label value="Description"/> 
+				<textbox  value="@{diagnosisCode.description, load-after='diagnosisLookup.onChange'}"/>
+			</div>
+			<div>
+				<label value="Statement Description"/> 
+				<textbox  value="@{diagnosisCode.statementDescription, load-after='diagnosisLookup.onChange'}"/>
+			</div>
+			<div>	
+				<label value="Alternate Code #1"/> 
+				<textbox  value="@{diagnosisCode.alternateCode1, load-after='diagnosisLookup.onChange'}"/>
+			</div>
+			<div>
+				<label value="Alternate Code #2"/> 
+				<textbox  value="@{diagnosisCode.alternateCode2, load-after='diagnosisLookup.onChange'}"/>
+			</div>
+			<div>
+				<label value="Age Specific"/> 
+				<combobox selectedItem="@{diagnosisCode.ageMark, load-after='diagnosisLookup.onChange'}">
+					<comboitem label="All" value="all" />
+					<comboitem label="Below 1" value="below1" />
+					<comboitem label="Below 18" value="below18" />
+					<comboitem label="Over 14" value="over14" />
+					<comboitem label="12 to 55" value="12-55" />
+				</combobox>
+			</div>
+			<div>
+				<label value="Choose Gender"/> 
+				<enumeration enumType="GENDER" selectedItem="@{diagnosisCode.gender, load-after='diagnosisLookup.onChange'}" />
+			</div>
+			 <div>
+			 	<label value="Disallow"></label>
+			  <checkbox checked="@{diagnosisCode.disallow, load-after='diagnosisLookup.onChange'}" />
+			  </div>
+			 <div>
+			 	<label value="Allow with warning"></label>
+			  <checkbox checked="@{diagnosisCode.allowWithWarning, load-after='diagnosisLookup.onChange'}"/>
+			  </div>
+			</div>
+		</panelchildren>
+	</panel>
+	<div class="panelFoot"/>
+	<separator/>
+	<div class="panelFoot">
+		<button onClick="save();" label="Save" />
+		<button label="Cancel" forward="onClick=onCancel" />
+	</div>
+	</div>
+</window>
+</zk>

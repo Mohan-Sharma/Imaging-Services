@@ -1,0 +1,100 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addImmunizationWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+<![CDATA[
+	import com.nzion.domain.emr.*;
+	Immunization immunization = (Immunization) arg.get("entity");
+	String label = " Edit ";
+	if (immunization == null) {
+		immunization = new Immunization();
+		label = " New ";
+	}
+]]>
+</zscript>
+	<window id="addImmunizationWindow"  width="60%" closable="true"
+		mode="modal">
+		<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Vaccine</h:small>
+                <button type="button" zclass="close" onClick="addImmunizationWindow.detach();">×</button>
+            </h:h1>
+        </div>
+			<div class="container-fluid">
+				 <div zclass="row-fluid">
+                  <div zclass="span2">
+							<label value="Short Name" mold="required"/>
+							<textbox value="@{immunization.shortDescription,save-when='addImmunization.onClick'}"
+								constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" />
+						</div>
+						  <div zclass="span4">
+							<label value="Full Name" mold="required" />
+							<textbox value="@{immunization.fullVaccineName,save-when='addImmunization.onClick'}"
+								constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" cols="55" />
+						</div>
+					</div>
+					<div zclass="row-fluid">
+						  <div zclass="span6">
+							<label value="Handout Url" />
+
+							<textbox value="@{immunization.informationUrl,save-when='addImmunization.onClick'}" sclass="span12" cols="50" />
+						</div>
+					</div>
+					
+				
+			
+		 <div zclass="row-fluid">
+						 <div zclass="span2">
+							<label value="Minimum" />
+							<intbox id="recommendationMinAgeIntbox" value="@{immunization.recommendedMinAge,save-when='addImmunization.onClick'}"
+								onChange='recommendMinCombobox.setConstraint("no empty")' sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" />
+						</div>
+						<div zclass="span2">
+							<label value="Time Unit" />
+							<combobox id="recommendMinCombobox" sclass="span12" 
+								selectedItem="@{immunization.recommendedMinUnit,save-when='addImmunization.onClick'}">
+								<comboitem label="Year" value="Year" />
+								<comboitem label="Month" value="Month" />
+								<comboitem label="Week" value="Week" />
+							</combobox>
+						</div>
+						</div>
+						 <div zclass="row-fluid">
+						<div zclass="span2">
+							<label value="Maximum" />
+							<intbox id="recommendationMaxAgeIntbox" sclass="span12"  value="@{immunization.recommendedMaxAge,save-when='addImmunization.onClick'}" />
+						</div>
+						<div zclass="span2">
+							<label value="Time Unit" />
+							<combobox  id="recommendMaxCombobox" sclass="span12" 
+								selectedItem="@{immunization.recommendedMaxUnit,save-when='addImmunization.onClick'}">
+								<comboitem label="Year" value="Year" />
+								<comboitem label="Month" value="Month" />
+								<comboitem label="Week" value="Week" />
+							</combobox>
+						</div>
+					</div>
+				
+</div>
+			<div sclass="panelFoot">
+				<button label="Save"  id="addImmunization" zclass="btn-success btn">
+					<attribute name="onClick">
+					<![CDATA[
+						if(com.nzion.util.UtilDisplay. validateVaccineAge(recommendationMinAgeIntbox,recommendationMaxAgeIntbox,recommendMinCombobox,recommendMaxCombobox))
+							return;
+						//if(com.nzion.util.UtilDisplay. validateVaccineAge(minimumAgeIntbox,maximumAgeIntbox,minIntervalCombobox,maxIntervalCombobox))
+							//return;
+						try{
+						commonCrudService.save(immunization);
+						addImmunizationWindow.detach();
+						}catch(Exception e){
+							com.nzion.util.ViewUtil.disPlayUniqueErrorMessage(e,"Vaccine Short Name '"+immunization.getShortDescription()+"' already exists.");
+						}
+						]]>
+					</attribute>
+				</button>
+				<button label="Cancel" forward="onClick=onCancel" sclass="btn" />
+			</div>
+	</window>
+</zk>

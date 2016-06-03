@@ -1,0 +1,36 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./BirthHx"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+		import com.nzion.zkoss.composer.SoapSentenceComposer;
+		import com.nzion.domain.emr.soap.ChiefComplainSection;
+		import com.nzion.domain.emr.soap.BirthHistorySection;
+		
+		SoapSentenceComposer sentenceComposer = (SoapSentenceComposer)arg.get("controller");
+		BirthHistorySection birthHxSection = (BirthHistorySection)sentenceComposer.getSoapNoteController().getSoapSection(BirthHistorySection.class,false);
+		sentenceComposer.setSelectedSection(birthHxSection);
+	</zscript>
+
+<div style="margin-left:10px" id="BirthHx">
+		<n:h2>${birthHxSection.soapModule.moduleDescription}</n:h2>
+		<n:br/>
+		<n:p>
+		<label value="@{birthHxSection.patientBirthHistory.sentence}" if="${not empty birthHxSection.patientBirthHistory.sentence}"></label>
+		<label value="Birth history is not available." if="${empty birthHxSection.patientBirthHistory.sentence}"></label>
+		<n:br/>
+		<div if="${birthHxSection.patientBirthHistory.comments!=null &amp;&amp; sentenceComposer.soapNoteController.soapNote.schedule.status != 'SOAPSIGNEDOUT'}">
+		<label value="Comments"/>
+		<textbox value="@{birthHxSection.patientBirthHistory.comments}" style="border:none" cols="100"
+		multiline="true" if="${birthHxSection.patientBirthHistory.comments!=null}"/>
+		</div>
+		<div unless="${birthHxSection.patientBirthHistory.comments!=null &amp;&amp; sentenceComposer.soapNoteController.soapNote.schedule.status != 'SOAPSIGNEDOUT' }">
+		<label value="Comments"/>
+		<label value="@{birthHxSection.patientBirthHistory.comments}"/>
+		</div>
+		</n:p>
+		
+</div>
+</zk>

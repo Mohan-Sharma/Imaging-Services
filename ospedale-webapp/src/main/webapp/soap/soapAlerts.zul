@@ -1,0 +1,56 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<style>
+		#popup_overlay { background:#333 !important; } #popup_container { font:12px bold Arial, Helvetica, sans-serif;
+		min-width: 402px; /* Dialog will be no smaller than this */ max-width: 402px; /* Dialog will wrap after this
+		width */ background: #ececec; border: solid 5px #696969; color: #000; -moz-border-radius: 5px;
+		-webkit-border-radius: 5px; border-radius: 5px; }
+
+		#popup_title { font:15px/1.75em bold Arial, Helvetica, sans-serif; text-align: left; color:#000; border-bottom:
+		solid 1px #999; cursor: default; padding-bottom:7px; margin:10px 20px; text-transform:uppercase;
+		font-weight:bold; }
+
+		#popup_content { background: 20px 0px no-repeat url(../images/info.gif); padding:5px 60px; margin: 0em; }
+
+		#popup_content.alert { background-image: url(../images/info.png); }
+
+		#popup_content.confirm { background-image: url(../images/warning.png); }
+
+		#popup_content.prompt { background-image: url(../images/question.png); }
+
+		#popup_message { padding:0px 0px; }
+
+		#popup_panel { text-align: right; margin:1em -5px 0em 0em; }
+
+		#popup_prompt { margin: .5em 0em; } input[type="button"],input[type="submit"] { padding:1px;font-size:11px; }
+	</style>
+	<zscript>
+	<![CDATA[
+	List cdssAlerts = arg.get("alerts");
+	List ccdFiles = arg.get("ccdFiles");
+	List ccrFiles = arg.get("ccrFiles");
+	Long scheduleId = arg.get("scheduleId");
+]]>
+</zscript>
+	<window mode="modal" width="65%" height="45%" closable="true" title="SOAP Alerts">
+		<h:h1 id="popup_title">SOAP Alerts</h:h1>
+
+		<div id="popup_content" sclass="alert" style="margin-left:20px">
+			<div forEach="${cdssAlerts}" sclass="popup_message">
+				<label value="${each.alertText}" if="${each.planProvided}" style="background-color:green;color:white"></label>
+				<label value="${each.alertText}" unless="${each.planProvided}"
+					style="background-color:red;color:white">
+				</label>
+				<h:br />
+				<h:br />
+			</div>
+			<div forEach="${ccdFiles}">
+				A CCD File <a href="../ccd/import?fileId=${each.id}&amp;scheduleId=${scheduleId}" target="_blank">${each.fileName}</a> is available.Click on the file name to import it.
+			</div>
+			<div forEach="${ccrFiles}">
+				A CCR File <a href="../ccd/import?fileId=${each.id}&amp;scheduleId=${scheduleId}" target="_blank">${each.fileName}</a> is available.Click here to view it.
+			</div>
+		</div>
+
+	</window>
+</zk>

@@ -1,0 +1,14 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk>
+	<zscript>
+		com.nzion.view.component.HomeGridMacroController homeGridMacroController = Executions.getCurrent().getArg().get("gridController");
+	</zscript>
+	<window id="deactivationReasonWindow" width="30%" mode="modal" closable="true" title="Enter reason for deactivation">
+		<textbox id="deactivationReasonTxtBox" rows="7" width="97%" style="margin: 5px;"/>
+		<div sclass="panelTop" >					
+			<button label="Deactivate" 
+				onClick="homeGridMacroController.deActivateClicked(deactivationReasonTxtBox.getValue());deactivationReasonWindow.detach();"/>
+			<button label="Cancel" onClick="deactivationReasonWindow.detach()"/>
+		</div>
+	</window>
+</zk>

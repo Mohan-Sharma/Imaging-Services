@@ -1,0 +1,110 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapPatientPastTreatmentHistoryWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native"
+	xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<window id="soapPatientPastTreatmentHistoryWindow">
+	<script type="text/javascript">
+		function showDelButton(comp){
+			jQuery('#'+comp.uuid).find('img').fadeIn('slow');
+		}
+		function hideDelButton(comp){
+			jQuery('#'+comp.uuid).find("img").fadeOut(15);
+		}
+	</script>
+	<zscript>
+		import com.nzion.domain.emr.soap.PatientPastTreatmentHistory;
+		com.nzion.domain.emr.soap.PastHistorySection pastHistorySection = arg.get("soapSection");
+		PatientPastTreatmentHistory pastTreatmentHistory = new PatientPastTreatmentHistory();
+		Set patientPastTreatmentHistories= new HashSet(soapNoteService.getAllSoapRecordsExcludingCurrentSection(patientSoapNoteController.getPatient(),pastHistorySection,PatientPastTreatmentHistory.class));
+		Set treatmentHistories = new HashSet();
+		Set pastTreatmentHistories = pastHistorySection.getPatientPastTreatmentHistories();
+		if(pastTreatmentHistories == null){
+			pastTreatmentHistories = new HashSet();
+			pastHistorySection.setPatientPastTreatmentHistories(pastTreatmentHistories);
+		}
+	</zscript>
+		<vbox>
+		<span sclass="linkBtn linkBtnOn">
+			<a id="addBtn1" sclass="addBtn" label="New" onClick="pastTreatmentHistory = new PatientPastTreatmentHistory();refreshInclude();auditRefreshInclude();" disabled="${patientSoapNoteController.readonly}"/>
+			<span />
+		</span>
+		</vbox>
+		
+		<div sclass="chiefComp soapNoteCont curSOAP ui-resizable"
+			style="position:relative;">
+		<h:table width="100%" cellpadding="0px" cellspacing="0px" style="border:0px">
+				<h:tr>
+					<h:td class="soapNoteContL" onClick="expandRHS(this.id)">
+					
+					<vbox>
+						<panel title="Treatments" collapsible="false" height="300px">
+							<panelchildren>
+							<radiogroup id="statusRadioGrp" >
+								<radio label="Current" value="Active" checked="true" id="activeRadio" onCreate='Events.postEvent("onCheck",activeRadio,null)'>
+								<attribute name="onCheck">
+									treatmentHistories.clear();
+									treatmentHistories.addAll(pastHistorySection.getPatientPastTreatmentHistories());
+									Events.postEvent("onReloadRequest",treatmentListbox,null);
+								</attribute>
+								</radio>
+								<radio label="All" value="InActive"  id="inactiveRadio">
+								<attribute name="onCheck">
+									treatmentHistories.clear();
+									treatmentHistories.addAll(patientPastTreatmentHistories);
+									Events.postEvent("onReloadRequest",treatmentListbox,null);
+								</attribute>
+								</radio>
+							</radiogroup>	
+								<listbox id="treatmentListbox" style="overflow:auto"
+									model="@{treatmentHistories,load-after='self.onReloadRequest'}">
+									<listhead>
+										<listheader label="Admit Date" />
+										<listheader label="Admission Type" />
+										<listheader label="Reason" />
+										<listheader label="Hospital" />
+									</listhead>
+									<listitem self="@{each='patientPastTreatmentHistory'}"
+										value="@{patientPastTreatmentHistory}" 
+										onClick="pastTreatmentHistory = self.getValue();refreshInclude();auditRefreshInclude();">
+										<listcell label="@{patientPastTreatmentHistory.admissionDate,converter='com.nzion.view.component.DateConverter'}" />
+										<listcell label="@{patientPastTreatmentHistory.admissionType.description}" />
+										<listcell label="@{patientPastTreatmentHistory.admissionReason}" />
+										<listcell label="@{patientPastTreatmentHistory.hospitalName}" />
+									</listitem>
+								</listbox>
+							</panelchildren>
+						</panel>
+						<div sclass="panelFoot">
+							<button  label="Save"  disabled="${patientSoapNoteController.readonly}">
+								<attribute name="onClick">
+								 <![CDATA[
+										patientSoapNoteController.saveSoapSection();
+									]]>	
+								</attribute>
+							</button>
+						</div>
+					</vbox>
+				</h:td>
+				<h:td class="soapNoteContR">
+						<include id="editTreatmentInclude" src="/soap/addPatientPastTreatment.zul" pastHistorySection="${pastHistorySection}" activeRadio="${activeRadio}" controller="${patientSoapNoteController}"/>
+	           	</h:td>
+			</h:tr>
+		</h:table>
+		</div>
+		<zscript>
+			<![CDATA[
+				void refreshInclude() {
+					Events.postEvent("onReload", editTreatmentInclude.getFellow("editTreatment"), null);
+					editTreatmentInclude.setDynamicProperty("pastTreatmentHistory", pastTreatmentHistory);
+					editTreatmentInclude.setDynamicProperty("patientPastTreatmentHistories",patientPastTreatmentHistories);
+				}
+				void auditRefreshInclude(){
+				editTreatmentInclude.getFellow("editTreatment").getFellow("auditInfoInclude").setDynamicProperty("record", pastTreatmentHistory);
+				editTreatmentInclude.getFellow("editTreatment").getFellow("auditInfoInclude").invalidate();
+				}
+
+			]]>
+	</zscript>
+	</window>
+</zk>

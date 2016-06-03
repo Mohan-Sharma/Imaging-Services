@@ -1,0 +1,22 @@
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+<zscript>
+	import com.nzion.service.common.CommonCrudService;
+	import com.nzion.domain.emr.soap.PatientSoapNote;
+	String soapNoteId = param.get("soapNoteId")[0];
+	String sectionName = Executions.getCurrent().getParameter("sectionName");
+	CommonCrudService commonCrudService= com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+	PatientSoapNote soapNote=commonCrudService.getById(PatientSoapNote.class,new Long(soapNoteId));
+	String xmlFilename = com.nzion.domain.Roles.hasRole(com.nzion.domain.Roles.PROVIDER) ? "newCropProvider.xml" : "newCropStaff.xml" ;
+	String xml = com.nzion.util.NewCorpUtil.generateXML(soapNote, xmlFilename,sectionName);
+	List newCropConfigs  = commonCrudService.getAll(com.nzion.domain.NewCropConfig.class);
+	com.nzion.domain.NewCropConfig newCropConfig = newCropConfigs.get(0);
+</zscript>
+	<div>
+	<n:form id="target" method="post" action="${newCropConfig.rxUrl}" name="info">
+		<textbox visible="false" id="RxInput" name="RxInput" rows="33" cols="79" value="${xml}"></textbox>
+	</n:form>
+	</div>
+	<zscript>
+		org.zkoss.zk.ui.util.Clients.evalJavaScript("jQuery('#target').submit()");
+	</zscript>
+</zk>

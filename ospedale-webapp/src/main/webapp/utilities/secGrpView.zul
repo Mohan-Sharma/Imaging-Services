@@ -1,0 +1,42 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./winSecurityGroupView"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import com.nzion.zkoss.composer.SecurityGroupController;
+	import com.nzion.zkoss.ext.EntityDropdownRenderer;
+	import org.zkoss.zkplus.spring.SpringUtil;
+	import com.nzion.service.UserLoginService;
+	import com.nzion.util.UtilMessagesAndPopups;
+	import com.nzion.domain.SecurityPermission;
+	EntityDropdownRenderer entityDropdownRenderer = new EntityDropdownRenderer("id");
+	SecurityGroupController securityGroupController = new SecurityGroupController();
+	setPageTitle("Security Groups", "");
+]]></zscript>
+	<window style="border: 7px solid #2d2d2d; background-color:#EEEEEE;" closable="true"
+		apply="${securityGroupController}" id="winSecurityGroupView" mode="modal" title="Security Group">
+
+		<panel collapsible="false" style="margin:5px" title="Permissions available with Security Group">
+			<panelchildren>
+				<div sclass="panelHeadTop pagination">
+					<div style="width:250px;float:right">
+						<paging detailed="true" id="listboxPaging" pageSize="10" pageIncrement="1" />
+					</div>
+				</div>
+				<listbox id="existingSecurityPermissionList" model="@{securityGroupController.uniquePermissions}"
+					mold="paging" visible="true" pageSize="10" paginal="${listboxPaging}"
+					itemRenderer="${securityGroupController.permissionRenderer}">
+					<listhead>
+						<listheader label="Description" />
+						<listheader label="View" />
+						<listheader label="Update" />
+						<listheader label="Create" />
+						<listheader label="Delete" />
+					</listhead>
+				</listbox>
+				<box width="100%" align="center">
+					<button id="SavePermissions" label="Save" forward="winSecurityGroup.onClick" />
+				</box>
+			</panelchildren>
+		</panel>
+	</window>
+</zk>

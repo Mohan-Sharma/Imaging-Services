@@ -1,0 +1,137 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./refillRequestWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		import com.nzion.domain.Enumeration;
+		com.nzion.domain.UserLogin userLogin = com.nzion.util.Infrastructure.getUserLogin();
+		List refillRequestNewCrops = refillRequestNewCrop;
+		boolean b = userLogin.hasRole(com.nzion.domain.Roles.RECEPTION);
+	</zscript>
+	<div id="refillRequestWin"> 
+	<zscript>
+	<![CDATA[
+	void populatePharmacyDetails(List refillRequestNewCrops){
+	for(int i = 0; i < refillRequestNewCrops.size() ; i++){
+		refillRequestNewCrops.get(i).getAddressFields().setAddress1(address1.getValue());
+		refillRequestNewCrops.get(i).getAddressFields().setAddress2(address2.getValue());
+		refillRequestNewCrops.get(i).getAddressFields().setCity(city.getValue());
+		refillRequestNewCrops.get(i).getAddressFields().setStateProvinceGeo(state.getValue());
+		refillRequestNewCrops.get(i).getAddressFields().setPostalCode(postalCodeBox.getValue());
+		refillRequestNewCrops.get(i).setPharmacyName(pharmacyTxtBox.getValue());
+		refillRequestNewCrops.get(i).setPhoneNumber(pharmacyPhoneBox.getValue());
+	} 
+	}
+	
+	void populatePharmacyDetailsForRefillRequestNewCrop(com.nzion.domain.drug.RefillRequestNewCrop crop){
+	crop.getAddressFields().setAddress1(address1.getValue());
+	crop.getAddressFields().setAddress2(address2.getValue());
+	crop.getAddressFields().setCity(city.getValue());
+	crop.getAddressFields().setStateProvinceGeo(state.getValue());
+	crop.getAddressFields().setPostalCode(postalCodeBox.getValue());
+	crop.setPharmacyName(pharmacyTxtBox.getValue());
+	crop.setPhoneNumber(pharmacyPhoneBox.getValue());
+	
+	}
+	]]>
+	</zscript>
+	<div>
+				<listbox id="activeRxsListBox" model="@{refillRequestNewCrops,load-after='self.onReloadRequest'}">
+				<listhead>
+					<listheader label="Drug"/>
+					<listheader label="Doctor"/>
+					<listheader label="Requested"/>
+					<listheader label="Comments"/>
+					<listheader label="Approved" if="${!b}"/>
+					<listheader label="Denial Reason" if="${!b}"/>
+					<listheader label="Submit" if="${!b}"/>
+				</listhead>
+				<listitem self="@{each='refillRequestNewCrop'}" value="@{refillRequestNewCrop}">
+					<listcell>
+						<label value="@{refillRequestNewCrop.rxNewCrop.drugName}" />
+					</listcell>
+					<listcell>
+						<label value="@{refillRequestNewCrop.rxNewCrop.rxSection.soapNote.provider.firstName}" />
+						<label value="@{refillRequestNewCrop.rxNewCrop.rxSection.soapNote.provider.middleName}" />
+						<label value="@{refillRequestNewCrop.rxNewCrop.rxSection.soapNote.provider.lastName}" />
+					</listcell>
+					<listcell>
+						<intbox value="@{refillRequestNewCrop.rxNewCrop.refillsRequested}" />
+					</listcell>
+					<listcell>
+						<textbox value="@{refillRequestNewCrop.comments}" />
+					</listcell>
+					<listcell if="${!b}">
+						<intbox  value="@{refillRequestNewCrop.rxNewCrop.approved}" if="${!b}" />
+					</listcell>
+					<listcell if="${!b}">
+						<textbox  value="@{refillRequestNewCrop.denyReason}" if="${!b}"/>
+					</listcell>
+					<listcell if="${!b}">
+						<button label="Submit">
+							<attribute name="onClick">
+							populatePharmacyDetailsForRefillRequestNewCrop(self.getParent().getParent().getValue());
+								if(self.getParent().getParent().getValue().getRxNewCrop().getApproved()==0) 
+									if(com.nzion.util.UtilValidator.isEmpty(self.getParent().getParent().getValue().getDenyReason()))
+										return;
+								refillRequestService.approveOrDenyRefillRequestNewCrop(self.getParent().getParent().getValue().getRxNewCrop().getApproved(),self.getParent().getParent().getValue().getDenyReason(),self.getParent().getParent().getValue());
+								self.getParent().getParent().getValue().setStatus(com.nzion.domain.drug.RefillRequestNewCrop.ACK);
+								commonCrudService.save(self.getParent().getParent().getValue());
+								refillRequestNewCrops.remove(self.getParent().getParent().getValue());
+								Events.postEvent("onReloadRequest",activeRxsListBox,null);
+							</attribute>
+						</button>
+					</listcell>
+				</listitem>
+			</listbox>
+	</div>
+			<separator/>
+			
+		<panel title="Pharmacy Details">
+			<panelchildren>
+			<separator/>
+			<div sclass="panelCont">
+				<div>
+					<label value="Pharmacy Name"/>		
+					<textbox id="pharmacyTxtBox"/>	
+				</div>
+				<div>
+					<label value="Pharmacy Number"/>		
+					<phonebox id="pharmacyPhoneBox"/>			
+				</div>
+					<div sclass="col2">
+						<label value="Address1" style="text-align:right" id="lbladdress1" />
+						<textbox  id="address1" maxlength="50" />
+					</div>
+					<div sclass="col2">
+						<label value="Address2" style="text-align:right;" id="lbladdress2" />
+						<textbox  id="address2" maxlength="50" />
+					</div>
+					<div>
+						<label value="City" style="text-align:right" id="lblcity" />
+						<textbox  id="city" maxlength="50" onChange="com.nzion.util.UtilDisplay.validateNonDigits(self)" />
+					</div>
+					<div>
+						<label value="State" style="text-align:right" id="lblstate" />
+						<textbox  id="state" maxlength="2" onBlur="self.setValue(self.getValue().toUpperCase())"/>
+					</div>
+					<div>
+						<label value="Zipcode" style="text-align:right" id="lblpostalCode" />
+						<zipcodebox id="postalCodeBox" />
+					</div>
+				</div>
+			</panelchildren>
+		</panel>
+			<hbox><!--
+			<button label="Acknowledge" onClick='refillRequestService.ackNurseRefillRequestNewCrop(crop);Executions.sendRedirect(com.nzion.view.HomePageHelper.getHomePageForLoggedInUser());'>
+				<attribute name="onCreate">
+					if(userLogin.hasRole(com.nzion.domain.Roles.RECEPTION))
+					self.setVisible(false);
+				</attribute>
+			</button>
+			--><button label="Forward To Provider" id="sendToProviderBtn" onClick="populatePharmacyDetails(refillRequestNewCrops);refillRequestService.sendRefillRequestNewCropsToProvider(refillRequestNewCrops);Executions.sendRedirect(com.nzion.view.HomePageHelper.getHomePageForLoggedInUser());"/>
+			<button label="Save" id="saveBtn" onClick="populatePharmacyDetails(refillRequestNewCrops);refillRequestService.saveRefillRequestNewCrop(refillRequestNewCrops);Executions.sendRedirect(com.nzion.view.HomePageHelper.getHomePageForLoggedInUser());"/>
+			</hbox>
+	</div>		
+</zk>

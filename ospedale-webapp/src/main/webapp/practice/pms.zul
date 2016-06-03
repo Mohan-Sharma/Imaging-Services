@@ -1,0 +1,40 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./PmsSetup"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<style>fieldset{clear:both;margin:5px 1% 0;padding-bottom:5px}</style>
+	<window id="PmsSetup" self="@{define(content)}" apply="${pmsController}">
+		<div>
+			<div width="100%" visible="true">
+				<tabbox id="preferencesTabBox" width="100%" orient="vertical" height="500px">
+					<tabs width="20%">
+						<tab label="Automatic Assignment" />
+						<tab label="Document Management"  onClick="folderCategory.invalidate();"></tab>
+						<tab label="Naming Defaults" />
+						<tab label="Billing Preference" />
+						<tab label="RCM Preferences" />
+					</tabs>
+					<tabpanels width="70%">
+						<tabpanel>
+							<include src="/practice/autoassign.zul"/>
+						</tabpanel>
+						<tabpanel>
+							<include id="folderCategory" src="/practice/doccategory.zul"></include>
+						</tabpanel>
+						<tabpanel>
+							<include src="/practice/namingconfig.zul"/>
+						</tabpanel>
+						<tabpanel>
+							<include src="/billing/billingPreference.zul"/>
+						</tabpanel>
+						<tabpanel>
+						    <include src="/practice/rcmPreference.zul"/>
+						</tabpanel>
+					</tabpanels>
+				</tabbox>
+				<!-- <div  sclass="panelFoot">
+					<button id="Save" label="Save" />
+				</div> -->
+			</div>
+		</div>
+	</window>
+</zk>

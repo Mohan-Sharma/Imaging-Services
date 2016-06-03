@@ -1,0 +1,11 @@
+<?page title="Chronic Diseases" contentType="text/html;charset=UTF-8"?>
+<zk>
+<zscript>
+setPageTitle("Chronic Diseases", "");
+</zscript>
+	<window>
+		<screen width="100%" pagetitle="ChronicDiseases" listtitle="List of Chronic Diseases" addpage="addChronicDisease" hidedeletebtn="true"
+				entityclass="com.nzion.domain.emr.ChronicDisease" fields="name,description,icdElement.description"
+				labels="Name,Description,Icd Code" addmodepopup="true" />
+	</window>
+</zk>

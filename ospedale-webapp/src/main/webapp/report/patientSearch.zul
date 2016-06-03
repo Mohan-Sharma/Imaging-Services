@@ -1,0 +1,134 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./searchPatientWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		com.nzion.zkoss.composer.emr.StateRenderer stateRenderer = new com.nzion.zkoss.composer.emr.StateRenderer();
+		com.nzion.zkoss.ext.DataExporter exporter = new com.nzion.zkoss.ext.CsvDataExporter();
+		com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+		List locations = commonCrudService.getAll(com.nzion.domain.Location.class);
+		List patients;
+		com.nzion.report.PatientReportSearchController  reportSearchController = new com.nzion.report.PatientReportSearchController();
+	</zscript>
+	<style>
+		.z-grid table, .z-window-embedded-cnt-noborder table {
+		border-collapse: separate;
+	}
+	</style>
+	<window id="searchPatientWindow" apply="${reportSearchController}">
+	<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Patient Search</h:small>
+            </h:h1>
+        </div>
+	<div zclass="container-fluid">
+		 <div zclass="row-fluid">
+                <div zclass="span2">
+							<label value="First Name:" style="font-weight:bold" />
+							<textbox cols="30" sclass="span12" value="@{reportSearchController.patientSearchVO.firstName}" />
+							</div>
+							 <div zclass="span2">
+							<label value="Last Name:" style="font-weight:bold" />
+							<textbox sclass="span12" cols="30" value="@{reportSearchController.patientSearchVO.lastName}" />
+							</div>
+							 <div zclass="span2">
+							<label value="Age (years):" style="font-weight:bold" />
+							<searchbox  controller="${reportSearchController}" sclass="span12"/>
+							</div>
+							</div>
+							<!-- <div zclass="row-fluid">
+						<div zclass="span2">
+							<label value="Referral:" style="font-weight:bold" />
+							<div zclass="form-search"  >
+							<div zclass="input-append">
+								<textbox readonly="true" sclass="search-query" style="height:24px" id="referalNameTextBox" >
+								<attribute name="onChange">
+									reportSearchController.getPatientSearchVO().setReferral((com.nzion.domain.Referral)event.getData());								
+								</attribute>
+								</textbox>
+									<a zclass="btn" >
+									 <n:i class="icon-search"></n:i>
+										<attribute name="onClick">
+												Window window = (Window) Executions.createComponents("/person/referralLookup.zul", null, com.nzion.util.UtilMisc.toMap("referalNameTextBox",referalNameTextBox));
+										</attribute>
+										Lookup
+									</a>
+									</div>
+									</div>
+							</div>
+							</div> -->
+							<div zclass="row-fluid">
+							 <div zclass="span3">
+							<label value="Gender:" style="font-weight:bold" />
+							<enumeration sclass="span12" enumType="GENDER" selectedItem="@{reportSearchController.patientSearchVO.gender}" />
+							</div>
+							 <div zclass="span3">
+							<label value="State:" style="font-weight:bold" />
+							<enumeration sclass="span12" enumType="STATE" itemRenderer="${stateRenderer}" selectedItem="@{reportSearchController.patientSearchVO.state}" />
+							</div> 
+							<!--   <div zclass="span2">
+							<label value="Location:" style="font-weight:bold" />
+							<combobox model="@{locations}" sclass="span12"
+								selectedItem="@{reportSearchController.patientSearchVO.location}">
+								<comboitem self="@{each='location'}" label="@{location.name}" value="@{location}" />
+							</combobox>
+							</div>  -->
+							</div>
+							
+							<div zclass="row-fluid">
+							<div zclass="span2">
+									<label value="Created From Date:" style="font-weight:bold" />
+									<datebox value="@{reportSearchController.patientSearchVO.createdFromDate}" />
+									</div>
+									<div zclass="span2">
+									<label value="Creaed To Date:" style="font-weight:bold" />
+									<datebox value="@{reportSearchController.patientSearchVO.createdThruDate}" />
+									
+				</div>
+				</div>
+				</div>
+				
+	<div sclass="gridCont" >
+					<div sclass="panelFoot">
+						<button label="Search" id="searchLink" zclass="btn-primary btn">
+							<attribute name="onClick">
+								patients = reportSearchController.searchPatients();
+							</attribute>
+						</button>											
+					</div>
+					<div sclass="panelHeadTop pagination">
+						<div sclass="fr">
+							<paging detailed="true" id="listboxPaging" pageSize="20" pageIncrement="1" />							
+						</div>
+						<div style="float:right">
+							<span sclass="linkBtn linkBtnOn" style="margin:-3px 13px;">
+							<a  tooltiptext="Export" label="Export" >
+							<attribute name="onClick">
+							    if(com.nzion.util.UtilValidator.isNotEmpty(patients))							
+									exporter.export(patients, new String[]{"firstName","lastName","gender.description","age","contacts.postalAddress.stateProvinceGeo"}, new String[]{"First Name","Last Name","Gender","Age","State"}, "patient.csv");
+							</attribute>
+							</a>
+							</span>
+						</div>	
+					</div>
+					<div height="230px" width="100%" style="overflow:auto">
+					<listbox  model="@{patients,load-after='searchLink.onClick'}" mold="paging" paginal="${listboxPaging}">
+						<listhead>
+							<listheader label="First Name" />
+							<listheader label="Last Name" />
+							<listheader label="Gender" />
+							<listheader label="Age" />
+							<listheader label="State" />
+						</listhead>
+						<listitem self="@{each='patient'}" value="@{patient}">
+							<listcell label="@{patient.firstName}" />
+							<listcell label="@{patient.lastName}" />
+							<listcell label="@{patient.gender.description}" />
+							<listcell label="@{patient.age}" />
+							<listcell label="@{patient.contacts.postalAddress.stateProvinceGeo}" />
+						</listitem>
+					</listbox>
+					</div>
+	     </div>
+	</window>
+</zk>

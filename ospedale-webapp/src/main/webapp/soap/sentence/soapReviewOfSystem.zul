@@ -1,0 +1,41 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+		import com.nzion.zkoss.composer.SoapSentenceComposer;
+		import com.nzion.domain.emr.soap.ChiefComplainSection;
+		import com.nzion.domain.emr.soap.RosSection;
+		
+		SoapSentenceComposer sentenceComposer = (SoapSentenceComposer)arg.get("controller");
+		RosSection rosSectionSentence = (RosSection)sentenceComposer.getSoapNoteController().getSoapSection(RosSection.class,false);
+		Set rosQas = rosSectionSentence.getPatientRosQAs();
+		sentenceComposer.setSelectedSection(rosSectionSentence);
+	</zscript>
+
+<div style="margin-left:10px;">
+		<style>
+		tr.z-row td.z-row-inner, tr.z-row .z-cell{
+ 			border-style:none none none;
+ 		}
+		</style>
+		<n:h2>${rosSectionSentence.soapModule.moduleDescription}</n:h2>
+		<label value="${rosSectionSentence.sentence}"/>
+		<label value="Review of Systems was not performed." if="${empty rosQas}"/>
+<!--		<grid oddRowSclass="none" zclass="none" if="${not empty rosQas}">-->
+<!--		<rows>-->
+<!--			<row forEach="${rosSectionSentence.patientRosQAs}">-->
+<!--				<div>-->
+<!--				<label value="${each.organSystem.desc}"/>-->
+<!--				<n:br/>-->
+<!--					<label value="${each.sentence}"/>-->
+<!--				</div>	-->
+<!--			</row>		-->
+<!--		</rows>-->
+<!--		</grid>	-->
+		<label value="Comments" style="font-size:12px;font-weight:bold;" if="${rosSectionSentence.sectionComments!=null}"/>
+		<textbox value="@{rosSectionSentence.sectionComments}" style="border:none" cols="100" multiline="true" if="${rosSectionSentence.sectionComments!=null}"/>
+</div>
+<separator height="10px"></separator>
+</zk>

@@ -1,0 +1,78 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./illnessLookUp"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript><![CDATA[
+	import com.nzion.util.Constants;
+	import com.nzion.domain.Provider;
+	import com.nzion.zkoss.composer.PatientSoapNoteController;
+	import com.nzion.domain.person.PersonFamilyIllness;
+	
+	Textbox component=(Textbox)Executions.getCurrent().getArg().get("illnessTxt");
+	char[] ALPHABETS = Constants.ALPHABETS;
+	char[] DIGITS = Constants.DIGITS;
+	Collection masterData=componentRepository.getMasterDataStartingWith(com.nzion.domain.emr.FamilyIllness.class,"A","illnessDesc");
+	PatientSoapNoteController controller=arg.get("controller");
+
+	com.nzion.domain.Person person = com.nzion.util.Infrastructure.getUserLogin().getPerson();
+	]]></zscript>
+<window  mode="modal" id="illnessLookUp" width="40%" title="Browse Illness" closable="true">
+<zscript>
+<![CDATA[
+	public void getProviderFavouriteFamilyIllness(){
+		List personFamilyIllnesses = personService.getPersonFamilyIllness(controller.getProvider());
+		masterData.clear();
+		for(int i=0 ; i < personFamilyIllnesses.size() ; ++i){
+			masterData.add(personFamilyIllnesses.get(i).getFamilyIllness());	
+		}
+	}
+	]]>
+</zscript>
+	<panel>
+		<panelchildren>
+		<radiogroup>
+		<radio label="Pull From Global">
+		<attribute name="onCheck">
+			globalSerachSection.setVisible(true);
+			masterDataDisplayGrid.setModel(new BindingListModelList(new ArrayList(),false));
+		</attribute>
+		</radio>
+		<radio label="Pull From Favourites">
+		<attribute name="onCheck">
+		globalSerachSection.setVisible(false);
+		List favouriteFamilyIllnesses = new ArrayList();
+		List personFamilyIllnesses = personService.getPersonFavourites(person,PersonFamilyIllness.class);
+		for(PersonFamilyIllness personFamilyIllness : personFamilyIllnesses)
+		favouriteFamilyIllnesses.add(personFamilyIllness.getFamilyIllness());
+		masterDataDisplayGrid.setModel(new BindingListModelList(favouriteFamilyIllnesses,false));
+		</attribute>
+		</radio>
+		</radiogroup>
+		<vbox width="100%" visible="false" id="globalSerachSection">
+			<hbox width="100%"><toolbarbutton forEach="${ALPHABETS}" label="${each}" width="15px;"
+				onClick='masterData=componentRepository.getMasterDataStartingWith(com.nzion.domain.emr.FamilyIllness.class,self.label,"illnessDesc");Events.postEvent("onReloadRequest",masterDataDisplayGrid,null)'/></hbox>
+			<hbox width="100%" widths="60%, 40%">
+				<div width="100%"> 
+				<toolbarbutton forEach="${DIGITS}" label="${each}" width="15px;"
+				onClick='masterData=componentRepository.getMasterDataStartingWith(com.nzion.domain.emr.FamilyIllness.class,self.label,"illnessDesc");Events.postEvent("onReloadRequest",masterDataDisplayGrid,null)'/>
+				</div>
+				</hbox>
+		</vbox>	
+			
+			<listbox model="@{masterData,load-after='self.onReloadRequest'}" id="masterDataDisplayGrid"  rows="10" > 
+				<listitem self="@{each='illness'}" value="@{illness}">
+					<attribute name="onClick">
+						component.setValue(self.getValue().getIllnessDesc());
+						Events.postEvent("onChange", component, null);
+						illnessLookUp.detach();
+					</attribute>
+					<listcell label="@{illness.illnessDesc}"/>
+				</listitem>
+			</listbox>
+		</panelchildren>
+	</panel><!--
+	<div sclass="panelTop">
+		<button label="Cancel" forward="onClick=onCancel"/>
+	</div>
+--></window>
+</zk>

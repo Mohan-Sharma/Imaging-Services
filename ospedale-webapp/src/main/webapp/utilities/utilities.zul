@@ -1,0 +1,42 @@
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/WEB-INF/layout/practiceTemplate.zul"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<h:table style="margin-top:-40px;background-color:#FFFFFF">
+		<h:tr>
+			<h:td>
+				<div width="100%" align="left">
+					<tabbox>
+						<tabs>
+							<tab label="System Admin" id="systemAdmin"	onClick='renderUtilityCenter("/utilities/systemAdmin.zul")' />
+							<tab label="EMR" id="emr" onClick='renderUtilityCenter("/utilities/emr.zul")' />
+							<tab label="SOAP Setup" id="qaNSoap" onClick='renderUtilityCenter("/utilities/qaAndSoap.zul")' />
+							<tab label="Lab" id="labTab" onClick='renderUtilityCenter("/utilities/labTab.zul")' />
+							<tab label="Scheduling Calendar" id="scheduleConfigTab" onClick='renderUtilityCenter("/utilities/scheduleConfigTab.zul")' />
+							<tab id="exportImportTab" label="Export" onClick='renderUtilityCenter("/utilities/exportImport.zul")'></tab>
+							<tab id="cqmTab" label="CQM" onClick='renderUtilityCenter("/utilities/cqm.zul")'></tab>
+							<tab id="billingTab" label="Billing" onClick='renderUtilityCenter("/billing/billing.zul")'></tab>
+							<tab id="drugTab" label="Drug" onClick='renderUtilityCenter("/utilities/drugTab.zul")'></tab>
+						</tabs>
+					</tabbox>
+				</div>
+			</h:td>
+		</h:tr>
+		<h:tr>
+			<h:td>
+				<div id="utilitycenterMain">
+				</div>
+			</h:td>
+		</h:tr>
+	</h:table>
+	<zscript>
+	void renderUtilityCenter(String url) {
+	if(utilitycenterMain.getFirstChild() != null){
+	   utilitycenterMain.getFirstChild().detach();
+	}
+		Component component = Executions.createComponents(url, null, null);
+		component.setParent(utilitycenterMain);
+	}
+	Events.postEvent("onClick", systemAdmin, null);
+</zscript>
+</zk>

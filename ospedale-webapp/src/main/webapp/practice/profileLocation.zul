@@ -1,0 +1,44 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addEditWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+ List locationObjList = commonCrudService.getAll(com.nzion.domain.Location.class);
+ com.nzion.domain.Person person = arg.get("person");
+ Set locationList = person.getLocations();
+ Button btnSearch = arg.get("btnSearch");
+</zscript>
+<window mode="modal" title="Add/Edit Location" id="addEditWin" width="60%" closable="true">
+<div height="200px" style="overflow:auto;">
+<listbox model="@{locationObjList}" width="100%" multiple="true" checkmark="true" id="locationListbox" 
+				selectedItem="@{locationList, converter=com.nzion.view.component.MultipleListitemBindingConverter}">
+	<listhead>
+			<listheader label="Code" />
+			<listheader label="Location Name" />
+			<listheader label="City"/>
+			<listheader label="State"/>
+			<listheader label="Office Phone"/>
+			<listheader label="Email"/>
+		</listhead>
+		<listitem self="@{each='location'}" value="@{location}">
+			<listcell label="@{location.code}"/>
+			<listcell label="@{location.description}"/>
+			<listcell label="@{location.contacts.postalAddress.city}"/>
+			<listcell label="@{location.contacts.postalAddress.stateProvinceGeo}"/>
+			<listcell label="@{location.contacts.officePhone}"/>
+			<listcell label="@{location.contacts.email}"/>
+		</listitem>
+</listbox>
+</div>
+	<div sclass="panelFoot">
+			<button label="Save" id="saveOtherDeatils" >
+			<attribute name="onClick">
+			 person.setLocations(locationList);
+			 commonCrudService.save(person); 
+			 Events.postEvent("onClick",btnSearch,null);
+			 addEditWin.detach();
+			</attribute>
+			</button>
+	</div>
+</window>
+</zk>

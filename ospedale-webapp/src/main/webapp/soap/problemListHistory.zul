@@ -1,0 +1,81 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+		import com.nzion.domain.emr.soap.PatientIcd;
+		import com.nzion.zkoss.composer.ProblemListSectionComposer;
+		import com.nzion.service.common.CommonCrudService;
+		import com.nzion.zkoss.composer.PatientSoapNoteController;
+		import com.nzion.util.Infrastructure;
+		import com.nzion.service.SoapNoteService;
+		import com.nzion.domain.emr.soap.ProblemListSection;
+		SoapNoteService soapNoteService = Infrastructure.getSpringBean("soapNoteService");
+		PatientSoapNoteController controller = (PatientSoapNoteController)desktop.getAttribute("controller");
+		ProblemListSection problemListSection = (ProblemListSection)controller.getSoapSection(ProblemListSection.class,true);
+	</zscript>
+	<window title="Problem List Historical View" border="normal" id="problemListHistoryWin" closable="true">
+		<zscript>
+	List allProblemList = soapNoteService.getIcdForPatient(controller.getPatient(), new String[] {
+			"Inactive", "Resolved", "Ruled Out", "Rule Out" }, null);
+</zscript>
+		<panel id="plList">
+			<panelchildren>
+				<div style="padding:5px">
+					<n:table id="problemHistoryList" cellpadding="0" cellspacing="0" border="0" class="display">
+						<n:thead>
+							<n:tr>
+								<n:th>Problem Code/Description</n:th>
+								<n:th>Source</n:th>
+								<n:th>Severity</n:th>
+								<n:th>Status</n:th>
+								<n:th>Action</n:th>
+							</n:tr>
+						</n:thead>
+						<n:tbody>
+							<n:tr forEach="${allProblemList}">
+								<n:td>${each}</n:td>
+								<n:td>
+									<name object="${each.soapNote.provider}" />
+								</n:td>
+								<n:td>${each.severity}</n:td>
+								<n:td>${each.status}</n:td>
+								<n:td>
+									<a class="group" onClick="reactivate(self.getId())" id="${each.id}">Reactivate</a>
+								</n:td>
+							</n:tr>
+						</n:tbody>
+					</n:table>
+				</div>
+			</panelchildren>
+		</panel>
+		<div sclass="panelFoot">
+					<button label="Close" id="closeBtn" onClick='problemListHistoryWin.detach();'/>
+		</div>
+		<script type="text/javascript">
+			zk.afterMount(function() { 
+				jq("#problemHistoryList").dataTable({
+				"bJQueryUI": true,
+				"sPaginationType": "full_numbers", 
+				"aoColumns":
+							[ null, null, null, null, { "bSortable": false,"sType": "html"} ] 
+						}); 
+			});
+		</script>
+		
+		<zscript>
+			void reactivate(String id){
+			CommonCrudService commonCrudService = Infrastructure.getSpringBean("commonCrudService");
+			PatientIcd oldPatientIcd = commonCrudService.getById(PatientIcd.class, new Long(id));
+			PatientIcd patientIcd=oldPatientIcd.createCopy();
+			com.nzion.domain.Enumeration active = commonCrudService.findUniqueByEquality(Enumeration.class,new String[]{"enumType","description"},new Object[]{"PROBLEM_STATUS_CODE","Active"});
+			patientIcd.setStatus(active);
+			patientIcd.setOnSetDate(new Date());
+			patientIcd.setProblemListSection(problemListSection);
+			patientIcd.setSoapNote(controller.getSoapNote());
+			commonCrudService.save(patientIcd);
+			commonCrudService.delete(oldPatientIcd);
+			Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null);problemListHistoryWin.detach();
+			}
+		</zscript>
+	</window>
+</zk>

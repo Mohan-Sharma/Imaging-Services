@@ -1,0 +1,48 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+		import com.nzion.zkoss.composer.SoapSentenceComposer;
+		import com.nzion.domain.emr.soap.RxSection;
+		
+		SoapSentenceComposer sentenceComposer = (SoapSentenceComposer)arg.get("controller");
+		RxSection rxSection = (RxSection)sentenceComposer.getSoapNoteController().getSoapSection(RxSection.class,false);
+		sentenceComposer.setSelectedSection(rxSection);
+	</zscript>
+<div style="margin-left:10px">
+		<style>
+		tr.z-row td.z-row-inner, tr.z-row .z-cell{
+ 			border-style:none none none;
+ 		}
+		</style>
+		<n:h2>${rxSection.soapModule.moduleDescription}</n:h2>
+		<n:br/>
+		<n:table width="100%" border="0px" cellspacing="10px" cellpadding="10px">
+		<n:thead>
+			<n:tr style="text-align:left">
+				<n:th>Drug Trade Name</n:th>
+				<n:th>Strength</n:th>
+				<n:th>Route</n:th>
+				<n:th>Direction</n:th>
+				<n:th>Start Date</n:th>
+				<n:th>End Date</n:th>
+				<n:th>Quantity</n:th>
+				<n:th>Prescription Date</n:th>
+			</n:tr>
+		</n:thead>
+		<n:tr forEach="${rxSection.patientRxs}">
+				<n:td><label value="${each.drug.tradeName}"/></n:td>
+				<n:td><label value="${each.drugStrength}"/></n:td>
+				<n:td><label value="${each.drugDosageRoute}"/></n:td>
+				<n:td><label value="${each.drugDirection}"/></n:td>
+				<n:td><label value="${display:fd(each.startDate)}"/></n:td>	
+				<n:td><label value="${display:fd(each.endDate)}"/></n:td>	
+				<n:td><label value="${each.quantity}"/> <label value="${each.quantityQualifier}"/></n:td>
+				<n:td><label value="${display:fd(each.prescriptionDate)}"/></n:td>	
+		</n:tr>
+		</n:table>
+		<n:br/>
+</div>
+</zk>

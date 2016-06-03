@@ -1,0 +1,134 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./soapPatientPastIllnessHistoryWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+	import com.nzion.zkoss.composer.ProblemListSectionComposer;
+	import com.nzion.domain.emr.soap.PatientIcd;
+	import com.nzion.util.Infrastructure;
+	import com.nzion.service.common.CommonCrudService;
+	import com.nzion.service.SoapNoteService;
+	SoapNoteService soapNoteService = Infrastructure.getSpringBean("soapNoteService");
+	com.nzion.zkoss.composer.PatientSoapNoteController controller = desktop.getAttribute("controller");
+	com.nzion.domain.emr.soap.ProblemListSection problemListSection = controller.getSoapSection(com.nzion.domain.emr.soap.ProblemListSection.class);
+	String icdCode = null;
+	PatientIcd patientIcd = null;
+</zscript>
+	<window id="soapPatientPastIllnessHistoryWindow">
+		<zscript>
+			List allProblemList = soapNoteService.getIcdForPatient(controller.getPatient(),new String[]{"Active","Chronic","Intermittent","Recurrent"},null);
+		</zscript>
+		<panel id="plList" title="Problem Summary List (PSL)" >
+			<panelchildren>
+				<n:h4 style="padding:5px"> Concise View</n:h4>
+				<space height="5px"></space>
+				<n:h5 style="padding:5px">The Active, Chronic, Recurrent and Intermittent records are displayed on the Concise view of PSL. These can also be edited.
+						Only the Inactive, Resolved, Rule Out and Ruled Out records will be displayed in the History View.</n:h5>
+				<n:div>
+					<h:table width="100%" cellpadding="0px" cellspacing="0px" style="border:0px">
+						<h:tr>
+							<h:td class="soapNoteContL">
+								<div >
+									<div >
+										<span sclass="linkBtn linkBtnOn">
+											<a onClick="showHistory();"> History </a>
+											<span/>
+										</span>
+									</div>
+									<div id="buttonBlock" >
+										<span sclass="linkBtn linkBtnOn">
+											<a label="New" sclass="addBtn" disabled="${controller.readonly}" id="newButton" onClick="edit(null)">
+												<n:i class="icon-plus-sign"></n:i>
+											</a>
+										<span />
+										</span>
+									</div>
+								</div >
+							</h:td>
+						</h:tr>
+						<h:tr>
+							<h:td class="soapNoteContL">
+								<div style="padding:5px">
+									<n:table id="illnessListBox" cellpadding="0" cellspacing="0" border="0" class="display" >
+										<n:thead>
+											<n:tr>
+												<n:th>Problem Code/Description</n:th>
+												<n:th>Source</n:th>
+												<n:th>OnSet Date</n:th>
+												<n:th>Severity</n:th>
+												<n:th>Status</n:th>
+												<n:th>Action</n:th>
+											</n:tr>
+										</n:thead>
+										<n:tbody>
+											<n:tr forEach="${allProblemList}">
+												<n:td>${each}</n:td>
+												<n:td>
+													<name object="${each.soapNote.provider}" />
+												</n:td>
+												<n:td>${display:fd(each.onSetDate)}</n:td>
+												<n:td>${each.severity}</n:td>
+												<n:td>${each.status}</n:td>
+												<n:td>
+													<div>
+														<custom-attributes value="${each}"/>
+														<a class="group" onClick="edit(self.getId())" id="${each.id}" disabled="${controller.readonly}">Edit</a>
+														<a label="| Remove" disabled="${controller.readonly}">
+															<attribute name="onClick">
+																controller.removeSoapRecord(self.getParent().getAttribute("value"),"problemListSection","patientIcds");
+															</attribute>
+														</a>
+														<a class="group" if="${each.icdElement.id ne null}"  image="${each.id}" label="| View PE">
+															<attribute name="onClick">
+																patientIcd = commonCrudService.getById(PatientIcd.class,new Long(self.getImage()));
+																icdCode = patientIcd.getIcdElement().getCode();
+																Executions.getCurrent().sendRedirect("http://apps.nlm.nih.gov/medlineplus/services/mpconnect_service.cfm?mainSearchCriteria.v.cs="+"2.16.840.1.113883.6.103"+"&amp;mainSearchCriteria.v.c="+icdCode+"&amp;mainSearchCriteria.v.dn="+"Diabetes%20mellitus%20with%20other%20coma%20type%201%20uncontrolled"+"&amp;informationRecipient.languageCode.c="+"en","_pe");
+															</attribute>
+														</a>
+													</div>
+												</n:td>
+											</n:tr>
+										</n:tbody>
+									</n:table>
+								</div>
+							</h:td>
+						</h:tr>
+					</h:table>
+				</n:div>
+				<div sclass="panelFoot">
+					<button label="Save" zclass="btn btn-success" onClick='controller.saveSoapSection();Events.postEvent("onClick",(Component)desktop.getAttribute("wkModule"),null)'/>
+				</div>
+			</panelchildren>
+		</panel>
+		<script type="text/javascript">
+			zk.afterMount(function() { 
+				jq("#illnessListBox").dataTable({
+				"bJQueryUI": true,
+				"sPaginationType": "full_numbers", 
+				"aoColumns":
+							[ null, null, null, null,null,{ "bSortable": false,"sType": "html"} ] 
+						});
+			});
+		</script>
+		<zscript>
+			void edit(String id){
+				if(id!=null){
+					CommonCrudService commonCrudService = Infrastructure.getSpringBean("commonCrudService");
+					patientIcd = commonCrudService.getById(PatientIcd.class, new Long(id));
+				}else{
+					patientIcd = new PatientIcd();
+				}
+				Window window = (Window)Executions.createComponents("/soap/addPatientPastIllness.zul",soapPatientPastIllnessHistoryWindow,
+					com.nzion.util.UtilMisc.toMap("patientIcd",patientIcd));
+				window.doModal();
+			}
+			
+			void showHistory(){
+				Window window = Executions.createComponents("/soap/problemListHistory.zul",soapPatientPastIllnessHistoryWindow,null);
+				window.doModal();
+			}
+		</zscript>
+	</window>
+</zk>

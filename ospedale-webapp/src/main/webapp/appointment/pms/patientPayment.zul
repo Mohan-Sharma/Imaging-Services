@@ -1,0 +1,103 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./newpatientPayment"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<zscript>
+		<![CDATA[
+	import com.nzion.zkoss.composer.appointment.ScheduleController;
+	import com.nzion.domain.pms.PatientPayment;
+	import com.nzion.zkoss.composer.appointment.AppointmentListcell;
+	import com.nzion.view.ScheduleValueObject;
+	ScheduleController scheduleController = (ScheduleController) arg.get("scheduleController");
+	Listbox paymentsListbox = (Listbox)arg.get("paymentsListbox");
+	AppointmentListcell cell = (AppointmentListcell) scheduleController.getSelectedComponent();
+	Map scheduleData = (Map) cell.getScheduleData();
+	String patientName = (String) scheduleData.get("patientName");
+	scheduleController.createNewPatientPayment();
+]]>
+	</zscript>
+	<window mode="modal" id="newpatientPayment" width="65%" height="45%" position="center" closable="true" title="New Patient Payment">
+			<div sclass="panelCont" height="175px">
+				<div>
+					<label value="Patient Name"></label>
+					<n:br />
+					<label value="${patientName}" />
+				</div>
+				<div>
+					<label value="Receipt Number" />
+					<textbox readonly="true"
+						value="@{scheduleController.patientPayment.receiptNumber}" />
+				</div>
+				<div>
+					<label value="Transaction Type" />
+					<listbox mold="select"
+						model="@{scheduleController.transactionTypes}"
+						selectedItem="@{scheduleController.patientPayment.transactionType}">
+						<listitem self="@{each='transactionType'}"
+							value="@{transactionType}"
+							label="@{transactionType.description}">
+						</listitem>
+					</listbox>
+				</div>
+				<div>
+					<label value="Mode of Payment" />
+					<listbox  mold="select"
+						model="@{scheduleController.modeOfPayments}"
+						selectedItem="@{scheduleController.patientPayment.modeOfPayment}">
+						<listitem self="@{each='modeOfPayment'}"
+							value="@{modeOfPayment}" label="@{modeOfPayment.description}">
+						</listitem>
+					</listbox>
+				</div>
+				<div>
+					<label value="Check Number" />
+					<textbox
+						value="@{scheduleController.patientPayment.checkNumber}" />
+				</div>
+				<div>
+					<label value="Check Date" />
+					<datebox
+						value="@{scheduleController.patientPayment.checkDate}" />
+				</div>
+				<div>
+					<label value="Amount" />
+					<decimalbox
+						value="@{scheduleController.patientPayment.amount}" format="#,##0.00"/>
+				</div>
+				<div>
+					<label value="Receipt Date" />
+					<datebox
+						value="@{scheduleController.patientPayment.receiptDate}" />
+				</div>
+				<div>
+					<label value="Receipt Notes" />
+					<textbox rows="2" cols="30"
+						value="@{scheduleController.patientPayment.receiptNote}" />
+				</div>
+				<div>
+					<label value="Billing Notes" />
+					<textbox rows="2" cols="30"
+						value="@{scheduleController.patientPayment.billingNote}" />
+				</div>
+			</div>
+			<div sclass="panelFoot">
+				<button id="newppsave" label="Save"
+					onClick="createPatientPayment()">
+				</button>
+				<button id="newppclose" label="Close"
+					onClick="newpatientPayment.detach()">
+				</button>
+			</div>
+		<zscript>
+		<![CDATA[
+	void createPatientPayment(){
+		scheduleController.createPatientPayment();
+		Events.postEvent("onReloadRequest",paymentsListbox,null);
+		newpatientPayment.detach();
+	}
+]]>
+		</zscript>
+
+	</window>
+</zk>

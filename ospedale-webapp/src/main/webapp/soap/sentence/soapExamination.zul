@@ -1,0 +1,41 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?xel-method prefix="display" name="getId" class="com.nzion.util.UtilDisplay" signature="String buildIdFromName(java.lang.String, java.lang.String)"?>
+	<?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String format(java.util.Date)"?>
+	<zscript>
+	import com.nzion.zkoss.composer.SoapSentenceComposer;
+	import com.nzion.domain.emr.soap.ChiefComplainSection;
+	import com.nzion.domain.emr.soap.ExaminationSection;
+	SoapSentenceComposer sentenceComposer = (SoapSentenceComposer) arg.get("controller");
+	ExaminationSection examSection = (ExaminationSection) sentenceComposer.getSoapNoteController().getSoapSection(ExaminationSection.class,false);
+	Set qas = examSection.getPatientExaminationQAs();
+	if (qas == null) {
+		qas = new HashSet();
+		examSection.setPatientExaminationQAs(qas);
+	}
+	sentenceComposer.setSelectedSection(examSection);
+</zscript>
+
+	<div style="margin-left:10px">
+		<style>tr.z-row td.z-row-inner, tr.z-row .z-cell{ border-style:none none none; }</style>
+		<n:h2>${examSection.soapModule.moduleDescription}</n:h2>
+		<html>${examSection.sentence}</html>
+		<label value="Examination was not performed." if="${empty qas}"/>
+<!--		<label value="${examSection.examinationNote}" if="${examSection.examinationNote ne null}" />-->
+<!--		<label value="Examination was not performed." if="${empty qas}" />-->
+<!--		<div forEach="${examSection.patientExaminationQAs}">-->
+<!--			<n:p>-->
+<!--				<n:h4>${each.organSystem.desc}</n:h4>-->
+<!--			<n:br />-->
+<!--			${each.sentence}-->
+<!--			</n:p>-->
+<!--			<n:br />-->
+<!--			-->
+<!--		</div>-->
+		<label value="Comments" style="font-size:12px;font-weight:bold;" if="${examSection.sectionComments!=null}" />
+		<textbox value="@{examSection.sectionComments}" style="border:none" cols="100" multiline="true"
+			if="${examSection.sectionComments!=null}" />
+		<n:br />
+	</div>
+</zk>

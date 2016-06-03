@@ -1,0 +1,97 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./multiBlockModalWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+	com.nzion.zkoss.composer.appointment.ScheduleController controller = arg.get("controller");
+	com.nzion.domain.Schedule schdl = controller.getOrCreateSelectedSchedule();	
+	com.nzion.view.MultiBookValueObject multiBookValueObject = new com.nzion.view.MultiBookValueObject(schdl);
+	controller.setMultiBookValueObject(multiBookValueObject);
+	com.nzion.service.impl.ScheduleScanner scanner;
+	String physianName = com.nzion.util.ViewUtil.getFormattedName(controller.getPerson());
+</zscript>
+<window mode="modal" id="multiBlockModalWindow" width="600px" closable="true" title="Block Multiple Slots (Dr. ${physianName})">
+<zscript>	
+	public void checkThruDate(){
+		if(thruDate.getValue() == null)
+			throw new WrongValueException(thruDate, "Can not be empty");
+		if(thruDate.getValue().before(new Date()))
+			throw new WrongValueException(thruDate, "Thru date should be after today.");
+	}
+</zscript>
+	<div class="panelTop" width="margin:-1px">
+		<button label="Scan schedules booked" id="scanBtn" onClick="checkThruDate();scanner = controller.scan();"/>
+		<button label="Skip booked schedules and block">
+			<attribute name="onClick">
+				checkThruDate();
+				controller.blockSlotsIgnoringExistingSchedules(scanner,commentsTxt.getValue());
+				multiBlockModalWindow.detach();
+			</attribute>		
+		</button>
+		<button label="Cancel booked schedules and block all">
+			<attribute name="onClick">
+				checkThruDate();
+				controller.blockSlotsCancelingExistingSchedules(scanner,commentsTxt.getValue());
+				multiBlockModalWindow.detach();
+			</attribute>		
+		</button>
+	</div>
+	<panel>
+		<panelchildren>
+			<div sclass="panelCont">
+				<div sclass="col2">
+					<label value="Date From" />
+					<datebox value="@{multiBookValueObject.schedule.startDate}" constraint="no empty"/>
+				</div>
+				<div sclass="col2">
+					<label value="Date Thru" />
+					<datebox value="@{multiBookValueObject.thruDate}" id="thruDate" constraint="no empty"/>
+				</div>
+				<div sclass="col2">
+					<label value="From Time" />
+					<timebox value="@{multiBookValueObject.schedule.startTime}" format="hh:mm a" constraint="no empty"/>
+				</div>
+				<div sclass="col2">
+					<label value="Till" />
+					<timebox value="@{multiBookValueObject.schedule.endTime}" format="hh:mm a" constraint="no empty"/>
+				</div>
+				<div sclass="col2">
+					<label value="Comment" />
+					<textbox id="commentsTxt"/>
+				</div>
+			</div>
+			<space height="5px;"/>
+			<groupbox width="80%" style="margin: 10px;">
+				<caption label="Select Days" />
+				<space height="5px"/>
+				<hbox>
+					<checkbox checked="@{multiBookValueObject.weekdays.monday}" label="Mon"/>	
+					<checkbox checked="@{multiBookValueObject.weekdays.tuesday}" label="Tue"/>	
+					<checkbox checked="@{multiBookValueObject.weekdays.wednesday}" label="Wed"/>	
+					<checkbox checked="@{multiBookValueObject.weekdays.thursday}" label="Thu"/>	
+					<checkbox checked="@{multiBookValueObject.weekdays.friday}" label="Fri"/>	
+					<checkbox checked="@{multiBookValueObject.weekdays.saturday}" label="Sat"/>	
+					<checkbox checked="@{multiBookValueObject.weekdays.sunday}" label="Sun"/>	
+				</hbox>			
+				<space height="5px"/>
+			</groupbox>
+		</panelchildren>
+	</panel>
+	<space height="5px;"/>
+	<panel title="Scan Result">
+		<panelchildren>
+			<listbox model="@{scanner.bookedSchedules, load-after='scanBtn.onClick'}">
+				<listhead>
+					<listheader label="Patient" />
+					<listheader label="Date" />
+					<listheader label="Time" />
+				</listhead>	
+				<listitem self="@{each='scanResult'}" >
+					<listcell><name object="@{scanResult.patient}" /></listcell>
+					<listcell><datebox value="@{scanResult.startDate}" readonly="true" disabled="true" buttonVisible="false"/> </listcell>
+					<listcell><timebox value="@{scanResult.startTime}" readonly="true" disabled="true" buttonVisible="false"/> </listcell>
+				</listitem>
+			</listbox>
+		</panelchildren>
+	</panel>
+</window>
+</zk>

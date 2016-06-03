@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?page title="Message" language="xul/html"?>
+<zk xmlns:h="http://www.zkoss.org/2005/zk/native" xmlns:a="http://www.zkoss.org/2005/zk/annotation">
+    <window border="none" width="300pt" closable="true"
+            zclass="popup_container" xmlns:w="http://www.zkoss.org/2005/zk/client">
+        <zscript>
+            Throwable excp = requestScope.get("javax.servlet.error.exception");
+            String message = com.nzion.web.ExceptionTranslator.translateException(excp);
+        </zscript>
+        <div zclass="modal">
+            <div zclass="modal-header">
+                <button zclass="close" onClick="self.getRoot().detach();">x</button>
+                <h:h3>
+                    <html id="title">Error</html>
+                </h:h3>
+            </div>
+            <div zclass="modal-body">
+                <div zclass="alert alert-block alert-error">
+                    <h:p>
+                        <label multiline="true" value="${message}" width="100%">
+                        </label>
+                    </h:p>
+                    <!--<div sclass="popup_panel">
+                         <hlayout style="text-align:center">
+                             <button sclass="z-messagebox-btn" label="OK" onClick="self.getRoot().detach();" />
+                         </hlayout>
+                     </div>-->
+                </div>
+            </div>
+        </div>
+    </window>
+</zk>

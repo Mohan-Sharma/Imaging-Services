@@ -1,0 +1,45 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	com.nzion.service.SoapNoteService soapNoteService = com.nzion.util.Infrastructure.getSpringBean("soapNoteService");
+	com.nzion.zkoss.composer.SoapAllergyComposer allergyComposer = arg.get("allergyComposer");
+	Set pastPatientAllergies = new HashSet(allergyComposer.getAllInactiveAllergiesExcludingCurrentSection());
+	</zscript>
+	<window id="soapAllegryHistory" closable="true" title="Allergy List Historical View" border="normal">
+		<div style="width:99%;height:99%">
+			 <div sclass="dataTables_scrollBody" style="width:98%; margin:auto;overflow:auto">
+				<n:table id="allergyHistoryListbox" cellpadding="0" cellspacing="0" border="0" class="display" >
+					<n:thead>
+						<n:tr>
+							<n:th>Reaction</n:th>
+							<n:th>Name</n:th>
+							<n:th>Severity</n:th>
+							<n:th>Status</n:th>
+							<n:th>OnSet Date</n:th>
+						</n:tr>
+					</n:thead>
+					<n:tbody>
+						<n:tr forEach="${pastPatientAllergies}">
+							<n:td>${each.reactionName}</n:td>											
+							<n:td>${each.allergy}</n:td>
+							<n:td>${each.severity}</n:td>
+							<n:td>${each.allergyStatus.description}</n:td>
+							<n:td>${each.onSetDate}</n:td>
+						</n:tr>
+					</n:tbody>
+				</n:table>
+				</div>
+		</div>
+		<script type="text/javascript">
+			zk.afterMount(function() { 
+				jq("#allergyHistoryListbox").dataTable({
+				"bJQueryUI": true,
+				"sPaginationType": "full_numbers", 
+				"aoColumns":
+							[ null, null, null,null,{ "bSortable": false,"sType": "html"} ] 
+						}); 
+			});
+		</script>
+	</window>
+</zk>
+	

@@ -1,0 +1,33 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./personFamilyMembersWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?component name="toolbar" macro-uri="/toolbar.zul"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+	<window  id="personFamilyMembersWin">
+	<zscript>
+	com.nzion.zkoss.composer.PersonProfileController profileController = desktop.getAttribute("profileController");
+	List personFamilyMembers = profileController.getPersonFavourites(com.nzion.domain.person.PersonFamilyMembers.class);
+	</zscript>
+	<div sclass="panelTop">
+		<button label="Save" onClick="profileController.saveFavourites(personFamilyMembers);"/>
+	</div>
+	<panel title="Person Family Members" id="familyMemberPanel"
+		onAddClick='profileController.favouriteAddClicked(personFamilyMembersWin, personFamilyMembersDisplayGrid, personFamilyMembers,"/person/add-person-family-members.zul")'
+		onDeleteClick="profileController.deleteFavourites(personFamilyMembersDisplayGrid, personFamilyMembers)">
+			<panelchildren>
+				<toolbar listenercomponent="${familyMemberPanel}" hidecancel="true" hidesearch="true"/>
+				<listbox multiple="true" id="personFamilyMembersDisplayGrid" checkmark="true" mold="paging" pageSize="10" pagingPosition="top"
+ 					model="@{personFamilyMembers,load-after='self.onReloadRequest, familyMemberPanel.onDeleteClick'}">
+				<listhead>
+					<listheader label="Family Member"/>
+				</listhead>
+					<listitem self="@{each='personFamilyMember'}" value="@{personFamilyMember}" >
+					<listcell>
+						<label value="@{personFamilyMember.familyMember.relationshipName}" />
+					</listcell>
+					</listitem>
+				</listbox>
+			</panelchildren>
+		</panel>
+</window>
+</zk>

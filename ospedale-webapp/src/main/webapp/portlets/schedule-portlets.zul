@@ -1,0 +1,85 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+	xmlns:n="http://www.zkoss.org/2005/zk/native">
+<zscript>
+<![CDATA[
+	import com.nzion.domain.Person;
+	import com.nzion.domain.screen.ScheduleCustomView;
+	List providers =  null;
+	com.nzion.domain.Location location =  session.getAttribute("_location");
+	ScheduleCustomView view = providerService.getDefaultProvidersForLoggedInUser();
+	if(view != null && view.getPersons().size() > 0)
+    	providers = new ArrayList(view.getPersons());
+	else
+		providers =  personService.searchSchedulablePerson("firstName", "",com.nzion.util.Infrastructure.getUserLogin().getLocations());
+	view = view == null ? new ScheduleCustomView() : view;
+	
+	int maxSize = providers.size();
+	Person provider1 = (maxSize > 0) ? providers.get(0) : new Person();
+	Person provider2 = (maxSize > 1) ? providers.get(1) : new Person();
+	
+	void render(){
+		int firstIndex = paging.getActivePage() * paging.getPageSize();
+		include1.setDynamicProperty("p",providers.get(firstIndex));
+		include2.setDynamicProperty("p",providers.size() > firstIndex + 1 ? providers.get(firstIndex + 1) : new Person());
+		include1.invalidate();
+		include2.invalidate();
+	}
+	
+	void locationChange(com.nzion.domain.Location location){
+		providers =  providerService.getAllProvidersForLocation(location);
+		session.setAttribute("_location", location);
+		int maxSize = providers.size();
+		paging.setTotalSize(maxSize);
+		paging.setActivePage(0);
+	    render();
+	}
+	
+	void viewUpdated(){
+	if(com.nzion.util.UtilValidator.isEmpty(view.getPersons()))
+		return;
+	providers =  new ArrayList(view.getPersons());
+	paging.setTotalSize(providers.size());
+	paging.setActivePage(0);
+    render();
+	}
+	
+]]>
+</zscript>
+<div>
+<hbox width="100%" widths="20%, 80%">
+	<menubar style="background:none;">
+		<menu label="Actions">
+			<menupopup>
+				<menuitem label="Settings">
+					<attribute name="onClick">
+					 Component component = Executions.createComponents("/person/schedulable-employee-search.zul",null,com.nzion.util.UtilMisc.toMap("view",view));
+					 component.addEventListener("onDetach",new org.zkoss.zk.ui.event.EventListener(){
+						public void onEvent(Event event) throws Exception {
+						viewUpdated();
+						}
+					});
+					</attribute>
+				</menuitem>
+				<menuitem label="Waiting List" onClick='Executions.createComponents("/appointment/schedule-waiting-list.zul", null, null)'/>		
+				<menu label="Locations">
+					<menupopup>
+						<menuitem forEach="${userLogin.locations}" label="${each.name}" 
+						onClick='locationChange((com.nzion.domain.Location)self.getAttribute("location"));'>
+							<custom-attributes location="${each}"/>
+						</menuitem>
+					</menupopup>
+				</menu>		
+			</menupopup>
+		</menu>
+	</menubar>
+	<div align="right" width="100%">
+		 <paging id="paging" totalSize="${maxSize}"  pageSize="2" onPaging="render()"  />
+	</div>
+</hbox>
+<hbox width="100%" widths="49%,49%" style="overflow:auto;margin-bottom:20px;">
+	<div style="overflow:auto;" width="99%"><include src="/portlets/schedule-portlet.zul" p="${provider1}"  id="include1" style="overflow:auto;"/></div>
+	<div style="overflow:auto;" width="99%"><include src="/portlets/schedule-portlet.zul" p="${provider2}"  id="include2" style="overflow:auto;"/></div>
+</hbox>
+</div>
+</zk>

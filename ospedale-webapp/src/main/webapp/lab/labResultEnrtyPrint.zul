@@ -57,7 +57,9 @@
 			String specimenLabel="";
 			if(specimenModel!=null)
 					specimenLabel=specimenModel.getSpecimenLabel();
-			
+
+			boolean isLogoWithAdd = com.nzion.util.Infrastructure.getPractice().isLogoWithAddress();
+            boolean isLogoWithoutAdd = !isLogoWithAdd;
 			
 		]]>
 </zscript>
@@ -95,6 +97,91 @@
         int size = labResultPrintComposer.getLabResults().size();
         int count = 0;
     </zscript>
+    <n:div style="width:95%;horizontal-align:center;margin:20px 10px 5px 30px;">
+
+        <div if="${isLogoWithAdd}">
+            <n:table style="align:center;width:100%">
+                <n:tr>
+                    <n:td style="cellspacing:0px;cellpadding:0px">
+                        <image id="logoImage1"  width="800px" height="200px" style="margin-left:5px">
+                            <attribute name="onCreate">
+                                String logoUrl = com.nzion.util.Infrastructure.getPractice().getImageUrl().replaceFirst("/","");
+                                java.io.FileInputStream fileInputStream = new java.io.FileInputStream(logoUrl);
+                                org.zkoss.image.AImage aImage = new org.zkoss.image.AImage(logoUrl,fileInputStream);
+                                self.setContent(aImage);
+                                self.setVisible(true);
+                            </attribute>
+                        </image>
+                    </n:td>
+                </n:tr>
+
+            </n:table>
+        </div>
+
+        <div if="${isLogoWithoutAdd}">
+            <n:table style="align:center;width:100%">
+                <n:tr>
+                    <n:td width="17%" style="cellspacing:0px;cellpadding:0px">
+                        <image id="logoImage" style="margin-left:5px">
+                            <attribute name="onCreate">
+                                String logoUrl = com.nzion.util.Infrastructure.getPractice().getImageUrl().replaceFirst("/","");
+                                java.io.FileInputStream fileInputStream = new java.io.FileInputStream(logoUrl);
+                                org.zkoss.image.AImage aImage = new org.zkoss.image.AImage(logoUrl,fileInputStream);
+                                self.setContent(aImage);
+                                self.setVisible(true);
+                            </attribute>
+                        </image>
+                    </n:td>
+
+                    <n:td width="75%" style="cellspacing:0px;cellpadding:0px;">
+                        <n:table style="align:left;width:50%;height:75px">
+                            <n:tr>
+                                <n:td>
+                                    <label value="${practice.practiceName}" style="font-size:13px;font-weight:bold;font-family:Calibri;margin-right:2px"/>
+                                </n:td>
+                            </n:tr>
+                            <n:tr>
+                                <n:td>
+                                    <label value="${location.contacts.postalAddress.city}"  style="font-size:12px;font-weight:normal;font-family:Calibri;margin-right:2px"/>
+                                </n:td>
+                            </n:tr>
+
+                            <n:tr>
+                                <n:td>
+                                    <label value="${location.contacts.postalAddress.address1},${location.contacts.postalAddress.address2}" style="font-size:12px;font-weight:normal;font-family:Calibri;margin-right:2px"/>
+                                </n:td>
+                            </n:tr>
+
+
+                            <n:tr>
+                                <n:td>
+                                    <label value="${location.contacts.postalAddress.postalCode}, ${location.contacts.postalAddress.stateProvinceGeo},${location.contacts.postalAddress.countryGeo}"
+                                           style="font-size:12px;font-weight:normal;font-family:Calibri;margin-right:2px"/>
+                                </n:td>
+                            </n:tr>
+
+                            <n:tr>
+                                <n:td>
+                                    <label value="Tel : ${location.contacts.officePhone}, Email : ${location.contacts.email}"
+                                           style="font-size:12px;font-weight:normal;font-family:Calibri;margin-right:2px" />
+                                </n:td>
+                            </n:tr>
+
+                        </n:table>
+                    </n:td>
+                </n:tr>
+
+            </n:table>
+        </div>
+    </n:div>
+    <n:div class="clr" style="width:95%;horizontal-align:center;margin:20px 0px 0px 30px;margin-top:0px;margin-bottom:15px;">
+        <n:table class="personDet" style="align:center;width:95%; border-color:#C0C0C0" border="1px">
+            <n:tr>
+                <n:td>
+                </n:td>
+            </n:tr>
+        </n:table>
+    </n:div>
     <div forEach="${labResultPrintComposer.labResults}">
         <zscript>
              count = count+1;
@@ -105,61 +192,89 @@
             <n:table class="personDet" style="align:center;width:100%">
                 <n:tr>
                     <n:td>
-                        <div class="z-hlayout" style="width:100%;">
-                        <div style="width:20%" class="z-hlayout-inner">
-                        <div>
-                                <label value="MRN : "
+                      <div class="z-hlayout" style="width:100%;">
+                            <!--<div style="width:20%" class="z-hlayout-inner">
+                               <div>
+                                    <label value="MRN : "
+                                           style="font-weight:bold;font-size:14px">
+                                    </label>
+                                    <label value="@{labRequisition.patient.accountNumber}"
+                                           style="font-weight:normal;font-size:14px"/>
+                                </div>
+                               </div>-->
+                        <div style="width:33%" class="z-hlayout-inner">
+                            <div>
+                                <label value="Afya Id : "
                                        style="font-weight:bold;font-size:14px">
                                 </label>
-                                <label value="@{labRequisition.patient.accountNumber}"
+                                <label value="@{labRequisition.patient.afyaId}"
                                        style="font-weight:normal;font-size:14px"/>
                             </div>
-                           </div>
-                           
-                          <div style="width:40%" class="z-hlayout-inner">  
+                        </div>
+                        <div style="width:33%" class="z-hlayout-inner">
                             <div>
-                                <label value="PATIENT : "
+                                <label value="Civil Id : "
+                                       style="font-weight:bold;font-size:14px">
+                                </label>
+                                <label value="@{labRequisition.patient.civilId}"
+                                       style="font-weight:normal;font-size:14px"/>
+                            </div>
+                        </div>
+
+                        <div style="width:33%" class="z-hlayout-inner">
+                            <div>
+                                <label value="Patient Name : "
                                        style="font-weight:bold;font-size:14px">
                                 </label>
                                 <label value="@{labRequisition.patient.salutation}"
                                        style="font-weight:normal;font-size:14px"/>
-                                <name value="@{labRequisition.patient.firstName}"
+                                <name value="@{labRequisition.patient}"
                                       style="font-weight:normal;font-size:14px"/>
+                                <!--<name value="@{labRequisition.patient.lastName}"
+                                      style="font-weight:normal;font-size:14px"/>-->
                             </div>
-                          </div>
-                          
-                             
- 						 <div style="width:40%" class="z-hlayout-inner">
-   							 <div>
-                                <label value="AGE : "
-                                       style="font-weight:bold;font-size:14px">
-                                </label>
-                                <label value="@{labRequisition.patient.age}"
-                                       style="font-weight:normal;font-size:14px"/>
-                                <label value="/"
-                                       style="font-weight:normal;font-size:14px"/>
-                                <label value="@{gender}"
-                                       style="font-weight:normal;font-size:14px"/>
-                            </div>
-                            </div>
-                            </div>
-                    
+                        </div>
+
+                      </div>
                     </n:td>
                 </n:tr>
                 <n:tr>
                     <n:td>
-                        <div class="z-hlayout" style="width:100%;">
-                         <div style="width:20%" class="z-hlayout-inner">
+                      <div class="z-hlayout" style="width:100%;">
+
+                         <div style="width:33%" class="z-hlayout-inner">
                             <div>
-                                <label value="DATE : "
-                                       style="font-size:14px;font-weight:bold">
-                                </label>
-                                <label value="@{observationDate,converter='com.nzion.view.component.DateConverter'}"
-                                       style="font-weight:normal;font-size:14px"/>
+                                    <label value="Age : "
+                                           style="font-weight:bold;font-size:14px">
+                                    </label>
+                                    <label value="@{labRequisition.patient.age}"
+                                           style="font-weight:normal;font-size:14px"/>
+                                    <label value="/"
+                                           style="font-weight:normal;font-size:14px"/>
+                                    <label value="@{gender}"
+                                           style="font-weight:normal;font-size:14px"/>
                             </div>
+                         </div>
+                         <div style="width:33%" class="z-hlayout-inner">
+                            <div>
+                                  <label value="Observation Date : "
+                                         style="font-size:14px;font-weight:bold">
+                                  </label>
+                                  <label value="@{observationDate,converter='com.nzion.view.component.DateConverter'}"
+                                         style="font-weight:normal;font-size:14px"/>
                             </div>
+                         </div>
+                         <div style="width:33%" class="z-hlayout-inner">
+                            <div>
+                                  <label value="Invoice Number : "
+                                         style="font-size:14px;font-weight:bold">
+                                  </label>
+                                  <label value="@{labRequisition.invoiceNumber}"
+                                         style="font-weight:normal;font-size:14px"/>
+                            </div>
+                         </div>
                          
-                          <div style="width:35%" class="z-hlayout-inner">
+                          <!--<div style="width:40%" class="z-hlayout-inner">
                             <div>
                                 <label value="DOCTOR : "
                                        style="font-weight:bold;font-size:14px">
@@ -167,10 +282,10 @@
                                 <label value="@{doctor}"
                                        style="font-weight:normal;font-size:14px"/>
                             </div>
-                           </div>
+                           </div>-->
                          
                             
-                         <div style="width:25%" class="z-hlayout-inner">
+                         <!--<div style="width:40%" class="z-hlayout-inner">
                             <div>
                                 <label value="Lab No : "
                                        style="font-size:14px;font-weight:bold">
@@ -182,18 +297,18 @@
                                 <label value="@{patientType}"
                                        style="font-weight:normal;font-size:14px"/>
                             </div>
-						</div>
-                            
-                            <div style="width:20%" class="z-hlayout-inner">
-                         <!--    <div if="${labRequisition.patientAdmission != null}">
-                                <label value="IP No : "
-                                       style="font-weight:bold;font-size:14px">
-                                </label>
-                                <label value="@{labRequisition.patientAdmission.accountNumber}"
-                                       style="font-weight:normal;font-size:14px"/>
-                            </div> -->
-                     </div> 
-                 </div>
+						</div>-->
+
+                            <!--   <div style="width:20%" class="z-hlayout-inner">
+                                <div if="${labRequisition.patientAdmission != null}">
+                                   <label value="IP No : "
+                                          style="font-weight:bold;font-size:14px">
+                                   </label>
+                                   <label value="@{labRequisition.patientAdmission.accountNumber}"
+                                          style="font-weight:normal;font-size:14px"/>
+                               </div>
+                        </div>  -->
+                      </div>
                     </n:td>
                 </n:tr>
             </n:table>
@@ -215,13 +330,13 @@
                   <n:tr>
                         <separator></separator>
                         <separator></separator>
-                        <n:th style="font-size:20px;width:30%;text-decoration:underline">
+                        <n:th style="font-size:20px;width:33%;text-decoration:underline">
                             LAB TEST
                         </n:th>
                         <n:th style="font-size:20px;width:33%;text-align:right;text-decoration:underline">
                             VALUES
                         </n:th>
-                        <n:th style="font-size:20px;padding-right:30px;text-decoration:underline">
+                        <n:th style="font-size:20px;padding-right:33px;text-decoration:underline">
                             NORMAL RANGE
                         </n:th>
                     </n:tr>
@@ -281,8 +396,13 @@
                 ${labRequisition.remarks}
             </html>
         </div>
+        <n:div>
+            <n:table>
+                <n:tr><n:td><n:td></n:td></n:td></n:tr>
+            </n:table>
+        </n:div>
         <n:div id="footerDiv" style="width:100%;text-align:center;">
-            <n:table style="width:80%;margin-top:5px;" align="center">
+            <n:table style="width:80%;margin-top:0px;" align="center">
                 <n:tr>
                     <n:th style="text-align:left;font-size:15px;width:45%">
                         LAB TECHNICIAN

@@ -53,6 +53,8 @@ public class PatientLabOrder extends IdGeneratingBaseEntity {
     private BILLINGSTATUS billingStatus = BILLINGSTATUS.UNINVOICED;
     
     private boolean homeService;
+
+    private String price;
        
 	public PatientLabOrder() {
     }
@@ -217,6 +219,14 @@ public class PatientLabOrder extends IdGeneratingBaseEntity {
 		this.homeService = homeService;
 	}
 
+    @Transient
+    public String getPrice() {
+        return price;
+    }
+
+    public void setPrice(String price) {
+        this.price = price;
+    }
 
 	private static final long serialVersionUID = 1L;
 }

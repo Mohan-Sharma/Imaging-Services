@@ -1,6 +1,7 @@
 package com.nzion.repository.billing;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -35,7 +36,9 @@ public interface BillingRepository extends BaseRepository {
 	
 	List<Invoice> getInvoice(List<InvoiceStatusItem> status,Patient patient,Employee emp,Date fromDate,Date thruDate,String ipNumber);
 	
-	List<LabOrderRequest> getSearchByLabOrder(List<LabOrderRequest.ORDERSTATUS> status, Patient patient, Provider provider, Referral referral);
+	List<LabOrderRequest> getSearchByLabOrder(List<LabOrderRequest.ORDERSTATUS> status, Patient patient,Referral referral,Date fromDate,Date thruDate);
+
+	ArrayList<InvoicePayment> getInvoicePaymentsByCriteria(Patient patient,Date fromDate,Date thruDate);
 	
 	List<InsuranceProvider> getInsuranceProviderAttachedToContract();
 	

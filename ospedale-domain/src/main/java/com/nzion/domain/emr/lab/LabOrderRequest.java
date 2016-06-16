@@ -243,9 +243,16 @@ public class LabOrderRequest extends IdGeneratingBaseEntity{
 		association.setEndTime(endTime);
 		CalendarSlot slot = new CalendarSlot();
 		slot.setAssociation(association);
-		slot.setEndTime(getEndTime());
-		slot.setStartTime(getStartTime());
-		slot.setSequenceNum(0);
+		if (phlebotomist != null){
+			slot.setEndTime(getPhlebotomistEndTime());
+			slot.setStartTime(getPhlebotomistStartTime());
+			slot.setSequenceNum(0);
+		} else {
+			slot.setEndTime(getEndTime());
+			slot.setStartTime(getStartTime());
+			slot.setSequenceNum(0);
+		}
+
 		return slot;
 	}
 

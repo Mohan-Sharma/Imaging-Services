@@ -6,8 +6,8 @@
 		setPageTitle("Lab Test Profile ", "");
 </zscript>
 	<window id="labTestProfileViewWindow">
-	<screen width="100%" listtitle="List of LabTestProfile" 	entityclass="com.nzion.domain.emr.lab.LabTestProfile" 
-	fields="profileCode,profileName" labels="Test Profile Code, Test Profile Name" 
-	hideactivation="true" hidedeletebtn="true" hideaddbtn = "true"/>
+	<screen width="100%" listtitle="List of LabTestProfile" addpage="newLabTestProfile"	entityclass="com.nzion.domain.emr.lab.LabTestProfile" addmodepopup="true"
+	fields="profileCode,profileName" labels="Test Profile Code, Test Profile Name" searchfields="profileCode,profileName"
+	hideactivation="true" hidedeletebtn="true" hideaddbtn = "false"/>
 	</window>
 </zk>

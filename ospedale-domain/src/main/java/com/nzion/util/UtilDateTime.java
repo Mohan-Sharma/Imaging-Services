@@ -1168,4 +1168,12 @@ public class UtilDateTime {
 		return cal.getTime();
 		//return new Date(start.getTime() + ((int) (hrs * 60L * 60L * 1000L)));
 	}
+
+	public static  String formatDateToddMMyyyyHHmmss(Date date){
+		if(date == null)
+			return  " ";
+		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_TIME_FORMAT);
+		String dateString = dateFormat.format(date);
+		return dateString;
+	}
 }

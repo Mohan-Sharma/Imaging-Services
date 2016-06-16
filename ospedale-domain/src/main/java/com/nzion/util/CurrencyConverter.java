@@ -94,12 +94,12 @@ public class CurrencyConverter {
 
 	private static String cleanNumber( String number ){
 		String cleanedNumber = "";
-		
+
 		cleanedNumber = number.replace( '.', ' ' ).replaceAll( " ", "" );
 		cleanedNumber = cleanedNumber.replace( ',', ' ' ).replaceAll( " ", "" );
 		if( cleanedNumber.startsWith( "0" ) )
 			cleanedNumber = cleanedNumber.replaceFirst( "0", "" );
-		
+
 		return cleanedNumber;
 	} //cleanNumber
 
@@ -118,14 +118,14 @@ public class CurrencyConverter {
 			double place = getPlace(number);
 			if( place == DefinePlace.TENS || place == DefinePlace.TENTHOUSANDS || place == DefinePlace.TENLAKHS || place == DefinePlace.TENCRORES ){
 				int subNum = Integer.parseInt( number.charAt(0) + "" + number.charAt(1) );
-			
+
 				if( subNum >= 21 && (subNum%10) != 0 ){
 					returnValue += getWord( Integer.parseInt( "" + number.charAt(0) ) * 10 ) + " " + getWord( subNum%10 ) ;
 				} //if
 				else{
 					returnValue += getWord(subNum);
 				}//else
-			
+
 				if( place == DefinePlace.TENS ){
 					num = 0;
 				}//if
@@ -144,7 +144,7 @@ public class CurrencyConverter {
 			}//if
 			else {
 				int subNum = Integer.parseInt( "" + number.charAt(0) );
-			
+
 				returnValue += getWord( subNum );
 				if( place == DefinePlace.UNITS ){
 					num = 0;
@@ -183,43 +183,44 @@ public class CurrencyConverter {
 		try{
 		BigDecimal decimalNumber = new BigDecimal(number);
 			if(decimalNumber.compareTo(BigDecimal.ZERO) < 1){
-				answer = "Rupees Zero and Paise Zero Only.";
+			//	answer = "Rupees Zero and Paise Zero Only.";
+				answer = "Zero KD";
 				return answer;
 			}
 		}catch(Exception e){
-			
+
 		}
 		if (delimiterPos > 0){
 			String left = number.substring(0, delimiterPos);
 			String right = number.substring(delimiterPos + 1,  delimiterPos + 1 + precision);
 			System.out.println(right);
 			if(UtilValidator.isNotEmpty(convertNumber(right)))
-				answer = convertNumber(left) + " Rupees and " + convertNumber(right) + " Paise Only.";
+				answer = convertNumber(left) + " KD and " + convertNumber(right) + " Fils.";
 			else
-				answer = convertNumber(left) + " Rupees Only.";
+				answer = convertNumber(left) + " KD";
 		} else {
-			answer = convertNumber(number) + " Rupees Only.";
+			answer = convertNumber(number) + " KD";
 		}
 		return answer;
 	}
-	
+
 	public static String rupeesInWords(Object number){
 		if(number == null)
 			return "";
 		return rupeesInWords(number.toString(),".",2);
 	}
-	
-	
+
+
 	public static void main( String args[] ){
 		if( args.length >= 1 )	{
 			for( int i=0; i<args.length; i++ )
 			System.out.println( "Given Number : " + args[i] + "\nConverted: " + CurrencyConverter.rupeesInWords(args[i], null, null) + "\n\n" );
 			System.exit(0);
 		}
-		
+
 		System.out.println( "Given Number : 999999999.99\nConverted: " + CurrencyConverter.rupeesInWords("999999999.99", null, null) + "\n\n" );
 	}//main
-	
+
 } //class
 
 class DefinePlace{

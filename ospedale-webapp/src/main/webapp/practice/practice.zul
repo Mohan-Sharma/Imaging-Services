@@ -10,6 +10,7 @@
 	import com.nzion.view.PracticeViewObject;
 	import org.zkoss.zkplus.spring.SpringUtil;
 	import com.nzion.domain.Enumeration;
+	import com.nzion.util.RestServiceConsumer;
 
 	String confirmPassword = new String();
 	PracticeSetupController pracController = new PracticeSetupController();
@@ -30,7 +31,8 @@
 	
 	com.nzion.zkoss.composer.emr.StateRenderer stateRenderer = new com.nzion.zkoss.composer.emr.StateRenderer();
 	
-	com.nzion.enums.SUBSCRIPTION_TYPE[] types = com.nzion.enums.SUBSCRIPTION_TYPE.values(); 
+	com.nzion.enums.SUBSCRIPTION_TYPE[] types = com.nzion.enums.SUBSCRIPTION_TYPE.values();
+	List allCities = RestServiceConsumer.getAllCities();
 	
 setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 ]]>
@@ -44,13 +46,13 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 </zscript>
     <div style="padding:5px" zclass="page-header titled-well">
             <h:h1>
-                <h:small>New Hospital</h:small>
+                <h:small>New Laboratory</h:small>
             </h:h1>
     </div>
 <div zclass="container-fluid">
 		 <div zclass="row-fluid">
 					 <div zclass="span6">
-						<label value="Hospital Name" mold="required" />
+						<label value="Laboratory Name" mold="required" />
 						<textbox id="practiceName" value="@{vo.practice.practiceName,save-when='Save.onClick'}"
 						constraint="no empty" cols="40" readonly="${!isSuperAdmin}" maxlength="50" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" />
 					</div>
@@ -69,38 +71,56 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 					</div>
 					</div>
 					<div zclass="row-fluid">
-		             <div zclass="span2">
+		             <!--<div zclass="span2">
 						<label value="Service Tax No"  />
 						<textbox value="@{vo.practice.serviceTaxNumber,save-when='Save.onClick'}"
 							 maxlength="30" sclass="span12"/>
 						</div>
 					 <div zclass="span2">
 						<label value="Pan No"  />
-					<textbox value="@{vo.practice.panNumber,save-when='Save.onClick'}"
+						<textbox value="@{vo.practice.panNumber,save-when='Save.onClick'}"
 							 maxlength="30" sclass="span12"/>
-					</div>
-					<div zclass="span2">
-						<label value="Drug Licence"  />
-					<textbox value="@{vo.practice.drugLicence,save-when='Save.onClick'}"
-							 maxlength="30" sclass="span12"/>
-					</div>
-					</div>
-					 <div zclass="row-fluid">
-					 <div zclass="span2">
-						<label value="Accr No"  />
-					<textbox value="@{vo.practice.accrNumber,save-when='Save.onClick'}"
-							 maxlength="30" sclass="span12"/>
-					</div>
-					 <div zclass="span2">
+					</div>-->
+						<div zclass="span2">
+							<label value="Licence"  />
+						<textbox value="@{vo.practice.drugLicence,save-when='Save.onClick'}"
+								 maxlength="30" sclass="span12"/>
+						</div>
+					<!--</div>
+					 <div zclass="row-fluid">-->
+						 <div zclass="span2">
+							<label value="Accredation"  />
+							<textbox value="@{vo.practice.accrNumber,save-when='Save.onClick'}"
+								 maxlength="30" sclass="span12"/>
+						</div>
+						<!--<div zclass="span2">
 						<label value="Valid From"  />
-					<datebox id="validFrom" format="dd/MM/yyyy" value="@{vo.practice.validFrom,save-when='Save.onClick'}" 
-					 sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
-					</div>
-					<div zclass="span2">
+						<datebox id="validFrom" format="dd/MM/yyyy" value="@{vo.practice.validFrom,save-when='Save.onClick'}"
+						 sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+						</div>
+						<div zclass="span2">
 						<label value="Valid To"  />
-					<datebox id="validTo" onChange="dateValidation(validFrom,validTo)" format="dd/MM/yyyy" value="@{vo.practice.validThru,save-when='Save.onClick'}" 
-					 sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
-					</div>
+						<datebox id="validTo" onChange="dateValidation(validFrom,validTo)" format="dd/MM/yyyy" value="@{vo.practice.validThru,save-when='Save.onClick'}"
+						 sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+						</div>-->
+						 <div zclass="span2" style="margin-left: 30px">
+							 <separator></separator><separator></separator>
+							 <button label="Upload Lab Logo" upload="true">
+								 <attribute name="onUpload">
+									 org.zkoss.util.media.Media media = event.getMedia();
+									 if (media instanceof org.zkoss.image.Image) {
+									 uploadLabLogo(media);
+									 //Practice prac = com.nzion.util.Infrastructure.getPractice();
+									 practice.setImageUrl("/images/"+media.getName());
+									 commonCrudService.save(practice);
+									 com.nzion.util.UtilMessagesAndPopups.showSuccess();
+									 } else {
+									 Messagebox.show("Not an image: " + media, "Error", Messagebox.OK,Messagebox.ERROR);
+									 break; //not to show too many errors
+									 }
+								 </attribute>
+							 </button>
+						 </div>
 					</div> 
 					 <div zclass="row-fluid">
 					 <div zclass="span3">
@@ -117,19 +137,37 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 					 <div zclass="row-fluid">
 					 <div zclass="span2">
 						<label value="City" style="text-align:right" mold="required" id="lblcity" />
-						<textbox value="@{vo.practice.contacts.postalAddress.city,save-when='Save.onClick,copyContacts.onCheck'}" id="city"
-							maxlength="20" onChange="com.nzion.util.UtilDisplay.validateNonDigits(self)" constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+						<!--<textbox value="@{vo.practice.contacts.postalAddress.city,save-when='Save.onClick,copyContacts.onCheck'}" id="city"
+							maxlength="20" onChange="com.nzion.util.UtilDisplay.validateNonDigits(self)" constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>-->
+						 <combobox sclass="span12" id="city" selectedItem="@{vo.practice.contacts.postalAddress.city,save-when='Save.onClick,copyContacts.onCheck'}"
+								   w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+							 <attribute name="onBlur">
+								 <![CDATA[
+									populateStateCountry(self.getValue());
+								 ]]>
+							 </attribute>
+							 <comboitem forEach="${allCities}" value="${each.city}" label="${each.city}"></comboitem>
+						 </combobox>
 					</div>
-				 <div zclass="span2">
-						<label value="State" style="text-align:right" id="lblstate"  mold="required"/>
-						<enumeration id="state" enumType="STATE" itemRenderer="${stateRenderer}"
-							value="@{vo.practice.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick,copyContacts.onCheck'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" />
-					</div>					
+				 	<div zclass="span2">
+						<label value="Governorate" style="text-align:right" id="lblstate"  mold="required"/>
+						<!--<enumeration id="state" enumType="STATE" itemRenderer="${stateRenderer}"
+							value="@{vo.practice.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick,copyContacts.onCheck'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" />-->
+						<textbox value="@{vo.practice.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick,copyContacts.onCheck'}" sclass="span12" readonly="true" id="state"
+								 w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"  constraint="no empty"/>
+					</div>
 					 <div zclass="span2">
-						<label value="Postal code" style="text-align:right" mold="required" id="lblpostalCode" />
-						<zipcodebox value="@{vo.practice.contacts.postalAddress.postalCode,save-when='Save.onClick,copyContacts.onCheck'}"
-							constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"	id="postalCode" onBlur="com.nzion.util.UtilDisplay.validateFiveDigits(self)"/>
+						 <label value="Country" id="lblCountry"/>
+						 <textbox value="@{vo.practice.contacts.postalAddress.countryGeo,save-when='Save.onClick,copyContacts.onCheck'}" id="country" sclass="span12" readonly="true" />
+					 </div>
+					 <div zclass="span2">
+						<label value="Postal code" style="text-align:right" id="lblpostalCode" />
+						<!--<zipcodebox value="@{vo.practice.contacts.postalAddress.postalCode,save-when='Save.onClick,copyContacts.onCheck'}"
+							 sclass="span12" id="postalCode" onBlur="com.nzion.util.UtilDisplay.validateFiveDigits(self)"/>-->
+						 <zipcodebox value="@{vo.userLogin.person.contacts.postalAddress.postalCode,save-when='Save.onClick',load-after='copyContacts.onCheck'}"
+									 sclass="span12" />
 					</div>
+
 					</div>
 			<separator></separator>
 			
@@ -138,7 +176,7 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
                 <h:small>Admin User Details</h:small>
             </h:h1>
             
-            <checkbox label="Same as Practice Address" id="copyContacts">
+            <checkbox label="Same as Lab Address" id="copyContacts">
 						<attribute name="onCheck">
 							if(self.isChecked()){
 								pracController.getPracticeViewObject().getUserLogin().getPerson().setContacts(pracController.getPracticeViewObject().getPractice().getContacts());
@@ -191,19 +229,47 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 					<div zclass="row-fluid">
 						 <div zclass="span2">
 							<label value="City" style="text-align:right" mold="required"/>
-							<textbox value="@{vo.userLogin.person.contacts.postalAddress.city,save-when='Save.onClick',load-after='copyContacts.onCheck'}" 
-								maxlength="20" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" onChange="com.nzion.util.UtilDisplay.validateNonDigits(self)"  constraint="no empty"/>
-						</div>
+							<!--<textbox value="@{vo.userLogin.person.contacts.postalAddress.city,save-when='Save.onClick',load-after='copyContacts.onCheck'}"
+								maxlength="20" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" onChange="com.nzion.util.UtilDisplay.validateNonDigits(self)"  constraint="no empty"/>-->
+							 <combobox sclass="span12" id="admincity" selectedItem="@{vo.practice.contacts.postalAddress.city,save-when='Save.onClick,copyContacts.onCheck'}"
+									   w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+								 <attribute name="onBlur">
+									 <![CDATA[
+										String admincity = self.getValue();
+										if(admincity != null){
+										Map stateCountry = RestServiceConsumer.getStateCountryBasedOnCity(admincity);
+										if(!stateCountry.isEmpty()){
+											if(stateCountry.get("state") != null)
+											adminState.setValue((String)stateCountry.get("state"));
+										 }
+										 if(!stateCountry.isEmpty()){
+										 	if(stateCountry.get("country") != null)
+										 		adminCountry.setValue((String)stateCountry.get("country"));
+										 }
+									 }
+                           			 ]]>
+								 </attribute>
+								 <comboitem forEach="${allCities}" value="${each.city}" label="${each.city}"></comboitem>
+							 </combobox>
+						 </div>
 						 <div zclass="span2">
-							<label value="State" mold="required" style="text-align:right" />
-							<enumeration sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"  enumType="STATE" itemRenderer="${stateRenderer}"
-								value="@{vo.userLogin.person.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick',load-after='copyContacts.onCheck'}" constraint="no empty" />
-						</div>
-							 <div zclass="span2">
-							<label value="Postal code" style="text-align:right" mold="required"  />
-							<zipcodebox value="@{vo.userLogin.person.contacts.postalAddress.postalCode,save-when='Save.onClick',load-after='copyContacts.onCheck'}"
-								constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" onBlur="com.nzion.util.UtilDisplay.validateFiveDigits(self)"/>
-					</div>
+							<label value="Governorate" mold="required" style="text-align:right" />
+							<!--<enumeration sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"  enumType="STATE" itemRenderer="${stateRenderer}"
+								value="@{vo.userLogin.person.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick',load-after='copyContacts.onCheck'}" constraint="no empty" />-->
+							 <textbox id="adminState" readonly="true" value="@{vo.userLogin.person.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick',load-after='copyContacts.onCheck'}"
+									  sclass="span12"	  w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"  constraint="no empty"/>
+						 </div>
+						 <div zclass="span2">
+							<label value="Country" id="lblAdminCountry"/>
+							<textbox value="@{vo.practice.contacts.postalAddress.countryGeo,save-when='Save.onClick,copyContacts.onCheck'}" id="adminCountry" sclass="span12" readonly="true" />
+						 </div>
+						 <div zclass="span2">
+							<label value="Postal code" style="text-align:right" />
+							<!--<zipcodebox value="@{vo.userLogin.person.contacts.postalAddress.postalCode,save-when='Save.onClick',load-after='copyContacts.onCheck'}"
+								 sclass="span12" onBlur="com.nzion.util.UtilDisplay.validateFiveDigits(self)"/>-->
+							 <zipcodebox value="@{vo.userLogin.person.contacts.postalAddress.postalCode,save-when='Save.onClick',load-after='copyContacts.onCheck'}"
+										 sclass="span12"/>
+					     </div>
 					</div>
 					
 			
@@ -212,13 +278,13 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 			<button id="Save" label="Save" onClick="savePractice(self);" zclass="btn-success btn" ></button>
 		</div>
 		<zscript><![CDATA[
-public void dateValidation(Datebox validFrom,Datebox validTo) {               
-   if(validFrom.getValue()!=null&& validTo.getValue()!=null)  {      
-if (validTo.getValue().before(validFrom.getValue())){
-	throw new WrongValueException(validTo, "Valid to date should be after valid from date");
-}    
-   }
-}
+		/*	public void dateValidation(Datebox validFrom,Datebox validTo) {
+			   if(validFrom.getValue()!=null&& validTo.getValue()!=null)  {
+			if (validTo.getValue().before(validFrom.getValue())){
+				throw new WrongValueException(validTo, "Valid to date should be after valid from date");
+			}
+			   }
+			} */
 
 			public void validatePasswordAndConfirmPassword() {
 			com.nzion.util.UtilDisplay.validateCharacters(passwordTxtBox);
@@ -229,7 +295,7 @@ if (validTo.getValue().before(validFrom.getValue())){
 			
 			public void savePractice(Component comp) {
 			validatePasswordAndConfirmPassword();
-			dateValidation(validFrom ,validTo );
+		//	dateValidation(validFrom ,validTo );
 			try{
 			pracController.savePractice();
 			}catch(Exception e){
@@ -237,6 +303,33 @@ if (validTo.getValue().before(validFrom.getValue())){
 				
 			}
 			}
+			 import java.io.*;
+            void uploadLabLogo(org.zkoss.util.media.Media media){
+            File newFile = new File("images/");
+            try {
+            if(!newFile.exists())
+            newFile.mkdir();
+            newFile = new File("images/"+media.getName());
+            FileOutputStream fos = new FileOutputStream(newFile, false);
+            org.apache.commons.io.IOUtils.copy(media.getStreamData(), fos);
+            fos.flush();
+            org.apache.commons.io.IOUtils.closeQuietly(fos);
+            } catch (IOException e) {
+            e.printStackTrace();
+            }
+            }
+            void populateStateCountry(String city){
+				if(city != null){
+				Map stateCountry = RestServiceConsumer.getStateCountryBasedOnCity(city);
+				if(!stateCountry.isEmpty()){
+				if(stateCountry.get("country") != null)
+				country.setValue((String)stateCountry.get("country"));
+				if(stateCountry.get("state") != null)
+				state.setValue((String)stateCountry.get("state"));
+			}
+			}
+			}
+
 
 		]]>
 		</zscript>

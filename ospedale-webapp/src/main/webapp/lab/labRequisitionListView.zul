@@ -60,10 +60,30 @@
                     <listhead>
                         <listheader label="Token" width="50px"/>
                         <listheader label="Patient Name"/>
+                        <listheader label="Mobile Number"/>
+                        <listheader>
+                            <vbox>
+                                <label value="Appointment"/>
+                                <label value="Date"/>
+                            </vbox>
+                        </listheader>
+                        <listheader>
+                            <vbox>
+                                <label value="Appointment"/>
+                                <label value="Start Time"/>
+                            </vbox>
+                        </listheader>
+                        <listheader>
+                            <vbox>
+                                <label value="Appointment"/>
+                                <label value="End Time"/>
+                            </vbox>
+                        </listheader>
+                        <listheader label="Phlebotomist"/>
                         <listheader label="Invoice Number"/>
                         <listheader label="Status"/>
                         <listheader label="Requested Date" />  
-                        <listheader/>
+                        <listheader label="Action"/>
                     </listhead>
                     <template name="model" var="requisition">
                         <listitem value="@bind(requisition)">
@@ -71,6 +91,12 @@
                             <listcell>
                                 <name value="@load(requisition.patient.firstName)"/>
                             </listcell>
+                            <listcell label="@load(requisition.patient.contacts.mobileNumber)"/>
+                            <listcell label="@load(requisition.labOrderRequest.startDate)@converter('formatedDate', format='dd/MM/yyyy') "/>
+                            <listcell label="@load(requisition.labOrderRequest.startTime)@converter('formatedDate', format='hh:mm')"/>
+                            <listcell label="@load(requisition.labOrderRequest.endTime)@converter('formatedDate', format='hh:mm')"/>
+                           <!-- <listcell label="@load(requisition.labOrderRequest.endTime)@converter('com.nzion.view.component.TimeConverter')"/>-->
+                            <listcell label="@load(requisition.labOrderRequest.phlebotomist.firstName)"/>
                             <listcell label="@load(requisition.invoiceNumber)"></listcell>
                             <listcell label="@load(requisition.status.description)"/>
                            <listcell >
@@ -105,12 +131,32 @@
                     <listhead>
                         <listheader label="Token" width="50px"/>
                         <listheader label="Patient Name"/>
+                        <listheader label="Mobile Number"/>
+                        <listheader>
+                            <vbox>
+                                <label value="Appointment"/>
+                                <label value="Date"/>
+                            </vbox>
+                        </listheader>
+                        <listheader>
+                            <vbox>
+                                <label value="Appointment"/>
+                                <label value="Start Time"/>
+                            </vbox>
+                        </listheader>
+                        <listheader>
+                            <vbox>
+                                <label value="Appointment"/>
+                                <label value="End Time"/>
+                            </vbox>
+                        </listheader>
+                        <listheader label="Phlebotomist"/>
                         <listheader label="Ward"/>
                         <listheader label="Bed No"/>
                         <listheader label="Ordering Doctor"/>
                         <listheader label="Status"/>
                         <listheader label="Requested Date" /> 
-                        <listheader/>
+                        <listheader label="Action"/>
                     </listhead>
                     <template name="model" var="requisition">
                         <listitem value="@bind(requisition)">
@@ -118,6 +164,11 @@
                             <listcell>
                                 <name value="@load(requisition.patient)"/>
                             </listcell>
+                            <listcell label="@load(requisition.patient.contacts.mobileNumber)"/>
+                            <listcell label="@load(requisition.labOrderRequest.startDate)@converter('formatedDate', format='dd/MM/yyyy') "/>
+                            <listcell label="@load(requisition.labOrderRequest.startTime)@converter('formatedDate', format='hh:mm') "/>
+                            <listcell label="@load(requisition.labOrderRequest.endTime )@converter('formatedDate', format='hh:mm')"/>
+                            <listcell label="@load(requisition.labOrderRequest.phlebotomist.firstName)"/>
                            <!--  <listcell label="@load(requisition.patientAdmission.latestAllocatedBed.ward)"></listcell>
                             <listcell label="@load(requisition.patientAdmission.latestAllocatedBed.bed)"></listcell> -->
                             <listcell> <name object="@load(requisition.labOrderRequest.provider)"/></listcell>

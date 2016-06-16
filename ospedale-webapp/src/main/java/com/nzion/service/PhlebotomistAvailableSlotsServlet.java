@@ -18,6 +18,7 @@ import com.nzion.hibernate.ext.multitenant.TenantIdHolder;
 import com.nzion.repository.PracticeRepository;
 import com.nzion.service.billing.BillingService;
 import com.nzion.service.common.CommonCrudService;
+import com.nzion.service.common.impl.EnumerationServiceImpl;
 import com.nzion.service.dto.LabOrderDto;
 import com.nzion.service.dto.LabOrderItemDto;
 import com.nzion.service.emr.lab.LabService;
@@ -53,6 +54,8 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
     PracticeRepository practiceRepository;
     @Autowired
     private LabService labService;
+    @Autowired
+    EnumerationServiceImpl enumerationServiceImpl;
 
     public void init(ServletConfig config) throws ServletException{
         super.init(config);
@@ -378,18 +381,34 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
 
             Patient patient = new Patient();
             patient.setFirstName(patientDetailsFromPortal.get("firstName").toString());
-            patient.setLastName(patientDetailsFromPortal.get("firstName").toString());
-            //patient.setPatientType("CASH PAYING");
-            //patient.setDateOfBirth(labOrderDto.getDateOfBirth());
+            if (patientDetailsFromPortal.get("middleName") != null){
+                patient.setMiddleName(patientDetailsFromPortal.get("middleName").toString());
+            }
+            patient.setLastName(patientDetailsFromPortal.get("lastName").toString());
+            patient.setPatientType("CASH PAYING");
+            Date dateOfBirth = null;
+            try {
+                if (patientDetailsFromPortal.get("dataOfBirth") != null){
+                    dateOfBirth = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(patientDetailsFromPortal.get("dataOfBirth").toString());
+                    patient.setDateOfBirth(dateOfBirth);
+                }
+            } catch (Exception e){e.printStackTrace();}
             ContactFields contactFields = new ContactFields();
-            contactFields.setMobileNumber(patientDetailsFromPortal.get("firstName").toString());
-            contactFields.setEmail(patientDetailsFromPortal.get("firstName").toString());
+            contactFields.setMobileNumber(patientDetailsFromPortal.get("mobileNumber").toString());
+
+            if (patientDetailsFromPortal.get("emailId") != null){
+                contactFields.setEmail(patientDetailsFromPortal.get("emailId").toString());
+            }
+
             patient.setContacts(contactFields);
-            //patient.setGender(gender);
+            if (patientDetailsFromPortal.get("gender") != null){
+                Enumeration gender = getGenderEnumerationForPatient(patientDetailsFromPortal.get("gender").toString());
+                patient.setGender(gender);
+            }
             //String afyaId = RestServiceConsumer.checkIfPatientExistInPortalAndCreateIfNotExist(patient, tenantId);
             patient.setAfyaId(labOrderDto.getAfyaId());
             //patient.setCivilId(labOrderDto.getCivilId());
-            //patient.setNotificationRequired("YES");
+            patient.setNotificationRequired("YES");
 
             //Enumeration enumeration = commonCrudService.findUniqueByEquality(Enumeration.class, new String[]{"enumType", "enumCode"}, new Object[]{"LANGUAGE", labOrderDto.getPreferredLanguage()});
 
@@ -409,14 +428,20 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
 
         try {
         Location location = commonCrudService.getById(Location.class, Long.parseLong(labOrderDto.getLocation().toString()));
+        Person phlebotomist = commonCrudService.getById(Person.class,Long.parseLong(labOrderDto.getPhlebotomistId().toString()));
 
         labOrderRequest.setLocation(location);
         labOrderRequest.setPatient(patient);
-        labOrderRequest.setStartTime(convertGivenDate(labOrderDto.getAppointmentStartDate()));
+        /*labOrderRequest.setStartTime(convertGivenDate(labOrderDto.getAppointmentStartDate()));
         labOrderRequest.setEndTime(convertGivenDate(labOrderDto.getAppointmentEndDate()));
-        labOrderRequest.setStartDate(com.nzion.util.UtilDateTime.getDayStart(labOrderDto.getAppointmentStartDate()));
+        labOrderRequest.setStartDate(com.nzion.util.UtilDateTime.getDayStart(labOrderDto.getAppointmentStartDate()));*/
+        labOrderRequest.setPhlebotomistStartTime(convertGivenDate(labOrderDto.getAppointmentStartDate()));
+        labOrderRequest.setPhlebotomistEndTime(convertGivenDate(labOrderDto.getAppointmentEndDate()));
+        labOrderRequest.setPhlebotomistStartDate(com.nzion.util.UtilDateTime.getDayStart(labOrderDto.getAppointmentStartDate()));
         labOrderRequest.setFromMobileApp(labOrderDto.isFromMobileApp());
         labOrderRequest.setPaymentId(labOrderDto.getPaymentId());
+        labOrderRequest.setPhlebotomist(phlebotomist);
+        labOrderRequest.setOrderStatus(LabOrderRequest.ORDERSTATUS.BILLING_DONE);
 
         /*Referral referral = null;
         if (labOrderItemDto.getReferralClinicId() != null) {
@@ -428,7 +453,7 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
         labOrderRequest.setReferral(referral);*/
         //labOrderRequest.setReferralDoctorFirstName(labOrderDto.getReferralDoctorName());
         //labOrderRequest.setSequenceNum(0);
-        labOrderRequest.setMobileOrPatinetPortal(labOrderDto.isFromMobileApp());
+        labOrderRequest.setMobileOrPatinetPortal(true);
 
         for (LabOrderItemDto labOrderItemDto:labOrderItemDtoList) {
 
@@ -464,7 +489,8 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
 
                 labOrderRequest.addLaboratories(test.getLaboratory());
             }
-            patientLabOrder.setHomeService(labOrderDto.isHomeService());
+            //patientLabOrder.setHomeService(labOrderDto.isHomeService());
+            patientLabOrder.setHomeService(true);
             labOrderRequest.addPatientLabOrder(patientLabOrder);
             patientLabOrder.setLabOrderRequest(labOrderRequest);
         }
@@ -528,13 +554,13 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
         }
         invoice.setLocation(labOrderRequest.getLocation());
         invoice.setCollectedAmount(invoice.getTotalAmount());
-        invoice.setInvoiceDate(labOrderDto.getAppointmentEndDate());
+        invoice.setInvoiceDate(new Date());
         invoice.setInvoiceStatus(InvoiceStatusItem.RECEIVED.toString());
 
         Enumeration paymentMethod = commonCrudService.findUniqueByEquality(Enumeration.class, new String[]{"enumCode", "enumType"}, new Object[]{"ONLINE_PAYMENT", "PAYMENT_MODE"});
         InvoicePayment invoicePayment = new InvoicePayment(paymentMethod, invoice, invoice.getTotalAmount(), PaymentType.ONLINE_PAYMENT);
         invoice.addInvoicePayment(invoicePayment);
-
+        invoice.setLabOrderId(labOrderRequest);
         Invoice inv = commonCrudService.save(invoice);
         //billingService.saveInvoiceStatus(invoice, InvoiceStatusItem.RECEIVED);
         labService.createLabRequisition(labOrderRequest, invoice);
@@ -548,5 +574,14 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
         String currency = billingDisplayConfig.getCurrency().getCode();
         Currency defaultCurrency = Currency.getInstance(currency);
         return defaultCurrency;
+    }
+
+    private Enumeration getGenderEnumerationForPatient(String gender) {
+        List<Enumeration> emEnumerations = enumerationServiceImpl.getGeneralEnumerationsByType("GENDER");
+        for(Enumeration enumeration : emEnumerations){
+            if(enumeration.getDescription().equals(gender))
+                return enumeration;
+        }
+        return null;
     }
 }

@@ -6,9 +6,9 @@
 		setPageTitle("Investigation", "");
 </zscript>
 	<window id="investigationViewWindow">
-	<screen width="100%" listtitle="List of Investigations"
-	entityclass="com.nzion.domain.emr.lab.Investigation" fields="investigationCode , investigationName, unit"
-	labels="Investigation Code, Investigation Name, Unit" searchfields="investigationCode,investigationName,unit"
-	hideactivation="true" hidedeletebtn="true" hideaddbtn = "true"/>
+	<screen width="100%" listtitle="List of Investigations" addpage="newInvestigation"
+	entityclass="com.nzion.domain.emr.lab.Investigation" addmodepopup="true"  fields="investigationCode , investigationName, unit,referenceRange"
+	labels="Investigation Code, Investigation Name, Unit,Reference Range" searchfields="investigationCode,investigationName,unit"
+	hideactivation="true" hidedeletebtn="true" hideaddbtn = "false" containername="contentArea"/>
 	</window>
 </zk>

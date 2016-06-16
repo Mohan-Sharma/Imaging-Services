@@ -2,6 +2,14 @@
 <?page title="Afya Lab" contentType="text/html;charset=UTF-8"?>
 <?meta name="viewport" content="width=device-width, initial-scale=1.0"?>
 <zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+    <script type="text/javascript" defer="true">
+        jq(document).ready(function() {
+        var version = null;
+        jq.getJSON('/ospedale/appointment/build.properties').then(function(data){
+        jq("$versionNo").text(data.GIT_HASH);
+        });
+        });
+    </script>
     <zscript>
         import org.zkoss.zkplus.spring.*;
         import com.nzion.domain.Person;
@@ -375,6 +383,35 @@
                                                             </n:li> -->
                                                         </n:ul>
                                                     </n:li>
+                                                    <n:li class="sub">
+                                                        <n:h5> Master Data for LIS </n:h5>
+                                                        <n:ul>
+                                                            <!--<n:li>
+                                                                <a label="Accreditation">
+                                                                    <attribute name="onClick">
+                                                                        setTitleAndActivateMenu("Master Data for LIS","Accreditation", masterList);
+                                                                        appendContent("accreditation");
+                                                                    </attribute>
+                                                                </a>
+                                                            </n:li>-->
+                                                            <n:li>
+                                                                <a label="Equipment ">
+                                                                    <attribute name="onClick">
+                                                                        setTitleAndActivateMenu("Master Data for LIS","Equipment", masterList);
+                                                                        appendContent("equipment");
+                                                                    </attribute>
+                                                                </a>
+                                                            </n:li>
+                                                            <n:li>
+                                                                <a label="Outsourced Center ">
+                                                                    <attribute name="onClick">
+                                                                        setTitleAndActivateMenu("Master Data for LIS","Outsourced Center", masterList);
+                                                                        appendContent("outsourcedCenter");
+                                                                    </attribute>
+                                                                </a>
+                                                            </n:li>
+                                                        </n:ul>
+                                                    </n:li>
 
                                                    
                                                       
@@ -537,7 +574,7 @@
                                                     </n:li>
                                                 </n:ul>
                                             </n:li>
-                                           <!--  <n:li class="top-li" if="${rvo.admin}">
+                                            <n:li class="top-li" if="${rvo.admin}">
                                                 <a zclass="top-a" id="reportsMenu">Reports
                                                     <attribute name="onClick">
                                                         setTitleAndActivateMenu("Report","",reportsMenu);
@@ -548,23 +585,31 @@
                                                     <n:li class="sub">
                                                         <n:ul>
                                                             <n:h5>Reports</n:h5>
-                                                            <n:li>
+                                                            <!--<n:li>
                                                                 <a label="Patient" >
                                                                     <attribute name="onClick">
                                                                         setTitleAndActivateMenu("Report","",reportsMenu);
                                                                         appendContent("/report/report");
                                                                     </attribute>
                                                                 </a>
-                                                            </n:li>
+                                                            </n:li>-->
                                                             <n:li>
-                                                                <a label="Billing" >
+                                                                <a label="Invoice Report" >
                                                                     <attribute name="onClick">
-                                                                        setTitleAndActivateMenu("Billing","",reportsMenu);
+                                                                        setTitleAndActivateMenu("Invoice","",reportsMenu);
                                                                         appendContent("billingReport");
                                                                     </attribute>
                                                                 </a>
                                                             </n:li>
                                                             <n:li>
+                                                                <a label="Collection Report" >
+                                                                    <attribute name="onClick">
+                                                                        setTitleAndActivateMenu("Invoice","",reportsMenu);
+                                                                        appendContent("/report/invoiceCollectionReport");
+                                                                    </attribute>
+                                                                </a>
+                                                            </n:li>
+                                                            <!--<n:li>
                                                                 <a label="MLC" >
                                                                     <attribute name="onClick">
                                                                         setTitleAndActivateMenu("Billing","",reportsMenu);
@@ -596,7 +641,7 @@
                                                                         appendContent("accTransactionReport");
                                                                     </attribute>
                                                                 </a>
-                                                            </n:li>
+                                                            </n:li>-->
                                                         </n:ul>
                                                     </n:li>
                                                     <n:li class="bottomLine">
@@ -605,7 +650,7 @@
                                                         </n:p>
                                                     </n:li>
                                                 </n:ul>
-                                            </n:li> -->
+                                            </n:li>
 
                                             <!-- Search section is hidden-->
                                             <!--<n:li class="top-li" if="${rvo.provider || rvo.reception || rvo.nurse}">

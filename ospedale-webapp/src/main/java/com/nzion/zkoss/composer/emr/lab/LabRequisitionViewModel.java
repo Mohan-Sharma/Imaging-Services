@@ -2,6 +2,7 @@ package com.nzion.zkoss.composer.emr.lab;
 
 import com.nzion.domain.Patient;
 import com.nzion.domain.UserLogin;
+import com.nzion.domain.emr.lab.LabOrderRequest;
 import com.nzion.domain.emr.lab.LabRequisition;
 import com.nzion.domain.emr.lab.Laboratories;
 import com.nzion.service.common.CommonCrudService;
@@ -303,7 +304,19 @@ public class LabRequisitionViewModel {
     }
 
     public List<LabRequisition> getRequisitionList() {
-        return requisitionList;
+		List<LabRequisition> updatedRequisitionList = requisitionList;
+		if(UtilValidator.isNotEmpty(updatedRequisitionList)){
+			for (LabRequisition labRequisition : updatedRequisitionList){
+				LabOrderRequest labOrderRequest = labRequisition.getLabOrderRequest();
+				if (labOrderRequest.isHomeService()){
+					labOrderRequest.setStartDate(labOrderRequest.getPhlebotomistStartDate());
+					labOrderRequest.setStartTime(labOrderRequest.getPhlebotomistStartTime());
+					labOrderRequest.setEndTime(labOrderRequest.getPhlebotomistEndTime());
+					labOrderRequest.setPhlebotomist(labOrderRequest.getPhlebotomist());
+				}
+			}
+		}
+        return updatedRequisitionList;
     }
 
     public void setRequisitionList(List<LabRequisition> requisitionList) {

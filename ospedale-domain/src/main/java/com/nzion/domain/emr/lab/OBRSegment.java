@@ -46,6 +46,7 @@ public class OBRSegment {
     private PatientLabOrder patientLabOrder;
     private String providerComment;
     private LabTest labTest;
+    private Set<OBRSegmentAttachments> attachments;
 
 
 
@@ -189,5 +190,22 @@ public class OBRSegment {
 
     public void setProvider(Provider provider) {
         this.provider = provider;
+    }
+
+    //@OneToMany(targetEntity = OBRSegmentAttachments.class, mappedBy = "obrSegment", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "obrSegment")
+    public Set<OBRSegmentAttachments> getAttachments() {
+        if (attachments == null) attachments = new HashSet<OBRSegmentAttachments>();
+        return attachments;
+    }
+
+    public void setAttachments(Set<OBRSegmentAttachments> attachments) {
+        this.attachments = attachments;
+    }
+
+    @Transient
+    public void addAttachments(OBRSegmentAttachments attachment) {
+        attachment.setObrSegment(this);
+        getAttachments().add(attachment);
     }
 }

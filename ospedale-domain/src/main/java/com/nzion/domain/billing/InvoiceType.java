@@ -75,6 +75,11 @@ public enum InvoiceType {
         public AcctgTransTypeEnum getAccountingTransType() {
             return null;
         }
+    }, OPD_PHARMACY("Pharmacy") {
+        @Override
+        public AcctgTransTypeEnum getAccountingTransType() {
+            return null;
+        }
     };
 
     private String description;

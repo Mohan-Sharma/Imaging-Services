@@ -4,6 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import com.nzion.util.UtilValidator;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -19,7 +20,8 @@ public class Employee extends Person {
 	
 	private String comments;
 
-	private Boolean phlebotomist;
+//	private Boolean phlebotomist;
+	private boolean phlebotomist = Boolean.FALSE;
 
 	@Column(length = 1000)
 	public String getComments() {
@@ -30,11 +32,12 @@ public class Employee extends Person {
 	this.comments = comments;
 	}
 
-	public Boolean getPhlebotomist() {
+	public boolean isPhlebotomist() {
 		return phlebotomist;
 	}
 
-	public void setPhlebotomist(Boolean phlebotomist) {
+	public void setPhlebotomist(boolean phlebotomist) {
+		setSchedulable(phlebotomist);
 		this.phlebotomist = phlebotomist;
 	}
 

@@ -2,15 +2,74 @@
 <?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./wrapper"?>
 <?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
 <zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<script type="text/javascript" defer="true">
+		jq(document).ready(function() {
+		var version = null;
+		jq.getJSON('/ospedale/appointment/build.properties').then(function(data){
+		jq("$versionNo").text(data.GIT_HASH);
+		});
+		});
+	</script>
+	<style>
+		.divLast
+		{
+		top: 0px;
+		margin:0px;
+		padding: 0px 1px 1px 1px;
+		border-width: 1px;
+		border-bottom: 1px #c9d2d7 solid !important;
+		width: 100%;
+		}
+	</style>
 <zscript><![CDATA[
     com.nzion.domain.UserLogin userLogin = com.nzion.util.Infrastructure.getUserLogin();
     String passwordExpirationWarningMessage = Executions.getCurrent().getSession().getAttribute("passwordExpirationWarningMessage");
 	com.nzion.service.UserLoginService userLoginService = com.nzion.util.Infrastructure.getSpringBean("userLoginService");
 	com.nzion.domain.Person person = userLogin.getPerson();
-    void setPageTitle(String title, String subTitle) {
+  /*  void setPageTitle(String title, String subTitle) {
 		pagetitle.setValue(title);
 		subpagetitle.setValue(subTitle);
+	} */
+	void setPageTitle(String pageTitle, String mainMenuTitle) {
+	  	if(com.nzion.util.UtilValidator.isEmpty(mainMenuTitle)){
+	  		//menuTitle.setLabel("");
+	  	    //arrowTitle.setValue("");
+	  	}else{
+	  	//	menuTitle.setLabel(mainMenuTitle);
+	  	    //arrowTitle.setValue(">>");
+	  	}
+
+	 	// pagetitle.setLabel(pageTitle);
+	 		successMsg.setValue(null);
 	}
+	void setPageTitle(String title, String id, String date,boolean displayInvoiceNo,boolean displayPrint, com.nzion.domain.billing.Invoice invoiceObj) {
+		pagetitle.setValue(title);
+		idLable.setValue(id);
+		dateLabel.setValue(date);
+
+		//headerSaveBtn.setLabel(saveBtnLabel);
+		//headerCancelBtn.setVisible(displayCancel);
+		//printBtn.setVisible(displayPrint);
+
+	/*	iconCancel.setVisible(displayCancel);
+		iconPrint.setVisible(displayPrint);
+
+		headerSaveBtn.setVisible(false);
+		headerCancelBtn.setVisible(false); */
+
+		iconPrint.setVisible(displayPrint);
+		printBtn.setVisible(false);
+
+		invoiceNo.setVisible(displayInvoiceNo);
+		idLable.setVisible(displayInvoiceNo);
+		if(invoiceObj != null){
+			invoiceStatus.setValue(com.nzion.domain.billing.InvoiceStatusItem.valueOf(invoiceObj.getInvoiceStatus()).getDescription());
+			/* cancelAuthorizerLabel.setValue(invoiceObj.getCancelAuthoriser());
+			  cancelReasonLabel.setValue(invoiceObj.getCancelReason()); */
+			invoice = invoiceObj;
+		}
+	}
+
     if(userLogin.isLocked())
     	Executions.createComponents("/lock.zul",null,null);
 	com.nzion.view.RolesValueObject rvo = new com.nzion.view.RolesValueObject(com.nzion.util.Infrastructure.getUserLogin().getAuthorization());
@@ -79,26 +138,72 @@
 		}
 		
 	</style>
-<div id="wrapper" style="min-height: 100%;">
- <n:div  style="min-height: 100%;">	
-	<n:div id="soapHeader" >
+	<include id="includeMenu"/>
+<div id="wrapper" style="min-height: 99%;">
+ <n:div  style="min-height: 99%;">
+	<!--<n:div id="soapHeader" zclass="divLast" align="center" >
 	    <div style="float:right:width:30%">
 			<span>
 				<label id="pagetitle" style="font-size:14px;color:#fff;font-weight:bold;padding-left:4px;" />
 				<label id="subpagetitle" style="font-size:12px;" />
 			</span>
-		</div>	
+		</div>
 		<div style="float:left; width:90%; text-align:center;" > <label value="${requestScope.message}" id="successMsg" style="font-size:14px;color:#00AA00;font-weight:bold" /> </div>	
-	</n:div>
+	</n:div> -->
+	 <div zclass="divLast" align="center">
+		 <n:table style="width:95%;">
+			 <n:tr>
+				 <n:td style="width:10%">
+				 </n:td>
+				 <n:td style="width:15%"> <label id="pagetitle" style="font-size:18px;font-weight:bold;padding-left:4px;color:#c00;" />  </n:td>
+				 <n:td style="width:15%"> <label value="Invoice No:" style="font-size:12px;font-weight:bold;" id="invoiceNo"/> <label id="idLable" style="font-size:12px;" /> </n:td>
+				 <n:td style="width:15%"> <label value="Invoice Date:" style="font-size:12px;font-weight:bold;" /> <label id="dateLabel" style="font-size:12px;" /> </n:td>
+				 <n:td style="width:15%"> <label value="Invoice Status:" style="font-size:12px;font-weight:bold;" /> <label id="invoiceStatus" style="font-size:12px;"/> </n:td>
+				 <n:td align="right">
+					 <button label="Print" id="printBtn"  zclass="btn btn-info">
+						 <attribute name="onClick">
+							 Map map = new HashMap();
+							 session.setAttribute("map",map);
+							 Executions.getCurrent().sendRedirect("/billing/billingTransactionPrint.zul?invoiceId="+billingController.getInvoice().getId(),"_blank");
+
+						 </attribute>
+					 </button>
+					 <a tooltiptext="Print">
+						 <image src="/images/BillingIcon/Print.png" width="40px" height="40px" id="iconPrint">
+							 <attribute name="onClick">
+								 Events.postEvent("onClick",printBtn,null);
+							 </attribute>
+
+						 </image>
+					 </a>
+
+				 </n:td>
+
+			 </n:tr>
+		 </n:table>
+		 <div style="float:left; width:90%; text-align:center;" > <label value="${requestScope.message}" id="successMsg" style="font-size:14px;color:#00AA00;font-weight:bold" /> </div>
+
+	 </div>
+
 
 	<n:div style="margin-top:22px;width:100%;min-height: 87%;" id="soapMiddleCont">
-		<div self="@{insert(content)}" id="center" />
+		<div self="@{insert(content)}" id="center" >
+			<attribute name="onCreate">
+				includeMenu.setDynamicProperty("contentArea",center);
+				includeMenu.setDynamicProperty("successMsg",successMsg);
+				includeMenu.setSrc("/WEB-INF/layout/practiceImageInclude.zul");
+				includeMenu.invalidate();
+			</attribute>
+		</div>
 	</n:div>
 	<n:div id="footer">
 		<div class="content">
 			<n:p>
-				Copyright (c) 2011-13 NthDimenzion Solutions (P) Limited -
-				<n:a href="http://www.nthdimenzion.com" target="_New" accesskey="C"  style="color:#333;font-weight:bold;">www.nthdimenzion.com</n:a>
+				<!--Copyright (c) 2011-13 NthDimenzion Solutions (P) Limited -
+				<n:a href="http://www.nthdimenzion.com" target="_New" accesskey="C"  style="color:#333;font-weight:bold;">www.nthdimenzion.com</n:a>-->
+				Powered by Afya -
+				<n:a href="http://www.afyaarabia.com" target="_New" accesskey="C"  style="color:#333;font-weight:bold;">www.afyaarabia.com</n:a>
+				<label id="versionNo" style="margin-left: 50px; font-weight: bold;"> </label>
 			</n:p>
 		</div>
 	</n:div>	

@@ -8,7 +8,8 @@
 	import com.nzion.domain.base.IdSequence;
 	import com.nzion.util.Infrastructure;
 	com.nzion.service.common.CommonCrudService service = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
-	List sequences = Infrastructure.getSessionFactory().getCurrentSession().createCriteria(IdSequence.class).addOrder(org.hibernate.criterion.Order.asc("entityName")).list();
+	//List sequences = Infrastructure.getSessionFactory().getCurrentSession().createCriteria(IdSequence.class).addOrder(org.hibernate.criterion.Order.asc("entityName")).list();
+	List sequences = Infrastructure.getSessionFactory().getCurrentSession().createCriteria(IdSequence.class).add(org.hibernate.criterion.Restrictions.disjunction().add(org.hibernate.criterion.Restrictions.like("description","O%")).add(org.hibernate.criterion.Restrictions.like("description","E%"))).list();
 	]]>
 	</zscript>
 	<panel title="Automatic Assignment" id="autoAssignPanel">

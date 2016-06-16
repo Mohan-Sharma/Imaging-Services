@@ -22,7 +22,7 @@ public class GenderImageConverter implements TypeConverter ,org.zkoss.bind.Conve
 
 	public static void coerceToUiStatic(java.lang.Object val, org.zkoss.zk.ui.Component comp) {
 	if (val == null) {
-		((Image) comp).setSrc("/images/blank.gif");
+		((Image) comp).setSrc("/images/blank-human.gif");
 		return;
 	}
 	Person person = commonCrudService.getById(Person.class, ((Person) val).getId());

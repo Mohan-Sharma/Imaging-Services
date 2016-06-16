@@ -6,9 +6,9 @@
 		setPageTitle("Lab Test", "");
 </zscript>
 	<window id="labTestViewWindow">
-	<screen width="100%" listtitle="List of LabTests" 
-	entityclass="com.nzion.domain.emr.lab.LabTest" fields="testCode,testDescription"
+	<screen width="100%" listtitle="List of LabTests" addpage="newLabTest"
+	entityclass="com.nzion.domain.emr.lab.LabTest" addmodepopup="true"  fields="testCode,testDescription"
 	labels="Test Code,Test Description" searchfields="testCode,testDescription"
-	hideactivation="true" hidedeletebtn="true" hideaddbtn = "true"/>
+	hideactivation="true" hidedeletebtn="true" hideaddbtn = "false" containername="contentArea"/>
 	</window>
 </zk>

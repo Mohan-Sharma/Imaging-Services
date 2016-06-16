@@ -16,7 +16,7 @@
 
         while (iterator.hasNext()){
             com.nzion.domain.Employee employee = (com.nzion.domain.Employee)iterator.next();
-            if (employee.getPhlebotomist().booleanValue()){
+            if (employee.isPhlebotomist().booleanValue()){
                 phlebotomistList.add(employee);
             }
         }

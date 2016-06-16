@@ -4,14 +4,32 @@
  <?xel-method prefix="display" name="fd" class="com.nzion.util.UtilDateTime" signature="String formatDateToDatetimeFormat(java.util.Date)"?>
 <zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
     xmlns:h="http://www.w3.org/1999/xhtml">
+    <style>
+        .divLast
+        {
+
+
+        border: 1px solid #c9d2d7;
+
+        }
+    </style>
     <zscript>
         <![CDATA[
 	import com.nzion.domain.billing.InvoiceType;
 	import com.nzion.domain.Roles;
-    setPageTitle("Patient Bill", null);
+	import com.nzion.domain.billing.Invoice;
+	import com.nzion.domain.billing.InvoiceItem;
+	import com.nzion.util.UtilValidator;
+	import com.nzion.domain.billing.InvoiceStatusItem;
+	import com.nzion.util.UtilDateTime;
+	import com.nzion.domain.billing.Invoice;
+	import com.nzion.domain.billing.Invoice.INSURANCESTATUS;
+   // setPageTitle("Patient Bill", null);
 	com.nzion.zkoss.composer.BillingController billingController = new com.nzion.zkoss.composer.BillingController();
 	com.nzion.service.common.CommonCrudService service = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
 	com.nzion.domain.billing.Contract contract = billingController.getInvoice().getContract();
+	Invoice invoice = billingController.getInvoice();
+	setPageTitle("Patient Invoice", billingController.getInvoice().getInvoiceNumber(),UtilDateTime.format(billingController.getInvoice().getInvoiceDate()),true,true,invoice);
 	boolean isInsurance = false;	
 	String billedItemType = billingController.getInvoice().getItemType();
 	
@@ -35,136 +53,168 @@
        .form-horizontal .control-group{margin-bottom:5px;}
     </style>
     <window id="txnItemWindow" apply="${billingController}" self="@{define(content)}">
-        <div align="right" style="margin-bottom:10px;margin-right:7.2%">
-        <separator></separator>
-         <div  >
-                    <button label="Go to Appointment Screen" zclass="btn btn-success" visible="${receptionist}">
-                    <attribute name="onClick">
-                     Executions.sendRedirect("/dashboards/frontDeskDashBoard.zul");
-                    </attribute>
-                    </button>
-                </div>
-            <button label="HTML Print View" id="printBtn" visible="${billingController.paymentReceived}">
-                <attribute name="onClick">
-                    Map map = new HashMap();
-                    session.setAttribute("map",map);
-                    Executions.getCurrent().sendRedirect("/billing/billingTxnItemPrint.zul?invoiceId=" +
-                    billingController.getInvoice().getId(),"_blank");
+        <div align="right" style="margin-right:7.2%">
+               <!-- <separator></separator>-->
 
-                </attribute>
-            </button>
+             <!--    <div >
+                            <button label="Go to Appointment Screen" zclass="btn btn-success" visible="${receptionist}">
+                            <attribute name="onClick">
+                             Executions.sendRedirect("/dashboards/frontDeskDashBoard.zul");
+                            </attribute>
+                            </button>
+                        </div>
+                    <button label="HTML Print View" id="printBtn" visible="${billingController.paymentReceived}">
+                        <attribute name="onClick">
+                            Map map = new HashMap();
+                            session.setAttribute("map",map);
+                            Executions.getCurrent().sendRedirect("/billing/billingTxnItemPrint.zul?invoiceId=" +
+                            billingController.getInvoice().getId(),"_blank");
+
+                        </attribute>
+                    </button>
+                </div>-->
+                <!--<div align="center">
+                        <div width="98%">
+                <n:table align="center">
+                                 <n:tr>
+                                    <n:td align="center">
+                                        <n:strong style="">${practice.practiceName}</n:strong>
+                                    </n:td>
+                                </n:tr>
+                                <n:tr>
+                                    <n:td>
+                                        <n:strong style="font-size:12px;margin-right:2px;padding:10px">
+                                            ${location.contacts.postalAddress.address1}
+                                        </n:strong>
+                                        <n:strong style="font-size:12px;margin-right:2px;padding:10px">
+                                            ${location.contacts.postalAddress.city}
+                                        </n:strong>
+                                        <n:strong style="font-size:12px;margin-right:2px;padding:10px">
+                                            ${location.contacts.postalAddress.stateProvinceGeo}
+                                        </n:strong>
+                                    </n:td>
+                                </n:tr>
+                                <n:tr>
+                                    <n:td>
+                                        <n:strong style="font-size:12px;margin-right:2px;padding:10px">
+                                            Tel : ${location.contacts.officePhone}
+                                        </n:strong>
+                                        <n:strong style="font-size:12px;padding:10px">Fax : ${location.contacts.faxNumber}</n:strong>
+                                    </n:td>
+                                </n:tr>
+                                </n:table>
+                                </div>
+                                </div>-->
         </div>
-        <div align="center">
-				<div width="98%">
-        <n:table align="center">
-						 <n:tr>
-							<n:td align="center">
-								<n:strong style="">${practice.practiceName}</n:strong>
-							</n:td>
-						</n:tr>
-						<n:tr>
-							<n:td>
-								<n:strong style="font-size:12px;margin-right:2px;padding:10px">
-									${location.contacts.postalAddress.address1}
-								</n:strong>
-								<n:strong style="font-size:12px;margin-right:2px;padding:10px">
-									${location.contacts.postalAddress.city}
-								</n:strong>
-								<n:strong style="font-size:12px;margin-right:2px;padding:10px">
-									${location.contacts.postalAddress.stateProvinceGeo}
-								</n:strong>
-							</n:td>
-						</n:tr>
-						<n:tr>
-							<n:td>
-								<n:strong style="font-size:12px;margin-right:2px;padding:10px">
-									Tel : ${location.contacts.officePhone}
-								</n:strong>
-								<n:strong style="font-size:12px;padding:10px">Fax : ${location.contacts.faxNumber}</n:strong>
-							</n:td>
-						</n:tr> 
-						</n:table>
-						</div>
-						</div>
         <div sclass="container-fluid">
+                <div zclass="span2">
+                    <div zclass="form-horizontal">
+                        <div sclass="control-group">
+                            <image hover="@{patient,converter='com.nzion.view.component.GenderImageConverter'}" height="80px" width="100px"/>
+                        </div>
+                    </div>
+                </div>
         
 					
-                <n:h2 class="fl SNHeader">Bill Details</n:h2>
+               <!-- <n:h2 class="fl SNHeader">Bill Details</n:h2>-->
                 <!-- -->
-                <div zclass="span6">
+                <div zclass="span4">
                     <div zclass="form-horizontal">
-                       <!--  <div if="${patientAdmission != null}" sclass="control-group">
-                            <label zclass="control-label" value="IP Number :"/>
-                            <div zclass="controls">
-                                <label value="@{patientAdmission.accountNumber}"/>
-                            </div>
-                        </div> -->
-                        <div sclass="control-group">
-                            <label zclass="control-label" value="MRN :"/>
-                            <div zclass="controls">
-                                <label value="@{billingController.invoice.patient.accountNumber}"/>
-                            </div>
+
+                        <div zclass="container-fluid">
+                           <!-- <div sclass="control-group">-->
+                                <label zclass="control-label" value="Afya ID :"/>
+                                <div zclass="controls">
+                                    <label value="@{billingController.invoice.patient.afyaId}"/>
+                                </div>
+                           <!-- </div>-->
                         </div>
-                        <div sclass="control-group">
-                            <label sclass="" class="control-label" value="Patient Name :"/>
-                            <div zclass="controls">
-                                <name object="@{billingController.invoice.patient}"/>
-                            </div>
+                        <div zclass="container-fluid">
+                            <!--<div sclass="control-group">-->
+                                <label zclass="control-label" class="control-label" value="Patient Name :"/>
+                                <div zclass="controls" width="150px">
+                                    <name object="@{billingController.invoice.patient}"/>
+                                </div>
+                            <!--</div>-->
                         </div>
+                    </div>
                         
-                    </div>
+
                 </div>
-                <div zclass="span4"/>
-                <div zclass="span6">
+                <div zclass="span4">
+                    <!--<div zclass="span6">-->
+                    <div  width="100" zclass="form-horizontal">
+                        <div zclass="container-fluid">
+                            <label zclass="control-label" value="Civil ID :"/>
+                            <div zclass="controls">
+                                <label value="@{billingController.invoice.patient.civilId}"/>
+                            </div>
+                        </div>
+                        <div zclass="container-fluid">
+                            <label zclass="control-label" value="Referral Lab :"/>
+
+                        </div>
+                           <!--  <div if="${isInsurance}" zclass="control-group">
+                                <label sclass="control-label" value="Insurance Provider: "/>
+                                <div zclass="controls">
+                                    <label value="${patientAdmission.insuranceProvider.insuranceProviderName}"></label>
+                                </div>
+                            </div>  -->
+
+                            <!--<div>
+                                <label sclass="control-label" value="Consultant :"/>
+                                <div zclass="controls">
+                                    <name object="@{billingController.invoice.consultant}"/>
+                                </div>
+                            </div>
+
+
+                               <div >
+                                <label sclass="control-label" value="Charge Type :"/>
+                                <div zclass="controls">
+                                    <label value="OUTPATIENT"/>
+
+                                </div>
+                                   </div>-->
+                                <!-- </div>-->
+                    </div>
+                 </div>
+                <div zclass="span4">
                     <div width="100%" zclass="form-horizontal">
-                        <div zclass="control-group">
-                            <label sclass="control-label" value="Bill No#"/>
-                            <div zclass="controls">
-                                <label  value="${billingController.invoice.invoiceNumber}"/>
+                        <div zclass="container-fluid">
+                            <label zclass="control-label" class="control-label" value="Age / Gender :"/>
+                            <div zclass="controls" width="300px">
+                                <label>
+                                    <attribute name="onCreate">
+                                        self.setValue(billingController.getInvoice().getPatient().getAge()+ " / " + billingController.getInvoice().getPatient().getGender());
+                                    </attribute>
+                                </label>
                             </div>
                         </div>
-                       <!--  <div if="${isInsurance}" zclass="control-group">
-                            <label sclass="control-label" value="Insurance Provider: "/>
-                            <div zclass="controls">
-                                <label value="${patientAdmission.insuranceProvider.insuranceProviderName}"></label>
-                            </div>
-                        </div>
- -->
-                        <div>
-                            <label sclass="control-label" value="Consultant :"/>
-                            <div zclass="controls">
-                                <name object="@{billingController.invoice.consultant}"/>
-                            </div>
-                        </div>
+                        <div zclass="container-fluid">
+                            <label zclass="control-label" class="control-label" value="Referral Technician Name :"/>
 
-                       
-                         <div >
-                            <label sclass="control-label" value="Charge Type :"/>
-                            <div zclass="controls">
-                                <label value="OUTPATIENT"/>
-                               
-                            </div>
                         </div>
                     </div>
                 </div>
 
 
-        <div width="100%" sclass="clr chiefComp soapNoteCont curSOAP ui-resizable">
-            <n:br/>
-            <listbox oddRowSclass="false" style="margin-left:20px;">
+        <div  sclass="clr chiefComp soapNoteCont curSOAP ui-resizable">
+
+            <listbox oddRowSclass="false" model="@{invoice.invoiceItems}">
                 <listhead>
-                    <listheader label="Item"/>
+                    <listheader label="Service"/>
                     <listheader label="Price"/>
                     <listheader label="Quantity"/>
                     <listheader label="Amount"/>
                 </listhead>
-            </listbox>
-            <grid model="@{billingController.invoiceItemMap}">
+                <!--</listbox>
+                <grid model="@{billingController.invoiceItemMap}">
                 <rows>
                     <row self="@{each='invoiceItems'}" value="@{invoiceItems}">
                         <label value="@{invoiceItems.key}" style="font-weight:bold"/>
                         <detail open="true">
-                            <listbox oddRowSclass="false" model="@{invoiceItems.value}">
+                            <listbox oddRowSclass="false" model="@{invoiceItems.value}">    -->
                                 <listitem self="@{each='invoiceItem'}" value="@{invoiceItem}">
                                 
                                     <listcell>
@@ -173,6 +223,7 @@
                                     <listcell>
                                         <hlayout spacing="3px">
                                             <label value="@{invoiceItem.factor}"/>
+                                            <label value="KD"/>
                                            <!--  <label value="@{invoiceItem.factorDescription}"/> -->
                                         </hlayout>
                                     </listcell>
@@ -195,15 +246,16 @@
                                                     onChange='Events.postEvent("onReload",amountLabel,null);Events.postEvent("onReload",remaingValueLabel,null);Events.postEvent("onReload",amountToBePaidLabel,null);'
                                                     constraint="no negative,no empty"/>
                                                
-                                        <label value="@{invoiceItem.price.currency.code}"></label>
+                                        <!--<label value="@{invoiceItem.price.currency.code}"></label>-->
+                                        <label style="font-weight:bold" value="KD"></label>
                                     </listcell>
                                 </listitem>
                             </listbox>
-                        </detail>
+                      <!--  </detail>
                     </row>
                 </rows>
-            </grid>
-            <div style="width:81%">
+            </grid>-->
+           <!-- <div style="width:81%">
                 <div align="right" sclass="total">
                     <label value="${c:l('totalAmount')}"/>
                     <label id="amountLabel"
@@ -211,21 +263,22 @@
                            value="@{billingController.invoice.totalAmount,load-after='self.onReload'}"
                            style="font-weight:bold"/>
                 </div>
-            </div>
-            <div sclass="panelFoot">
-                <button label="Save" id="saveBtn"
-                        onClick="billingController.saveInvoice();com.nzion.util.UtilMessagesAndPopups.showSuccess()"
-                        visible="${!billingController.paymentReceived}" zclass="btn btn-success"/>
-                <button label="Receive Payment" id="payBtn"
-                        onClick='paymentSection.setVisible(true);
-										Events.postEvent("onReload",paymentListbox,null);Events.postEvent("onReload",remaingValueLabel,null)'
-                        visible="${!billingController.paymentReceived}"/>
-            </div>
+            </div>-->
+                <!--<div sclass="panelFoot">
+                    <button label="Save" id="saveBtn"
+                            onClick="billingController.saveInvoice();com.nzion.util.UtilMessagesAndPopups.showSuccess()"
+                            visible="${!billingController.paymentReceived}" zclass="btn btn-success"/>
+                    <button label="Receive Payment" id="payBtn"
+                            onClick='paymentSection.setVisible(true);
+                                            Events.postEvent("onReload",paymentListbox,null);Events.postEvent("onReload",remaingValueLabel,null)'
+                            visible="${!billingController.paymentReceived}"/>
+                </div>-->
 
-            <div visible="${billingController.paymentReceived}" id="paymentSection">
+               <!-- <div visible="${billingController.paymentReceived}" id="paymentSection">-->
+            <div id="paymentSection">
                 <div sclass="panelCont" height="40px" visible="${!billingController.paymentReceived}">
                     <div>
-                        <div>
+                        <div width="120px" align="right">
                             <label value="Payment Mode" mold="required"/>
                         </div>
                         <enumeration enumType="PAYMENT_MODE"
@@ -351,7 +404,8 @@
                             <label id="remaingValueLabel"
                                    value="@{billingController.remainingAmount,load-after='self.onReload'}"
                                    style="font-weight:bold;color:red"/>
-                            <label value="@{billingController.invoice.totalAmount.currency.code}"/>
+                            <!--<label value="@{billingController.invoice.totalAmount.currency.code}"/>-->
+                            <label value="KD"/>
                         </div>
                         <div style="margin-top:15px;" if="${billingController.isWriteOff()}">
                             (<label value="Discounted Amount" style="font-weight:bold;"/>
@@ -467,5 +521,6 @@
 
         </zscript>
         </div>
+
     </window>
 </zk>

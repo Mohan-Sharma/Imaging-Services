@@ -120,6 +120,8 @@ public class PatientDto implements Serializable,Salutable {
             this.state = patient.getContacts().getPostalAddress().getStateProvinceGeo();
         if(patient.getContacts().getPostalAddress() != null)
             this.country = patient.getContacts().getPostalAddress().getCountryGeo();
+        if(patient.getRegisteredFrom() != null)
+            this.registeredFrom = patient.getRegisteredFrom();
     }
 
     public void setPropertiesToPatient(Patient patient){

@@ -84,25 +84,26 @@
                         Executions.createComponents("/patient/patientView.zul", (Component) desktopScope.get("contentArea"), m);
                         viewPatient.detach();
                     </attribute>
-                </a> |
-                <a id="userLoginBtn" style="margin:20px;" label="User Login">
-                    <attribute name="onClick">
-                        Map m = new HashMap();
-                        m.put("entity", patient);
-                        Executions.createComponents("/patient/patientUserLogin.zul", null, m);
-                        //viewPatient.detach();
-                    </attribute>
-                </a> |
-                <a  style="margin:20px;" label="Print ID Card">
-                    <attribute name="onClick">
-                        Executions.getCurrent().sendRedirect("/patient/printPatientIdCard.zul?patientId="+patient.getId(),"_clinicalRecords");
-                    </attribute>
-                </a> |
-                <a id="summarySheetButton" style="margin:20px;" label="Summary Sheet" if="${showSummarySheetButton}">
-                    <attribute name="onClick">
-                        Executions.getCurrent().sendRedirect("/soap/faceSheet.zul?patientId="+patient.getId(),"_clinicalRecords");
-                    </attribute>
                 </a>
+                <!--     |
+                     <a id="userLoginBtn" style="margin:20px;" label="User Login">
+                         <attribute name="onClick">
+                             Map m = new HashMap();
+                             m.put("entity", patient);
+                             Executions.createComponents("/patient/patientUserLogin.zul", null, m);
+                             //viewPatient.detach();
+                         </attribute>
+                     </a> |
+                     <a  style="margin:20px;" label="Print ID Card">
+                         <attribute name="onClick">
+                             Executions.getCurrent().sendRedirect("/patient/printPatientIdCard.zul?patientId="+patient.getId(),"_clinicalRecords");
+                         </attribute>
+                     </a> |
+                     <a id="summarySheetButton" style="margin:20px;" label="Summary Sheet" if="${showSummarySheetButton}">
+                         <attribute name="onClick">
+                             Executions.getCurrent().sendRedirect("/soap/faceSheet.zul?patientId="+patient.getId(),"_clinicalRecords");
+                         </attribute>
+                     </a>-->
             </div>
 
         </hbox>

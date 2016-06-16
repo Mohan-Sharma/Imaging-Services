@@ -70,7 +70,7 @@
                             <listcell label="@load(requisition.patient.accountNumber)"></listcell>
                             
                             <listcell>
-                                <name value="@load(requisition.patient.firstName)"/>
+                                <name value="@load(requisition.patient)"/>
                             </listcell>
                             <listcell >
                             <label>

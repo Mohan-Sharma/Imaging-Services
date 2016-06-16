@@ -10,7 +10,7 @@
 	<security:http auto-config="true">
 		<!-- Restrict URLs based on role -->
 		<security:remember-me  services-ref="rememberMeServices" key="ajaynema"/>
-		<security:intercept-url pattern="/imagingServiceMaster/*" filters="none" />
+		<security:intercept-url pattern="/labMaster/*" filters="none" />
 		<security:intercept-url pattern="/login.zhtml" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
 		<security:intercept-url pattern="/hl7Upload/*" filters="none" />
 		<security:intercept-url pattern="/sessionTimeOut.zul" access="IS_AUTHENTICATED_ANONYMOUSLY" />

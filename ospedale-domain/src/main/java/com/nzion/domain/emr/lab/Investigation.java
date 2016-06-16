@@ -27,10 +27,17 @@ public class Investigation extends IdGeneratingBaseEntity {
 	private String investigationPneumonic;
 	
 	private String unit;
-	
+
 	private String resultType;
-	
-	
+
+	private String referenceRange;
+
+	private boolean attachment;
+
+	private boolean freeText;
+
+	private boolean numericalValue;
+
 	public String getInvestigationName() {
 		return investigationName;
 	}
@@ -71,4 +78,35 @@ public class Investigation extends IdGeneratingBaseEntity {
 		this.resultType = resultType;
 	}
 
+	public String getReferenceRange() {
+		return referenceRange;
+	}
+
+	public void setReferenceRange(String referenceRange) {
+		this.referenceRange = referenceRange;
+	}
+
+	public boolean isAttachment() {
+		return attachment;
+	}
+
+	public void setAttachment(boolean attachment) {
+		this.attachment = attachment;
+	}
+
+	public boolean isFreeText() {
+		return freeText;
+	}
+
+	public void setFreeText(boolean freeText) {
+		this.freeText = freeText;
+	}
+
+	public boolean isNumericalValue() {
+		return numericalValue;
+	}
+
+	public void setNumericalValue(boolean numericalValue) {
+		this.numericalValue = numericalValue;
+	}
 }

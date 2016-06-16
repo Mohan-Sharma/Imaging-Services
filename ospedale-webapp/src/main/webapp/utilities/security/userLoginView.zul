@@ -153,7 +153,7 @@
 											userLoginController.addOrRemoveLabDepartment(((Listbox) self.getPreviousSibling()).getSelectedItem().getValue(), event.isChecked());
 											
 											List laboratoryList = null;
-											
+											laboratories.clear();
 											for (com.nzion.domain.emr.lab.LabDepartment ldept : userLoginController.getLabDepartments()) {
 												String depart = ldept.getDepartment();
 												laboratoryList = commonCrudRepository.findByEquality(com.nzion.domain.emr.lab.Laboratories.class, new String[] { "department" }, new Object[] {depart});

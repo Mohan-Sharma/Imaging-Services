@@ -1,10 +1,7 @@
 package com.nzion.repository.billing.impl;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import com.nzion.domain.billing.*;
 import org.hibernate.Criteria;
@@ -35,6 +32,8 @@ import com.nzion.repository.billing.BillingRepository;
 import com.nzion.repository.impl.HibernateBaseRepository;
 import com.nzion.util.UtilDateTime;
 import com.nzion.util.UtilValidator;
+
+import javax.rmi.CORBA.Util;
 
 @SuppressWarnings("unchecked")
 public class HibernateBillingRepository extends HibernateBaseRepository implements BillingRepository {
@@ -125,19 +124,42 @@ public class HibernateBillingRepository extends HibernateBaseRepository implemen
 		return criteria.list();
 	}
 		@Override
-	public List<LabOrderRequest> getSearchByLabOrder(List<LabOrderRequest.ORDERSTATUS> status, Patient patient, Provider provider, Referral referral) {
+	public List<LabOrderRequest> getSearchByLabOrder(List<LabOrderRequest.ORDERSTATUS> status, Patient patient, Referral referral,Date fromDate,Date thruDate) {
 		Criteria criteria = getSession().createCriteria(LabOrderRequest.class);
 		if (UtilValidator.isNotEmpty(status))
 			criteria.add(Restrictions.in("orderStatus", status));
 		if(patient!=null)
 			criteria.add(Restrictions.eq("patient", patient));
-		if(provider!=null)
-			criteria.add(Restrictions.eq("provider", provider));
+		/*if(provider!=null)
+			criteria.add(Restrictions.eq("provider", provider));*/
 		if(referral!=null)
 			criteria.add(Restrictions.eq("referral", referral));
+		if(fromDate != null)
+			criteria.add(Restrictions.or(Restrictions.ge("startDate", fromDate),Restrictions.ge("phlebotomistStartDate", fromDate)));
+			//criteria.add(Restrictions.ge("startDate",fromDate));
+		if(thruDate != null)
+			criteria.add(Restrictions.or(Restrictions.le("startDate", thruDate), Restrictions.le("phlebotomistStartDate", thruDate)));
+			//criteria.add(Restrictions.le("startDate",thruDate));
 		criteria.addOrder(Order.desc("createdTxTimestamp"));
 		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		return criteria.list();
+	}
+
+	@Override
+	public ArrayList<InvoicePayment> getInvoicePaymentsByCriteria(Patient patient, Date fromDate, Date thruDate) {
+		Criteria criteria = getSession().createCriteria(InvoicePayment.class);
+		if(fromDate != null)
+			criteria.add(Restrictions.ge("paymentDate",UtilDateTime.getDayStart(fromDate)));
+		if(thruDate != null)
+			criteria.add(Restrictions.le("paymentDate", UtilDateTime.getDayEnd(thruDate)));
+
+		ArrayList<InvoicePayment> list = new ArrayList<InvoicePayment>();
+		if(UtilValidator.isNotEmpty(criteria.list())){
+			Set<InvoicePayment> set = new  HashSet<InvoicePayment>(criteria.list());
+			list.addAll(set);
+		}
+		return list;
+
 	}
 
 	@Override

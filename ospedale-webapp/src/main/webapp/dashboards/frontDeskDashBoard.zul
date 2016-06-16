@@ -7,8 +7,9 @@
   <!--   portletDatas.add(new com.nzion.view.PortletData("Appointment", "/portlets/appointment.zul", "../images/Medical Appointment.jpg", true));
     portletDatas.add(new com.nzion.view.PortletData("Today's Appointment", "/portlets/schedules-of-the-day-portlet.zul","../images/appointment.png", true)); -->
    <!-- portletDatas.add(new com.nzion.view.PortletData("Messages/Tasks", "/portlets/message-portlet-view.zul","../images/new-message-icon.png", true));-->
-    portletDatas.add(new com.nzion.view.PortletData("Lab Order", "/billing/labOrderPortlet.zul", "../images/labresults.jpg",true));
     portletDatas.add(new com.nzion.view.PortletData("Billing", "/portlets/frontdeskBillingPortlet.zul","../images/folder_invoices_256.png"));
+    portletDatas.add(new com.nzion.view.PortletData("Lab Order", "/billing/labOrderPortlet.zul", "../images/labresults.jpg",true));
+
 
     <!--
         portletDatas.add(new com.nzion.view.PortletData("Discharge", "/inPatient/dischargeRequestBilling.zul","../images/hospital-discharge.jpg"));

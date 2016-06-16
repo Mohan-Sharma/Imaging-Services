@@ -20,6 +20,9 @@ public class LabOrderDto {
     private String paymentId;
     private boolean homeService;
     private String homeAddress;
+    private String phlebotomistId;
+
+    private String scheduleId;
 
     private List<LabOrderItemDto> rows;
 
@@ -110,5 +113,21 @@ public class LabOrderDto {
 
     public void setHomeAddress(String homeAddress) {
         this.homeAddress = homeAddress;
+    }
+
+    public String getPhlebotomistId() {
+        return phlebotomistId;
+    }
+
+    public void setPhlebotomistId(String phlebotomistId) {
+        this.phlebotomistId = phlebotomistId;
+    }
+
+    public String getScheduleId() {
+        return scheduleId;
+    }
+
+    public void setScheduleId(String scheduleId) {
+        this.scheduleId = scheduleId;
     }
 }

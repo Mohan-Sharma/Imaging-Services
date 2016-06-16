@@ -157,13 +157,21 @@ public class HibernateScheduleRepository extends HibernateBaseRepository impleme
 
 		if (person != null){
 			criteria.add(Restrictions.eq("phlebotomist", person));
+			//criteria.add(Restrictions.eq("phlebotomistStartDate", UtilDateTime.getDateOnly(date)));
+
+			criteria.add(Restrictions.le("phlebotomistStartDate", UtilDateTime.getDateOnly(date)));
 			criteria.add(Restrictions.eq("phlebotomistStartDate", UtilDateTime.getDateOnly(date)));
+
 			criteria.add(Restrictions.eq("location", location));
 		} else {
 			criteria.add(Restrictions.isNull("phlebotomist"));
+			//criteria.add(Restrictions.eq("startDate", UtilDateTime.getDateOnly(date)));
+			criteria.add(Restrictions.le("startDate", UtilDateTime.getDateOnly(date)));
 			criteria.add(Restrictions.eq("startDate", UtilDateTime.getDateOnly(date)));
+
 			criteria.add(Restrictions.eq("location", Infrastructure.getSelectedLocation()));
 		}
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		return criteria.list();
 	}
 

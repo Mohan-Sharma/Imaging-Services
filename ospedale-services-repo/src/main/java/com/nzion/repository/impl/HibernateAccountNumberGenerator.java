@@ -42,7 +42,7 @@ public class HibernateAccountNumberGenerator implements AccountNumberGenerator {
         if (accountNumberObject instanceof Invoice) {
             Invoice inv = (Invoice) accountNumberObject;
             if (InvoiceType.OPD.equals(inv.getInvoiceType()))
-                c.add(Restrictions.eq("description", "0PD Billing"));
+                c.add(Restrictions.eq("description", "OPD Billing"));
             else if ((InvoiceType.CASUALTY.equals(inv.getInvoiceType())))
                 c.add(Restrictions.eq("description", InvoiceType.CASUALTY.name()));
 

@@ -37,7 +37,7 @@
     Executions.createComponents("/billing/addNewMiscellaneousCharges.zul",null,null);
     </attribute>
     </button>-->
-        <a visible="${isBiller}" target="_blank" href="../superBill/superBill.html"><button label="Add" ></button></a>
+      <!--  <a visible="${isBiller}" target="_blank" href="../superBill/superBill.html"><button label="Add" ></button></a>-->
     </div>
     <separator></separator>
     <separator></separator>
@@ -49,15 +49,15 @@
                     <patientlookup style="height:24px"
                             onChange="invoicSearchObject.setPatient((com.nzion.domain.Patient)event.getOrigin().getData())"/>
                 </div>
-                <div zclass="span3">
+               <!-- <div zclass="span3">
                     <label value="Doctor"/>
                     <providerlookup style="height:24px"
                             onChange="invoicSearchObject.setConsultant((com.nzion.domain.Provider)event.getOrigin().getData())"/>
-                </div>
-                <div zclass="span2">
+                </div>-->
+               <!-- <div zclass="span2">
                     <label value="IP Number" />
                     <textbox id="ipNumber" sclass="span12"/>
-                </div>
+                </div>-->
                 <div zclass="span2">
                     <label value="Invoice From Date"/>
                     <datebox id="fromDate" sclass="span12"/>
@@ -67,7 +67,7 @@
                     <datebox id="thruDate" sclass="span12"/>
                 </div>
                 
-                <checkbox id="outsidePatient" label="External Patients" />
+               <!-- <checkbox id="outsidePatient" label="External Patients" />-->
             </div>
         </div>
         <div align="center" sclass="panelFoot buttonPanel" >
@@ -80,13 +80,17 @@
                           return;
                            }
                          */ 
-                         if(outsidePatient.isChecked())   
-                                invoices = billingService.getInvoiceForOutsidersPatients(com.nzion.domain.billing.InvoiceType.OPD_PHARMACY,fromDate.getValue(),thruDate.getValue());
-                            else if(invoicSearchObject.getPatient()!=null){
-                                invoices = billingService.getInvoice(new ArrayList(),invoicSearchObject.getPatient(),invoicSearchObject.getConsultant(),fromDate.getValue(),thruDate.getValue(),ipNumber.getValue());
+                        /* if(outsidePatient.isChecked())
+                                invoices = billingService.getInvoiceForOutsidersPatients(com.nzion.domain.billing.InvoiceType.OPD_PHARMACY,fromDate.getValue(),thruDate.getValue()); */
+
+                      //    else if(invoicSearchObject.getPatient()!=null){
+
+                            if(invoicSearchObject.getPatient()!=null){
+                               // invoices = billingService.getInvoice(new ArrayList(),invoicSearchObject.getPatient(),invoicSearchObject.getConsultant(),fromDate.getValue(),thruDate.getValue(),ipNumber.getValue());
+                                  invoices = billingService.getInvoice(new ArrayList(),invoicSearchObject.getPatient(),invoicSearchObject.getConsultant(),fromDate.getValue(),thruDate.getValue(),null);
                             }
                             else
-                               invoices = billingService.getInvoice(allStatuses,invoicSearchObject.getPatient(),invoicSearchObject.getConsultant(),fromDate.getValue(),thruDate.getValue(),ipNumber.getValue());
+                               invoices = billingService.getInvoice(allStatuses,invoicSearchObject.getPatient(),invoicSearchObject.getConsultant(),fromDate.getValue(),thruDate.getValue(),null);
                            
                          	Collections.sort(invoices);
                           for(Invoice invoice : invoices){
@@ -113,8 +117,8 @@
                 <listheader label="Invoice Date" />
                 <listheader label="Invoice No" />
                 <listheader label="Patient Name" />
-                <listheader label="IP Number" />
-                <listheader label="Requested By" />
+               <!-- <listheader label="IP Number" />-->
+               <!-- <listheader label="Requested By" />-->
                 <listheader label="Status" />
                 <listheader label="Action" />
             </listhead>
@@ -126,12 +130,12 @@
                 <listcell>
                     <name object="@{invoiceObj.patient}"    />
                 </listcell>
-                <listcell>
+               <!-- <listcell>
                     <label value="@{invoiceObj.ipNumber}" />
-                </listcell>
-                <listcell>
+                </listcell>-->
+               <!-- <listcell>
                     <name object="@{invoiceObj.consultant}" />
-                </listcell>
+                </listcell>-->
                 <listcell label="@{invoiceObj.invoiceStatus}" />
                 <listcell>
                     <button label="Receive Payment">
@@ -143,13 +147,16 @@
                             self.setLabel("View");
                         </attribute>
                         <attribute name="onClick"><![CDATA[
-                       
-                         if(com.nzion.domain.billing.InvoiceType.OPD.equals(((com.nzion.domain.billing.Invoice)self.getParent().getParent().getValue()).getInvoiceType())) 
+
+                         if(com.nzion.domain.billing.InvoiceType.OPD.equals(((com.nzion.domain.billing.Invoice)self.getParent().getParent().getValue()).getInvoiceType()))
+                             Executions.getCurrent().sendRedirect("/billing/billingTxnItem.zul?invoiceId=" + self.getParent().getParent().getValue().getId(),"_blank");
+
+                     /*    if(com.nzion.domain.billing.InvoiceType.OPD.equals(((com.nzion.domain.billing.Invoice)self.getParent().getParent().getValue()).getInvoiceType()))
                              Executions.getCurrent().sendRedirect("/billing/billingTxnItem.zul?invoiceId=" + self.getParent().getParent().getValue().getId(),"_BillSoapNote");
                             
                          
                          if(com.nzion.domain.billing.InvoiceType.OPD_PHARMACY.equals(((com.nzion.domain.billing.Invoice)self.getParent().getParent().getValue()).getInvoiceType()))
-                             Executions.getCurrent().sendRedirect("/billing/billingTxnItem.zul?invoiceId=" + self.getParent().getParent().getValue().getId(),"_BillSoapNote");
+                             Executions.getCurrent().sendRedirect("/billing/billingTxnItem.zul?invoiceId=" + self.getParent().getParent().getValue().getId(),"_BillSoapNote"); */
                       
                          
                                          ]]>

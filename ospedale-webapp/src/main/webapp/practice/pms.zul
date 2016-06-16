@@ -8,10 +8,12 @@
 				<tabbox id="preferencesTabBox" width="100%" orient="vertical" height="500px">
 					<tabs width="20%">
 						<tab label="Automatic Assignment" />
-						<tab label="Document Management"  onClick="folderCategory.invalidate();"></tab>
+
+						<!--Following tabs are hidden and can be used for later purpose-->
+						<!--<tab label="Document Management"  onClick="folderCategory.invalidate();"></tab>
 						<tab label="Naming Defaults" />
-						<tab label="Billing Preference" />
-						<tab label="RCM Preferences" />
+						<tab label="Billing Preference" /> -->
+						<!--<tab label="RCM Preferences" />-->
 					</tabs>
 					<tabpanels width="70%">
 						<tabpanel>

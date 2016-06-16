@@ -19,7 +19,7 @@
 
         while (iterator.hasNext()){
             com.nzion.domain.Employee employee = (com.nzion.domain.Employee)iterator.next();
-            if (employee.getPhlebotomist().booleanValue()){
+            if (employee.isPhlebotomist().booleanValue()){
                 phlebotomistList.add(employee);
             }
         }
@@ -40,7 +40,7 @@
                                    onChange="vm.getLabOrderRequest().setPatient((com.nzion.domain.Patient)event.getOrigin().getData());"/>
                 </div>
                 
-                 <div zclass="span4">
+                 <div zclass="span4" visible="false">
                     <label value="Referral Doctor"/>
                     <referrallookup
                             onChange="vm.getLabOrderRequest().setReferral((com.nzion.domain.Referral)event.getOrigin().getData())"/>
@@ -65,8 +65,8 @@
                         </attribute>
                     </datebox>
                 </div>
-                <div zclass="span5" style="margin-left: 20px;">
-                    <label value="Time Slot" mold="required" class="z-label-bold"></label>
+                <div zclass="span3" style="margin-left: 20px;">
+                    <label value="Time Slot" style="margin-left: 8px;" mold="required" class="z-label-bold"></label>
                     <listbox mold="select" model="@{searchResult,load-after='freeSlot.onClick'}"
                              id="slotListbox" zclass="span10">
                         <listitem self="@{each='zk'}"
@@ -88,14 +88,22 @@
                 
                 <radiogroup orient="horizontal">
 					
-					<radio label="Lab Test"  id="testRadio" style="padding:30px" 
+					<!--<radio label="Lab Test"  id="testRadio" style="padding:30px"
 					onCheck = "labTestDiv.setVisible(true);labTestPanelDiv.setVisible(false);labTestProfileDiv.setVisible(false);homeSerDiv.setVisible(true)"/>
 					
 					<radio label="Lab Profile"  id="profileRadio" style="padding:30px" 
 					onCheck = "labTestProfileDiv.setVisible(true);labTestDiv.setVisible(false);labTestPanelDiv.setVisible(false);homeSerDiv.setVisible(true)"/>
 					
 					<radio label="Lab Panel"  id="panelRadio" style="padding:30px" 
-					onCheck = "labTestPanelDiv.setVisible(true);labTestProfileDiv.setVisible(false);labTestDiv.setVisible(false);homeSerDiv.setVisible(true)"/>
+					onCheck = "labTestPanelDiv.setVisible(true);labTestProfileDiv.setVisible(false);labTestDiv.setVisible(false);homeSerDiv.setVisible(true)"/>-->
+                    <radio label="Lab Test"  id="testRadio" style="padding:30px"
+                           onCheck = "labTestDiv.setVisible(true);labTestPanelDiv.setVisible(false);labTestProfileDiv.setVisible(false)"/>
+
+                    <radio label="Lab Profile"  id="profileRadio" style="padding:30px"
+                           onCheck = "labTestProfileDiv.setVisible(true);labTestDiv.setVisible(false);labTestPanelDiv.setVisible(false)"/>
+
+                    <radio label="Lab Panel"  id="panelRadio" style="padding:30px"
+                           onCheck = "labTestPanelDiv.setVisible(true);labTestProfileDiv.setVisible(false);labTestDiv.setVisible(false)"/>
 				
 				 </radiogroup>
                 
@@ -147,6 +155,11 @@
                         <listitem self="@{each='zk'}"
                                   label="@{zk.firstName}"
                                   value="@{zk}">
+                            <attribute name="onSelect">
+                                <![CDATA[
+                                        Events.postEvent("onClick", phlebotomistFreeSlot, null);
+                                    ]]>
+                            </attribute>
                         </listitem>
                     </listbox>
                 </div>
@@ -160,10 +173,12 @@
                     </listbox>
                     <a id="phlebotomistFreeSlot" zclass="btn btn-primary" visible="false">
                         <n:i class="whiteIcon-search"></n:i>
-                        <attribute name="onClick">
+                        <attribute name="onClick"><![CDATA[
+                            if((phlebotomistList.getSelectedItem() != null) && (phlebotomistAppointmentDate.getValue() != null)){
                             phlebotomistsearchResult = vm.searchSchedule(phlebotomistList.getSelectedItem().getValue(), phlebotomistAppointmentDate.getValue(), weekdays);
                             //searchResult = scheduleController.searchSchedule(searchObject, weekdays);
-                        </attribute>
+                            }
+                        ]]></attribute>
                     </a>
                 </div>
             </div>
@@ -210,6 +225,10 @@
                        			//hSCheckBox.setChecked(false);
                         		vm.getLabOrderRequest().addPatientLabOrder(patientLabOrder);
                                 patientLabOrder.setLabOrderRequest(vm.getLabOrderRequest());
+
+                                vm.updatePrice();
+
+
                           Events.postEvent("onReloadRequest",inPLabOrderListBox,null);
                         ]]>
                     </attribute>
@@ -238,9 +257,9 @@
                                     <label value="@{labOrder.labTestPanel.panelDescription}" if="${empty labOrder.labTestPanel.panelDescription}"/>
                                 </listcell>
                                 
-                               <!--  <listcell>
-                                    <label value="@{labOrder.labTestPanel.price}"/>
-                                </listcell> -->
+                                 <listcell>
+                                    <label value="@{labOrder.price}"/>
+                                </listcell>
                             </listitem>
                         </listbox>
                         <div align="center" sclass="panelFoot">

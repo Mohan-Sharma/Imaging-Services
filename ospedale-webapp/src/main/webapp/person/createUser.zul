@@ -48,9 +48,25 @@
 				       <label value="Office phone" />
 						<phonebox value="@{employee.contacts.officePhone,save-when='Save.onClick'}" cols="10" sclass="span12" />
 						</div>
-						<div zclass="span4">
+						<!--<div zclass="span4">
 							<label value="Fax" />
 							<phonebox value="@{employee.contacts.faxNumber,save-when='Save.onClick'}" cols="10" sclass="span12" />
+						</div>-->
+						<div zclass="span4">
+							<separator></separator>
+							<separator></separator>
+							<checkbox label=" Phlebotomist" >
+								<attribute name="onCreate">
+									self.setChecked(employee.isPhlebotomist());
+								</attribute>
+								<attribute name="onCheck">
+									if(self.isChecked()){
+									employee.setPhlebotomist(true);
+									} else {
+									employee.setPhlebotomist(false);
+									}
+								</attribute>
+									</checkbox>
 						</div>
 			</div>
 		       <div zclass="row-fluid">
@@ -74,8 +90,8 @@
 					</div>
 					 <div zclass="span4">
 						<label value="State" id="lblstate" mold="required"/>
-						<enumeration id="state" enumType="STATE" itemRenderer="${stateRenderer}"
-							value="@{employee.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" />
+						<!--<enumeration id="state" enumType="STATE" itemRenderer="${stateRenderer}"-->
+						<textbox id="state"  value="@{employee.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" />
 					</div>
 					 <div zclass="span4">
 						<label value="Postal code" id="lblpostalCode" mold="required" />

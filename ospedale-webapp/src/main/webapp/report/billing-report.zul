@@ -19,52 +19,58 @@
 	<window id="billingReportWindow" apply="${billingSearchController}">
 		<div style="padding:5px" zclass="page-header titled-well">
             <h:h1>
-                <h:small>Billing Reports</h:small>
+                <h:small>Invoice Report</h:small>
             </h:h1>
          </div>
 	<div class="container-fluid">
        <div zclass="row-fluid">
-                 <div zclass="span3">
-			<label value="Patient"  />	
-			<patientlookup onChange="billingSearchController.getBillingSearchVO().setPatient((com.nzion.domain.Patient)event.getOrigin().getData())" />
-		</div>
-		<div zclass="span2">
-				<label value="IP number" />
-				<textbox id="ipNumber" value="@{billingSearchController.billingSearchVO.ipNumber}" sclass="span12"/>
-		</div>
-		<div zclass="span3">
-				<label value="Consultant"  />
-				<providerlookup id="empLookup" onChange="billingSearchController.getBillingSearchVO().setConsultant(event.getOrigin().getData())"/>
-				
+			<div zclass="span3">
+				<label value="Patient"  />
+				<patientlookup onChange="billingSearchController.getBillingSearchVO().setPatient((com.nzion.domain.Patient)event.getOrigin().getData())" />
 			</div>
+			<!--<div zclass="span2">
+					<label value="IP number" />
+					<textbox id="ipNumber" value="@{billingSearchController.billingSearchVO.ipNumber}" sclass="span12"/>
+			</div>-->
+			<!--<div zclass="span3">
+					<label value="Consultant"  />
+					<providerlookup id="empLookup" onChange="billingSearchController.getBillingSearchVO().setConsultant(event.getOrigin().getData())"/>
+
+			</div>-->
 			<div zclass="span2">
-			<label value="Invoice Status"  />
-		     <combobox model="@{billingStatusesArray}" value="@{billingSearchController.billingSearchVO.status}" sclass="span12">
-			     <comboitem self="@{each='status'}" value="@{status}" label="@{status}" style="padding-right:10px" />
-		     </combobox>
+				<label value="Invoice Status"  />
+				 <!--<combobox model="@{billingStatusesArray}" value="@{billingSearchController.billingSearchVO.status}" sclass="span12">-->
+				 <combobox  value="@{billingSearchController.billingSearchVO.status}" sclass="span12">
+					 <!--<comboitem self="@{each='status'}" value="@{status}" label="@{status}" style="padding-right:10px" />-->
+					 <comboitem value="READY" label="READY"/>
+					 <comboitem value="INPROCESS" label="INPROCESS"/>
+					 <comboitem value="RECEIVED" label="RECEIVED"/>
+					 <comboitem value="CANCELLED" label="CANCELLED"/>
+				 </combobox>
+			</div>
+		    <div zclass="span2">
+			   <label value="Invoice Date From" mold="required" />
+			   <datebox id="fromDate"   value="@{billingSearchController.billingSearchVO.fromDate}" sclass="span12" constraint="no empty, no future"/>
+		    </div>
+		    <div zclass="span2">
+			   <label value="Invoice Date Thru" mold="required" />
+			   <datebox id="thruDate" value="@{billingSearchController.billingSearchVO.thruDate}" sclass="span12" constraint="no empty, no future"/>
+		    </div>
 		</div>
-		</div>
-		<div zclass="row-fluid">
-		<div zclass="span3">
+		<!--<div zclass="row-fluid">-->
+		<!--<div zclass="span3">
 			<label value="Procedures" />
 				<cptlookup id="cptlookupbox" onChange="billingSearchController.getBillingSearchVO().setCpt(event.getOrigin().getData())" />
-			</div>
-			<div zclass="span2">
-				<label value="Invoice Date From"  />
-				<datebox id="fromDate"   value="@{billingSearchController.billingSearchVO.fromDate}" sclass="span12"/>
-		</div>
-		<div zclass="span2">
-				<label value="Invoice Date Thru"  />
-				<datebox id="thruDate" value="@{billingSearchController.billingSearchVO.thruDate}" sclass="span12"/>
-		</div>
-		<div zclass="span2">
+		</div>-->
+
+		<!--<div zclass="span2">
 			<label value="Received By"  />
 		     <combobox id="userCombo" model="@{userLogins}" value="@{billingSearchController.billingSearchVO.collectedByUser}" sclass="span12">
 			     <comboitem self="@{each='user'}" value="@{user}" label="@{user.username}" style="padding-right:10px" />
 		     </combobox>
-		</div>
+		</div>-->
 		
-		<div zclass="span2">
+		<!--<div zclass="span2">
 			<label value="Total Amount Range"  />
 				<combobox id="totalAmtRange" selectedItem="@{billingSearchController.billingSearchVO.lowEndAmtQuantifier}" sclass="span12">
 					<comboitem label="Equal" value="Equal" />
@@ -88,10 +94,11 @@
 				<decimalbox id="amountIntBox"  visible="false" value="@{billingSearchController.billingSearchVO.highAmntRange.amount}"/>
 			</div>
 					
-		</div>
-			</div>
+		</div>-->
+		<!--</div>-->
+	</div>
 		<div align="center" sclass="panelFoot"  >
-					<button label="Search Bills" id="searchButton" zclass="btn-primary btn"  >
+					<button label="Search" id="searchButton" zclass="btn-primary btn"  >
 						<attribute name="onClick">
 						<![CDATA[
 						//if(UtilValidator.isEmpty(billingSearchController.getBillingSearchVO().getIpNumber()) && UtilValidator.isEmpty (billingSearchController.getBillingSearchVO().getStatus()) && 
@@ -162,8 +169,8 @@
 					<label value="Group By:" />
 					<listbox id="groupByComboBox" mold="select" sizedByContent="true" style="padding:2px">
 						<listitem/>
-						<listitem label="Procedure" value="Procedure" />
-						<listitem label="Bill Item" value="BillItem" />
+						<!--<listitem label="Procedure" value="Procedure" />-->
+						<!--<listitem label="Bill Item" value="BillItem" />-->
 						<listitem label="Payment  Mode" value="paymentMode" />
 						<attribute name="onSelect">
 									<![CDATA[	
@@ -210,8 +217,8 @@
 						<listhead>
 							<listheader label="Patient Name"
 								onCreate='billingSearchController.setAscendingComparator(self,"patient.firstName");billingSearchController.setDescendingComparator(self,"patient.firstName")' />
-							<listheader label="Consultant Name"
-								onCreate='billingSearchController.setAscendingComparator(self,"consultant.firstName");billingSearchController.setDescendingComparator(self,"consultant.firstName")' />
+							<!--<listheader label="Consultant Name"
+								onCreate='billingSearchController.setAscendingComparator(self,"consultant.firstName");billingSearchController.setDescendingComparator(self,"consultant.firstName")' />-->
 							<listheader label="Invoice Date"
 								onCreate='billingSearchController.setAscendingComparator(self,"invoiceDate");billingSearchController.setDescendingComparator(self,"invoiceDate")' />
 							<listheader label="Invoice Status"
@@ -226,9 +233,9 @@
 							<listcell>
 								<name object="@{invoice.patient}" />
 							</listcell>
-							<listcell>
+							<!--<listcell>
 								<name object="@{invoice.consultant}" />
-							</listcell>
+							</listcell>-->
 							<listcell label="@{invoice.invoiceDate,converter='com.nzion.view.component.DateConverter'}" />
 							<listcell label="@{invoice.invoiceStatus}" />
 							<listcell >
@@ -236,7 +243,7 @@
 							</listcell>
 							<listcell label="@{invoice.totalAmount.amount}" />
 							<listcell>
-							<button label="Bill">
+							<button label="Invoice">
 								<attribute name="onClick">
 								com.nzion.domain.billing.Invoice invoice = self.getParent().getParent().getValue();
 								if("IPD".equals(invoice.getInvoiceType().name())){
@@ -482,27 +489,31 @@
 									<listbox checkmark="true" multiple="true" 
 										model="@{invPaymentGroup.value}" >
 										<listhead>
-											 <listheader label="Patient Name" />
-											<listheader label="Doctor Name" />
+											<listheader label="Patient Name" />
+											<!--<listheader label="Doctor Name" />-->
 											<listheader label="Invoice Status" />
-											<listheader label="Invoice ID" />
+											<listheader label="Invoice Number"/>
+											<!--<listheader label="Invoice ID" />-->
 											<listheader label="Invoice Date" /> 
 											<listheader label="Payment Mode" />
-											<listheader label="Item Amount" />
+											<listheader label="Amount" />
 											<listheader label="Action" />
 										</listhead>
 										<listitem self="@{each='invoicePayment'}" value="@{invoicePayment}">
 											 <listcell>
 												<name object="@{invoicePayment.invoice.patient}" style="font-weight:normal" />
 											</listcell>
-											<listcell>
+											<!--<listcell>
 												<name object="@{invoicePayment.invoice.consultant}" style="font-weight:normal" />
-											</listcell>
+											</listcell>-->
 											<listcell>
 												<label value="@{invoicePayment.invoice.invoiceStatus}" style="font-weight:normal" />
 											</listcell>
-											<listcell>
+											<!--<listcell>
 												<label value="@{invoicePayment.invoice.id}" style="font-weight:normal" />
+											</listcell>-->
+											<listcell>
+												<label value="@{invoicePayment.invoice.invoiceNumber}" style="font-weight:normal" />
 											</listcell>
 											<listcell>
 												<label value="@{invoicePayment.invoice.invoiceDate,converter='com.nzion.view.component.DateConverter'}" style="font-weight:normal" />
@@ -515,7 +526,7 @@
 												<label value="@{invoicePayment.amount.amount}" style="font-weight:normal" />
 											</listcell>
 											<listcell>
-											<button label="Bill">
+											<button label="Invoice">
 						                    <attribute name="onClick">
 						                    
 						        com.nzion.domain.billing.Invoice invoice = ((com.nzion.domain.billing.InvoicePayment)self.getParent().getParent().getValue()).getInvoice();

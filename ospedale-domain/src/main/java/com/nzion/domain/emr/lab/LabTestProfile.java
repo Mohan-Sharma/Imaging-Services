@@ -16,6 +16,7 @@ import javax.persistence.UniqueConstraint;
 
 import com.nzion.domain.annot.AccountNumberField;
 import com.nzion.domain.base.IdGeneratingBaseEntity;
+import org.hibernate.annotations.Fetch;
 
 
 @Entity
@@ -35,6 +36,7 @@ public class LabTestProfile extends IdGeneratingBaseEntity implements Serializab
 	
 
 	@ManyToMany(targetEntity = LabTest.class,fetch = FetchType.EAGER)
+	@Fetch(org.hibernate.annotations.FetchMode.SELECT)
 	@JoinTable(name = "lab_test_profile_lab_test", 
 	joinColumns = {@JoinColumn(name = "PROFILE_CODE")},
 	inverseJoinColumns = { @JoinColumn(name = "TEST_CODE") })

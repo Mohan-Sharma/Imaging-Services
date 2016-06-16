@@ -22,6 +22,7 @@ import org.zkoss.zul.Messagebox;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.*;
@@ -62,6 +63,19 @@ public class BillingController extends OspedaleAutowirableComposer {
 
     private BigDecimal writeOffAmount;
 
+    private BigDecimal totalGrossAmount;
+
+    public BigDecimal getTotalGrossAmount() {
+        totalGrossAmount = BigDecimal.ZERO;
+        for(InvoiceItem li : invoice.getInvoiceItems()){
+            totalGrossAmount = totalGrossAmount.add(li.getPrice().getAmount().setScale(3, RoundingMode.HALF_UP));
+        }
+        return totalGrossAmount.setScale(3, RoundingMode.HALF_UP);
+    }
+
+    public void setTotalGrossAmount(BigDecimal totalGrossAmount) {
+        this.totalGrossAmount = totalGrossAmount;
+    }
 
     private Money labItemTotalAmount = new Money();
 
@@ -70,6 +84,10 @@ public class BillingController extends OspedaleAutowirableComposer {
 
     public TreeMap<String, List<InvoiceItem>> getQuickBillinvoiceItemMap() {
         return quickBillinvoiceItemMap;
+    }
+
+    public BillingController(Invoice invoice){
+        this.invoice = invoice;
     }
 
     public void setQuickBillinvoiceItemMap(
@@ -183,7 +201,7 @@ public class BillingController extends OspedaleAutowirableComposer {
     }
 
 
-    public void addTxnPaymentItem() {
+    public void addTxnPaymentItem() throws InterruptedException{
         if (invoicePayment.getAmount().getAmount().compareTo(remainingAmount) == 1) {
             invoicePayment = new InvoicePayment(invoicePayment.getPaymentMethod(), invoicePayment.getInvoice(), invoicePayment.getAmount()
                     , invoicePayment.getPaymentType());
@@ -221,6 +239,8 @@ public class BillingController extends OspedaleAutowirableComposer {
         remainingAmount = remainingAmount.subtract(invoicePayment.getAmount().getAmount());
 
         invoicePayment = new InvoicePayment();
+        UtilMessagesAndPopups.showSuccess();
+       // Executions.sendRedirect(null);
     }
 
     public void writeOffBillAmt() throws InterruptedException {

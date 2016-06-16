@@ -217,9 +217,14 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     public List<LabOrderRequest> getSearchByLabOrder(List<LabOrderRequest.ORDERSTATUS> status, Patient patient,
-                                                     Provider provider, Referral referral) {
-        return billingRepository.getSearchByLabOrder(status, patient, provider, referral);
+                                                     Referral referral,Date fromDate,Date thruDate) {
+        return billingRepository.getSearchByLabOrder(status, patient,referral,fromDate,thruDate);
 
+    }
+
+    @Override
+    public ArrayList<InvoicePayment> getInvoicePaymentsByCriteria(Patient patient, Date fromDate, Date thruDate) {
+        return billingRepository.getInvoicePaymentsByCriteria(patient,fromDate,thruDate);
     }
 
     @Override

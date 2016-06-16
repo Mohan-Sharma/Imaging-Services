@@ -8,11 +8,11 @@ import com.nzion.domain.base.IdGeneratingBaseEntity;
 @Entity
 @Table
 public class LabSpecimenSource extends IdGeneratingBaseEntity{
-	
+
 	private String code;
 	
 	private String description;
-	
+
 	public String getCode() {
 	return code;
 	}

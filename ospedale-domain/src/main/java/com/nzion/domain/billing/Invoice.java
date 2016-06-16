@@ -8,22 +8,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.AssociationOverride;
-import javax.persistence.AttributeOverride;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
+import com.nzion.domain.emr.lab.LabOrderRequest;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.Filter;
@@ -106,6 +93,8 @@ public class Invoice extends IdGeneratingBaseEntity implements LocationAware,Com
     private String collectedByUser;
     
     private Date generatedOn;
+
+    private LabOrderRequest labOrderId;
     
     @Temporal(TemporalType.DATE)
     public Date getGeneratedOn() {
@@ -425,5 +414,15 @@ public class Invoice extends IdGeneratingBaseEntity implements LocationAware,Com
     @Override
     public int compareTo(Invoice other) {
                 return other.invoiceDate.compareTo(this.invoiceDate);
+    }
+
+    @OneToOne
+    @JoinColumn(name="LAB_ORDER_ID")
+    public LabOrderRequest getLabOrderId() {
+        return labOrderId;
+    }
+
+    public void setLabOrderId(LabOrderRequest labOrderId) {
+        this.labOrderId = labOrderId;
     }
 }

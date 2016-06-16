@@ -188,21 +188,21 @@ public class LabServiceImpl implements LabService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = false)
     public List<PatientLabOrder> getPatientLabOrderBy(Patient patient, Provider provider, PatientLabOrder.STATUS status,
                                                       String panelName, String panelCode) {
         return labRepository.getPatientLabOrderBy(patient, provider, status, panelName, panelCode);
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = false)
     public List<LabRequisition> getLabRequisitionForProcessing(Boolean inPatient, Date fromDate, Date thruDate, Patient patient, String ipNumber
     		,Set<Laboratories> loggedinUserLaboratories) {
         return labRepository.getLabRequisitionForProcessing(inPatient, fromDate, thruDate, patient, ipNumber, loggedinUserLaboratories);
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = false)
     public List<LabRequisition> getCompletedLabRequisition(Boolean inPatient, Date fromDate, Date thruDate, Patient patient, String specimenLabel, String ipNumber) {
         return labRepository.getCompletedLabRequisition(inPatient, fromDate, thruDate, patient, specimenLabel, ipNumber);
     }

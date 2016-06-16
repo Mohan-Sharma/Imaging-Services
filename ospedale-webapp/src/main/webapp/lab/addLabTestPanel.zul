@@ -8,61 +8,68 @@
 		import com.nzion.domain.emr.lab.LabTestCpt;
 		import com.nzion.domain.emr.lab.LabTestPanel;
 		 com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
-		LabController labController = new LabController();
-		List labTests = commonCrudService.getAll(com.nzion.domain.emr.lab.LabTest.class);
-		List labCategoryList=commonCrudService.getAll(com.nzion.domain.emr.lab.LabCategory.class);
-		com.nzion.domain.emr.lab.LabTestPanel labTestPanel = arg.get("entity");
-		List labTestPanels = commonCrudService.getAll(com.nzion.domain.emr.lab.LabTestPanel.class);
+		com.nzion.zkoss.composer.emr.lab.LabController labController = new com.nzion.zkoss.composer.emr.lab.LabController();
+		List labTests = commonCrudService.getAll(com.nzion.domain.emr.lab.Investigation.class);
+		List labCategoryList=commonCrudService.getAll(com.nzion.domain.emr.lab.Laboratories.class);
+		/*Object obj = arg.get("entity");
+		com.nzion.domain.emr.lab.LabTest labTestPanel = (com.nzion.domain.emr.lab.LabTest)obj;
+
+		List labTestPanels = commonCrudService.getAll(com.nzion.domain.emr.lab.LabTest.class);
 		String label = "New";
 		if (labTestPanel != null) {
 			labTestPanels.remove(labTestPanel);
 			label = "Edit";
-		}
+		}*/
     	List specimenSources = commonCrudService.getAll(com.nzion.domain.emr.lab.LabSpecimenSource.class);
-		List locations = commonCrudService.getAll(com.nzion.domain.Location.class);
+    	List specimenSourcesDescript = new java.util.ArrayList();
 
+    for(com.nzion.domain.emr.lab.LabSpecimenSource s : specimenSources){
+            specimenSourcesDescript.add(s.getDescription());
+    }
+		List locations = commonCrudService.getAll(com.nzion.domain.Location.class);
+//add lab test page
 	]]>
     </zscript>
     <window id="addLabTestPanelWindow" width="50%" apply="${labController}" closable="true"
             position="center">
         <div style="padding:5px" zclass="page-header titled-well">
             <h:h1>
-                <h:small>New Lab Test Panel</h:small>
+                <h:small>New Lab Test</h:small>
                 <button type="button" zclass="close" onClick="addLabTestPanelWindow.detach();">×</button>
             </h:h1>
         </div>
         <div zclass="container-fluid">
             <div zclass="row-fluid">
                 <div zclass="span6">
-                    <label value="Panel Name" mold="required"/>
-                    <textbox value="@{labController.labTestPanel.panelName,save-when='Save.onClick'}"
+                    <label value="Test Name" mold="required"/>
+                    <textbox value="@{labController.labTest.testDescription,save-when='Save.onClick'}"
                              constraint="no empty:Panel Name Required" sclass="span12"
                              w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
                 </div>
-                <div zclass="span2">
+                <!--<div zclass="span2">
                     <label value="Price"/>
                     <decimalbox format="###.##" placeholder="0"
                                 value="@{labController.labTestPanel.price,save-when='Save.onClick'}" sclass="span12"/>
-                </div>
+                </div>-->
             </div>
 
             <div zclass="row-fluid">
                 <div zclass="span4">
-                    <label style="margin-left:2px;" value="Lab Category" mold="required"></label>
+                    <label style="margin-left:2px;" value="Sub Department" mold="required"></label>
                     <combobox model="@{labCategoryList}" sclass="span12"
                               w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
-                              selectedItem="@{labController.labTestPanel.labCategory,save-when='Save.onClick'}"
-                              constraint="no empty:Lab Category Required">
-                        <comboitem self="@{each='labCategory'}" label="@{labCategory.name}"
+                              selectedItem="@{labController.labTest.laboratory,save-when='Save.onClick'}"
+                              constraint="no empty:Laboratory Required">
+                        <comboitem self="@{each='labCategory'}" label="@{labCategory.laboratory}"
                                    value="@{labCategory}"></comboitem>
                     </combobox>
                 </div>
 
                 <div zclass="span3">
                     <label value="Specimen Source" />
-                    <combobox model="@{specimenSources}"
-                              selectedItem="@{labController.labTestPanel.labSpecimenSource,save-when='Save.onClick'}">
-                        <comboitem self="@{each='specimen'}" value="@{specimen}" label="@{specimen.description}" />
+                    <combobox model="@{specimenSourcesDescript}"
+                              selectedItem="@{labController.labTest.specimen,save-when='Save.onClick'}">
+                        <comboitem self="@{each='specimen'}" value="@{specimen}" label="@{specimen}" />
                     </combobox>
                 </div>
 
@@ -70,8 +77,9 @@
              <div zclass="row-fluid">
                             <div zclass="span6">
                                 <label value="Display Order" />
-                                  <textbox value="@{labController.labTestPanel.sortOrder,save-when='Save.onClick'}"
-                                                               sclass="span12" />
+                                  <!--<textbox value="@{labController.labTest.sortOrder,save-when='Save.onClick'}"
+                                                               sclass="span12" />-->
+                                <textbox sclass="span12" />
                             </div>
              </div>
         <separator height="10px"/>
@@ -99,7 +107,7 @@
                                             <listheader label="Test Name"/>
                                         </listhead>
                                         <listitem self="@{each='labTest'}" value="@{labTest}">
-                                            <listcell label="@{labTest.testName}" style="background:none"/>
+                                            <listcell label="@{labTest.investigationName}" style="background:none"/>
                                         </listitem>
                                     </listbox>
                                 </div>
@@ -108,16 +116,16 @@
                     </h:table>
                 </tabpanel>
                 <tabpanel>
-                    <div sclass="panelFoot">
+                    <!--<div sclass="panelFoot">
                         <a id="addButton" class="btn btn-mini" label="Add" onClick="labController.buildPanelTechnicianSet()">
                             <attribute name="onClick">
                                 Window window = (Window) Executions.createComponents("/lab/panelTechnician.zul", null,
                                 com.nzion.util.UtilMisc.toMap("labController", labController));
-                                window.addForward("onDetach", associatedTechnicianGrid, "onReload");
+                                //window.addForward("onDetach", associatedTechnicianGrid, "onReload");
                             </attribute>
                         </a>
-                    </div>
-                    <div id="associatedTechnicianSection">
+                    </div>-->
+                    <!--<div id="associatedTechnicianSection">
                         <label value="Associated Technician"/>
                         <grid id="associatedTechnicianGrid"
                               model="@{labController.labTestPanel.panelTechnicians,load-after='self.onReload,deleteButton.onClick'}">
@@ -143,7 +151,7 @@
                                 </row>
                             </rows>
                         </grid>
-                    </div>
+                    </div>-->
                     <separator/>
                 </tabpanel>
             </tabpanels>

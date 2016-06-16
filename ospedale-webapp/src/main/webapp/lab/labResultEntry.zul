@@ -70,7 +70,7 @@
 				<h:dt></h:dt>
 				<h:dd></h:dd>
 			</n:dl>
-			<n:dl class="dl-horizontal"
+			<!--<n:dl class="dl-horizontal"
 				unless="${patientSoapNoteId ne null}">
 				<h:dt>Clinical History:</h:dt>
 				<h:dd>
@@ -83,7 +83,7 @@
 				<h:dd>
 					<label value="@load(vm.labRequisition.remarks)" />
 				</h:dd>
-			</n:dl>
+			</n:dl>-->
 			<h:dl class="dl-horizontal">
 				<h:dt>
 					<label value="Ordered Lab Tests"></label>
@@ -95,6 +95,15 @@
 							<comboitem value="@bind(labTestResult)" 	label="@load(labTestResult.testName)" />
 						</template>
 					</combobox>
+				</h:dd>
+				<h:dd class="dl-horizontal">
+					<div>
+						<button label="Upload Results" upload="true"
+								onUpload="@command('uploadLabAttachmentOBR',eventType=event)" />
+						<a label="@bind(vm.fileName)"></a>
+						<a label="Remove" class="delBtn" visible="@bind(vm.fileName ne null)"
+						   onClick="@command('removeAttachmentOBR')" />
+					</div>
 				</h:dd>
 			</h:dl>
 			<h:dl class="dl-horizontal">
@@ -149,41 +158,55 @@
 						<listcell>
 							<textbox rows="2" cols="50" value="@bind(obxSegment.freeText)" 	if="${obxSegment.labTest.freeText}"/>
 						</listcell> -->
-							<listcell>
+						<listcell>
 							<textbox width="80%" value="@bind(obxSegment.observationValue)" />
 						</listcell>
 						<listcell>
-							<textbox width="80%" value="@bind(obxSegment.referenceRange)"/>
+							<textbox width="80%" value="@bind(obxSegment.investigation.referenceRange)"/>
 						</listcell>
 						<listcell>
-							<textbox width="80%" value="@bind(obxSegment.units)"/>
+							<textbox width="80%" value="@bind(obxSegment.investigation.unit)"/>
 						</listcell>
 						<listcell>
 							<textbox rows="2" cols="50" value="@bind(obxSegment.freeText)"/>
 						</listcell>
-						<!-- <listcell>
-							<a label="@bind(obxSegment.file.fileName)" if="${obxSegment.file!=null}" 
-														onClick="@command('downloadAttachment',obxSegmentObject=obxSegment)" />
-							<button label="Upload" upload="true" visible="@bind(obxSegment.labTest.attachment &amp;&amp; obxSegment.file eq null)"
-														onUpload="@command('uploadLabAttachment',eventType=event,obxSegmentObject=obxSegment)" />
-							<a label="Remove" class="delBtn" visible="@bind(obxSegment.file ne null)"
-														onClick="@command('removeAttachment',obxSegmentObject=obxSegment)" />
-						</listcell> -->
-						
+						 <listcell>
+						<a label="@bind(obxSegment.file.fileName)" if="${obxSegment.file!=null}"
+						   onClick="@command('downloadAttachment',obxSegmentObject=obxSegment)" />
+						<button label="Upload" upload="true" visible="@bind(obxSegment.investigation.attachment &amp;&amp; obxSegment.file eq null)"
+								onUpload="@command('uploadLabAttachment',eventType=event,obxSegmentObject=obxSegment)" />
+						<a label="Remove" class="delBtn" visible="@bind(obxSegment.file ne null)"
+						   onClick="@command('removeAttachment',obxSegmentObject=obxSegment)" />
+					</listcell>
+
 					</listitem>
 				</template>
 			</listbox>
             <div style="margin-top: 10px">
                 <label value="Remarks" style="font-weight: bold"/>
-                <fckeditor id="fckEditor" customConfigurationsPath="/images/dataTables/media/js/myfckeditor.js"  onChange="vm.getObrSegment().setTechnicianComment(self.getValue())"/>
+                <fckeditor id="fckEditor" customConfigurationsPath="/images/dataTables/media/js/myfckeditor.js">
+				<attribute name="onChange">
+					if(vm.getObrSegment() != null){
+					vm.getObrSegment().setTechnicianComment(self.getValue());
+					}
+				</attribute>
+				</fckeditor>
             </div>
             <div style="margin-top: 10px">
                 <label value="Overall Comments" style="font-weight: bold"/>
                 <fckeditor id="overallComments" customConfigurationsPath="/images/dataTables/media/js/myfckeditor.js"/>
             </div>
 			<div zclass="panelFoot">
-				<button zclass="btn btn-mini" label="Save" onClick="@command('MarkSave')" />
-				<button zclass="btn btn-mini" label="Complete" onClick="@command('MarkComplete',overallComments=overallComments)" />
+				<button zclass="btn btn-mini" label="Save" onClick="@command('MarkSave')">
+					<attribute name="onClick">
+						com.nzion.util.UtilMessagesAndPopups.showCustomizedSuccess("Action Completed Successfully", "Success");
+					</attribute>
+				</button>
+				<button zclass="btn btn-mini" label="Complete" onClick="@command('MarkComplete',overallComments=overallComments)">
+					<attribute name="onClick">
+						com.nzion.util.UtilMessagesAndPopups.showCustomizedSuccess("Action Completed Successfully", "Success");
+					</attribute>
+						</button>
 			</div>
 		</div>
 	</window>

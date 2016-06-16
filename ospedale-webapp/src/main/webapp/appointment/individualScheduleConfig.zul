@@ -73,22 +73,22 @@
 							 associations = scheduleService.getAllCalendarAssociationsFor(self.getSelectedItem().getValue());
 							 }
 							 }
-							 locations  = association.getPerson().getLocations();
+							 <!--locations  = association.getPerson().getLocations();
 							 if(com.nzion.util.UtilValidator.isEmpty(locations)){
 							 List locationsList = commonCrudService.getAll(com.nzion.domain.Location.class);
 							 locations.addAll(locationsList);
-							 }
+							 }-->
 							 //visitTypeSoapModules = commonCrudService.findByEquality(VisitTypeSoapModule.class, new String[]{"provider.id"}, new Object[]{association.getPerson().getId()});
 						 </attribute>
 					 </combobox>
 						</div>
-						 <div zclass="span2">
+						 <!--<div zclass="span2">
 						<label value="Location"/>				
 						<label value=" *" zclass="labelReq"/>
 						<combobox model="@{locations, load-after='personCombo.onSelect, saveAssocBtn.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" selectedItem="@{association.location, save-when='saveAssocBtn.onClick'}" id="locationCombo" constraint="no empty">
 							<comboitem self="@{each='location'}" label="@{location.name}" value="@{location}"/>
 						</combobox>
-						</div>
+						</div>-->
 						 <div zclass="span2">
 						<label value="Start time"/>				
 						<label value=" *" zclass="labelReq"/>
@@ -99,7 +99,7 @@
 						<label value=" *" zclass="labelReq"/>
 						<timebox value="@{association.endTime, save-when='saveAssocBtn.onClick', load-after='saveAssocBtn.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" id="endTimebox"/>
 						</div>
-					    <div id="weeklyDetail" visible="true">
+					    <div id="weeklyDetail" visible="true" style="margin-left:50%">
 						   <n:br/>
 						   <checkbox label=" Monday">
 							   <attribute name="onClick">
@@ -199,7 +199,11 @@
 		<button label="Save" id="saveAssocBtn" zclass="btn-success btn">
 			<attribute name="onClick">
 			<![CDATA[
-				//association.setLocation(com.nzion.util.Infrastructure.getSelectedLocation());
+
+			List locationList = commonCrudService.getAll(com.nzion.domain.Location.class);
+			if(com.nzion.util.UtilValidator.isNotEmpty(locationList)){
+			association.setLocation(locationList.iterator().next());
+			}
 				com.nzion.util.UtilDisplay.validateDateRange(startDatebox, endDatebox);
 				com.nzion.util.UtilDisplay.validateTimeRange(startTimebox, endTimebox);
 				if(interval.getValue() < 2){
@@ -271,9 +275,9 @@
 	</div>
 	<separator></separator>
 		<separator></separator>
-				<listbox model="@{associations, load-after='saveAssocBtn.onClick, locationCombo.onChange, personCombo.onChange, self.onReload'}" id="calenderList">
+				<listbox model="@{associations, load-after='saveAssocBtn.onClick, personCombo.onChange, self.onReload'}" id="calenderList">
 					<listhead>
-						<listheader label="Location"/>
+						<!--<listheader label="Location"/>-->
 						<listheader label="Start Date"/>
 						<listheader label="End Date"/>
 						<listheader label="Start Time"/>
@@ -288,9 +292,9 @@
 						<attribute name="onDoubleClick">
 							Executions.createComponents("/appointment/editPersonalCalendarAssociation.zul", null, com.nzion.util.UtilMisc.toMap("calendarAssoc",calendarAssoc));
 						</attribute>
-						<listcell>
+						<!--<listcell>
 							<label value="@{assoc.location.name}"/>					
-						</listcell>
+						</listcell>-->
 						<listcell>
 							<label value="@{assoc.fromDate, converter='com.nzion.view.component.DateConverter'}" />					
 						</listcell>

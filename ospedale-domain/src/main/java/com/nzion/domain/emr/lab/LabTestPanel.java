@@ -3,24 +3,15 @@ package com.nzion.domain.emr.lab;
 import java.io.Serializable;
 import java.util.Set;
 
-import javax.persistence.Access;
-import javax.persistence.AccessType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 
 import com.nzion.domain.annot.AccountNumberField;
 import com.nzion.domain.base.IdGeneratingBaseEntity;
+import org.hibernate.annotations.Fetch;
 
 @Entity
 @AccountNumberField("panelCode")
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = { "panelCode"}))
-@Access(AccessType.FIELD)
 public class LabTestPanel extends IdGeneratingBaseEntity implements Serializable{
 	
 	@Column(length = 20)
@@ -35,10 +26,6 @@ public class LabTestPanel extends IdGeneratingBaseEntity implements Serializable
 	private boolean prescriptionRequired;
 	
 
-	@ManyToMany(targetEntity = LabTest.class,fetch = FetchType.EAGER)
-	@JoinTable(name = "lab_test_panel_lab_test", 
-	joinColumns = {@JoinColumn(name = "PANEL_CODE")},
-	inverseJoinColumns = { @JoinColumn(name = "TEST_CODE") })
 	private Set<LabTest> tests;
 
 	public String getPanelCode() {
@@ -73,6 +60,11 @@ public class LabTestPanel extends IdGeneratingBaseEntity implements Serializable
 		this.department = department;
 	}
 
+	@ManyToMany(targetEntity = LabTest.class,fetch = FetchType.EAGER)
+	@Fetch(org.hibernate.annotations.FetchMode.SELECT)
+	@JoinTable(name = "lab_test_panel_lab_test",
+			joinColumns = {@JoinColumn(name = "PANEL_CODE")},
+			inverseJoinColumns = { @JoinColumn(name = "TEST_CODE") })
 	public Set<LabTest> getTests() {
 		return tests;
 	}

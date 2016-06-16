@@ -97,6 +97,7 @@ public class LabInvoiceManager extends AbstractInvoiceManager {
         commonCrudService.save(patientLabOrders);
         if (UtilValidator.isEmpty(searchVO.getInvoiceItems()))
             return null;
+        searchVO.setLabOrderId(labOrderRequest);
         createInvoice(searchVO);
         return searchVO;
     }

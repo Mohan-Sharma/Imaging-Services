@@ -36,6 +36,10 @@ public class UtilMessagesAndPopups {
         display(message, Messagebox.OK, Messagebox.EXCLAMATION);
     }
 
+    public static void showCustomizedSuccess(String message, String header) {
+        display(message, Messagebox.OK, Messagebox.ERROR, header);
+    }
+
     public static void showError(String message) {
         display(message, MultiLineMessageBox.OK, Messagebox.ERROR);
     }
@@ -65,6 +69,23 @@ public class UtilMessagesAndPopups {
             MultiLineMessageBox.doSetTemplate();
             try {
                 return MultiLineMessageBox.show(message, TITLE, buttons, icon, true);
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Contact Administrator", e);
+            }
+        } else {
+            final Label l = (Label) ExecutionsCtrl.getCurrentCtrl().getCurrentPage().getFellow("successMsg", true);
+            if(!StringUtils.isEmpty(message))
+                l.getParent().setVisible(true);
+            l.setValue(message);
+            //Clients.evalJavaScript("test()");
+            return 0;
+        }
+    }
+    private static int display(String message, int buttons, String icon, String title) {
+        if (icon != null && icon.equals(MultiLineMessageBox.ERROR)) {
+            MultiLineMessageBox.doSetTemplate();
+            try {
+                return MultiLineMessageBox.show(message, title, buttons, icon, true);
             } catch (InterruptedException e) {
                 throw new RuntimeException("Contact Administrator", e);
             }

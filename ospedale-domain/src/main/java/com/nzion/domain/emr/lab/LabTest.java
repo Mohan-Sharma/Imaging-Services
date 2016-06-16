@@ -19,6 +19,8 @@ import javax.persistence.AccessType;
 import com.nzion.domain.Person;
 import com.nzion.domain.annot.AccountNumberField;
 import com.nzion.domain.base.IdGeneratingBaseEntity;
+import org.hibernate.FetchMode;
+import org.hibernate.annotations.Fetch;
 
 @Entity
 @AccountNumberField("testCode")
@@ -49,6 +51,7 @@ public class LabTest extends IdGeneratingBaseEntity implements Serializable{
 
 	
 	@ManyToMany(targetEntity = Investigation.class,fetch = FetchType.EAGER)
+	@Fetch(org.hibernate.annotations.FetchMode.SELECT)
 	@JoinTable(name = "lab_test_investigation", 
 	joinColumns = {@JoinColumn(name = "TEST_CODE")},
 	inverseJoinColumns = { @JoinColumn(name = "INVESTIGATION_CODE") })

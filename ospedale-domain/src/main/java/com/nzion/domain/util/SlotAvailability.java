@@ -40,7 +40,12 @@ public class SlotAvailability {
 	}*/
 	public SlotAvailability(LabOrderRequest schedule) {
 		this.slot = schedule.buildCalendarSlot();
-		setOn(schedule.getStartDate());
+		if (schedule.getPhlebotomist() != null){
+			setOn(schedule.getPhlebotomistStartDate());
+		} else {
+			setOn(schedule.getStartDate());
+		}
+
 	}
 
 	public Date getOn() {

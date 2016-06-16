@@ -2,6 +2,14 @@
 <?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./wrapper"?>
 <?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
 <zk xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<script type="text/javascript" defer="true">
+		jq(document).ready(function() {
+		var version = null;
+		jq.getJSON('/ospedale/appointment/build.properties').then(function(data){
+		jq("$versionNo").text(data.GIT_HASH);
+		});
+		});
+	</script>
 <zscript><![CDATA[
     com.nzion.domain.UserLogin userLogin = com.nzion.util.Infrastructure.getUserLogin();
     String passwordExpirationWarningMessage = Executions.getCurrent().getSession().getAttribute("passwordExpirationWarningMessage");

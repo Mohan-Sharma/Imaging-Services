@@ -12,7 +12,7 @@
 					onClick='loadPage("/practice/pms.zul",preferenceView)' />
 				<!-- <tab label="Auditing" onClick='loadPage("/configuration/auditConfig.zul",auditingView)'/> -->
 				<!-- 	<tab label="Encounter Security" onClick='loadPage("/soap/soapSecurity.zul",soapSecurityView)'/> --> 
-					<tab label="Messages/Tasks" onClick='loadPage("/portlets/message-portlet-view.zul",messageView)' />
+				<!--	<tab label="Messages/Tasks" onClick='loadPage("/portlets/message-portlet-view.zul",messageView)' />-->
 			</tabs>
 			<tabpanels>
 				<tabpanel id="practiceView"/>

@@ -9,13 +9,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.StringBufferInputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import com.nzion.domain.emr.lab.*;
 import org.zkforge.fckez.FCKeditor;
 import org.zkoss.bind.annotation.BindingParam;
 import org.zkoss.bind.annotation.Command;
@@ -33,17 +29,7 @@ import com.nzion.domain.File;
 import com.nzion.domain.Provider;
 import com.nzion.domain.Referral;
 import com.nzion.domain.UserLogin;
-import com.nzion.domain.emr.lab.LabRequisition;
 import com.nzion.domain.emr.lab.LabRequisition.LabRequisitionStatus;
-import com.nzion.domain.emr.lab.LabRequisitionItem;
-import com.nzion.domain.emr.lab.LabTest;
-import com.nzion.domain.emr.lab.LabTestPanel;
-import com.nzion.domain.emr.lab.LabTestProfile;
-import com.nzion.domain.emr.lab.LabTestResult;
-import com.nzion.domain.emr.lab.Laboratories;
-import com.nzion.domain.emr.lab.OBRSegment;
-import com.nzion.domain.emr.lab.OBXSegment;
-import com.nzion.domain.emr.lab.SpecimenModel;
 import com.nzion.repository.common.CommonCrudRepository;
 import com.nzion.service.common.CommonCrudService;
 import com.nzion.service.emr.lab.LabService;
@@ -118,6 +104,10 @@ public class LabTestResultController {
 	public void setLabTestResultList(List<LabTestResult> labTestResultList) {
 		this.labTestResultList = labTestResultList;
 	}
+
+    private Set<OBRSegmentAttachments> obrSegmentAttachmentSet = new HashSet<OBRSegmentAttachments>();
+
+    private String fileName;
 
 	@Init
     public void init(@ExecutionArgParam("labRequisition") LabRequisition labRequisition) {
@@ -241,10 +231,17 @@ public class LabTestResultController {
         if (obxSegment.getFile() == null) {
             file = new File();
         }
+
         file.setFileType(media.getContentType());
         file.setInputStream(media.isBinary() ? media.getStreamData() : new StringBufferInputStream(media.getStringData()));
         file.setFileName(media.getName());
-        fileBasedServiceImpl.createFilesForImageSection(file, obxSegment.getPatient());
+        try {
+            fileBasedServiceImpl.createFilesForImageSection(file, obxSegment.getPatient());
+        } catch (Exception e){
+            fileBasedServiceImpl.createDefaultFolderStructure(labRequisition.getPatient());
+            fileBasedServiceImpl.createFilesForImageSection(file, obxSegment.getPatient());
+        }
+
         obxSegment.setFile(file);
         this.observations = updateFileAttachmentInfoInObx(this.observations, obxSegment);
     }
@@ -267,6 +264,31 @@ public class LabTestResultController {
 
     }
 
+    @Command("removeAttachmentOBR")
+    @NotifyChange("fileName")
+    public void removeAttachmentOBR() {
+        File fileRecord = null;
+        if ((obrSegment != null) && (obrSegment.getAttachments() != null)) {
+             fileRecord = commonCrudRepository.findUniqueByEquality(File.class, new String[]{"id"}, new Object[]{obrSegment.getAttachments().iterator().next().getFile().getId()});
+        }
+        if (fileRecord != null) {
+            Set<OBRSegmentAttachments> attachments = obrSegment.getAttachments();
+            OBRSegmentAttachments obrSegmentAttachments = attachments.iterator().next();
+            obrSegmentAttachments.setFile(null);
+
+            obrSegment.setAttachments(attachments);
+            commonCrudService.save(obrSegment);
+
+            if (fileRecord.getId() != null)
+                commonCrudService.delete(fileRecord);
+        } else {
+            getObrSegmentAttachmentSet().clear();
+        }
+        fileName = null;
+
+
+    }
+
     @Command("downloadAttachment")
     public void downloadAttachment(@BindingParam("obxSegmentObject") OBXSegment obxSegment) throws FileNotFoundException {
         File file = obxSegment.getFile();
@@ -275,9 +297,21 @@ public class LabTestResultController {
     }
 
     @Command("LoadSpecimen")
-    @NotifyChange("specimenModelList")
+    @NotifyChange({"specimenModelList", "fileName"})
     public void loadSpecimen(@BindingParam("editor") FCKeditor fcKeditor) {
         if (selectedLabTestResult != null) {
+
+            obrSegment = commonCrudService.findUniqueByEquality(OBRSegment.class, new String[]{"labTest", "requisitionNumber"}, new Object[]{this.selectedLabTestResult.getLabTest(), this.labRequisition.getId().toString()});
+            if (obrSegment != null) {
+                if (obrSegment.getAttachments().iterator().hasNext()){
+                    if (obrSegment.getAttachments().iterator().next().getFile() != null) {
+                        fileName = obrSegment.getAttachments().iterator().next().getFile().getFileName();
+                    }
+                }
+                obrSegmentMap.put(this.selectedLabTestResult, obrSegment);
+            } else {
+                obrSegmentMap.put(this.selectedLabTestResult, labService.createOBRSegment(labRequisition, selectedSpecimenModel, selectedLabTestResult.getLabTest()));
+            }
             specimenModelList = labService.getSpecimenList(labRequisition, selectedLabTestResult);
             fcKeditor.setValue("");
             fcKeditor.invalidate();
@@ -312,6 +346,8 @@ public class LabTestResultController {
         }*/
         if (obrSegmentMap.get(this.selectedLabTestResult) == null) {
             obrSegmentMap.put(this.selectedLabTestResult, labService.createOBRSegment(labRequisition, selectedSpecimenModel, selectedLabTestResult.getLabTest()));
+        } else {
+            obrSegmentMap.get(this.selectedLabTestResult).setSpecimen(selectedSpecimenModel);
         }
     }
 
@@ -327,8 +363,16 @@ public class LabTestResultController {
             if (labRequisition.getLabOrderRequest().getProvider() != null)
                 obrSegment.setProvider(labRequisition.getLabOrderRequest().getProvider());
             obrSegment.setRequisitionNumber(String.valueOf(labRequisition.getId()));
+
+            if(obrSegmentAttachmentSet.size() > 0) {
+                for (OBRSegmentAttachments attachments : obrSegmentAttachmentSet) {
+                    attachments.setObrSegment(obrSegment);
+                }
+                obrSegment.setAttachments(obrSegmentAttachmentSet);
+            }
+
             commonCrudService.save(obrSegment);
-            UtilMessagesAndPopups.displaySuccess();
+            UtilMessagesAndPopups.showSuccess();
         }
 
     }
@@ -339,6 +383,8 @@ public class LabTestResultController {
         //labRequisition.setRemarks(fcKeditor.getValue());
        // labRequisition = commonCrudService.save(labRequisition);
         UtilMessagesAndPopups.displaySuccess();
+        if (selectedLabTestResult == null)
+            return;
         selectedLabTestResult.setStatus(LabRequisitionStatus.COMPLETED);
         commonCrudService.save(selectedLabTestResult);
         
@@ -425,4 +471,50 @@ public class LabTestResultController {
         obrSegmentMap.put(this.selectedLabTestResult, obrSegment);
     }
 
+    public Set<OBRSegmentAttachments> getObrSegmentAttachmentSet() {
+        return obrSegmentAttachmentSet;
+    }
+
+    public void setObrSegmentAttachmentSet(Set<OBRSegmentAttachments> obrSegmentAttachmentSet) {
+        this.obrSegmentAttachmentSet = obrSegmentAttachmentSet;
+    }
+
+    @Command("uploadLabAttachmentOBR")
+    @NotifyChange("fileName")
+    public void uploadLabAttachmentOBR(@BindingParam("eventType") UploadEvent uploadEvent) {
+        Media media = uploadEvent.getMedia();
+        File file = new File();
+
+        file.setFileType(media.getContentType());
+        file.setInputStream(media.isBinary() ? media.getStreamData() : new StringBufferInputStream(media.getStringData()));
+        file.setFileName(media.getName());
+        try{
+            fileBasedServiceImpl.createFilesForImageSection(file, labRequisition.getPatient());
+        }catch(Exception e){
+
+            fileBasedServiceImpl.createDefaultFolderStructure(labRequisition.getPatient());
+            fileBasedServiceImpl.createFilesForImageSection(file, labRequisition.getPatient());
+        }
+
+        if ((obrSegment != null) && (obrSegment.getAttachments().iterator().hasNext()) && (obrSegment.getAttachments().iterator().next().getFile() == null)){
+                    obrSegment.getAttachments().iterator().next().setFile(file);
+            obrSegmentAttachmentSet = Collections.EMPTY_SET;
+        } else {
+            OBRSegmentAttachments attachment = new OBRSegmentAttachments();
+            attachment.setFile(file);
+            getObrSegmentAttachmentSet().clear();
+            getObrSegmentAttachmentSet().add(attachment);
+        }
+
+        fileName = file.getFileName();
+        //this.observations = updateFileAttachmentInfoInObx(this.observations, obxSegment);
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
 }

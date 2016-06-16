@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app id="WebApp_ID" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
-	<display-name>Imaging-Services</display-name>
+	<display-name>Afya-Lab</display-name>
 
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
@@ -13,7 +13,7 @@
 	</context-param>
 	<context-param>
 		<param-name>webAppRootKey</param-name>
-		<param-value>Imaging-Services</param-value>
+		<param-value>afya-lab</param-value>
 	</context-param>
 
 	<listener>
@@ -267,7 +267,7 @@
 
     <servlet-mapping>
         <servlet-name>labOrderServlet</servlet-name>
-        <url-pattern>/imagingServiceMaster/addLabOrderRequest</url-pattern>
+        <url-pattern>/labMaster/addLabOrderRequest</url-pattern>
     </servlet-mapping>
 
 	<!--<servlet>
@@ -277,7 +277,7 @@
 
 	<servlet-mapping>
 		<servlet-name>bookLabAppointmentServlet</servlet-name>
-		<url-pattern>/imagingServiceMaster/getAvailableTimeslotsForGivenDateAndBookAppointment</url-pattern>
+		<url-pattern>/labMaster/getAvailableTimeslotsForGivenDateAndBookAppointment</url-pattern>
 	</servlet-mapping>-->
 
 	<servlet>
@@ -287,7 +287,7 @@
 
 	<servlet-mapping>
 		<servlet-name>phlebotomistListServlet</servlet-name>
-		<url-pattern>/imagingServiceMaster/getPhlebotomistList</url-pattern>
+		<url-pattern>/labMaster/getPhlebotomistList</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -297,7 +297,7 @@
 
 	<servlet-mapping>
 		<servlet-name>phlebotomistAvailabilityServlet</servlet-name>
-		<url-pattern>/imagingServiceMaster/placeLabOrder</url-pattern>
+		<url-pattern>/labMaster/placeLabOrder</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -306,7 +306,27 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>updatePracticeDetails</servlet-name>
-		<url-pattern>/imagingServiceMaster/updatePracticeDetails</url-pattern>
+		<url-pattern>/labMaster/updatePracticeDetails</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>rescheduleLabAppointment</servlet-name>
+		<servlet-class>com.nzion.service.RescheduleLabOrderServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>rescheduleLabAppointment</servlet-name>
+		<url-pattern>/labMaster/rescheduleLabAppointment</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>appointmentSlotsAvailabilityServlet</servlet-name>
+		<servlet-class>com.nzion.service.AppointmentSlotsAvailabilityServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>appointmentSlotsAvailabilityServlet</servlet-name>
+		<url-pattern>/labMaster/getAvailableTimeslotsForGivenPhlebotomist</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -316,7 +336,16 @@
 
 	<servlet-mapping>
 		<servlet-name>tenantDataSourceConfigServlet</servlet-name>
-		<url-pattern>/imagingServiceMaster/tenantDataSourceConfig</url-pattern>
+		<url-pattern>/labMaster/tenantDataSourceConfig</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>logoUrlFinderServlet</servlet-name>
+		<servlet-class>com.nzion.service.TenantLogoUrlFinderServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>logoUrlFinderServlet</servlet-name>
+		<url-pattern>/labMaster/getTenantLogoURL</url-pattern>
 	</servlet-mapping>
 
 	<welcome-file-list>

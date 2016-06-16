@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app id="WebApp_ID" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
-	<display-name>Afya-Lab</display-name>
+		 xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+	<display-name>Imaging-Services</display-name>
 
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
@@ -13,7 +13,7 @@
 	</context-param>
 	<context-param>
 		<param-name>webAppRootKey</param-name>
-		<param-value>afya-lab</param-value>
+		<param-value>Imaging-Services</param-value>
 	</context-param>
 
 	<listener>
@@ -119,19 +119,19 @@
 		<filter-name>passwordPolicyFilter</filter-name>
 		<url-pattern>*.zul</url-pattern>
 	</filter-mapping>
-    <servlet>
-        <servlet-name>default</servlet-name>
-        <init-param>
-            <param-name>useFileMappedBuffer</param-name>
-            <param-value>false</param-value>
-        </init-param>
-    </servlet>
+	<servlet>
+		<servlet-name>default</servlet-name>
+		<init-param>
+			<param-name>useFileMappedBuffer</param-name>
+			<param-value>false</param-value>
+		</init-param>
+	</servlet>
 
-    <servlet>
-        <description>Sample</description>
-        <servlet-name>PdfServlet</servlet-name>
-        <servlet-class>com.nzion.web.PdfServlet</servlet-class>
-    </servlet>
+	<servlet>
+		<description>Sample</description>
+		<servlet-name>PdfServlet</servlet-name>
+		<servlet-class>com.nzion.web.PdfServlet</servlet-class>
+	</servlet>
 	<servlet>
 		<description>ZK loader for ZUML pages</description>
 		<servlet-name>zkLoader</servlet-name>
@@ -178,10 +178,10 @@
 		<servlet-name>ccdImportServlet</servlet-name>
 		<url-pattern>/ccd/import</url-pattern>
 	</servlet-mapping>-->
-    <servlet-mapping>
-        <servlet-name>PdfServlet</servlet-name>
-        <url-pattern>downloadPdf</url-pattern>
-    </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>PdfServlet</servlet-name>
+		<url-pattern>downloadPdf</url-pattern>
+	</servlet-mapping>
 
 	<servlet-mapping>
 		<servlet-name>zkLoader</servlet-name>
@@ -214,61 +214,61 @@
 		<session-timeout>-1</session-timeout>
 	</session-config>
 
-    <servlet>
-        <servlet-name>superBillServlet</servlet-name>
-        <servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
-        <load-on-startup>0</load-on-startup>
-    </servlet>
+	<servlet>
+		<servlet-name>superBillServlet</servlet-name>
+		<servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
+		<load-on-startup>0</load-on-startup>
+	</servlet>
 
-    <servlet>
-        <servlet-name>superBillPatientSearchServlet</servlet-name>
-        <servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
-        <load-on-startup>0</load-on-startup>
-    </servlet>
+	<servlet>
+		<servlet-name>superBillPatientSearchServlet</servlet-name>
+		<servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
+		<load-on-startup>0</load-on-startup>
+	</servlet>
 
-    <servlet-mapping>
-        <servlet-name>superBillPatientSearchServlet</servlet-name>
-        <url-pattern>/superbillsearchpatient</url-pattern>
-    </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>superBillPatientSearchServlet</servlet-name>
+		<url-pattern>/superbillsearchpatient</url-pattern>
+	</servlet-mapping>
 
-    <servlet-mapping>
-        <servlet-name>superBillServlet</servlet-name>
-        <url-pattern>/superbilldata</url-pattern>
-    </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>superBillServlet</servlet-name>
+		<url-pattern>/superbilldata</url-pattern>
+	</servlet-mapping>
 
-    <servlet>
-        <servlet-name>superBillPaymentServlet</servlet-name>
-        <servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
-        <load-on-startup>0</load-on-startup>
-    </servlet>
+	<servlet>
+		<servlet-name>superBillPaymentServlet</servlet-name>
+		<servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
+		<load-on-startup>0</load-on-startup>
+	</servlet>
 
-    <servlet-mapping>
-        <servlet-name>superBillPaymentServlet</servlet-name>
-        <url-pattern>/superbill</url-pattern>
-    </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>superBillPaymentServlet</servlet-name>
+		<url-pattern>/superbill</url-pattern>
+	</servlet-mapping>
 
 
-    <servlet>
-        <servlet-name>authorizationServlet</servlet-name>
-        <servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
-        <load-on-startup>0</load-on-startup>
-    </servlet>
+	<servlet>
+		<servlet-name>authorizationServlet</servlet-name>
+		<servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
+		<load-on-startup>0</load-on-startup>
+	</servlet>
 
-    <servlet-mapping>
-        <servlet-name>authorizationServlet</servlet-name>
-        <url-pattern>/securityauthorization</url-pattern>
-    </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>authorizationServlet</servlet-name>
+		<url-pattern>/securityauthorization</url-pattern>
+	</servlet-mapping>
 
-	 <servlet>
-        <servlet-name>labOrderServlet</servlet-name>
-        <servlet-class>com.nzion.util.LabOrderServlet</servlet-class>
-        <load-on-startup>0</load-on-startup>
-    </servlet>
+	<servlet>
+		<servlet-name>labOrderServlet</servlet-name>
+		<servlet-class>com.nzion.util.LabOrderServlet</servlet-class>
+		<load-on-startup>0</load-on-startup>
+	</servlet>
 
-    <servlet-mapping>
-        <servlet-name>labOrderServlet</servlet-name>
-        <url-pattern>/labMaster/addLabOrderRequest</url-pattern>
-    </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>labOrderServlet</servlet-name>
+		<url-pattern>/imagingServiceMaster/addLabOrderRequest</url-pattern>
+	</servlet-mapping>
 
 	<!--<servlet>
 		<servlet-name>bookLabAppointmentServlet</servlet-name>
@@ -277,7 +277,7 @@
 
 	<servlet-mapping>
 		<servlet-name>bookLabAppointmentServlet</servlet-name>
-		<url-pattern>/labMaster/getAvailableTimeslotsForGivenDateAndBookAppointment</url-pattern>
+		<url-pattern>/imagingServiceMaster/getAvailableTimeslotsForGivenDateAndBookAppointment</url-pattern>
 	</servlet-mapping>-->
 
 	<servlet>
@@ -287,7 +287,7 @@
 
 	<servlet-mapping>
 		<servlet-name>phlebotomistListServlet</servlet-name>
-		<url-pattern>/labMaster/getPhlebotomistList</url-pattern>
+		<url-pattern>/imagingServiceMaster/getPhlebotomistList</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -297,7 +297,7 @@
 
 	<servlet-mapping>
 		<servlet-name>phlebotomistAvailabilityServlet</servlet-name>
-		<url-pattern>/labMaster/placeLabOrder</url-pattern>
+		<url-pattern>/imagingServiceMaster/placeLabOrder</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -306,27 +306,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>updatePracticeDetails</servlet-name>
-		<url-pattern>/labMaster/updatePracticeDetails</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>rescheduleLabAppointment</servlet-name>
-		<servlet-class>com.nzion.service.RescheduleLabOrderServlet</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>rescheduleLabAppointment</servlet-name>
-		<url-pattern>/labMaster/rescheduleLabAppointment</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>appointmentSlotsAvailabilityServlet</servlet-name>
-		<servlet-class>com.nzion.service.AppointmentSlotsAvailabilityServlet</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>appointmentSlotsAvailabilityServlet</servlet-name>
-		<url-pattern>/labMaster/getAvailableTimeslotsForGivenPhlebotomist</url-pattern>
+		<url-pattern>/imagingServiceMaster/updatePracticeDetails</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -336,16 +316,7 @@
 
 	<servlet-mapping>
 		<servlet-name>tenantDataSourceConfigServlet</servlet-name>
-		<url-pattern>/labMaster/tenantDataSourceConfig</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>logoUrlFinderServlet</servlet-name>
-		<servlet-class>com.nzion.service.TenantLogoUrlFinderServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>logoUrlFinderServlet</servlet-name>
-		<url-pattern>/labMaster/getTenantLogoURL</url-pattern>
+		<url-pattern>/imagingServiceMaster/tenantDataSourceConfig</url-pattern>
 	</servlet-mapping>
 
 	<welcome-file-list>

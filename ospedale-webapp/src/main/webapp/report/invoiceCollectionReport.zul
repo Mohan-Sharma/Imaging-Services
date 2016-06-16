@@ -1,0 +1,134 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./invoiceCollectionWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+
+<window id="invoiceCollectionWin" apply="org.zkoss.bind.BindComposer" viewModel="@id('vm') @init('com.nzion.zkoss.composer.InvoiceCollectionReportViewModel')">
+    <div style="padding:5px" zclass="page-header titled-well">
+        <h:h1>
+            <h:small>Collection Report</h:small>
+        </h:h1>
+    </div>
+
+    <div class="container-fluid">
+        <div zclass="row-fluid">
+            <div zclass="span2">
+                <label value="Patient"  />
+                <patientlookup onChange="vm.setPatient((com.nzion.domain.Patient)event.getOrigin().getData())" />
+            </div>
+
+            <!--<div zclass="span2" style="margin-left:112px;">
+                <label value="Patient Type"  />
+                <combobox selectedItem="@save(vm.patientType)" sclass="span9">
+                    <comboitem label="Cash" value="CASH PAYING" />
+                    <comboitem label="Insurance" value="INSURANCE"/>
+                    <comboitem label="Corporate" value="CORPORATE"/>
+                </combobox>
+            </div>-->Lab Result Entry
+
+            <div zclass="span2" style="margin-left:112px;">
+                <label value="From Date"  />
+                <datebox id="fromDate" value="@save(vm.fromDate)" sclass="span12"/>
+            </div>
+
+            <div zclass="span2" >
+                <label value="Thru Date"  />
+                <datebox id="thruDate" value="@save(vm.thruDate)" sclass="span12"/>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div align="center" sclass="panelFoot">
+        <button label="Search" zclass="btn btn-primary" id="searchButton" onClick="@command('search')"/>
+    </div>
+    <separator></separator>
+    <panel id="searchResults" title="Search Results" width="100%" visible="false" >
+        <panelchildren>
+            <listbox model="@bind(vm.paymentList)">
+               <listhead>
+                   <listheader label="Receipt Number"></listheader>
+                   <listheader label="Date"/>
+                   <listheader label="Afya ID"/>
+                   <listheader label="File No."/>
+                   <listheader label="Civil ID"/>
+                   <listheader label="Invoice Number"/>
+                   <listheader label="Patient Name"/>
+                   <listheader label="Invoice Amount"/>
+                   <listheader label="Paid Amount"/>
+                   <listheader label="Mode"/>
+                   <listheader label="TransRef/CheckNum" width="130px"/>
+                   <listheader label="Bank"/>
+                   <listheader label="Cheque Date"/>
+               </listhead>
+               <template name="model" var="invoicePayment">
+               <listitem>
+                   <listcell label="@bind(invoicePayment.receiptNumber)"></listcell>
+                   <listcell label="@bind(invoicePayment.paymentDate) @converter('formatedDate', format='dd/MM/yyyy')"></listcell>
+                   <listcell label="@bind(invoicePayment.afyaId)"></listcell>
+                   <listcell label="@bind(invoicePayment.fileNo)"></listcell>
+                   <listcell label="@bind(invoicePayment.civilId)"></listcell>
+                   <listcell label="@bind(invoicePayment.invoiceNumber)"></listcell>
+                   <listcell label="@bind(invoicePayment.patientName)"></listcell>
+                   <listcell>
+                       <div align="right">
+                           <label value="@bind(invoicePayment.billableAmount)" />
+                       </div>
+                   </listcell>
+                   <listcell>
+                       <div align="right">
+                           <label value="@bind(invoicePayment.paidAmount)" />
+                       </div>
+                   </listcell>
+                   <listcell label="@bind(invoicePayment.modeDescription)"></listcell>
+                   <listcell label="@bind(invoicePayment.transRefOrCheckNumber)"></listcell>
+                   <listcell label="@bind(invoicePayment.bankName)"></listcell>
+                   <listcell label="@bind(invoicePayment.checkDate) @converter('formatedDate', format='dd/MM/yyyy')"></listcell>
+               </listitem>
+
+            </template>
+                <listfoot>
+                    <listfooter></listfooter>
+                    <listfooter></listfooter>
+                    <listfooter></listfooter>
+                    <listfooter></listfooter>
+                    <listfooter></listfooter>
+                   <!-- <listfooter>
+                        <div align="right">
+                            <label value="@bind(vm.totalBillableAmount)"/>
+                        </div>
+                    </listfooter>
+                   <listfooter>
+                        <div align="right">
+                            <label value="@bind(vm.totalPaidAmount)"/>
+                        </div>
+                    </listfooter>-->
+                    <!--   <listfooter>
+                          <div align="right">
+                              <label value="@bind(vm.totalInsuranceAmount) @converter('com.nzion.zkoss.composer.appointment.InvoiceCollectionConverter')"/>
+                          </div>
+                      </listfooter>
+                      <listfooter>
+                          <div align="right">
+                              <label value="@bind(vm.totalCorporateAmount) @converter('com.nzion.zkoss.composer.appointment.InvoiceCollectionConverter')"/>
+                          </div>
+                      </listfooter>-->
+                    <listfooter></listfooter>
+                    <listfooter></listfooter>
+                    <listfooter></listfooter>
+                    <listfooter></listfooter>
+                </listfoot>
+            </listbox>
+            <div align="center">
+                <label value="@bind(vm.totalDescriptionFooter1)" style="font-weight:bold;"/>
+            </div>
+            <div align="center">
+                <label value="@bind(vm.totalDescriptionFooter2)" style="font-weight:bold;"/>
+            </div>
+        </panelchildren>
+    </panel>
+</window>
+
+</zk>            

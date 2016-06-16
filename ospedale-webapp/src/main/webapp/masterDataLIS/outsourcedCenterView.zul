@@ -1,0 +1,14 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+
+    <zscript>
+        setPageTitle("Outsourced Center ", "");
+    </zscript>
+    <window>
+        <screen width="100%" listtitle="List of OutsourcedCenters" addpage="outsourcedCenterAdd" addmodepopup="true" entityclass="com.nzion.domain.masterDataLIS.OutsourcedCenter"
+                fields="osCode,OsName,address,emailId,telPhone,contactPerson" labels="OS Code,OS Name,Address,EMAIL ID,Tel-Phone,Contact Person" hidedeletebtn="true" />
+    </window>
+
+
+</zk>            

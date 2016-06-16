@@ -1,0 +1,13 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+
+    <zscript>
+        setPageTitle("Accreditation ", "");
+    </zscript>
+    <window>
+        <screen width="100%" listtitle="Accreditation" addpage="accreditationAdd" addmodepopup="true" entityclass="com.nzion.domain.masterDataLIS.Accreditation"
+                fields="acrCode,acrName,acrDescription" labels="Accreditation Code,Accreditation Name,Accreditation Description"
+                hidedeletebtn="true" />
+    </window>
+</zk>            

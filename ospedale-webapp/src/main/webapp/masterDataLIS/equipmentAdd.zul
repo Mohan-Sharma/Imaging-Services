@@ -1,0 +1,86 @@
+<?page title="Afya Lab" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./createEquipment"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+
+    <zscript>
+        import com.nzion.service.common.CommonCrudService;
+        import com.nzion.domain.masterDataLIS.Equipment;
+        Equipment equipment = arg.get("entity");
+        if(equipment == null)
+            equipment = new Equipment();
+    </zscript>
+    <window id="createEquipment" mode="modal" width="50%" position="center,top">
+        <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Equipment</h:small>
+                <button type="button" zclass="close" onClick="createEquipment.detach();">×</button>
+            </h:h1>
+        </div>
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Equipment Code" style="text-align:right;" mold="required"/>
+                    <intbox value="@{equipment.eqpCode,save-when='Save.onClick'}" id="eqpCode" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"
+                            maxlength="3"/>
+                </div>
+                <div zclass="span3">
+                    <label value="Equipment Name" style="text-align:right;" mold="required"/>
+                    <textbox value="@{equipment.eqpName,save-when='Save.onClick'}" id="eqpName" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"
+                            maxlength="30"/>
+                </div>
+                <div zclass="span3">
+                    <label value="Equipment Alias" style="text-align:right;" />
+                    <textbox value="@{equipment.eqpAlias,save-when='Save.onClick'}" id="eqpAlias" sclass="span12" maxlength="10"/>
+                </div>
+                <div zclass="span3">
+                    <label value="Equipment Type" style="text-align:right;" />
+                    <textbox value="@{equipment.eqpType,save-when='Save.onClick'}" id="eqpType" sclass="span12" maxlength="10"/>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Baud Rate" style="text-align:right;" />
+                    <textbox value="@{equipment.baudRate,save-when='Save.onClick'}" id="baudRate" sclass="span12" maxlength="20"/>
+                </div>
+                <div zclass="span3">
+                    <label value="Data Bit" style="text-align:right;" />
+                    <intbox value="@{equipment.dataBit,save-when='Save.onClick'}" id="dataBit" sclass="span12" maxlength="1"/>
+                </div>
+                <div zclass="span3">
+                    <label value="Parity" style="text-align:right;" />
+                    <textbox value="@{equipment.parity,save-when='Save.onClick'}" id="parity" sclass="span12" maxlength="6"/>
+                </div>
+                <div zclass="span3">
+                    <label value="Stop Bit" style="text-align:right;" />
+                    <intbox value="@{equipment.stopBit,save-when='Save.onClick'}" id="stopBit" sclass="span12" maxlength="1"/>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Accession No" style="text-align:right;" />
+                    <textbox value="@{equipment.accessionNo,save-when='Save.onClick'}" id="accessionNo" sclass="span12" maxlength="10"/>
+                </div>
+
+                <div zclass="span3">
+                    <label value="PC Name" style="text-align:right;" />
+                    <textbox value="@{equipment.pcName,save-when='Save.onClick'}" id="pcName" sclass="span12" maxlength="20"/>
+                </div>
+            </div>
+        </div>
+        <div sclass="panelFoot">
+            <button label="Save" id="Save" visible="true">
+                <attribute name="onClick">
+                    try{
+                    commonCrudService.save(equipment);
+                    createEquipment.detach();
+                    }catch(org.springframework.dao.DataIntegrityViolationException e){
+                      throw new RuntimeException("Eqp code'"+equipment.getAccountNumber()+"' already exists.");
+                    }
+                </attribute>
+            </button>
+            <button label="Close" id="Close" onClick='createEquipment.detach();'/>
+        </div>
+    </window>
+</zk>            

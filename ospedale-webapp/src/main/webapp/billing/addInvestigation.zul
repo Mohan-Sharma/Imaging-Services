@@ -1,0 +1,96 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./addInvestigationWindow"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<zscript>
+	<![CDATA[
+	import com.nzion.domain.emr.lab.*;
+	import com.nzion.domain.pms.Modifier;
+	//import com.nzion.zkoss.composer.emr.lab.LabController;
+	Investigation investigation = arg.get("entity");
+	//LabTestCpt labTestCpt;
+	String str="false";
+
+	boolean isReadOnly = true;
+	String label = "Edit ";
+	if (investigation == null) {
+		investigation = new Investigation();
+		label = "New ";
+		isReadOnly = false;
+
+	}
+
+
+]]>
+	</zscript>
+	<window id="addInvestigationWindow"  mode="modal" width="40%" position="center,top" closable="true">
+		<style>.addTestClass{ }</style>
+		<div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Investigation</h:small>
+                  <button type="button" zclass="close" onClick="addInvestigationWindow.detach();">x</button>
+            </h:h1>
+        </div>
+					<div zclass="container-fluid">
+		              <!--<div zclass="row-fluid" if="@{!investigation.investigationName}">-->
+
+				     <div zclass="row-fluid">
+						   <div zclass="span8">
+								<label value="Name" />
+								<label value="*" style="color:red"  />
+							<textbox value="@{investigation.investigationName,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty:Name Required"
+									 readonly="${isReadOnly}"	 />
+						</div>
+						<div zclass="span2">
+							<label value="Code" />
+							<textbox id="codeTextBox"  value="@{investigation.investigationCode,save-when='Save.onClick'}" sclass="span12" readonly="${isReadOnly}"	/>
+						</div>
+						<space></space>
+						<div zclass="span12">
+						<hbox>
+							<label value="Result Type" />
+							<checkbox id="attachmentChkBox" label="Attachment" checked="@{investigation.attachment,save-when='Save.onClick'}"  />
+							<checkbox id="freeTextChkBox" label="Free Text" checked="@{investigation.freeText,save-when='Save.onClick'}"  />
+							<checkbox id="numericalChkBox" label="Numerical Value" checked="@{investigation.numericalValue,save-when='Save.onClick'}"  />
+							</hbox>
+						</div>
+						</div>
+						<div zclass="row-fluid">
+						<div zclass="span3" >
+							<label value="Reference Range" />
+							<textbox placeholder="109-130" value="@{investigation.referenceRange,save-when='Save.onClick'}" sclass="span12"  />
+						</div>
+						<div zclass="span5">
+							<label value="Unit" />
+							<textbox  value="@{investigation.unit,save-when='Save.onClick'}"  sclass="span12" readonly="${isReadOnly}" />
+								
+						</div> 
+						<!--<div zclass="span2">
+                      <label value="Price"/> 
+					  <decimalbox placeholder="0" value="@{labTest.standardAmount,save-when='Save.onClick'}"  sclass="span12"/>
+                	</div>-->
+						</div>
+					</div>
+			<div sclass="panelFoot"/>
+			<separator height="10px"/>
+			<div sclass="panelFoot">
+				<button label="Save" zclass="btn-success btn" id="Save">
+					<attribute name="onClick">
+					try{
+						commonCrudService.save(investigation);
+						com.nzion.util.UtilMessagesAndPopups.showSuccess();
+						addInvestigationWindow.detach();
+						}catch(Exception e){
+							com.nzion.util.ViewUtil.disPlayUniqueErrorMessage(e,"Test Code '"+investigation.investigationCode()+"' already exists.");
+					}
+				
+					//if(!(attachmentChkBox.isChecked()|| freeTextChkBox.isChecked()||numericalChkBox.isChecked())){
+					//alert("ccccccccc");
+					//}
+					
+					</attribute>
+				</button>
+				<button label="Cancel" forward="onClick=onCancel" />
+			</div>
+	</window>
+</zk>

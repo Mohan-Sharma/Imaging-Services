@@ -1,0 +1,14 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+
+    <zscript>
+        setPageTitle("Equipment ", "");
+    </zscript>
+    <window>
+        <screen width="100%" listtitle="List of Equipments" addpage="equipmentAdd" addmodepopup="true" entityclass="com.nzion.domain.masterDataLIS.Equipment"
+                fields="eqpCode,eqpName,eqpAlias,eqpType,baudRate,dataBit,parity,stopBit,accessionNo,pcName" labels="Equipment Code,Equipment Name,Equipment Alias,Equipment Type,
+                Baud Rate,Data Bit,Parity,Stop Bit,Accession No.,PC Name" hidedeletebtn="true" />
+    </window>
+
+</zk>            

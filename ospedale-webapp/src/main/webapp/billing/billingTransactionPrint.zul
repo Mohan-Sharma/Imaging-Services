@@ -1,0 +1,555 @@
+<?page title="Afya Lab" contentType="text/html;charset=UTF-8"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./txnItemPrintWindow"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+
+    <zscript>
+        import java.text.*;
+        import com.nzion.util.UtilValidator;
+        String invId = param.get("invoiceId")[0];
+        com.nzion.zkoss.composer.BillingController billingController  = new com.nzion.zkoss.composer.BillingController();
+        com.nzion.domain.billing.Invoice invoice;
+
+        com.nzion.domain.Location location = com.nzion.util.Infrastructure.getSelectedLocation();
+        com.nzion.domain.Practice practice=com.nzion.util.Infrastructure.getPractice();
+        if(UtilValidator.isNotEmpty(invId)){
+            invoice = billingController.getInvoice();
+        }
+        com.nzion.domain.Patient patient = invoice.getPatient();
+        Date createdTxTimestamp = invoice.getCreatedTxTimestamp();
+        String invoiceDate = com.nzion.util.UtilDateTime.formatDateToDatetimeFormat(createdTxTimestamp);
+        com.nzion.domain.UserLogin userLogin = com.nzion.util.Infrastructure.getUserLogin();
+        String loggedInPersonFormattedName = com.nzion.util.ViewUtil.getFormattedName(userLogin.getPerson());
+        String ageGender = null;
+        if(patient != null){
+            String gender = patient.getGender().getDescription();
+            Date d = patient.getDateOfBirth();
+            String age = com.nzion.util.UtilDateTime.calculateAge(d,new Date());
+            ageGender = age+" / "+gender;
+        }
+
+        boolean isLogoWithAdd = com.nzion.util.Infrastructure.getPractice().isLogoWithAddress();
+        boolean isLogoWithoutAdd = !isLogoWithAdd;
+        List invoiceItems = new ArrayList();
+        for(com.nzion.domain.billing.InvoiceItem invoiceItem : invoice.getInvoiceItems()){
+            invoiceItems.add(invoiceItem);
+        }
+        boolean isInvoicePayments = false;
+        if(invoice.getInvoicePayments() != null)
+            isInvoicePayments = invoice.getInvoicePayments().size() > 0;
+
+        String currencyInWords = "";
+        com.nzion.util.CurrencyConverter currencyConverter = new com.nzion.util.CurrencyConverter();
+        java.math.BigDecimal totalAmount = invoice.getTotalAmount().getAmount();
+        currencyInWords = currencyConverter.rupeesInWords(totalAmount.toString(), null, null);
+    </zscript>
+
+
+    <style>
+        .personDet{
+        border: 1px solid #333;
+        align:center;
+        margin : 2px 0px 0px 0px;
+        }
+
+        .personDet td{
+        padding:0px;
+        }
+        .break {
+        page-break-after: always;
+        }
+
+        @media print {
+        #footerDiv {
+        position: fixed;
+        bottom: 0;
+        }
+
+        #body {
+        margin: x x y x;
+        ( y should reflect the height of the footer );
+        }
+        }
+
+
+    </style>
+
+<window id="txnItemPrintWindow">
+    <attribute name="onCreate">
+        Clients.print();
+    </attribute>
+    <n:div style="width:95%;horizontal-align:center;margin:20px 10px 5px 30px;">
+
+        <div if="${isLogoWithAdd}">
+            <n:table style="align:center;width:100%">
+                <n:tr>
+                    <n:td style="cellspacing:0px;cellpadding:0px">
+                        <image id="logoImage1"  width="800px" height="200px" style="margin-left:5px">
+                            <attribute name="onCreate">
+                                String logoUrl = com.nzion.util.Infrastructure.getPractice().getImageUrl().replaceFirst("/","");
+                                java.io.FileInputStream fileInputStream = new java.io.FileInputStream(logoUrl);
+                                org.zkoss.image.AImage aImage = new org.zkoss.image.AImage(logoUrl,fileInputStream);
+                                self.setContent(aImage);
+                                self.setVisible(true);
+                            </attribute>
+                        </image>
+                    </n:td>
+                </n:tr>
+
+            </n:table>
+        </div>
+
+        <div if="${isLogoWithoutAdd}">
+            <n:table style="align:center;width:100%">
+                <n:tr>
+                    <n:td width="17%" style="cellspacing:0px;cellpadding:0px">
+                        <image id="logoImage" style="margin-left:5px">
+                            <attribute name="onCreate">
+                                String logoUrl = com.nzion.util.Infrastructure.getPractice().getImageUrl().replaceFirst("/","");
+                                java.io.FileInputStream fileInputStream = new java.io.FileInputStream(logoUrl);
+                                org.zkoss.image.AImage aImage = new org.zkoss.image.AImage(logoUrl,fileInputStream);
+                                self.setContent(aImage);
+                                self.setVisible(true);
+                            </attribute>
+                        </image>
+                    </n:td>
+
+                    <n:td width="75%" style="cellspacing:0px;cellpadding:0px;">
+                        <n:table style="align:left;width:50%;height:75px">
+                            <n:tr>
+                                <n:td>
+                                    <label value="${practice.practiceName}" style="font-size:13px;font-weight:bold;font-family:Calibri;margin-right:2px"/>
+                                </n:td>
+                            </n:tr>
+                            <n:tr>
+                                <n:td>
+                                    <label value="${location.contacts.postalAddress.city}"  style="font-size:12px;font-weight:normal;font-family:Calibri;margin-right:2px"/>
+                                </n:td>
+                            </n:tr>
+
+                            <n:tr>
+                                <n:td>
+                                    <label value="${location.contacts.postalAddress.address1},${location.contacts.postalAddress.address2}" style="font-size:12px;font-weight:normal;font-family:Calibri;margin-right:2px"/>
+                                </n:td>
+                            </n:tr>
+
+
+                            <n:tr>
+                                <n:td>
+                                    <label value="${location.contacts.postalAddress.postalCode}, ${location.contacts.postalAddress.stateProvinceGeo},${location.contacts.postalAddress.countryGeo}"
+                                           style="font-size:12px;font-weight:normal;font-family:Calibri;margin-right:2px"/>
+                                </n:td>
+                            </n:tr>
+
+                            <n:tr>
+                                <n:td>
+                                    <label value="Tel : ${location.contacts.officePhone}, Email : ${location.contacts.email}"
+                                           style="font-size:12px;font-weight:normal;font-family:Calibri;margin-right:2px" />
+                                </n:td>
+                            </n:tr>
+
+                        </n:table>
+                    </n:td>
+                </n:tr>
+
+            </n:table>
+        </div>
+    </n:div>
+    <!--<n:div class="clr" style="width:95%;horizontal-align:center;margin:20px 0px 0px 30px;margin-top:0px;margin-bottom:15px;">
+        <n:table class="personDet" style="align:center;width:95%; border-color:#C0C0C0" border="1px">
+            <n:tr>
+                <n:td>
+                </n:td>
+            </n:tr>
+        </n:table>
+    </n:div>-->
+    <n:div class="clr" style="width:95%;horizontal-align:center;margin:20px 0px 0px 30px;margin-top:0px;margin-bottom:15px;">
+        <n:table class="personDet" style="align:center;width:95%; border-color:#C0C0C0" border="1px">
+            <n:tr>
+                <n:td>
+                </n:td>
+            </n:tr>
+        </n:table>
+    </n:div>
+    <n:div style="width:95%;text-align:center;">
+        <div align="center">
+            <label style="font-size:17px;font-weight:bold;font-family:Calibri;" value="Patient Invoice and Receipt">
+            </label>
+        </div>
+    </n:div>
+    <n:div class="clr" style="width:95%;horizontal-align:center;margin:20px 0px 0px 30px;margin-top:0px">
+        <n:table class="personDet" style="align:center;width:95%;border-color:#C0C0C0"  border="1px">
+            <n:tr>
+                <n:td style="border-color:#C0C0C0">
+
+                    <div class="z-hlayout" style="width:100%;">
+                        <div style="width:25%" class="z-hlayout-inner" align="left">
+                            <label value="Afya Id"
+                                   style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px">
+                            </label>
+                        </div>
+                        <div style="width:5%" class="z-hlayout-inner" align="center">
+                            <label value=" : "
+                                   style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px">
+                            </label>
+                        </div>
+                        <div style="width:70%" class="z-hlayout-inner" align="left">
+                            <label value="@{patient.afyaId}" style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+                        </div>
+                    </div>
+
+                    <div class="z-hlayout" style="width:100%;">
+                        <div style="width:25%" class="z-hlayout-inner" align="left">
+                            <label value="Civil Id"
+                                   style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px">
+                            </label>
+                        </div>
+                        <div style="width:5%" class="z-hlayout-inner" align="center">
+                            <label value=" : "
+                                   style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px">
+                            </label>
+                        </div>
+                        <div style="width:70%" class="z-hlayout-inner" align="left">
+                            <label value="@{patient.civilId}" style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+                        </div>
+                    </div>
+
+                    <div class="z-hlayout" style="width:100%;">
+                        <div style="width:25%" class="z-hlayout-inner" align="left">
+                            <label value="Patient Name"
+                                   style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px">
+                            </label>
+                        </div>
+                        <div style="width:5%" class="z-hlayout-inner" align="center">
+                            <label value=" : "
+                                   style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px">
+                            </label>
+                        </div>
+                        <div style="width:70%" class="z-hlayout-inner" align="left">
+                            <name value="@{patient}" style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+                        </div>
+                    </div>
+
+                    <!--<div class="z-hlayout" style="width:100%;">
+
+                        <div style="width:25%" class="z-hlayout-inner" align="left">
+                            <label value="Patient Type"
+                                   style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px">
+                            </label>
+                        </div>
+                        <div style="width:5%" class="z-hlayout-inner" align="center">
+                            <label value=" : "
+                                   style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px">
+                            </label>
+                        </div>
+                        <div style="width:70%" class="z-hlayout-inner" align="left">
+                            <label value="@{patient.patientType}"
+                                   style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+
+
+                        </div>
+
+                    </div>-->
+
+
+                       <div class="z-hlayout" style="width:100%;">
+                        <div style="width:25%" class="z-hlayout-inner" align="left">
+                            <label value="Age/Gender"
+                                   style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px">
+                            </label>
+                        </div>
+                        <div style="width:5%" class="z-hlayout-inner" align="center">
+                            <label value=" : "
+                                   style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px">
+                            </label>
+                        </div>
+                        <div style="width:70%" class="z-hlayout-inner" align="left">
+                            <label value="${ageGender}"
+                                   style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+                        </div>
+
+                    </div>
+                </n:td>
+
+                <n:td style="width:48%;border-color:#C0C0C0">
+
+                    <!--<div class="z-hlayout" style="width:100%;">
+
+                        <div style="width:30%" class="z-hlayout-inner" align="left">
+                            <label value="Doctor"
+                                   style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px">
+                            </label>
+                        </div>
+                        <div style="width:5%" class="z-hlayout-inner" align="center">
+                            <label value=" : "
+                                   style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px">
+                            </label>
+                        </div>
+                        <div style="width:65%" class="z-hlayout-inner" align="left">
+                            <name value="@{invoice.consultant}" style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+
+                        </div>
+
+                    </div>-->
+
+                    <div class="z-hlayout" style="width:100%;">
+
+
+                        <div style="width:30%" class="z-hlayout-inner" align="left">
+                            <label value="Invoice Date"
+                                   style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px">
+                            </label>
+                        </div>
+                        <div style="width:5%" class="z-hlayout-inner" align="center">
+                            <label value=" : "
+                                   style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px">
+                            </label>
+                        </div>
+                        <div style="width:65%" class="z-hlayout-inner" align="left">
+                            <name value="${invoiceDate}" style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+
+                        </div>
+
+
+                    </div>
+
+                    <div class="z-hlayout" style="width:100%;">
+
+
+                        <div style="width:30%" class="z-hlayout-inner" align="left">
+                            <label value="Invoice No"
+                                   style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px">
+                            </label>
+                        </div>
+                        <div style="width:5%" class="z-hlayout-inner" align="center">
+                            <label value=" : "
+                                   style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px">
+                            </label>
+                        </div>
+                        <div style="width:65%" class="z-hlayout-inner" align="left">
+                            <name value="@{invoice.invoiceNumber}" style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+
+                        </div>
+
+                    </div>
+
+                    <!--<div class="z-hlayout" style="width:100%;">
+
+
+                        <div style="width:30%" class="z-hlayout-inner" align="left">
+                            <label value="Employer Name"
+                                   style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:4px">
+                            </label>
+                        </div>
+                        <div style="width:5%" class="z-hlayout-inner" align="center">
+                            <label value=" : "
+                                   style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:2px">
+                            </label>
+                        </div>
+                        <div style="width:65%" class="z-hlayout-inner" align="left">
+                            <name value="" style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+
+                        </div>
+
+
+                    </div>-->
+
+
+                </n:td>
+            </n:tr>
+        </n:table>
+    </n:div>
+    <separator></separator>
+    <separator></separator>
+    <div>
+        <n:div style="text-align:left;width:90%;">
+
+            <n:table class="personDet" style="align:center;width:100%;margin-left:30px " align="center" border="1px">
+                <n:tr >
+                    <n:th align="center">
+                        Service Name
+                    </n:th>
+                    <n:th>
+                        Quantity
+                    </n:th>
+
+                    <n:th>
+                        Unit Price
+                    </n:th>
+
+                    <n:th>
+                        Amount
+                    </n:th>
+                </n:tr>
+
+                <n:tr forEach="${invoiceItems}">
+                    <n:td>
+                        <label value="${each.description}" style="width:55%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:left;margin-left:5px"/>
+                    </n:td>
+                    <n:td style="width:10%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
+                        ${each.quantity}
+                    </n:td>
+
+                    <n:td  style="text-align:right;">
+                        <label style="width:10%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:right;margin-right:5px"
+                               value=" KD ${each.factor}"/>
+                    </n:td>
+
+                    <n:td style="text-align:right;">
+                        <label value="KD ${each.price.amount}"  style="width:15%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:right;margin-right:5px"/>
+
+                    </n:td>
+
+                </n:tr>
+
+
+                <n:tr>
+                    <n:td style="width:55%;font-size:12px;font-weight:bold;font-family:Calibri;border:none"></n:td>
+                    <n:td style="width:15%;font-size:12px;font-weight:bold;font-family:Calibri;border:none;"></n:td>
+                    <n:td style="width:15%;font-size:12px;font-weight:bold;font-family:Calibri;">
+                        <label value="Amount:" style="width:15%;font-size:12px;font-weight:bold;font-family:Calibri;margin-left:3px;"/>
+
+                    </n:td>
+                    <n:td style="text-align:right;">
+                        <label value="KD ${billingController.totalGrossAmount}" style="width:15%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:right;margin-right:5px"/>
+                    </n:td>
+                </n:tr>
+
+                <!--<n:tr>
+                    <n:td style="width:55%;font-size: 12px;font-weight:bold;border:none"></n:td>
+                    <n:td style="width:15%;font-size: 12px;font-weight:bold;border:none;"></n:td>
+                    <n:td style="width:15%;font-size:12px;font-weight:bold;font-family:Calibri;">
+                        <label value="Discount:" style="width:15%;font-size:12px;font-weight:bold;font-family:Calibri;margin-left:3px"/>
+
+                    </n:td>
+                    <n:td style="text-align:right;">
+                        <label value="KD ${totalDiscount}"  style="width:15%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:right;margin-right:5px"/>
+
+                    </n:td>
+                </n:tr>
+-->
+               <!-- <n:tr>
+                    <n:td style="width:55%;font-size: 12px;font-weight:bold;border:none"></n:td>
+                    <n:td style="width:15%;font-size: 12px;font-weight:bold;border:none;"></n:td>
+                    <n:td style="width:15%;font-size:12px;font-weight:bold;font-family:Calibri;">
+                        <label value="Net Amount:" style="width:15%;font-size:12px;font-weight:bold;font-family:Calibri;margin-left:3px;"/>
+                    </n:td>
+                    <n:td style="text-align:right;">
+                        <label value="KD ${billingController.totalNetAmount}" style="width:15%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:right;margin-right:5px"/>
+
+                    </n:td>
+                </n:tr>-->
+
+            </n:table>
+
+            <separator></separator><separator></separator>
+            <!--<div align="right" if="${isInsurancePatient}">
+                <label value="Patient Payable:"    style="font-size:12px;font-weight:bold;font-family:Calibri;"/>
+                <label value="KD" style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+                <label    style="font-size:12px;font-weight:normal;font-family:Calibri;"   value="@{billingController.coPayment}"/>
+
+            </div>
+
+            <div align="right" if="${isInsurancePatient}">
+                <label value="Insurance Payable:"    style="font-size:12px;font-weight:bold;font-family:Calibri;"/>
+                <label value="KD" style="font-size:12px;font-weight:normal;font-family:Calibri;"/>
+                <label    style="font-size:12px;font-weight:normal;font-family:Calibri;"   value="@{billingController.insurancePayment}"/>
+
+            </div>-->
+
+            <div align="left">
+                <separator></separator>
+                <label value="Amount in Words:"    style="font-size:12px;font-weight:bold;font-family:Calibri;margin-left:30px;"/>
+                <label    style="font-size:12px;font-weight:normal;font-family:Calibri;"   value="${currencyInWords}"/>
+            </div>
+
+        </n:div>
+
+
+    </div>
+
+    <div if="${isInvoicePayments}">
+        <n:div style="text-align:left;width:90%;">
+            <label
+                    style="font-size:12px;font-weight:bold;font-family:Calibri; margin:20px 0px 0px 30px;"
+                    value="Payment Details:">
+            </label>
+            <n:table class="personDet" style="align:center;width:100%;margin-left:30px " align="center" border="1px">
+                <n:tr >
+                    <n:td style="width:30%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
+                        Payment Type/Mode
+                    </n:td>
+                    <n:td style="width:20%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
+                        Cheque/CC - Auth. Number
+                    </n:td>
+
+                    <n:td style="width:20%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
+                        Date
+                    </n:td>
+
+                    <n:td style="width:20%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
+                        Bank / Card Details
+                    </n:td>
+
+                    <n:td style="width:20%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
+                        Amount
+                    </n:td>
+
+                </n:tr>
+
+                <n:tr forEach="${invoice.invoicePayments}">
+                    <n:td style="width:30%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
+                        ${each.paymentMethod.description}
+                    </n:td>
+                    <n:td style="width:20%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
+                        ${each.chequeOrDdNo} ${each.transactionNumb}
+                    </n:td>
+
+                    <n:td style="width:20%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
+                        <label value="${each.paymentDate}">
+                            <attribute name="onCreate">
+                                String date = self.getValue();
+                                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S", Locale.ENGLISH);
+                                Date parsedDate = format.parse(date);
+                                self.setValue(com.nzion.util.UtilDateTime.formatDateToddMMyyyyHHmmss(parsedDate));
+                            </attribute>
+                        </label>
+                    </n:td>
+                    <n:td style="width:20%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
+                        ${each.bankName}
+                    </n:td>
+
+                    <n:td style="text-align:right;">
+                        <label value="KD ${each.amount.amount}"  style="width:20%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:right;margin-right:5px"/>
+
+                    </n:td>
+                </n:tr>
+            </n:table>
+            <!--<div align="center">
+                <label style="color: #000;font-family: Calibri;font-size: 14px;font-weight: bold;">
+                    <attribute name="onCreate">
+                        self.setValue(billingController.getTotalCancelationCharges());
+                    </attribute>
+                </label>
+            </div>-->
+            <separator></separator><separator></separator>
+        </n:div>
+    </div>
+    <div>
+        <n:div style="text-align:left;width:90%;">
+
+            <div align="right">
+                <label value="User:"    style="font-size:12px;font-weight:bold;font-family:Calibri;">
+                </label>
+                <label    style="font-size:12px;font-weight:normal;font-family:Calibri;"   value="${loggedInPersonFormattedName}">
+                </label>
+            </div>
+        </n:div>
+    </div>
+
+
+</window>
+
+</zk>            

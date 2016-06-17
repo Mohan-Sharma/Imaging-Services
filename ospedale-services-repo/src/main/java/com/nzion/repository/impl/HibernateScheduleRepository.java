@@ -169,7 +169,7 @@ public class HibernateScheduleRepository extends HibernateBaseRepository impleme
 			criteria.add(Restrictions.le("startDate", UtilDateTime.getDateOnly(date)));
 			criteria.add(Restrictions.eq("startDate", UtilDateTime.getDateOnly(date)));
 
-			criteria.add(Restrictions.eq("location", Infrastructure.getSelectedLocation()));
+			criteria.add(Restrictions.eq("location", location));
 		}
 		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		return criteria.list();

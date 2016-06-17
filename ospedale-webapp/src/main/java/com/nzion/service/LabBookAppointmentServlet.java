@@ -82,7 +82,6 @@ public class LabBookAppointmentServlet extends HttpServlet{
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        System.out.println("hiiii");
         Set<String> slots = null;
         Set<CalendarIndividualSlot> calendarIndividualSlots = new HashSet<>();
         List<SlotWithVisitType> furnishedSlots = null;
@@ -112,28 +111,36 @@ public class LabBookAppointmentServlet extends HttpServlet{
             TenantIdHolder.setTenantId(labId);
             //List<CalendarResourceAssoc> calendarResourceAssocs = commonCrudService.findByEquality(CalendarResourceAssoc.class, new String[]{"person.id"}, new Object[]{Long.valueOf(providerId)});
             List<CalendarResourceAssoc> calendarResourceAssocs = commonCrudService.findByEquality(CalendarResourceAssoc.class, new String[]{"location.id"}, new Object[]{Long.parseLong(locationId)});
+
+            Iterator iterator = calendarResourceAssocs.iterator();
+            while (iterator.hasNext()){
+                CalendarResourceAssoc calendarResourceAssoc = (CalendarResourceAssoc)iterator.next();
+                if (calendarResourceAssoc.getPerson() != null){
+                    iterator.remove();
+                }
+            }
+
             Set<SlotAvailability> timeslots = null;
             if(calendarResourceAssocs.size() > 0){
                 List<CalendarResourceAssoc> assocs = getCurrentCalendarResourceAssoc(calendarResourceAssocs, date);
 
                 //***********Added code for available day of week start******
                 String day = new SimpleDateFormat("EEE").format(date);
-                Iterator iterator = assocs.iterator();
-                while (iterator.hasNext()){
-                    CalendarResourceAssoc calendarResourceAssoc = (CalendarResourceAssoc)iterator.next();
+                Iterator iterator1 = assocs.iterator();
+                while (iterator1.hasNext()){
+                    CalendarResourceAssoc calendarResourceAssoc = (CalendarResourceAssoc)iterator1.next();
                     if (calendarResourceAssoc.getWeek() != null){
                         List<String> listOfDays = calendarResourceAssoc.getWeek().getSelectedDays();
                         if (!listOfDays.contains(day)){
-                            iterator.remove();
+                            iterator1.remove();
                         }
                     }
-
                 }
                 //******Added code for available day of week end ******
 
                 for(CalendarResourceAssoc assoc : assocs)
                     for(CalendarIndividualSlot calendarIndividualSlot : assoc.getCalendarIndividualSlots() ){
-                            calendarIndividualSlots.add(calendarIndividualSlot);
+                        calendarIndividualSlots.add(calendarIndividualSlot);
                     }
             }
             timeslots = getAvailableSlots(locationId, appointmentDate);

@@ -270,15 +270,25 @@
 		<url-pattern>/imagingServiceMaster/addLabOrderRequest</url-pattern>
 	</servlet-mapping>
 
-	<!--<servlet>
+	<servlet>
 		<servlet-name>bookLabAppointmentServlet</servlet-name>
 		<servlet-class>com.nzion.service.LabBookAppointmentServlet</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
 		<servlet-name>bookLabAppointmentServlet</servlet-name>
-		<url-pattern>/imagingServiceMaster/getAvailableTimeslotsForGivenDateAndBookAppointment</url-pattern>
-	</servlet-mapping>-->
+		<url-pattern>/imagingServiceMaster/getImagingAvailableTimeslotsForGivenDate</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>labAppointmentSlotsAvailServlet</servlet-name>
+		<servlet-class>com.nzion.service.LabAppointmentSlotsAvailServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>labAppointmentSlotsAvailServlet</servlet-name>
+		<url-pattern>/imagingServiceMaster/getImagingAvailableTimeslots</url-pattern>
+	</servlet-mapping>
 
 	<servlet>
 		<servlet-name>phlebotomistListServlet</servlet-name>

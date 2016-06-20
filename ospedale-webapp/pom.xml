@@ -9,10 +9,10 @@
         <version>1.0</version>
     </parent>
     <groupId>com.nzion</groupId>
-    <artifactId>afya-lab-webapp</artifactId>
+    <artifactId>Imaging-Services-webapp</artifactId>
     <version>1.0</version>
     <packaging>war</packaging>
-    <name>afya-lab-webapp</name>
+    <name>Imaging-Services-webapp</name>
     <url>http://maven.apache.org</url>
     <properties>
         <zkel.version>1.0.1</zkel.version>
@@ -247,7 +247,7 @@
     </dependencies>
     <build>
         <defaultGoal>package</defaultGoal>
-        <finalName>afya-lab</finalName>
+        <finalName>Imaging-Services</finalName>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -256,7 +256,7 @@
                 <configuration>
                     <jbossHome>${appserver.home}</jbossHome>
                     <serverName>all</serverName>
-                    <fileName>target/afya-lab.war</fileName>
+                    <fileName>target/Imaging-Services.war</fileName>
                     <unpack>true</unpack>
                 </configuration>
             </plugin>
@@ -278,8 +278,8 @@
                 <artifactId>maven-jetty-plugin</artifactId>
                 <version>6.1.8</version>
                 <configuration>
-                    <contextPath>/afya-lab</contextPath>
-                    <webAppSourceDirectory>target/afya-lab</webAppSourceDirectory>
+                    <contextPath>/Imaging-Services</contextPath>
+                    <webAppSourceDirectory>target/Imaging-Services</webAppSourceDirectory>
                     <!--
                                     <webDefaultXml>src/test/resources/webdefault.xml</webDefaultXml>
                     -->

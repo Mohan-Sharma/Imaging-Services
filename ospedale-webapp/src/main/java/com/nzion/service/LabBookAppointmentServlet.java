@@ -84,7 +84,7 @@ public class LabBookAppointmentServlet extends HttpServlet{
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Set<String> slots = null;
         Set<CalendarIndividualSlot> calendarIndividualSlots = new HashSet<>();
-        List<SlotWithVisitType> furnishedSlots = null;
+        List<TimeSlotWithVisitType> furnishedSlots = null;
         Date date = null;
 
         BigDecimal leadTime = null;
@@ -211,11 +211,11 @@ public class LabBookAppointmentServlet extends HttpServlet{
         //System.out.println( UtilDateTime.addHrsToDate(new Date(), 720) );
     }
 
-    private List<SlotWithVisitType> createMappingOfSlotAndVisitType(Set<CalendarIndividualSlot> calendarIndividualSlots, Set<String> slots) {
-        List<SlotWithVisitType> mapList = new ArrayList<>();
+    private List<TimeSlotWithVisitType> createMappingOfSlotAndVisitType(Set<CalendarIndividualSlot> calendarIndividualSlots, Set<String> slots) {
+        List<TimeSlotWithVisitType> mapList = new ArrayList<>();
         for(String time : slots){
             StringBuffer buffer = null;
-            SlotWithVisitType slotWithVisitType;
+            TimeSlotWithVisitType slotWithVisitType;
             for(CalendarIndividualSlot calendarIndividualSlot : calendarIndividualSlots){
                 buffer = new StringBuffer();
                 SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
@@ -223,7 +223,7 @@ public class LabBookAppointmentServlet extends HttpServlet{
                 buffer.append(" - ");
                 buffer.append(sdf.format(calendarIndividualSlot.getEndTime()));
                 if(time.equals(buffer.toString())){
-                    slotWithVisitType = new SlotWithVisitType(time);
+                    slotWithVisitType = new TimeSlotWithVisitType(time);
                     mapList.add(slotWithVisitType);
                 }
             }
@@ -364,10 +364,10 @@ public class LabBookAppointmentServlet extends HttpServlet{
         return localDate.isBefore(currentDate);
     }
 
-    private class SlotWithVisitType{
+    private class TimeSlotWithVisitType{
         private String time;
         //private String visitType;
-        public SlotWithVisitType(String time){
+        public TimeSlotWithVisitType(String time){
             this.time = time;
             //this.visitType = visitType;
         }

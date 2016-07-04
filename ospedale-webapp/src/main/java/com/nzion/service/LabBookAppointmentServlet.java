@@ -374,7 +374,7 @@ public class LabBookAppointmentServlet extends HttpServlet{
 
         @Override
         public String toString() {
-            return "{" + time + "}";
+            return "{" + "\"timeSlot\" : \"" + time +"\" }";
         }
     }
 

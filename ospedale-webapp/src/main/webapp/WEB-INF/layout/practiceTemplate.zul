@@ -337,25 +337,25 @@
                                                             -->
                                                           
 
-                                                        <n:h5 >LAB</n:h5>
+                                                        <n:h5 >Radiology</n:h5>
                                                         <n:ul>
-                                                        	 <n:li>
+                                                        	 <!--<n:li>
                                                                 <a  label="Investigation" >
                                                                     <attribute name="onClick">
                                                                         setTitleAndActivateMenu("Master List","Investigation", masterList);
                                                                         appendContent("investigation");
                                                                     </attribute>
                                                                 </a>
-                                                            </n:li>
+                                                            </n:li>-->
                                                             <n:li>
-                                                                <a  label="LAB Test" >
+                                                                <a  label="Radiology Test" >
                                                                     <attribute name="onClick">
-                                                                        setTitleAndActivateMenu("Master List","LAB Test", masterList);
+                                                                        setTitleAndActivateMenu("Master List","Radiology Test", masterList);
                                                                         appendContent("labTest");
                                                                     </attribute>
                                                                 </a>
                                                             </n:li>
-                                                            <n:li>
+                                                           <!-- <n:li>
                                                                 <a  label="LAB Test Panel" >
                                                                     <attribute name="onClick">
                                                                         setTitleAndActivateMenu("Master List","LAB Test Panel", masterList);
@@ -371,7 +371,7 @@
                                                                         appendContent("labTestProfile");
                                                                     </attribute>
                                                                 </a>
-                                                            </n:li>
+                                                            </n:li>-->
                                                             
                                                             <!-- <n:li>
                                                                 <a  label="LAB Category" >

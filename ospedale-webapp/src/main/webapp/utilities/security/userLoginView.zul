@@ -88,21 +88,22 @@
 									<!-- <checkbox id="providerCheckBox" label=" Doctor"
 										checked="@{userLoginController.rolesVo.provider}" disabled="true" style="padding:6px;" />
 									 -->	
-									<checkbox label=" Phlebotomist" checked="@{userLoginController.rolesVo.phlebotomist}"
+									<!--<checkbox label=" Phlebotomist" checked="@{userLoginController.rolesVo.phlebotomist}"
 										style="padding:6px;" id="phlebotomist"
 										onCheck="labDeptBox.setVisible(event.isChecked());ldeptMsgBox.setVisible(!event.isChecked());
 										laboratoriesBox.setVisible(event.isChecked());labtMsgBox.setVisible(!event.isChecked())">
-									</checkbox>	
-									
-									<checkbox label=" Technician" checked="@{userLoginController.rolesVo.technician}"
+									</checkbox>	-->
+
+									<!--Label change : Technician to Radiologist, functionality remain same. (can use Technician specification)-->
+									<checkbox label=" Radiologist" checked="@{userLoginController.rolesVo.technician}"
 										style="padding:6px;" id="technician"
 										onCheck="labDeptBox.setVisible(event.isChecked());ldeptMsgBox.setVisible(!event.isChecked());
 										laboratoriesBox.setVisible(event.isChecked());labtMsgBox.setVisible(!event.isChecked())">
 									</checkbox>
 									<checkbox label=" Reception" checked="@{userLoginController.rolesVo.reception}"
 										style="padding:6px;" id="reception" />
-							     <checkbox label=" Billing" checked="@{userLoginController.rolesVo.billing}"
-										style="padding:6px;" id="billing" />
+							     	<!--<checkbox label=" Billing" checked="@{userLoginController.rolesVo.billing}"
+										style="padding:6px;" id="billing" />-->
 								</div>
 							</h:td>
 						</h:tr>
@@ -141,8 +142,9 @@
 								<n:strong>:</n:strong>
 							</h:td>
 						<h:td width="80%">
-							<hbox onCreate="self.setVisible(phlebotomist.isChecked() || technician.isChecked())" id="labDeptBox">	
-								<div forEach="${labDepartments}">
+							<!--<hbox onCreate="self.setVisible(phlebotomist.isChecked() || technician.isChecked())" id="labDeptBox">-->
+							<hbox onCreate="self.setVisible(technician.isChecked())" id="labDeptBox">
+							<div forEach="${labDepartments}">
 									<listbox visible="false">
 										<listitem value="${each}" selected="true" />
 									</listbox>
@@ -169,7 +171,8 @@
 								</hbox>	
 								<div id="ldeptMsgBox">
 								<attribute name="onCreate">
-								if(phlebotomist.isChecked() || technician.isChecked()) self.setVisible(false);
+								//if(phlebotomist.isChecked() || technician.isChecked()) self.setVisible(false);
+								if(technician.isChecked()) self.setVisible(false);
 								</attribute>
 									<label style="width:100%;font-size: 10px;">Only When Phlebotomist or Technician Role is Selected</label>
 								</div>
@@ -185,14 +188,16 @@
 								<n:strong style="padding:12px;">:</n:strong>
 							</h:td>
 							<h:td width="80%">
-								<div id="laboratoriesBox" onCreate="self.setVisible(phlebotomist.isChecked() || technician.isChecked())">
+								<!--<div id="laboratoriesBox" onCreate="self.setVisible(phlebotomist.isChecked() || technician.isChecked())">-->
+								<div id="laboratoriesBox" onCreate="self.setVisible(technician.isChecked())">
 									<include id="laboratoriesInc"
 										src="/utilities/security/laboratory-include-userlogin.zul" laboratories="${laboratories}"
 										userLoginController="${userLoginController}" />
 								</div>
 						<div id="labtMsgBox" >
 						<attribute name="onCreate">
-								if(phlebotomist.isChecked() || technician.isChecked()) self.setVisible(false);
+							//	if(phlebotomist.isChecked() || technician.isChecked()) self.setVisible(false);
+							if(technician.isChecked()) self.setVisible(false);
 						</attribute>
 									<label style="width:100%;font-size: 10px;">Only When Phlebotomist or Technician Role is Selected</label>
 						</div>

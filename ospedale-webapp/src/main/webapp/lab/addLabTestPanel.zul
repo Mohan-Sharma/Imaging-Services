@@ -34,7 +34,7 @@
             position="center">
         <div style="padding:5px" zclass="page-header titled-well">
             <h:h1>
-                <h:small>New Lab Test</h:small>
+                <h:small>New Radiology Test</h:small>
                 <button type="button" zclass="close" onClick="addLabTestPanelWindow.detach();">×</button>
             </h:h1>
         </div>
@@ -53,7 +53,7 @@
                 </div>-->
             </div>
 
-            <div zclass="row-fluid">
+            <!--<div zclass="row-fluid">
                 <div zclass="span4">
                     <label style="margin-left:2px;" value="Sub Department" mold="required"></label>
                     <combobox model="@{labCategoryList}" sclass="span12"
@@ -75,13 +75,13 @@
 
             </div>
              <div zclass="row-fluid">
-                            <div zclass="span6">
-                                <label value="Display Order" />
-                                  <!--<textbox value="@{labController.labTest.sortOrder,save-when='Save.onClick'}"
-                                                               sclass="span12" />-->
-                                <textbox sclass="span12" />
-                            </div>
-             </div>
+                    <div zclass="span6">
+                        <label value="Display Order" />
+                          &lt;!&ndash;<textbox value="@{labController.labTest.sortOrder,save-when='Save.onClick'}"
+                                                       sclass="span12" />&ndash;&gt;
+                        <textbox sclass="span12" />
+                    </div>
+             </div>-->
         <separator height="10px"/>
         <tabbox>
             <tabs>
@@ -93,7 +93,7 @@
                     <h:table width="100%">
                         <h:tr>
                             <h:td width="50%">
-                                <label value="Lab Test"/>
+                                <label value="Radiology Test"/>
                             </h:td>
                         </h:tr>
                         <h:tr>

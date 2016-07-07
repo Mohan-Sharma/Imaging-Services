@@ -33,6 +33,9 @@
 	
 	com.nzion.enums.SUBSCRIPTION_TYPE[] types = com.nzion.enums.SUBSCRIPTION_TYPE.values();
 	List allCities = RestServiceConsumer.getAllCities();
+	List accreditations = commonCrudService.getAll(com.nzion.domain.masterDataLIS.Accreditation.class);
+	List certifications = commonCrudService.getAll(com.nzion.domain.masterDataLIS.Certification.class);
+	List serviceTypes = commonCrudService.getAll(com.nzion.domain.masterDataLIS.ServiceType.class);
 	
 setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 ]]>
@@ -46,13 +49,13 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 </zscript>
     <div style="padding:5px" zclass="page-header titled-well">
             <h:h1>
-                <h:small>New Laboratory</h:small>
+                <h:small>New Imaging Service</h:small>
             </h:h1>
     </div>
 <div zclass="container-fluid">
 		 <div zclass="row-fluid">
 					 <div zclass="span6">
-						<label value="Laboratory Name" mold="required" />
+						<label value="Imaging Service Name" mold="required" />
 						<textbox id="practiceName" value="@{vo.practice.practiceName,save-when='Save.onClick'}"
 						constraint="no empty" cols="40" readonly="${!isSuperAdmin}" maxlength="50" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" />
 					</div>
@@ -69,6 +72,10 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 						<phonebox id="faxNumber" value="@{vo.practice.contacts.faxNumber,save-when='Save.onClick'}"
 							constraint="no empty"  sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
 					</div>
+					 <div zclass="span2">
+						 <label value="Imaging Service Availability Time"/>
+						 <textbox value="@{vo.practice.labAvailabilityTime,save-when='Save.onClick'}" sclass="span12"/>
+					 </div>
 					</div>
 					<div zclass="row-fluid">
 		             <!--<div zclass="span2">
@@ -86,13 +93,18 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 						<textbox value="@{vo.practice.drugLicence,save-when='Save.onClick'}"
 								 maxlength="30" sclass="span12"/>
 						</div>
+						<div zclass="span2">
+							<label value="Imaging Service Experience In years "  />
+							<textbox value="@{vo.practice.labExperience,save-when='Save.onClick'}"
+									 maxlength="30" sclass="span12"/>
+						</div>
 					<!--</div>
 					 <div zclass="row-fluid">-->
-						 <div zclass="span2">
+						 <!--<div zclass="span2">
 							<label value="Accredation"  />
 							<textbox value="@{vo.practice.accrNumber,save-when='Save.onClick'}"
 								 maxlength="30" sclass="span12"/>
-						</div>
+						</div>-->
 						<!--<div zclass="span2">
 						<label value="Valid From"  />
 						<datebox id="validFrom" format="dd/MM/yyyy" value="@{vo.practice.validFrom,save-when='Save.onClick'}"
@@ -105,7 +117,7 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 						</div>-->
 						 <div zclass="span2" style="margin-left: 30px">
 							 <separator></separator><separator></separator>
-							 <button label="Upload Lab Logo" upload="true">
+							 <button label="Upload Logo" upload="true">
 								 <attribute name="onUpload">
 									 org.zkoss.util.media.Media media = event.getMedia();
 									 if (media instanceof org.zkoss.image.Image) {
@@ -167,8 +179,40 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 						 <zipcodebox value="@{vo.userLogin.person.contacts.postalAddress.postalCode,save-when='Save.onClick',load-after='copyContacts.onCheck'}"
 									 sclass="span12" />
 					</div>
+			 </div>
+		 <div zclass="row-fluid">
+			<div zclass="span2">
+				<label value="Turnaround Time" style="text-align:right" id="turnaroundTime" />
+				<!--<textbox value="@{vo.practice.turnaroundTime,save-when='Save.onClick'}" sclass="span12"></textbox>-->
+				<decimalbox value="@{vo.practice.turnaroundTime,save-when='Save.onClick'}" sclass="span12"></decimalbox>
+			</div>
+			<div zclass="span2">
+				<label value="Accreditation" style="text-align:right" id="accreditation" />
+				<listbox model="@{accreditations}" sclass="span12" multiple="true" id="specialityListbox" rows="5"
+						 mold="select" sizedByContent="true" vflex="true"
+						 selectedItem="@{vo.practice.accreditationSet, converter=com.nzion.view.component.MultipleListitemBindingConverter}">
+					<listitem self="@{each}" value="@{each}" label="@{each.acrDescription}">
+					</listitem>
+				</listbox>
+			</div>
+			<div zclass="span2">
+				<label value="Certification" style="text-align:right" id="certification" />
+				<listbox model="@{certifications}" sclass="span12" multiple="true" id="certificationListBox" rows="5"
+						 mold="select" sizedByContent="true" vflex="true"
+						 selectedItem="@{vo.practice.certificationSet, converter=com.nzion.view.component.MultipleListitemBindingConverter }">
+					<listitem self="@{each}" value="@{each}" label="@{each.certificationDescription}"/>
+				</listbox>
+			</div>
+			<div zclass="span2">
+				<label value="Type of Service" style="text-align:right" id="serviceType" />
+				<listbox model="@{serviceTypes}" sclass="span12" multiple="true" id="serviceTypeListBox" rows="5"
+						 mold="select" sizedByContent="true" vflex="true"
+						 selectedItem="@{vo.practice.serviceTypeSet, converter=com.nzion.view.component.MultipleListitemBindingConverter }">
+					<listitem self="@{each}" value="@{each}" label="@{each.serviceDescription}"/>
+				</listbox>
+			</div>
+		 </div>
 
-					</div>
 			<separator></separator>
 			
 			<div style="padding:2px" zclass="page-header titled-well">
@@ -176,7 +220,7 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
                 <h:small>Admin User Details</h:small>
             </h:h1>
             
-            <checkbox label="Same as Lab Address" id="copyContacts">
+            <checkbox label="Same as Imaging Service Address" id="copyContacts">
 						<attribute name="onCheck">
 							if(self.isChecked()){
 								pracController.getPracticeViewObject().getUserLogin().getPerson().setContacts(pracController.getPracticeViewObject().getPractice().getContacts());

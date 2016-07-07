@@ -51,6 +51,11 @@ public class Accreditation extends IdGeneratingBaseEntity {
         this.acrDescription = acrDescription;
     }
 
+    @Override
+    public String toString() {
+        return acrDescription;
+    }
+
    /* @Transient
     @Column(name = "ACCOUNT_NUMBER", nullable = false)
     public String getAccountNumber() {

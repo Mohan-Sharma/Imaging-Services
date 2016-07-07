@@ -78,7 +78,7 @@
                    <n:tr>
                     <n:div style="text-align:center;height:5px;color:#40B1E4;">  <n:span >${passwordExpirationWarningMessage}</n:span></n:div>
                     <n:td valign="top" width="100%" style="text-align:right;height:5px;color:#fff;">
-                        <label style="color:#40B1E4;font-family: Calibri;font-size: 14px;font-weight:bold" > Lab : ${practiceName}</label>
+                        <label style="color:#40B1E4;font-family: Calibri;font-size: 14px;font-weight:bold" >Imaging Service : ${practiceName}</label>
                         <n:span style='color:#40B1E4;'>|</n:span>
                         <a style="color:#40B1E4;font-family: Calibri;font-size: 14px;font-weight:bold" label="Location : ${locationName} | " onClick='Executions.createComponents("/person/changeLocation.zul", null,com.nzion.util.UtilMisc.toMap("userLocation",userLocation));' if="${roleName !=
 		                            'SUPER_ADMIN'}">

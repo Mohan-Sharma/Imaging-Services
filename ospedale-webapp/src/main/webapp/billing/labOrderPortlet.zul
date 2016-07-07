@@ -5,49 +5,38 @@
     xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
     <zscript>
         <![CDATA[
-     com.nzion.domain.emr.lab.LabOrderRequest labOrderRequest=new com.nzion.domain.emr.lab.LabOrderRequest();
-     com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
-     com.nzion.service.billing.BillingService billingService = com.nzion.util.Infrastructure.getSpringBean("billingService");
-     com.nzion.service.emr.lab.LabService labService = com.nzion.util.Infrastructure.getSpringBean("labService");
-     com.nzion.domain.UserLogin login = com.nzion.util.Infrastructure.getUserLogin();
-
-
-  /*   //List labOrderRequestList = commonCrudService.findByEquality(com.nzion.domain.emr.lab.LabOrderRequest.class,new String[]{"orderStatus"},
-    // new Object[]{com.nzion.domain.emr.lab.LabOrderRequest.ORDERSTATUS.BILLING_REQUIRED});
-   //  List statuses = new ArrayList();
-     //statuses.add(com.nzion.domain.emr.lab.LabOrderRequest.ORDERSTATUS.BILLING_REQUIRED);
-  //   statuses.add(com.nzion.domain.emr.lab.LabOrderRequest.ORDERSTATUS[]); */
-
-     
-     com.nzion.domain.emr.lab.LabOrderRequest.ORDERSTATUS[] labStatusesArray = com.nzion.domain.emr.lab.LabOrderRequest.ORDERSTATUS.values();
- //   List allList= Arrays.asList(labStatusesArray);
-     List statuses= Arrays.asList(labStatusesArray);
-
-
-    ]]></zscript>
+         com.nzion.domain.emr.lab.LabOrderRequest labOrderRequest=new com.nzion.domain.emr.lab.LabOrderRequest();
+         com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+         com.nzion.service.billing.BillingService billingService = com.nzion.util.Infrastructure.getSpringBean("billingService");
+         com.nzion.service.emr.lab.LabService labService = com.nzion.util.Infrastructure.getSpringBean("labService");
+         com.nzion.domain.UserLogin login = com.nzion.util.Infrastructure.getUserLogin();
+         com.nzion.domain.emr.lab.LabOrderRequest.ORDERSTATUS[] labStatusesArray = com.nzion.domain.emr.lab.LabOrderRequest.ORDERSTATUS.values();
+         List statuses= Arrays.asList(labStatusesArray);
+        ]]>
+    </zscript>
 
     <window id="frontDeskLabOrderPortletWindow">
     <separator></separator>
     <separator></separator>
         <div zclass="container-fluid">
             <div zclass="row-fluid">
-                <div zclass="span2">
+                <div zclass="span3">
                     <label value="Patient"/>
                     <patientlookup
                             onChange="labOrderRequest.setPatient((com.nzion.domain.Patient)event.getOrigin().getData())"/>
                 </div>
-                <div zclass="span2" style="margin-left=10px">
+                <!--<div zclass="span2">
                     <label value="Referral"/>
                     <referrallookup
                             onChange="labOrderRequest.setReferral((com.nzion.domain.Referral)event.getOrigin().getData())"/>
-                </div>
-                <div zclass="span2" style="margin-left=10px">
+                </div>-->
+                <div zclass="span2">
                     <label value="From Date"/>
-                    <datebox id="fromDate" sclass="span9"/>
+                    <datebox id="fromDate" sclass="span12"/>
                 </div>
                 <div zclass="span2">
                     <label value="Thru Date"/>
-                    <datebox id="thruDate" sclass="span9"/>
+                    <datebox id="thruDate" sclass="span12"/>
                 </div>
 
 
@@ -63,29 +52,27 @@
             <button label="Search" id="Search" zclass="btn btn-primary">
                 <attribute name="onClick">
                     <![CDATA[
-                       //     List labOrderList =billingService.getSearchByLabOrder(statuses,labOrderRequest.getPatient(),labOrderRequest.getProvider(),labOrderRequest.getReferral());
+                       //List labOrderList =billingService.getSearchByLabOrder(statuses,labOrderRequest.getPatient(),labOrderRequest.getProvider(),labOrderRequest.getReferral());
 
                        if(fromDate.getValue() == null && thruDate.getValue() == null) {
-                        fromDate.setValue(new java.util.Date());
-                        thruDate.setValue(new java.util.Date());
+                            fromDate.setValue(new java.util.Date());
+                            thruDate.setValue(new java.util.Date());
                        }
+                       List labOrderList =billingService.getSearchByLabOrder(statuses,labOrderRequest.getPatient(),labOrderRequest.getReferral(),fromDate.getValue(),thruDate.getValue());
 
-                            List labOrderList =billingService.getSearchByLabOrder(statuses,labOrderRequest.getPatient(),labOrderRequest.getReferral(),fromDate.getValue(),thruDate.getValue());
-
-
-                            for(com.nzion.domain.emr.lab.LabOrderRequest lr:labOrderList){
+                         /*   for(com.nzion.domain.emr.lab.LabOrderRequest lr:labOrderList){
                             if(lr.isHomeService()){
                                 lr.setStartTime(lr.getPhlebotomistStartTime());
                                 lr.setStartDate(lr.getPhlebotomistStartDate());
                                 lr.setEndTime(lr.getPhlebotomistEndTime());
                                 lr.setPhlebotomist(lr.getPhlebotomist());
                             }
-                            }
+                            } */
 
                     ]]>
                 </attribute>
             </button>
-            <button label="New LabOrder" id="add">
+            <button label="New Imaging Order" id="add">
                 <attribute name="onClick"><![CDATA[
                        com.nzion.zkoss.ext.Navigation.navigate("/portlets/frontDeskLabOrderRequest",null,frontDeskLabOrderPortletWindow);
                    ]]>
@@ -118,10 +105,10 @@
                         <label value="End Time"/>
                     </vbox>
                 </column>
-                <column label="Phlebotomist" width="10%"/>
+              <!--  <column label="Phlebotomist" width="10%"/>-->
 
                 <!--<column label="Doctor"/>-->
-                <column label="Referral"/>
+                <!--<column label="Referral"/>-->
                 <column label="Status" />
                 <column label="Action" />
             </columns>
@@ -138,9 +125,9 @@
                 <label value="@{labOrderRequest.startDate converter='org.zkoss.zkplus.databind.DateFormatConverter' }" self="@{format(dd/MM/yyyy)}"/>
                 <label value="@{labOrderRequest.startTime converter='com.nzion.view.component.TimeConverter'}" />
                 <label value="@{labOrderRequest.endTime converter='com.nzion.view.component.TimeConverter' }"/>
-                <label value="@{labOrderRequest.phlebotomist.firstName}" width="10%"/>
+               <!-- <label value="@{labOrderRequest.phlebotomist.firstName}" width="10%"/>-->
                <!-- <name object="@{labOrderRequest.provider}"/>-->
-                <name object="@{labOrderRequest.referral}"/>
+               <!-- <name object="@{labOrderRequest.referral}"/>-->
                 <label value="@{labOrderRequest.orderStatus.description}" width="10%"/>
                 <vlayout>
                 <button label="View Order">
@@ -154,6 +141,13 @@
                 <button label="Reschedule">
                     <attribute name="onClick"><![CDATA[
                         Executions.createComponents("/lab/rescheduleLabOrder.zul", null,com.nzion.util.UtilMisc.toMap("labOrderRequest",self.getParent().getParent().getValue()));
+                        ]]>
+                    </attribute>
+                </button>
+                <button label="Result Entry">
+                    <attribute name="onClick">
+                        <![CDATA[
+                             Executions.createComponents("/lab/labOrderResult.zul", null,com.nzion.util.UtilMisc.toMap("labOrderRequest",self.getParent().getParent().getValue()));
                         ]]>
                     </attribute>
                 </button>

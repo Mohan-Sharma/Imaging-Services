@@ -4,6 +4,9 @@
 package com.nzion.domain;
 
 import com.nzion.domain.base.IdGeneratingBaseEntity;
+import com.nzion.domain.masterDataLIS.Accreditation;
+import com.nzion.domain.masterDataLIS.Certification;
+import com.nzion.domain.masterDataLIS.ServiceType;
 import com.nzion.domain.pms.CustomFormField;
 import com.nzion.enums.SUBSCRIPTION_TYPE;
 import org.hibernate.annotations.Fetch;
@@ -11,6 +14,7 @@ import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Set;
 import java.util.TimeZone;
@@ -73,6 +77,18 @@ public class Practice extends IdGeneratingBaseEntity {
 	private String imageUrl;
 
 	private boolean logoWithAddress = Boolean.FALSE;
+
+	private Set<Accreditation> accreditationSet;
+
+	private Set<Certification> certificationSet;
+
+	private Set<ServiceType> serviceTypeSet;
+
+	private String labAvailabilityTime;
+
+	private String labExperience;
+
+	private BigDecimal turnaroundTime;
 	
 	
 	public String getServiceTaxNumber() {
@@ -270,5 +286,62 @@ public class Practice extends IdGeneratingBaseEntity {
 
 	public void setImageUrl(String imageUrl) {
 		this.imageUrl = imageUrl;
+	}
+
+	public String getLabAvailabilityTime() {
+		return labAvailabilityTime;
+	}
+
+	public void setLabAvailabilityTime(String labAvailabilityTime) {
+		this.labAvailabilityTime = labAvailabilityTime;
+	}
+
+	public String getLabExperience() {
+		return labExperience;
+	}
+
+	public void setLabExperience(String labExperience) {
+		this.labExperience = labExperience;
+	}
+
+	public BigDecimal getTurnaroundTime() {
+		return turnaroundTime;
+	}
+
+	public void setTurnaroundTime(BigDecimal turnaroundTime) {
+		this.turnaroundTime = turnaroundTime;
+	}
+
+	@ManyToMany(targetEntity = Accreditation.class,fetch = FetchType.EAGER)
+	@JoinTable(name = "IMAGING_ACCREDITATION", joinColumns = { @JoinColumn(name = "PRACTICE_ID") }, inverseJoinColumns = { @JoinColumn(name = "ACCREDITATION_ID") })
+	@Fetch(FetchMode.SELECT)
+	public Set<Accreditation> getAccreditationSet() {
+		return accreditationSet;
+	}
+
+	public void setAccreditationSet(Set<Accreditation> accreditationSet) {
+		this.accreditationSet = accreditationSet;
+	}
+
+	@ManyToMany(targetEntity = Certification.class,fetch = FetchType.EAGER)
+	@JoinTable(name = "IMAGING_CERTIFICATION", joinColumns = {@JoinColumn(name = "PRACTICE_ID")},inverseJoinColumns = {@JoinColumn(name = "CERTIFICATION_ID")})
+	@Fetch(FetchMode.SELECT)
+	public Set<Certification> getCertificationSet() {
+		return certificationSet;
+	}
+
+	public void setCertificationSet(Set<Certification> certificationSet) {
+		this.certificationSet = certificationSet;
+	}
+
+	@ManyToMany(targetEntity = ServiceType.class,fetch = FetchType.EAGER)
+	@JoinTable(name = "IMAGING_SERVICE_TYPE", joinColumns = {@JoinColumn(name = "PRACTICE_ID")},inverseJoinColumns = {@JoinColumn(name = "SERVICE_TYPE_ID")})
+	@Fetch(FetchMode.SELECT)
+	public Set<ServiceType> getServiceTypeSet() {
+		return serviceTypeSet;
+	}
+
+	public void setServiceTypeSet(Set<ServiceType> serviceTypeSet) {
+		this.serviceTypeSet = serviceTypeSet;
 	}
 }

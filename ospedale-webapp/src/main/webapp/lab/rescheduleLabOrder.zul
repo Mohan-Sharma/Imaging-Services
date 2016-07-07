@@ -22,7 +22,7 @@
         }
     ]]>
     </zscript>
-    <window mode="modal" closable="true" height="400px" title="Reschedule Lab Order" id="rescheduleLabOrder" sclass="modalStyle"
+    <window mode="modal" closable="true" height="400px" title="Reschedule Imaging Order" id="rescheduleLabOrder" sclass="modalStyle"
             apply="org.zkoss.bind.BindComposer"
             viewModel="@id('vm') @init('com.nzion.zkoss.composer.emr.lab.RescheduleLabOrderViewModel')">
         <!--<div style="padding:5px" zclass="page-header titled-well">

@@ -29,7 +29,7 @@
             viewModel="@id('vm') @init('com.nzion.zkoss.composer.emr.lab.LabOrderRequestViewModel')">
         <div style="padding:5px" zclass="page-header titled-well">
             <h:h1>
-                <h:small>New Lab Test Request</h:small>
+                <h:small>New Imaging Test Request</h:small>
             </h:h1>
         </div>
         <div zclass="container-fluid">

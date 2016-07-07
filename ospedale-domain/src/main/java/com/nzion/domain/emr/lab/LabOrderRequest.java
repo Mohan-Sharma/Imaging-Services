@@ -60,6 +60,8 @@ public class LabOrderRequest extends IdGeneratingBaseEntity{
 
 	private boolean homeService;
 
+	private String resultEntryDescription;
+
 
 	@ManyToMany(targetEntity=Laboratories.class,fetch=FetchType.EAGER)
     @JoinTable(name = "lab_order_request_laboratories",
@@ -321,5 +323,13 @@ public class LabOrderRequest extends IdGeneratingBaseEntity{
 
 	public void setHomeService(boolean homeService) {
 		this.homeService = homeService;
+	}
+
+	public String getResultEntryDescription() {
+		return resultEntryDescription;
+	}
+
+	public void setResultEntryDescription(String resultEntryDescription) {
+		this.resultEntryDescription = resultEntryDescription;
 	}
 }

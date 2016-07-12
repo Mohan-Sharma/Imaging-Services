@@ -1,0 +1,40 @@
+<?page title="Afya Imaging Services" contentType="text/html;charset=UTF-8"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <zscript>
+        import com.nzion.util.*;
+        import com.nzion.service.*;
+        import com.nzion.domain.*;
+        com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+        List referralLists = new ArrayList();
+        com.nzion.domain.Practice practice = commonCrudService.getAll(Practice.class) != null ? commonCrudService.getAll(Practice.class).get(0) : null ;
+        referralLists = com.nzion.util.PortalRestServiceConsumer.fetchReferralOrder(practice.getTenantId());
+    </zscript>
+    <hlayout apply="org.zkoss.bind.BindComposer"  id="specimenCollWin"
+             viewModel="@id('vm') @init('com.nzion.zkoss.composer.ReferralRequestController')">
+
+        <listbox model="@load(vm.referralLists)">
+            <listhead>
+                <listheader label="Clinic Name"/>
+                <listheader label="Doctor Name"/>
+                <listheader label="Patient Name"/>
+                <listheader label="Patient Mobile Number"/>
+                <listheader label="Visit Date"/>
+                <listheader label="Lab Test"/>
+            </listhead>
+            <template name="model" var="each">
+                <listitem>
+                    <listcell label="@load(each.clinicName)"/>
+                    <listcell label="@load(each.doctorName)"/>
+                    <listcell label="@load(each.patientName)"/>
+                    <listcell label="@load(each.patientMobileNumber)"/>
+                    <listcell label="@load(each.visitDate) @converter('formatedDate',format='dd/MM/yyyy')"/>
+                    <listcell label="@load(each.labTest)"/>
+                </listitem>
+            </template>
+        </listbox>
+
+    </hlayout>
+
+</zk>            

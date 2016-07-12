@@ -9,6 +9,7 @@
    <!-- portletDatas.add(new com.nzion.view.PortletData("Messages/Tasks", "/portlets/message-portlet-view.zul","../images/new-message-icon.png", true));-->
     portletDatas.add(new com.nzion.view.PortletData("Billing", "/portlets/frontdeskBillingPortlet.zul","../images/folder_invoices_256.png"));
     portletDatas.add(new com.nzion.view.PortletData("Lab Order", "/billing/labOrderPortlet.zul", "../images/labresults.jpg",true));
+    portletDatas.add(new com.nzion.view.PortletData("Referral Requests", "/referral/referralRequests.zul", "../images/labresults.jpg",true));
 
 
     <!--

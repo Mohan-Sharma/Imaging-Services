@@ -3,6 +3,7 @@ package com.nzion.util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.nzion.dto.PatientDto;
+import com.nzion.dto.ReferralOrderDto;
 import com.nzion.zkoss.dto.UserLoginDto;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
@@ -134,5 +135,26 @@ public class PortalRestServiceConsumer {
         HttpEntity<String> requestEntity = new HttpEntity<String>(headers);
         ResponseEntity<String> responseEntity = restTemplate.exchange(PORTAL_URL+"/anon/persistUserLoginFacilityAssociation?userName={userName}&tenantId={tenantId}&facilityType={facilityType}", HttpMethod.POST, requestEntity, String.class, userLoginDto.getUsername(), userLoginDto.getTenantId(), "LABORATORY");
         return responseEntity.getBody();
+    }
+    public static List<ReferralOrderDto> fetchReferralOrder(String tenantId){
+        RestTemplate restTemplate = new RestTemplate(RestServiceConsumer.getHttpComponentsClientHttpRequestFactory());
+        HttpHeaders httpHeaders = getHttpHeader();
+        HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(PORTAL_URL + "/anon/fetchReferralOrder?tenantId={tenantId}", HttpMethod.GET, requestEntity, String.class, tenantId);
+        String json = responseEntity.getBody();
+        Gson gson = new GsonBuilder().serializeNulls().create();
+        List<Map<String, Object>> resultList = gson.fromJson(json, List.class);
+        return constructReferralOrderDtoList(resultList);
+    }
+
+    private static List<ReferralOrderDto> constructReferralOrderDtoList(List<Map<String, Object>> resultList){
+        List<ReferralOrderDto> referralOrderDtos = new ArrayList<>();
+        ReferralOrderDto referralOrderDto = null;
+        for(Map<String, Object> resultMap : resultList){
+            referralOrderDto = new com.nzion.dto.ReferralOrderDto();
+            referralOrderDto.setPropertiesToReferralOrderDtoFromMap(resultMap);
+            referralOrderDtos.add(referralOrderDto);
+        }
+        return referralOrderDtos;
     }
 }

@@ -55,7 +55,7 @@
 						<div zclass="span4">
 							<separator></separator>
 							<separator></separator>
-							<checkbox label=" Phlebotomist" >
+							<checkbox label=" Radiologist" >
 								<attribute name="onCreate">
 									self.setChecked(employee.isPhlebotomist());
 								</attribute>

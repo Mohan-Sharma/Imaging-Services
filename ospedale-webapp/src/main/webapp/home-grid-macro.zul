@@ -28,13 +28,13 @@
                         <a href="#popup" zclass="btn" label="Add" id="customAddBtn" onClick='homeGridMacroController.addClicked(listModel)' visible="${hideCustomAddBtn}">
                             <n:i class="icon-plus-sign"></n:i>
                         </a>
-                        <a href="#" zclass="btn"  label="Delete" onClick='homeGridMacroController.deleteClicked()' visible="${!hideDeleteBtn}">
+                        <a href="#" zclass="btn btn-danger"  label="Delete" onClick='homeGridMacroController.deleteClicked()' visible="${!hideDeleteBtn}">
                             <n:i class="icon-off"></n:i>
                         </a>
-                        <a href="#" zclass="btn" onClick='homeGridMacroController.activateClicked()' visible="${!hideActivation}" label="Activate">
+                        <a href="#" zclass="btn btn-success" onClick='homeGridMacroController.activateClicked()' visible="${!hideActivation}" label="Activate">
                             <n:i class="icon-ok-sign"></n:i>
                         </a>
-                        <a href="#" zclass="btn" visible="${!hideActivation}" label="Deactivate">
+                        <a href="#" zclass="btn btn-danger" visible="${!hideActivation}" label="Deactivate">
                             <attribute name="onClick">
                                 if(com.nzion.util.UtilValidator.isEmpty(com.nzion.util.ViewUtil.getSelectedItems(listbox))){
                                 com.nzion.util.UtilMessagesAndPopups.displayError("Please select items to deactivate");

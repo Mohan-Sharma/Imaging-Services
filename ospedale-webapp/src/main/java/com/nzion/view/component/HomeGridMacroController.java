@@ -13,13 +13,7 @@ import org.zkoss.zk.ui.SuspendNotAllowedException;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
-import org.zkoss.zul.Listbox;
-import org.zkoss.zul.Listcell;
-import org.zkoss.zul.Listfooter;
-import org.zkoss.zul.Listitem;
-import org.zkoss.zul.ListitemRenderer;
-import org.zkoss.zul.Messagebox;
-import org.zkoss.zul.Window;
+import org.zkoss.zul.*;
 
 import com.nzion.service.common.GenericHomeScreenSearchService;
 import com.nzion.service.common.GenericHomeScreenService;
@@ -385,8 +379,25 @@ public class HomeGridMacroController extends GenericForwardComposer implements P
                 if("Active".equals(fieldName))continue;
                 Object object = UtilReflection.getNestedFieldValue(data, fieldName);
                 Listcell cell = new Listcell();
-                String cellLabel = object == null ? "" : "" + object;
-                cell.setLabel(cellLabel);
+                if("active".equals(fieldName)){
+                    if(object.equals(true)){
+                        Image image = new Image("/images/right-icon.png");
+                        cell.appendChild(image);
+                        cell.setParent(item);
+                    } else{
+                        Image image = new Image("/images/wrong-icon.png");
+                        cell.appendChild(image);
+                        cell.setParent(item);
+                        item.setSclass("inactive");
+                    }
+                } else {
+                    String cellLabel = object == null ? "" : "" + object;
+                    cell.setLabel(cellLabel);
+                    cell.setParent(item);
+                }
+
+               /* String cellLabel = object == null ? "" : "" + object;
+                cell.setLabel(cellLabel);*/
                 cell.setParent(item);
             }
             Object object = UtilReflection.getNestedFieldValue(data, "Active");

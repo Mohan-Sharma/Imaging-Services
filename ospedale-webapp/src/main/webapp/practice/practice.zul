@@ -181,11 +181,11 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 					</div>
 			 </div>
 		 <div zclass="row-fluid">
-			<div zclass="span2">
+			<!--<div zclass="span2">
 				<label value="Turnaround Time" style="text-align:right" id="turnaroundTime" />
-				<!--<textbox value="@{vo.practice.turnaroundTime,save-when='Save.onClick'}" sclass="span12"></textbox>-->
+				&lt;!&ndash;<textbox value="@{vo.practice.turnaroundTime,save-when='Save.onClick'}" sclass="span12"></textbox>&ndash;&gt;
 				<decimalbox value="@{vo.practice.turnaroundTime,save-when='Save.onClick'}" sclass="span12"></decimalbox>
-			</div>
+			</div>-->
 			<div zclass="span2">
 				<label value="Accreditation" style="text-align:right" id="accreditation" />
 				<listbox model="@{accreditations}" sclass="span12" multiple="true" id="specialityListbox" rows="5"
@@ -195,14 +195,14 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 					</listitem>
 				</listbox>
 			</div>
-			<div zclass="span2">
+			<!--<div zclass="span2">
 				<label value="Certification" style="text-align:right" id="certification" />
 				<listbox model="@{certifications}" sclass="span12" multiple="true" id="certificationListBox" rows="5"
 						 mold="select" sizedByContent="true" vflex="true"
 						 selectedItem="@{vo.practice.certificationSet, converter=com.nzion.view.component.MultipleListitemBindingConverter }">
 					<listitem self="@{each}" value="@{each}" label="@{each.certificationDescription}"/>
 				</listbox>
-			</div>
+			</div>-->
 			<div zclass="span2">
 				<label value="Type of Service" style="text-align:right" id="serviceType" />
 				<listbox model="@{serviceTypes}" sclass="span12" multiple="true" id="serviceTypeListBox" rows="5"

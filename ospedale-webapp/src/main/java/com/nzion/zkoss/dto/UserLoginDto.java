@@ -163,7 +163,7 @@ public class UserLoginDto {
         }
         userLoginDto.setRoles(getRoleOfTheLoggedInUser(userLogin));
         userLoginDto.setDefaultRole(getDefaultRole(userLogin));
-        userLoginDto.setProviderType(ProviderType.LABORATORY);
+        userLoginDto.setProviderType(ProviderType.IMAGING_CENTER);
         return userLoginDto;
     }
 

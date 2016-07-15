@@ -435,9 +435,9 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
         /*labOrderRequest.setStartTime(convertGivenDate(labOrderDto.getAppointmentStartDate()));
         labOrderRequest.setEndTime(convertGivenDate(labOrderDto.getAppointmentEndDate()));
         labOrderRequest.setStartDate(com.nzion.util.UtilDateTime.getDayStart(labOrderDto.getAppointmentStartDate()));*/
-        labOrderRequest.setPhlebotomistStartTime(convertGivenDate(labOrderDto.getAppointmentStartDate()));
-        labOrderRequest.setPhlebotomistEndTime(convertGivenDate(labOrderDto.getAppointmentEndDate()));
-        labOrderRequest.setPhlebotomistStartDate(com.nzion.util.UtilDateTime.getDayStart(labOrderDto.getAppointmentStartDate()));
+        labOrderRequest.setStartTime(convertGivenDate(labOrderDto.getAppointmentStartDate()));
+        labOrderRequest.setEndTime(convertGivenDate(labOrderDto.getAppointmentEndDate()));
+        labOrderRequest.setStartDate(com.nzion.util.UtilDateTime.getDayStart(labOrderDto.getAppointmentStartDate()));
         labOrderRequest.setFromMobileApp(labOrderDto.isFromMobileApp());
         labOrderRequest.setPaymentId(labOrderDto.getPaymentId());
         labOrderRequest.setPhlebotomist(phlebotomist);
@@ -490,9 +490,10 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
                 labOrderRequest.addLaboratories(test.getLaboratory());
             }
             //patientLabOrder.setHomeService(labOrderDto.isHomeService());
-            patientLabOrder.setHomeService(true);
+            patientLabOrder.setHomeService(false);
             labOrderRequest.addPatientLabOrder(patientLabOrder);
             patientLabOrder.setLabOrderRequest(labOrderRequest);
+            patientLabOrder.setBillingStatus(PatientLabOrder.BILLINGSTATUS.INVOICED);
         }
         //labOrderRequest.setConsultationInvoiceGenerated(false);
         LabOrderRequest orderRequest = commonCrudService.save(labOrderRequest);

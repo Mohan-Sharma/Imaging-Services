@@ -160,9 +160,9 @@ public class RescheduleLabOrderServlet extends HttpServlet{
             Person phlebotomist = commonCrudService.getById(Person.class,Long.parseLong(labOrderDto.getPhlebotomistId().toString()));
             LabOrderRequest existingLabOrderRequest = commonCrudService.getById(LabOrderRequest.class, Long.parseLong(labOrderDto.getScheduleId().toString()));
 
-            existingLabOrderRequest.setPhlebotomistStartTime(convertGivenDate(labOrderDto.getAppointmentStartDate()));
-            existingLabOrderRequest.setPhlebotomistEndTime(convertGivenDate(labOrderDto.getAppointmentEndDate()));
-            existingLabOrderRequest.setPhlebotomistStartDate(com.nzion.util.UtilDateTime.getDayStart(labOrderDto.getAppointmentStartDate()));
+            existingLabOrderRequest.setStartTime(convertGivenDate(labOrderDto.getAppointmentStartDate()));
+            existingLabOrderRequest.setEndTime(convertGivenDate(labOrderDto.getAppointmentEndDate()));
+            existingLabOrderRequest.setStartDate(com.nzion.util.UtilDateTime.getDayStart(labOrderDto.getAppointmentStartDate()));
             existingLabOrderRequest.setPhlebotomist(phlebotomist);
 
             LabOrderRequest updatedLabOrderRequest = commonCrudService.merge(existingLabOrderRequest);

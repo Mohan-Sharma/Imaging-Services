@@ -60,6 +60,7 @@ public class PatientDto implements Serializable,Salutable {
 
     /** The suffix. */
     private String suffix;
+    private String geographyCode;
 
     @JsonSerialize(using = CustomDateSerializer.class)
     public Date getDateOfBirth() {
@@ -122,6 +123,7 @@ public class PatientDto implements Serializable,Salutable {
             this.country = patient.getContacts().getPostalAddress().getCountryGeo();
         if(patient.getRegisteredFrom() != null)
             this.registeredFrom = patient.getRegisteredFrom();
+        this.geographyCode = "KW";
     }
 
     public void setPropertiesToPatient(Patient patient){
@@ -436,6 +438,14 @@ public class PatientDto implements Serializable,Salutable {
 
     public void setRegisteredFrom(String registeredFrom) {
         this.registeredFrom = registeredFrom;
+    }
+
+    public String getGeographyCode() {
+        return geographyCode;
+    }
+
+    public void setGeographyCode(String geographyCode) {
+        this.geographyCode = geographyCode;
     }
 
     public void setPropertiesToPatientDtoFromMap(Map<String, Object> resultMap){

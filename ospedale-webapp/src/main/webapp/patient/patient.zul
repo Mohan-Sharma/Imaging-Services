@@ -502,8 +502,8 @@
                 <div zclass="span2"  >
                     <label value="Mobile phone" mold="required"/>
                     <hbox>
-                     <textbox value="@{vo.patient.contacts.isdCode,save-when='Save.onClick', load-after='civilId.onBlur,afyaIdTxt.onBlur, civilId.onScanReload, patientAccountNumber.onDetailsPopulate'}" constraint="no empty" style="height: 23px;width: 40px;" />
-                    <textbox  w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" maxlength="8" constraint="no empty" id="mobPhone" value="@{vo.patient.contacts.mobileNumber,save-when='Save.onClick', load-after='civilId.onBlur,civilId.onScanReload,afyaIdTxt.onBlur, patientAccountNumber.onDetailsPopulate'}" sclass="span12"
+                     <textbox value="@{vo.patient.contacts.isdCode,save-when='Save.onClick', load-after='civilId.onBlur,afyaIdTxt.onBlur, civilId.onScanReload, patientAccountNumber.onDetailsPopulate'}" constraint="no empty" style="height: 23px;width: 40px;" visible="false"/>
+                    <textbox  w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" maxlength="11" constraint="no empty" id="mobPhone" value="@{vo.patient.contacts.mobileNumber,save-when='Save.onClick', load-after='civilId.onBlur,civilId.onScanReload,afyaIdTxt.onBlur, patientAccountNumber.onDetailsPopulate'}" sclass="span12"
                      style="margin-left:0px;height: 23px;width: 120px;"/>
                     </hbox>
                 </div>

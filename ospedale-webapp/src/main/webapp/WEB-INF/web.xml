@@ -329,6 +329,16 @@
 		<url-pattern>/imagingServiceMaster/tenantDataSourceConfig</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>rescheduleRadiologyAppointment</servlet-name>
+		<servlet-class>com.nzion.service.RescheduleLabOrderServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>rescheduleRadiologyAppointment</servlet-name>
+		<url-pattern>/imagingServiceMaster/rescheduleLabAppointment</url-pattern>
+	</servlet-mapping>
+
 	<welcome-file-list>
 		<welcome-file>home.zul</welcome-file>
 	</welcome-file-list>

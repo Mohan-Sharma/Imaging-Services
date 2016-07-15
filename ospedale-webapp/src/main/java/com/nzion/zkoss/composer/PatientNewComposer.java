@@ -47,6 +47,9 @@ public class PatientNewComposer extends OspedaleAutowirableComposer {
             commonCrudService = Infrastructure.getSpringBean("commonCrudService");
         }
         Practice practice = commonCrudService.getAll(Practice.class)!= null ? commonCrudService.getAll(Practice.class).get(0):null;
+        String newMobNo = patientVO.getPatient().getContacts().getMobileNumber();
+        String mobNoWithISDCode = (newMobNo.length() > 8) ? newMobNo : "965"+newMobNo;
+        patientVO.getPatient().getContacts().setMobileNumber(mobNoWithISDCode);
         patientVO.getPatient().setRegisteredFrom("LAB_MANUAL_ENTRY");
         String afyaId = RestServiceConsumer.checkIfPatientExistInPortalAndCreateIfNotExist(patientVO.getPatient(),practice != null? practice.getTenantId():null);
         if(afyaId != null) {

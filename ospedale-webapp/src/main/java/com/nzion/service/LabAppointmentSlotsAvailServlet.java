@@ -27,7 +27,7 @@ import java.util.*;
 
 public class LabAppointmentSlotsAvailServlet extends HttpServlet{
     private Location location;
-    
+
     @Autowired
     PersonRepository personRepository;
     @Autowired
@@ -41,138 +41,116 @@ public class LabAppointmentSlotsAvailServlet extends HttpServlet{
     }
 
     @Override
-    public void doGet(HttpServletRequest request1, HttpServletResponse response1) throws IOException {
-        final HttpServletRequest request = request1;
-        final HttpServletResponse response = response1;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Map<String, Set<String>> slotsMap = new LinkedHashMap<>();
-                    Map<String, String> resultMap = new LinkedHashMap<>();
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-                    Map<String, Set<CalendarIndividualSlot>> calendarIndividualSlotsMap = new LinkedHashMap<>();
-                    List<Set<SlotAvailability>> slotAvailabilityList = new ArrayList<>();
-                    int noOfDays = 7;
-                    Date date = null;
+        Map<String, Set<String>> slotsMap = new LinkedHashMap<>();
+        Map<String, String> resultMap = new LinkedHashMap<>();
 
-                    BigDecimal leadTime = null;
-                    BigDecimal maxTime = null;
+        Map<String,Set<CalendarIndividualSlot>> calendarIndividualSlotsMap = new LinkedHashMap<>();
+        List<Set<SlotAvailability>> slotAvailabilityList = new ArrayList<>();
+        int noOfDays = 7;
+        Date date = null;
 
-                    String labId = request.getParameter("labId") != null ? request.getParameter("labId").trim() : request.getParameter("labId");
-                    String appointmentDate = request.getParameter("appointmentDate") != null ? request.getParameter("appointmentDate").trim() : request.getParameter("appointmentDate");
-                    String locationId = request.getParameter("locationId") != null ? request.getParameter("locationId").trim() : request.getParameter("locationId");
+        BigDecimal leadTime = null;
+        BigDecimal maxTime = null;
 
-                    try {
-                        date = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).parse(appointmentDate);
-                        if (validateDate(date)) {
-                            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid date, cannot book appointment from past");
-                            return;
-                        }
+        String labId = request.getParameter("labId") != null ? request.getParameter("labId").trim() :request.getParameter("labId");
+        String appointmentDate = request.getParameter("appointmentDate") != null ? request.getParameter("appointmentDate").trim() : request.getParameter("appointmentDate");
+        String locationId = request.getParameter("locationId") != null ? request.getParameter("locationId").trim() : request.getParameter("locationId");
 
-                        TenantIdHolder.setTenantId(labId);
+        try {
+            date = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).parse(appointmentDate);
+            if(validateDate(date)) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid date, cannot book appointment from past");
+                return;
+            }
+            TenantIdHolder.setTenantId(labId);
 
-                        CalendarResourceAssoc calendarResourceAssoc1 = new CalendarResourceAssoc();
-                        calendarResourceAssoc1.setLocation(commonCrudService.getById(Location.class, Long.parseLong(locationId)));
-                        calendarResourceAssoc1.setPerson(null);
+            List<CalendarResourceAssoc> calendarResourceAssocs = commonCrudService.findByEquality(CalendarResourceAssoc.class, new String[]{"location.id"}, new Object[]{Long.parseLong(locationId)});
 
-                        List<CalendarResourceAssoc> calendarResourceAssocs = commonCrudService.searchByExample(calendarResourceAssoc1);
+            if(calendarResourceAssocs.size() > 0){
+                for (int i= 0; i < noOfDays; i++) {
+                    Date date1 = UtilDateTime.addDaysToDate(date, i);
+                    List<CalendarResourceAssoc> assocs = getCurrentCalendarResourceAssoc(calendarResourceAssocs, date1);
 
-                        Iterator iterator = calendarResourceAssocs.iterator();
-                        while (iterator.hasNext()) {
-                            CalendarResourceAssoc calendarResourceAssoc = (CalendarResourceAssoc) iterator.next();
-                            if (calendarResourceAssoc.getPerson() != null) {
-                                iterator.remove();
+                    //***********Added code for available day of week start******
+                    String day = new SimpleDateFormat("EEE").format(date1);
+                    Iterator iterator1 = assocs.iterator();
+                    while (iterator1.hasNext()){
+                        CalendarResourceAssoc calendarResourceAssoc = (CalendarResourceAssoc)iterator1.next();
+                        if (calendarResourceAssoc.getWeek() != null){
+                            List<String> listOfDays = calendarResourceAssoc.getWeek().getSelectedDays();
+                            if (!listOfDays.contains(day)){
+                                iterator1.remove();
+                                //break;
                             }
                         }
 
-                        if (calendarResourceAssocs.size() > 0) {
-                            for (int i = 0; i < noOfDays; i++) {
-                                Date date1 = UtilDateTime.addDaysToDate(date, i);
-                                List<CalendarResourceAssoc> assocs = getCurrentCalendarResourceAssoc(calendarResourceAssocs, date1);
-
-                                //***********Added code for available day of week start******
-                                String day = new SimpleDateFormat("EEE").format(date1);
-                                Iterator iterator1 = assocs.iterator();
-                                while (iterator1.hasNext()) {
-                                    CalendarResourceAssoc calendarResourceAssoc = (CalendarResourceAssoc) iterator1.next();
-                                    if (calendarResourceAssoc.getWeek() != null) {
-                                        List<String> listOfDays = calendarResourceAssoc.getWeek().getSelectedDays();
-                                        if (!listOfDays.contains(day)) {
-                                            iterator1.remove();
-                                            //break;
-                                        }
-                                    }
-
-                                }
-                                //******Added code for available day of week end ******
-
-                                Set<CalendarIndividualSlot> calendarIndividualSlots = new HashSet<>();
-                                for (CalendarResourceAssoc assoc : assocs) {
-                                    calendarIndividualSlots.addAll(assoc.getCalendarIndividualSlots());
-                                }
-                                calendarIndividualSlotsMap.put(UtilDateTime.toDateString(date1, "dd-MM-yyyy"), calendarIndividualSlots);
-                            }
-                        }
-                        for (int i = 0; i < noOfDays; i++) {
-                            Date date1 = UtilDateTime.addDaysToDate(date, i);
-                            Set<SlotAvailability> timeslots = null;
-                            timeslots = getAvailableSlots(locationId, date1);
-                            Set<String> slots = null;
-                            if (timeslots.size() > 0) {
-                                slots = getTimeSlot(timeslots);
-                            } else {
-                                slots = new HashSet<>();
-                            }
-                            slotsMap.put(UtilDateTime.toDateString(date1, "dd-MM-yyyy"), slots);
-                        }
-
-                        RCMPreference rcmPreference = commonCrudService.getByPractice(RCMPreference.class);
-                        SchedulingPreference schedulingPreferences = commonCrudService.findUniqueByEquality(SchedulingPreference.class, new String[]{"rcmPreference", "visitType"}, new Object[]{rcmPreference, RCMVisitType.HOME_PHLEBOTOMY});
-                        leadTime = schedulingPreferences.getLeadTimeAllowed();
-                        maxTime = schedulingPreferences.getMaxTimeAllowed();
-
-
-                        for (Map.Entry<String, Set<CalendarIndividualSlot>> entry : calendarIndividualSlotsMap.entrySet()) {
-                            Set<CalendarIndividualSlot> calendarIndividualSlotsFilter = new HashSet<>();
-                            for (CalendarIndividualSlot calendarIndividualSlot : entry.getValue()) {
-                                Date slotDateTime = UtilDateTime.toDate(date.getMonth(), date.getDate(), date.getYear(), calendarIndividualSlot.getStartTime().getHours(),
-                                        calendarIndividualSlot.getStartTime().getMinutes(), calendarIndividualSlot.getStartTime().getSeconds());
-                                slotDateTime = UtilDateTime.getDayStart(slotDateTime);
-                                BigDecimal hoursInterval = new BigDecimal(UtilDateTime.getIntervalInHours(UtilDateTime.getDayStart(new Date()), slotDateTime));
-                                if (hoursInterval.compareTo(leadTime) >= 0 && hoursInterval.compareTo(maxTime) <= 0) {
-                                    calendarIndividualSlotsFilter.add(calendarIndividualSlot);
-                                }
-                            }
-                            calendarIndividualSlotsMap.put(entry.getKey(), calendarIndividualSlotsFilter);
-                        }
-
-                        Set<String> slotKey = slotsMap.keySet();
-                        for (String key : calendarIndividualSlotsMap.keySet()) {
-                            if (slotKey.contains(key)) {
-                                Set<CalendarIndividualSlot> calendarIndividualSlots = calendarIndividualSlotsMap.get(key);
-                                Set<String> slotsSet = slotsMap.get(key);
-                                int j = createMappingOfSlotAndVisitType(calendarIndividualSlots, slotsSet).size();
-                                resultMap.put(key, j + "&" + calendarIndividualSlots.size());
-                            }
-                        }
-
-                    } catch (ParseException e) {
-                        response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.toString());
                     }
-                    PrintWriter writer = response.getWriter();
-                    if (resultMap != null) {
-                        String s = new JSONObject().toJSONString(resultMap);
-                        writer.print(s);
-                    } else {
-                        writer.print("");
+                    //******Added code for available day of week end ******
+
+                    Set<CalendarIndividualSlot> calendarIndividualSlots = new HashSet<>();
+                    for (CalendarResourceAssoc assoc : assocs){
+                        calendarIndividualSlots.addAll(assoc.getCalendarIndividualSlots());
                     }
-                    writer.close();
-                }catch (Exception e){
-                    e.printStackTrace();
+                    calendarIndividualSlotsMap.put(UtilDateTime.toDateString(date1, "dd-MM-yyyy"), calendarIndividualSlots);
                 }
             }
-        }).start();
+            for (int i= 0; i< noOfDays; i++) {
+                Date date1 = UtilDateTime.addDaysToDate(date, i);
+                Set<SlotAvailability> timeslots = null;
+                timeslots = getAvailableSlots(locationId, date1);
+                Set<String> slots = null;
+                if(timeslots.size() > 0) {
+                    slots = getTimeSlot(timeslots);
+                } else {
+                    slots = new HashSet<>();
+                }
+                slotsMap.put(UtilDateTime.toDateString(date1, "dd-MM-yyyy"), slots);
+            }
+
+            RCMPreference rcmPreference = commonCrudService.getByPractice(RCMPreference.class);
+            SchedulingPreference schedulingPreferences = commonCrudService.findUniqueByEquality(SchedulingPreference.class, new String[]{"rcmPreference","visitType"}, new Object[]{rcmPreference, RCMVisitType.HOME_PHLEBOTOMY});
+            leadTime = schedulingPreferences.getLeadTimeAllowed();
+            maxTime = schedulingPreferences.getMaxTimeAllowed();
+
+
+            for (Map.Entry<String, Set<CalendarIndividualSlot>> entry : calendarIndividualSlotsMap.entrySet()) {
+                Set<CalendarIndividualSlot> calendarIndividualSlotsFilter = new HashSet<>();
+                for (CalendarIndividualSlot calendarIndividualSlot : entry.getValue()) {
+                    Date slotDateTime = UtilDateTime.toDate(date.getMonth(), date.getDate(), date.getYear(), calendarIndividualSlot.getStartTime().getHours(),
+                            calendarIndividualSlot.getStartTime().getMinutes(), calendarIndividualSlot.getStartTime().getSeconds());
+                    slotDateTime = UtilDateTime.getDayStart(slotDateTime);
+                    BigDecimal hoursInterval = new BigDecimal(UtilDateTime.getIntervalInHours(UtilDateTime.getDayStart(new Date()), slotDateTime));
+                    if (hoursInterval.compareTo(leadTime) >= 0 && hoursInterval.compareTo(maxTime) <= 0) {
+                        calendarIndividualSlotsFilter.add(calendarIndividualSlot);
+                    }
+                }
+                calendarIndividualSlotsMap.put(entry.getKey(), calendarIndividualSlotsFilter);
+            }
+
+            Set<String> slotKey = slotsMap.keySet();
+            for (String key : calendarIndividualSlotsMap.keySet()) {
+                if (slotKey.contains(key)){
+                    Set<CalendarIndividualSlot> calendarIndividualSlots = calendarIndividualSlotsMap.get(key);
+                    Set<String> slotsSet = slotsMap.get(key);
+                    int j = createMappingOfSlotAndVisitType(calendarIndividualSlots , slotsSet).size();
+                    resultMap.put(key, j+"&"+calendarIndividualSlots.size());
+                }
+            }
+
+        } catch (ParseException e) {
+            response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.toString());
+        }
+        PrintWriter writer = response.getWriter();
+        if(resultMap != null){
+            String s=new JSONObject().toJSONString(resultMap);
+            writer.print(s);
+        }
+        else {
+            writer.print("");
+        }
+        writer.close();
     }
 
     public static void main(String args[]){
@@ -200,12 +178,12 @@ public class LabAppointmentSlotsAvailServlet extends HttpServlet{
     }
 
     private List<CalendarResourceAssoc> getCurrentCalendarResourceAssoc(List<CalendarResourceAssoc> calendarResourceAssocs, Date appointmentDate) throws ParseException {
-    	List<CalendarResourceAssoc> calAssocs = new ArrayList<CalendarResourceAssoc>();
+        List<CalendarResourceAssoc> calAssocs = new ArrayList<CalendarResourceAssoc>();
         for(CalendarResourceAssoc calendarResourceAssoc :  calendarResourceAssocs){
             if(calendarResourceAssoc.getThruDate() == null && (appointmentDate.after(calendarResourceAssoc.getFromDate()) || appointmentDate.equals(calendarResourceAssoc.getFromDate())))
-            	calAssocs.add(calendarResourceAssoc);
+                calAssocs.add(calendarResourceAssoc);
             if(calendarResourceAssoc.getThruDate() != null && (appointmentDate.after(calendarResourceAssoc.getFromDate()) || appointmentDate.equals(calendarResourceAssoc.getFromDate())) && (appointmentDate.before(calendarResourceAssoc.getThruDate()) || appointmentDate.equals(calendarResourceAssoc.getThruDate())))
-            	calAssocs.add(calendarResourceAssoc);
+                calAssocs.add(calendarResourceAssoc);
         }
         return calAssocs;
     }
@@ -231,7 +209,7 @@ public class LabAppointmentSlotsAvailServlet extends HttpServlet{
                 SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
                 try {
                     if (new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(UtilDateTime.format(slotAvailability.getOn(), new SimpleDateFormat("yyyy-MM-dd")) + " " + sdf.format(slot.getStartTime())).before(new Date())) {
-                    continue;
+                        continue;
                     }
                 }catch (Exception e){
                     e.printStackTrace();

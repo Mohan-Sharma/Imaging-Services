@@ -8,6 +8,7 @@ import com.nzion.service.PracticeService;
 import com.nzion.service.UserLoginService;
 import com.nzion.service.exceptions.ServiceException;
 import com.nzion.util.Infrastructure;
+import com.nzion.util.RestServiceConsumer;
 import com.nzion.util.UtilMessagesAndPopups;
 import com.nzion.util.UtilValidator;
 import com.nzion.view.PracticeViewObject;
@@ -44,6 +45,7 @@ public class PracticeSetupController extends OspedaleAutowirableComposer {
     public void savePractice() throws ServiceException, InterruptedException {
         if (practiceViewObject.getPractice().getId() != null) {
             practiceService.updatePractice(practiceViewObject);
+            RestServiceConsumer.updateRadiologyInformation(practiceViewObject.getPractice());
             UtilMessagesAndPopups.showSuccess();
             return;
         }

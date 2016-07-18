@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.nzion.domain.Patient;
 import com.nzion.domain.PatientInsurance;
+import com.nzion.domain.Practice;
 import com.nzion.dto.*;
 import com.nzion.service.dto.ServiceMasterDto;
 import org.apache.http.client.HttpClient;
@@ -16,10 +17,12 @@ import org.apache.http.impl.client.HttpClients;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -275,6 +278,28 @@ public class RestServiceConsumer {
         String json = responseEntity.getBody();
         Gson gson = new GsonBuilder().serializeNulls().create();
         return (Map<String, Object>) gson.fromJson(json, Map.class);
+    }
+
+    public static void updateRadiologyInformation(Practice practice){
+        RadiologyInfDto labInfDto = new RadiologyInfDto();
+        labInfDto.setPropertiesToLabInfDto(practice);
+        Gson gson = new GsonBuilder().serializeNulls().setDateFormat("yyyy-MM-dd").create();
+        String labInfJsonString = gson.toJson(labInfDto);
+        try {
+            RestTemplate restTemplate = new RestTemplate(getHttpComponentsClientHttpRequestFactory());
+            HttpHeaders headers = getHttpHeader();
+
+            restTemplate.getMessageConverters()
+                    .add(0, new StringHttpMessageConverter(Charset.forName("UTF-8")));
+
+            HttpEntity<String> requestEntity = new HttpEntity<String>(labInfJsonString, headers);
+            ResponseEntity<String> responseEntity = restTemplate.exchange(PORTAL_URL+"/anon/updateRadiologyInformation?tenantId={tenantId}", HttpMethod.POST, requestEntity, String.class, practice.getTenantId());
+            String labInf = responseEntity.getBody();
+            //return providerId;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //return null;
     }
 
 }

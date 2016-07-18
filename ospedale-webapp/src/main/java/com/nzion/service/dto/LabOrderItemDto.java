@@ -17,6 +17,7 @@ public class LabOrderItemDto {
     private String scheduleId;
     private String homeServiceCost;
     private boolean isPrescriptionScanned;
+    private String referralDoctorId;
 
     public String getReferralClinicId() {
         return referralClinicId;
@@ -72,5 +73,13 @@ public class LabOrderItemDto {
 
     public void setIsPrescriptionScanned(boolean isPrescriptionScanned) {
         this.isPrescriptionScanned = isPrescriptionScanned;
+    }
+
+    public String getReferralDoctorId() {
+        return referralDoctorId;
+    }
+
+    public void setReferralDoctorId(String referralDoctorId) {
+        this.referralDoctorId = referralDoctorId;
     }
 }

@@ -454,6 +454,8 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
         //labOrderRequest.setReferralDoctorFirstName(labOrderDto.getReferralDoctorName());
         //labOrderRequest.setSequenceNum(0);
         labOrderRequest.setMobileOrPatinetPortal(true);
+            String referralClinicId = "";
+            String referralDoctorId = "";
 
         for (LabOrderItemDto labOrderItemDto:labOrderItemDtoList) {
 
@@ -494,8 +496,23 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
             labOrderRequest.addPatientLabOrder(patientLabOrder);
             patientLabOrder.setLabOrderRequest(labOrderRequest);
             patientLabOrder.setBillingStatus(PatientLabOrder.BILLINGSTATUS.INVOICED);
+            if((labOrderItemDto.getReferralClinicId() != null) && (labOrderItemDto.getReferralClinicId() != "") && (referralClinicId == "")){
+                referralClinicId = labOrderItemDto.getReferralClinicId();
+                referralDoctorId = labOrderItemDto.getReferralDoctorId();
+            }
         }
         //labOrderRequest.setConsultationInvoiceGenerated(false);
+
+            Referral referral = null;
+            if ((referralClinicId != null) && (referralClinicId != "")) {
+                List<Referral> referrals = commonCrudService.findByEquality(Referral.class, new String[]{"tenantId"}, new Object[]{referralClinicId});
+                if (UtilValidator.isNotEmpty(referrals)) {
+                    referral = referrals.get(0);
+                }
+            }
+            labOrderRequest.setReferral(referral);
+            labOrderRequest.setReferralDoctorId(referralDoctorId);
+
         LabOrderRequest orderRequest = commonCrudService.save(labOrderRequest);
 
         try{

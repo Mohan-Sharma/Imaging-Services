@@ -62,6 +62,8 @@ public class LabOrderRequest extends IdGeneratingBaseEntity{
 
 	private String resultEntryDescription;
 
+	private String referralDoctorId;
+
 
 	@ManyToMany(targetEntity=Laboratories.class,fetch=FetchType.EAGER)
     @JoinTable(name = "lab_order_request_laboratories",
@@ -331,5 +333,13 @@ public class LabOrderRequest extends IdGeneratingBaseEntity{
 
 	public void setResultEntryDescription(String resultEntryDescription) {
 		this.resultEntryDescription = resultEntryDescription;
+	}
+
+	public String getReferralDoctorId() {
+		return referralDoctorId;
+	}
+
+	public void setReferralDoctorId(String referralDoctorId) {
+		this.referralDoctorId = referralDoctorId;
 	}
 }

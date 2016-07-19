@@ -93,7 +93,7 @@ public class HibernateScheduleRepository extends HibernateBaseRepository impleme
 			criteria.add(Restrictions.isNull("person"));
 		}
 
-		List<CalendarResourceAssoc> calendarResourceAssocList =  criteria.setCacheable(true).list();
+		List<CalendarResourceAssoc> calendarResourceAssocList =  criteria.list();
 		if (person != null) {
 			Iterator iterator = calendarResourceAssocList.iterator();
 			while (iterator.hasNext()) {

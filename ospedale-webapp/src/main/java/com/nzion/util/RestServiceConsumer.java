@@ -7,6 +7,7 @@ import com.nzion.domain.Patient;
 import com.nzion.domain.PatientInsurance;
 import com.nzion.domain.Practice;
 import com.nzion.dto.*;
+import com.nzion.service.dto.LabOrderDto;
 import com.nzion.service.dto.ServiceMasterDto;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -35,12 +36,14 @@ import java.lang.reflect.Type;
  */
 public class RestServiceConsumer {
     static String PORTAL_URL = null;
+    static String CLINIC_URL = null;
     static {
         Properties properties = new Properties();
         try {
             String profileName = System.getProperty("profile.name") != null ? System.getProperty("profile.name") : "dev";
             properties.load(RestServiceConsumer.class.getClassLoader().getResourceAsStream("application-"+profileName+".properties"));
             PORTAL_URL = (String)properties.get("PORTAL_SERVER_URL");
+            CLINIC_URL = (String)properties.get("CLINIC_SERVER_URL");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -294,6 +297,28 @@ public class RestServiceConsumer {
 
             HttpEntity<String> requestEntity = new HttpEntity<String>(labInfJsonString, headers);
             ResponseEntity<String> responseEntity = restTemplate.exchange(PORTAL_URL+"/anon/updateRadiologyInformation?tenantId={tenantId}", HttpMethod.POST, requestEntity, String.class, practice.getTenantId());
+            String labInf = responseEntity.getBody();
+            //return providerId;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //return null;
+    }
+
+    public static void updateImagingOrderInClinic(String tenantId, LabOrderDto labOrderDto){
+        labOrderDto.setAppointmentStartDate(null);
+        labOrderDto.setAppointmentEndDate(null);
+        Gson gson = new GsonBuilder().serializeNulls().setDateFormat("yyyy-MM-dd").create();
+        String labInfJsonString = gson.toJson(labOrderDto);
+        try {
+            RestTemplate restTemplate = new RestTemplate(getHttpComponentsClientHttpRequestFactory());
+            HttpHeaders headers = getHttpHeader();
+
+            restTemplate.getMessageConverters()
+                    .add(0, new StringHttpMessageConverter(Charset.forName("UTF-8")));
+
+            HttpEntity<String> requestEntity = new HttpEntity<String>(labInfJsonString, headers);
+            ResponseEntity<String> responseEntity = restTemplate.exchange(CLINIC_URL+"/clinicMaster/updateImagingOrder?tenantId={tenantId}", HttpMethod.POST, requestEntity, String.class, tenantId);
             String labInf = responseEntity.getBody();
             //return providerId;
         } catch (Exception e) {

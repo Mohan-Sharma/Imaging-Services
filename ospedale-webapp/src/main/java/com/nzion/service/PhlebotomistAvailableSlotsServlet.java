@@ -251,6 +251,18 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
         if(status.equals("created")) {
             response.setStatus(HttpServletResponse.SC_OK, "order placed");
 
+            try{
+                String referralClinicId = "";
+                if (UtilValidator.isNotEmpty(labOrderDto.getRows())){
+                    referralClinicId = labOrderDto.getRows().get(0).getReferralClinicId();
+                }
+                if ((UtilValidator.isNotEmpty(labOrderDto.getRows())) && (labOrderDto.getRows().get(0).getReferralClinicId() != null) && (labOrderDto.getRows().get(0).getReferralClinicId() != "")){
+                    RestServiceConsumer.updateImagingOrderInClinic(referralClinicId, labOrderDto);
+                }
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+
             String resultString = "{" +
                     "\"status\" : \"" + "SUCCESS" +
                     "\", \"orderId\" : \"" + resultStatus.get("labOrder") +

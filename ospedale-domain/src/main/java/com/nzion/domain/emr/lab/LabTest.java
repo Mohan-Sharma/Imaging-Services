@@ -45,6 +45,8 @@ public class LabTest extends IdGeneratingBaseEntity implements Serializable{
 	private String method;
 
 	private boolean prescriptionRequired;
+	private String specialInstruction;
+	private String turnaroundTime;
 
 	
 	private Set<Investigation> investigations;
@@ -137,5 +139,21 @@ public class LabTest extends IdGeneratingBaseEntity implements Serializable{
 
 	public void setPrescriptionRequired(boolean prescriptionRequired) {
 		this.prescriptionRequired = prescriptionRequired;
+	}
+
+	public String getSpecialInstruction() {
+		return specialInstruction;
+	}
+
+	public void setSpecialInstruction(String specialInstruction) {
+		this.specialInstruction = specialInstruction;
+	}
+
+	public String getTurnaroundTime() {
+		return turnaroundTime;
+	}
+
+	public void setTurnaroundTime(String turnaroundTime) {
+		this.turnaroundTime = turnaroundTime;
 	}
 }

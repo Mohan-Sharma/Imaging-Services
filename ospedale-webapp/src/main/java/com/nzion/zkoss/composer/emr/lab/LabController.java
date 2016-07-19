@@ -110,7 +110,7 @@ public class LabController extends OspedaleAutowirableComposer {
 	labTest.setTestPneumonic(labTest.getTestDescription());
 	//labService.saveLabTestPanel(labTestPanel);
 	LabTest test = commonCrudService.save(labTest);
-	test.setTestCode("Lab "+test.getId());
+	//test.setTestCode("Lab "+test.getId());
 	commonCrudService.merge(labTest);
 	root.getFellowIfAny("addLabTestPanelWindow", true).detach();
 	UtilMessagesAndPopups.showSuccess();

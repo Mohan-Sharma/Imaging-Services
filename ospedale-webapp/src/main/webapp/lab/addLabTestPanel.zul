@@ -51,6 +51,22 @@
                     <decimalbox format="###.##" placeholder="0"
                                 value="@{labController.labTestPanel.price,save-when='Save.onClick'}" sclass="span12"/>
                 </div>-->
+                <separator/> <separator/>
+                <div zclass="span4">
+                    <checkbox label=" Prescription Required">
+                        <attribute name="onCreate">
+                            self.setChecked(labController.labTest.isPrescriptionRequired());
+                        </attribute>
+                        <attribute name="onCheck">
+                            if(self.isChecked()){
+                                labController.labTest.setPrescriptionRequired(true);
+                            }
+                            else{
+                                labController.labTest.setPrescriptionRequired(false);
+                            }
+                        </attribute>
+                    </checkbox>
+                </div>
             </div>
 
             <!--<div zclass="row-fluid">
@@ -82,6 +98,16 @@
                         <textbox sclass="span12" />
                     </div>
              </div>-->
+             <div zclass="row-fluid">
+                 <div zclass="span4">
+                     <label value="Special Instruction"/>
+                     <textbox value="@{labController.labTest.specialInstruction,save-when='Save.onClick'}" sclass="span12"/>
+                 </div>
+                 <div zclass="span4">
+                     <label value="Turn Around Time (in hrs)"/>
+                     <decimalbox value="@{labController.labTest.turnaroundTime,save-when='Save.onClick'}" sclass="span12"/>
+                 </div>
+             </div>
         <separator height="10px"/>
         <tabbox>
             <tabs>

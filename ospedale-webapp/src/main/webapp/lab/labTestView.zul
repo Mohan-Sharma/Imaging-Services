@@ -9,6 +9,6 @@
 	<screen width="100%" listtitle="List of Radiology Tests" addpage="newLabTest"
 	entityclass="com.nzion.domain.emr.lab.LabTest" addmodepopup="true"  fields="testCode,testDescription,active"
 	labels="Test Code,Test Description,Active" searchfields="testCode,testDescription"
-	hideactivation="true" hidedeletebtn="true" hideaddbtn = "true" containername="contentArea"/>
+	hideactivation="false" hidedeletebtn="true" hideaddbtn = "true" containername="contentArea"/>
 	</window>
 </zk>

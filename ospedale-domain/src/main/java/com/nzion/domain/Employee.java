@@ -37,7 +37,7 @@ public class Employee extends Person {
 	}
 
 	public void setPhlebotomist(boolean phlebotomist) {
-		setSchedulable(phlebotomist);
+		// setSchedulable(phlebotomist);
 		this.phlebotomist = phlebotomist;
 	}
 

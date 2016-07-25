@@ -10,7 +10,7 @@
 		//com.nzion.domain.screen.ScheduleConfig screenDisplay = scheduleService.getAppointmentDisplayScreen();
 		List persons = scheduleService.getSchedulablePersons();
 		com.nzion.domain.Person person = new com.nzion.domain.Person();
-		person.setFirstName("LAB WALKIN");
+		person.setFirstName("IMAGING WALKIN");
 		persons.add(person);
 
 		EntityDropdownRenderer dropdownRenderer = new EntityDropdownRenderer(new EntityDropDownPersonNameAdapter());

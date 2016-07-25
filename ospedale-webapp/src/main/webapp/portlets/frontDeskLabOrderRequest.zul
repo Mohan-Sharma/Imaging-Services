@@ -55,9 +55,9 @@
              </div>
             <div zclass="row-fluid">
 
-                <div zclass="span5" style="margin-left: 10px;">
-                    <label value="Appointment Date" style="margin-left: 8px;" class="z-label-bold"/>
-                    <datebox id="appointmentDate" sclass="span11">
+                <div zclass="span5">
+                    <label value="Appointment Date" class="z-label-bold"/>
+                    <datebox id="appointmentDate" sclass="span11" style="margin-left:0px;">
                         <attribute name="onChange">
                             <![CDATA[
                                         Events.postEvent("onClick", freeSlot, null);
@@ -65,10 +65,10 @@
                         </attribute>
                     </datebox>
                 </div>
-                <div zclass="span3" style="margin-left: 20px;">
-                    <label value="Time Slot" style="margin-left: 8px;" mold="required" class="z-label-bold"></label>
-                    <listbox mold="select" model="@{searchResult,load-after='freeSlot.onClick'}"
-                             id="slotListbox" zclass="span10">
+                <div zclass="span3" style="margin-left : -10px;">
+                    <label value="Time Slot" mold="required" class="z-label-bold"></label>
+                    <listbox mold="select" model="@{searchResult,load-after='freeSlot.onClick'}" style="margin-left:0px;"
+                             id="slotListbox" zclass="span12">
                         <listitem self="@{each='zk'}"
                                   label="@{zk.slot,converter='com.nzion.zkoss.composer.appointment.SlotConverter'}"
                                   value="@{zk.slot}"></listitem>
@@ -83,19 +83,19 @@
                 </div>
 
             </div>
-            <div zclass="row-fluid">
+            <!--<div zclass="row-fluid">
                        
                 
                 <radiogroup orient="horizontal">
 					
-					<!--<radio label="Lab Test"  id="testRadio" style="padding:30px"
+					&lt;!&ndash;<radio label="Lab Test"  id="testRadio" style="padding:30px"
 					onCheck = "labTestDiv.setVisible(true);labTestPanelDiv.setVisible(false);labTestProfileDiv.setVisible(false);homeSerDiv.setVisible(true)"/>
 					
 					<radio label="Lab Profile"  id="profileRadio" style="padding:30px" 
 					onCheck = "labTestProfileDiv.setVisible(true);labTestDiv.setVisible(false);labTestPanelDiv.setVisible(false);homeSerDiv.setVisible(true)"/>
 					
 					<radio label="Lab Panel"  id="panelRadio" style="padding:30px" 
-					onCheck = "labTestPanelDiv.setVisible(true);labTestProfileDiv.setVisible(false);labTestDiv.setVisible(false);homeSerDiv.setVisible(true)"/>-->
+					onCheck = "labTestPanelDiv.setVisible(true);labTestProfileDiv.setVisible(false);labTestDiv.setVisible(false);homeSerDiv.setVisible(true)"/>&ndash;&gt;
                     <radio label="Lab Test"  id="testRadio" style="padding:30px"
                            onCheck = "labTestDiv.setVisible(true);labTestPanelDiv.setVisible(false);labTestProfileDiv.setVisible(false)"/>
 
@@ -107,13 +107,13 @@
 				
 				 </radiogroup>
                 
-            </div>
+            </div>-->
 
             <div zclass="row-fluid">
                  
-                 <div zclass="span4" id="labTestDiv" visible ="false">
-                    <label value="Lab Test Name" mold="required"/>
-                    <suggest id="labTestTxt" entity="com.nzion.domain.emr.lab.LabTest" sclass="span12"
+                 <div zclass="span4" id="labTestDiv">
+                    <label value="Radiology Test Name" mold="required"/>
+                    <suggest id="labTestTxt" entity="com.nzion.domain.emr.lab.LabTest" sclass="span12" style="margin-left:0px;"
                              searchcolumns="testDescription" displaycolumns="testDescription" requiredcolumn="testDescription"/>
                 </div>
                 
@@ -193,7 +193,7 @@
                         
                        PatientLabOrder patientLabOrder = new PatientLabOrder();
                         
-                        if(profileRadio.isChecked()){
+                     /*   if(profileRadio.isChecked()){
                         	if(com.nzion.util.UtilValidator.isEmpty( labTestProfileTxt.getValue()))
                                 throw new WrongValueException(labTestProfileTxt , "Test Profile Name Required");
 
@@ -211,7 +211,7 @@
                         	for(LabTest test: panel.getTests())
                         		vm.getLabOrderRequest().addLaboratories(test.getLaboratory());
                         	labTestPanelTxt.setValue(null);
-                        }else{
+                        }else{ */
                         	if(com.nzion.util.UtilValidator.isEmpty( labTestTxt.getValue()))
                                 throw new WrongValueException(labTestTxt , "Test Name Required");
 
@@ -219,7 +219,7 @@
                         	patientLabOrder.setLabTest(test);
                         	vm.getLabOrderRequest().addLaboratories(test.getLaboratory());
                         	labTestTxt.setValue(null);
-                        }
+                     //   }
 
                        			patientLabOrder.setHomeService(hSCheckBox.isChecked());
                        			//hSCheckBox.setChecked(false);

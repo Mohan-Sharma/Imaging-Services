@@ -1,0 +1,140 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./frontDeskLabOrderPortletWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <zscript>
+        <![CDATA[
+         com.nzion.domain.emr.lab.LabOrderRequest labOrderRequest=new com.nzion.domain.emr.lab.LabOrderRequest();
+         com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+         com.nzion.service.billing.BillingService billingService = com.nzion.util.Infrastructure.getSpringBean("billingService");
+         com.nzion.service.emr.lab.LabService labService = com.nzion.util.Infrastructure.getSpringBean("labService");
+         com.nzion.domain.UserLogin login = com.nzion.util.Infrastructure.getUserLogin();
+         List labStatus = commonCrudService.findByEquality(com.nzion.domain.emr.lab.LabOrderRequest.class,new String[]{"orderStatus"}, new Object[]{com.nzion.domain.emr.lab.LabOrderRequest.ORDERSTATUS.BILLING_DONE});
+         List statuses = new ArrayList();
+         statuses.add(com.nzion.domain.emr.lab.LabOrderRequest.ORDERSTATUS.BILLING_DONE);
+
+        ]]>
+    </zscript>
+
+    <window id="frontDeskLabOrderPortletWindow">
+        <separator></separator>
+        <separator></separator>
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span3">
+                    <label value="Patient"/>
+                    <patientlookup
+                            onChange="labOrderRequest.setPatient((com.nzion.domain.Patient)event.getOrigin().getData())"/>
+                </div>
+                <div zclass="span2">
+                    <label value="From Date"/>
+                    <datebox id="fromDate" sclass="span12"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Thru Date"/>
+                    <datebox id="thruDate" sclass="span12"/>
+                </div>
+
+            </div>
+        </div>
+        <div align="center" sclass="panelFoot buttonPanel"
+             onCreate='Events.postEvent("onClick",frontDeskLabOrderPortletWindow.getFellow("Search"),null);'>
+            <button label="Search" id="Search" zclass="btn btn-primary">
+                <attribute name="onClick">
+                    <![CDATA[
+                       //List labOrderList =billingService.getSearchByLabOrder(statuses,labOrderRequest.getPatient(),labOrderRequest.getProvider(),labOrderRequest.getReferral());
+
+                       if(fromDate.getValue() == null && thruDate.getValue() == null) {
+                            fromDate.setValue(new java.util.Date());
+                            thruDate.setValue(new java.util.Date());
+                       }
+                       List labOrderList =billingService.getSearchByLabOrder(statuses,labOrderRequest.getPatient(),labOrderRequest.getReferral(),fromDate.getValue(),thruDate.getValue());
+
+                         /*   for(com.nzion.domain.emr.lab.LabOrderRequest lr:labOrderList){
+                            if(lr.isHomeService()){
+                                lr.setStartTime(lr.getPhlebotomistStartTime());
+                                lr.setStartDate(lr.getPhlebotomistStartDate());
+                                lr.setEndTime(lr.getPhlebotomistEndTime());
+                                lr.setPhlebotomist(lr.getPhlebotomist());
+                            }
+                            } */
+
+                    ]]>
+                </attribute>
+            </button>
+            <!--<button label="New Imaging Order" id="add">
+                <attribute name="onClick"><![CDATA[
+                       com.nzion.zkoss.ext.Navigation.navigate("/portlets/frontDeskLabOrderRequest",null,frontDeskLabOrderPortletWindow);
+                   ]]>
+                </attribute>
+            </button>-->
+        </div>
+        <separator></separator>
+
+        <grid id="labOrderRequestGrid" model="@{labOrderList,load-after='Search.onClick'}" mold="paging">
+            <columns>
+                <column label="Order Date"/>
+                <column label="Order Time"/>
+                <column label="Patient"/>
+                <column label="Mobile Number"/>
+                <column>
+                    <vbox>
+                        <label value="Appointment"/>
+                        <label value="Date"/>
+                    </vbox>
+                </column>
+                <column>
+                    <vbox>
+                        <label value="Appointment"/>
+                        <label value="Start Time"/>
+                    </vbox>
+                </column>
+                <column>
+                    <vbox>
+                        <label value="Appointment"/>
+                        <label value="End Time"/>
+                    </vbox>
+                </column>
+                <!--  <column label="Phlebotomist" width="10%"/>-->
+
+                <!--<column label="Doctor"/>-->
+                <!--<column label="Referral"/>-->
+                <column label="Status" />
+                <column label="Action" />
+            </columns>
+            <rows>
+                <row self="@{each='labOrderRequest'}" value="@{labOrderRequest}">
+                    <label value="@{labOrderRequest.createdTxTimestamp converter='org.zkoss.zkplus.databind.DateFormatConverter'}" self="@{format(dd/MM/yyyy)}}">
+                        <!--<attribute name="onCreate">
+                            alert("h*****i" +labOrderRequest.isHomeService()+ "helo" + labOrderRequest.getId());
+                        </attribute>-->
+                    </label>
+                    <label value="@{labOrderRequest.createdTxTimestamp converter='com.nzion.view.component.TimeConverter'}"/>
+                    <label value="@{labOrderRequest.patient.firstName}"/>
+                    <label value="@{labOrderRequest.patient.person.contacts.mobileNumber}"/>
+                    <label value="@{labOrderRequest.startDate converter='org.zkoss.zkplus.databind.DateFormatConverter' }" self="@{format(dd/MM/yyyy)}"/>
+                    <label value="@{labOrderRequest.startTime converter='com.nzion.view.component.TimeConverter'}" />
+                    <label value="@{labOrderRequest.endTime converter='com.nzion.view.component.TimeConverter' }"/>
+                    <!-- <label value="@{labOrderRequest.phlebotomist.firstName}" width="10%"/>-->
+                    <!-- <name object="@{labOrderRequest.provider}"/>-->
+                    <!-- <name object="@{labOrderRequest.referral}"/>-->
+                    <label value="@{labOrderRequest.orderStatus.description}" width="10%"/>
+                    <vlayout>
+                        <button label="Result Entry">
+                            <attribute name="onClick">
+                                <![CDATA[
+                                     Executions.createComponents("/lab/labOrderResult.zul", null,com.nzion.util.UtilMisc.toMap("labOrderRequest",self.getParent().getParent().getValue()));
+                                ]]>
+                            </attribute>
+                        </button>
+                    </vlayout>
+                </row>
+            </rows>
+        </grid>
+
+        <zscript>
+        </zscript>
+
+    </window>
+
+</zk>            

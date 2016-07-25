@@ -136,21 +136,19 @@
                         ]]>
                     </attribute>
                 </button>
-                <!--</hlayout>
-                <hlayout>-->
                 <button label="Reschedule">
                     <attribute name="onClick"><![CDATA[
                         Executions.createComponents("/lab/rescheduleLabOrder.zul", null,com.nzion.util.UtilMisc.toMap("labOrderRequest",self.getParent().getParent().getValue()));
                         ]]>
                     </attribute>
                 </button>
-                <button label="Result Entry">
+                <!--<button label="Result Entry">
                     <attribute name="onClick">
                         <![CDATA[
                              Executions.createComponents("/lab/labOrderResult.zul", null,com.nzion.util.UtilMisc.toMap("labOrderRequest",self.getParent().getParent().getValue()));
                         ]]>
                     </attribute>
-                </button>
+                </button>-->
                 </vlayout>
             </row>
             </rows>

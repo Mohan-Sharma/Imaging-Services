@@ -34,16 +34,22 @@
             position="center">
         <div style="padding:5px" zclass="page-header titled-well">
             <h:h1>
-                <h:small>New Radiology Test</h:small>
+                <h:small>Radiology Test Description</h:small>
                 <button type="button" zclass="close" onClick="addLabTestPanelWindow.detach();">×</button>
             </h:h1>
         </div>
         <div zclass="container-fluid">
             <div zclass="row-fluid">
                 <div zclass="span6">
-                    <label value="Test Name" mold="required"/>
+                    <label value="Afya Test Name" mold="required"/>
                     <textbox value="@{labController.labTest.testDescription,save-when='Save.onClick'}"
-                             constraint="no empty:Panel Name Required" sclass="span12"
+                             constraint="no empty:Afya Test Description Required" sclass="span12" readonly="true"
+                             w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                </div>
+                <div zclass="span6">
+                    <label value="Display Name" mold="required"/>
+                    <textbox value="@{labController.labTest.testPneumonic,save-when='Save.onClick'}"
+                             constraint="no empty:Test Name Required" sclass="span12"
                              w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
                 </div>
                 <!--<div zclass="span2">
@@ -51,6 +57,16 @@
                     <decimalbox format="###.##" placeholder="0"
                                 value="@{labController.labTestPanel.price,save-when='Save.onClick'}" sclass="span12"/>
                 </div>-->
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span4">
+                    <label value="Display Order"/>
+                    <intbox value="@{labController.labTest.displayOrder,save-when='Save.onClick'}" sclass="span12"/>
+                </div>
+                <div zclass="span4">
+                    <label value="Turn Around Time (in hrs)"/>
+                    <decimalbox value="@{labController.labTest.turnaroundTime,save-when='Save.onClick'}" sclass="span12"/>
+                </div>
                 <separator/> <separator/>
                 <div zclass="span4">
                     <checkbox label=" Prescription Required">
@@ -66,6 +82,16 @@
                             }
                         </attribute>
                     </checkbox>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span6">
+                    <label value="Department"/>
+                    <textbox value="@{labController.labTest.department,save-when='Save.onClick'}" sclass="span12" disabled="true"/>
+                </div>
+                <div zclass="span6">
+                    <label value="Sub Department"/>
+                    <textbox value="@{labController.labTest.laboratory.laboratory,save-when='Save.onClick'}" sclass="span12" disabled="true"/>
                 </div>
             </div>
 
@@ -99,20 +125,17 @@
                     </div>
              </div>-->
              <div zclass="row-fluid">
-                 <div zclass="span4">
+                 <div zclass="span12">
                      <label value="Special Instruction"/>
-                     <textbox value="@{labController.labTest.specialInstruction,save-when='Save.onClick'}" sclass="span12"/>
+                     <textbox value="@{labController.labTest.specialInstruction,save-when='Save.onClick'}" sclass="span12"  rows="2" cols="50" maxlength="500"/>
                  </div>
-                 <div zclass="span4">
-                     <label value="Turn Around Time (in hrs)"/>
-                     <decimalbox value="@{labController.labTest.turnaroundTime,save-when='Save.onClick'}" sclass="span12"/>
-                 </div>
+
              </div>
         <separator height="10px"/>
-        <tabbox>
+        <!--<tabbox>
             <tabs>
                 <tab label="Associate Test"/>
-                <!-- <tab label="Technician" id="technicianTab"/> -->
+                &lt;!&ndash; <tab label="Technician" id="technicianTab"/> &ndash;&gt;
             </tabs>
             <tabpanels>
                 <tabpanel>
@@ -143,7 +166,7 @@
                     </h:table>
                 </tabpanel>
                 <tabpanel>
-                    <!--<div sclass="panelFoot">
+                    &lt;!&ndash;<div sclass="panelFoot">
                         <a id="addButton" class="btn btn-mini" label="Add" onClick="labController.buildPanelTechnicianSet()">
                             <attribute name="onClick">
                                 Window window = (Window) Executions.createComponents("/lab/panelTechnician.zul", null,
@@ -151,8 +174,8 @@
                                 //window.addForward("onDetach", associatedTechnicianGrid, "onReload");
                             </attribute>
                         </a>
-                    </div>-->
-                    <!--<div id="associatedTechnicianSection">
+                    </div>&ndash;&gt;
+                    &lt;!&ndash;<div id="associatedTechnicianSection">
                         <label value="Associated Technician"/>
                         <grid id="associatedTechnicianGrid"
                               model="@{labController.labTestPanel.panelTechnicians,load-after='self.onReload,deleteButton.onClick'}">
@@ -178,17 +201,21 @@
                                 </row>
                             </rows>
                         </grid>
-                    </div>-->
+                    </div>&ndash;&gt;
                     <separator/>
                 </tabpanel>
             </tabpanels>
-        </tabbox>
+        </tabbox>-->
         <div sclass="panelFoot"/>
         <separator height="10px"/>
         <div sclass="panelFoot">
             <button label="Save" id="Save" zclass="btn-success btn">
                 <attribute name="onClick">
+                    try{
                     labController.saveLabTestPanel();
+                    }catch(Exception e){
+                        com.nzion.util.UtilMessagesAndPopups.showError("Display Order :"+labController.labTest.getDisplayOrder()+"  is already exists");
+                    }
                 </attribute>
             </button>
             <button label="Cancel" forward="onClick=onCancel"/>

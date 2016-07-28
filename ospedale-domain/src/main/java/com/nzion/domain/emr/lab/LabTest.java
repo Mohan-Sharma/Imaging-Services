@@ -50,6 +50,7 @@ public class LabTest extends IdGeneratingBaseEntity implements Serializable{
 
 	
 	private Set<Investigation> investigations;
+	private Integer displayOrder;
 
 	
 	@ManyToMany(targetEntity = Investigation.class,fetch = FetchType.EAGER)
@@ -155,5 +156,13 @@ public class LabTest extends IdGeneratingBaseEntity implements Serializable{
 
 	public void setTurnaroundTime(String turnaroundTime) {
 		this.turnaroundTime = turnaroundTime;
+	}
+
+	public Integer getDisplayOrder() {
+		return displayOrder;
+	}
+
+	public void setDisplayOrder(Integer displayOrder) {
+		this.displayOrder = displayOrder;
 	}
 }

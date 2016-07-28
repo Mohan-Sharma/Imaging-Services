@@ -9,10 +9,7 @@ import com.nzion.zkoss.composer.OspedaleAutowirableComposer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.zkoss.bind.annotation.BindingParam;
-import org.zkoss.bind.annotation.Command;
-import org.zkoss.bind.annotation.ExecutionArgParam;
-import org.zkoss.bind.annotation.Init;
+import org.zkoss.bind.annotation.*;
 import org.zkoss.zul.Filedownload;
 import javax.sql.DataSource;
 import java.io.FileInputStream;
@@ -65,6 +62,24 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
         Filedownload.save(in, file.getFileType(), file.getFileName());
     }
 
+    @Command("Save")
+    @NotifyChange("labResultAttachments")
+    public void save(@BindingParam("labResultAttachment") LabResultAttachments labResultAttachment){
+        try {
+            labResultAttachments.add(labResultAttachment);
+        }catch (Exception e){}
+    }
+
+    @Command("Remove")
+    @NotifyChange("labResultAttachments")
+    public void remove(@BindingParam(value = "arg1")LabResultAttachments labResultAttachments1){
+        try{
+            labResultAttachments.remove(labResultAttachments1);
+            commonCrudService.delete(labResultAttachments1);
+        }catch (Exception e){}
+
+    }
+
 
     public int updateLabRequisitionStatus(Long labOrderRequestId){
         int updateRow;
@@ -76,4 +91,5 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
         }
         return 0;
     }
+
 }

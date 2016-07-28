@@ -16,11 +16,11 @@
         com.nzion.zkoss.composer.emr.lab.LabOrderResultController labOrderResultController = new com.nzion.zkoss.composer.emr.lab.LabOrderResultController();
     </zscript>
 
-    <window id="labOrderRequestWin" mode="modal" position="center" width="40%"  closable="true">
+    <window id="labOrderRequestWin" mode="modal" position="center" width="40%"  closable="true" apply="org.zkoss.bind.BindComposer"  viewModel="@id('vm') @init('com.nzion.zkoss.composer.emr.lab.LabOrderResultController')">
 
         <div style="padding:5px" zclass="page-header titled-well">
             <h:h1>
-                <h:small>Result Entry :</h:small>
+                <h:small>Result Entry</h:small>
                 <button type="button" zclass="close" onClick="labOrderRequestWin.detach();">×</button>
             </h:h1>
         </div>
@@ -30,9 +30,7 @@
                 <div zclass="span4">
                     <label value="Enter below in text area " mold="required"></label>
                     <textbox id="reasonDesc" sclass="span12" value="@{labOrderRequest.resultEntryDescription,save-when='Save.onClick'}" rows="2" cols="50"
-                             w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty:Please Enter Results"
-                            >
-                            </textbox>
+                             w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty:Please Enter Results"/>
                 </div>
 
             </div>
@@ -40,21 +38,21 @@
             <div zclass="span4">
                 <label value="Test Name" mold="required" class="z-label-bold"></label>
                 <listbox mold="select" model="@{patientLabOrderList}"
-                         id="labTestListbox" zclass="span10">
+                         id="labTestListbox" zclass="span10" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
                     <listitem self="@{each='test'}"
                               label="@{test.labTest.testDescription}" value="@{test.labTest}"></listitem>
                 </listbox>
             </div>
             <div zclass="span4">
-                <label value="Result Type"/>
-                <combobox id="resultTypeCombobox">
-                    <comboitem value="KEYIMAGES" label="KEY IMAGES"/>
-                    <comboitem value="TESTRESULTS" label="TEST RESULTS"/>
+                <label value="Result Type" mold="required"/>
+                <combobox id="resultTypeCombobox" constraint="no empty" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+                    <comboitem value="KEYIMAGES" label="Key Images"/>
+                    <comboitem value="TESTRESULTS" label="Test Results"/>
                 </combobox>
             </div>
             <separator/><separator/>
             <div zclass="span3">
-                <button label="Upload Result file" upload="true">
+                <button label="Upload" upload="true" id="uploadBtn">
                     <attribute name="onUpload">
                         org.zkoss.util.media.Media media = event.getMedia();
                         //if (media instanceof org.zkoss.image.Image) {
@@ -70,22 +68,22 @@
 
 
         <div sclass="panelFoot" align="center">
-            <button label="Save" id="Save" zclass="btn-success btn">
+            <button label="Save" id="Save" zclass="btn-success btn" onClick="@command('Save',labResultAttachment=labResultAttachments)">
                 <attribute name="onClick">
                     if(labTestListbox.getSelectedItem() == null){
                     com.nzion.util.UtilMessagesAndPopups.showError("Lab test is mandatory");
                     }
                     if(resultTypeCombobox.getSelectedItem() == null){
-                    com.nzion.util.UtilMessagesAndPopups.showError("Result Type is mandatory");
+                    com.nzion.util.UtilMessagesAndPopups.showError("Result Type and Upload File are mandatory");
                     }
+                    try{
                     labResultAttachments.setLabTest(labTestListbox.getSelectedItem().getValue());
                     labResultAttachments.setLabOrderRequest(labOrderRequest);
                     labResultAttachments.setResultType(resultTypeCombobox.getSelectedItem().getValue());
                     //labOrderRequest.setResultEntryDescription();
                     commonCrudService.save(labResultAttachments);
                     commonCrudService.save(labOrderRequest);
-                    com.nzion.util.UtilMessagesAndPopups.showSuccess();
-                    labOrderRequestWin.detach();
+                    }catch(Exception e){}
                 </attribute>
             </button>
 
@@ -107,8 +105,7 @@
             </zscript>
         </div>
         <div>
-            <panel id="panelList" apply="org.zkoss.bind.BindComposer"  viewModel="@id('vm') @init('com.nzion.zkoss.composer.emr.lab.LabOrderResultController')">
-                <caption label="Attachments"/>
+            <panel id="panelList">
                 <panelchildren>
                     <listbox model="@bind(vm.labResultAttachments)">
                         <listhead>
@@ -125,12 +122,9 @@
                                 <a label="@load(each.file.fileName)" onClick="@command('downloadAttachment',fileObject=each)"/>
                             </listcell>
                             <listcell>
-                                <button label="  Remove" sclass="btn btn-danger">
+                                <button label="Remove" sclass="btn btn-danger" onClick="@command('Remove',arg1=each)">
                                     <attribute name="onClick">
                                         commonCrudService.delete(self.getParent().getParent().getValue());
-                                       // Events.postEvent("onReloadRequest",panelList,null);
-                                        labOrderRequestWin.detach();
-                                        com.nzion.util.UtilMessagesAndPopups.showSuccess();
                                     </attribute>
                                 </button>
                             </listcell>
@@ -141,12 +135,15 @@
 
                 </panelchildren>
             </panel>
-            <button label="Complete">
-                <attribute name="onClick">
-                    labOrderResultController.updateLabRequisitionStatus(labOrderRequest.getId());
-                    labOrderRequestWin.detach();
-                </attribute>
-            </button>
+            <div zclass="panelFoot" align="center">
+                <button label="Complete" zclass="btn-success btn">
+                    <attribute name="onClick">
+                        labOrderResultController.updateLabRequisitionStatus(labOrderRequest.getId());
+                        labOrderRequestWin.detach();
+                        com.nzion.util.UtilMessagesAndPopups.showSuccess();
+                    </attribute>
+                </button>
+            </div>
 
 
         </div>

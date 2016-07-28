@@ -410,6 +410,14 @@
                                                                     </attribute>
                                                                 </a>
                                                             </n:li>
+                                                            <n:li>
+                                                                <a label="Tariff Category ">
+                                                                    <attribute name="onClick">
+                                                                        setTitleAndActivateMenu("Master Data for LIS","Tariff Category", masterList);
+                                                                        appendContent("tariffCategory");
+                                                                    </attribute>
+                                                                </a>
+                                                            </n:li>
                                                         </n:ul>
                                                     </n:li>
 

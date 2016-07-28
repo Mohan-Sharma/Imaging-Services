@@ -1,0 +1,14 @@
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <zscript>
+        setPageTitle("Tariff Category ", "");
+    </zscript>
+    <window>
+        <screen width="100%" listtitle="List of Tariff Categories" addpage="tariffCategoryAdd" editpage="tariffRate" addmodepopup="true" entityclass="com.nzion.domain.billing.TariffCategory"
+                fields="tariffCode,tariffName,patientCategory" labels="Tariff Code,Tariff Name,Patient Type" hidedeletebtn="true" hideactivation="true"
+                hidedeactivation="true"/>
+
+    </window>
+
+</zk>            

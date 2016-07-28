@@ -4,6 +4,7 @@ import com.nzion.domain.*;
 import com.nzion.domain.billing.*;
 import com.nzion.domain.emr.UnitOfMeasurement;
 import com.nzion.domain.emr.lab.LabOrderRequest;
+import com.nzion.domain.emr.lab.LabTest;
 import com.nzion.domain.emr.lab.LabTestPanel;
 import com.nzion.domain.emr.soap.PatientLabOrder;
 import com.nzion.domain.pms.InsuranceProvider;
@@ -558,6 +559,14 @@ public class BillingServiceImpl implements BillingService {
             acctgTransactionMap.put(acctgTransactionEntry.getTransactionType().getDescription(), acctgTransactionEntries);
         }
         return acctgTransactionMap;
+    }
+
+    public List<LabTest> getPriceForLabTest(List<LabTest> labTests){
+        return billingRepository.getPriceForLabTest(labTests);
+    }
+
+    public boolean updatePriceInLabTariff(List<LabTest> labTests){
+        return billingRepository.updatePriceInLabTariff(labTests);
     }
 
 

@@ -1,18 +1,10 @@
 package com.nzion.domain.emr.lab;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Set;
 
-import javax.persistence.Access;
-import javax.persistence.AccessType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 
 import com.nzion.domain.annot.AccountNumberField;
 import com.nzion.domain.base.IdGeneratingBaseEntity;
@@ -33,6 +25,8 @@ public class LabTestProfile extends IdGeneratingBaseEntity implements Serializab
 	private String profileNeumonic;
 
 	private boolean prescriptionRequired;
+	private BigDecimal homeServiceAmount;
+	private BigDecimal billableAmount;
 	
 
 	@ManyToMany(targetEntity = LabTest.class,fetch = FetchType.EAGER)
@@ -81,5 +75,23 @@ public class LabTestProfile extends IdGeneratingBaseEntity implements Serializab
 
 	public void setPrescriptionRequired(boolean prescriptionRequired) {
 		this.prescriptionRequired = prescriptionRequired;
+	}
+
+	@Transient
+	public BigDecimal getHomeServiceAmount() {
+		return homeServiceAmount;
+	}
+
+	public void setHomeServiceAmount(BigDecimal homeServiceAmount) {
+		this.homeServiceAmount = homeServiceAmount;
+	}
+
+	@Transient
+	public BigDecimal getBillableAmount() {
+		return billableAmount;
+	}
+
+	public void setBillableAmount(BigDecimal billableAmount) {
+		this.billableAmount = billableAmount;
 	}
 }

@@ -1,0 +1,48 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./tariffCategoryId"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <zscript>
+        import com.nzion.service.common.CommonCrudService;
+        com.nzion.domain.billing.TariffCategory tariffCategory = arg.get("entity");
+        if(tariffCategory == null)
+        tariffCategory = new com.nzion.domain.billing.TariffCategory();
+
+    </zscript>
+    <window id="tariffCategoryId" mode="modal" width="50%" position="center,top">
+        <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>New Tariff Category</h:small>
+                <button type="button" zclass="close" onClick="tariffCategoryId.detach();">×</button>
+            </h:h1>
+        </div>
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div zclass="span4">
+                    <label value="Tariff Code" style="text-align:right;"/>
+                    <textbox value="@{tariffCategory.tariffCode, save-when='Save.onClick'}" sclass="span12"/>
+                </div>
+                <div zclass="span4">
+                    <label value="Tariff Name" style="text-align:right;"/>
+                    <textbox value="@{tariffCategory.tariffName,save-when='Save.onClick'}" sclass="span12"/>
+                </div>
+                <div zclass="span4">
+                    <label value="Patient Type" style="text-align:right;"/>
+                    <textbox value="@{tariffCategory.patientCategory,save-when='Save.onClick'}" sclass="span12"/>
+                </div>
+            </div>
+
+        </div>
+        <div sclass="panelFoot">
+            <button id="Save" label="Save" zclass="btn-success btn">
+                <attribute name="onClick">
+                    commonCrudService.save(tariffCategory);
+                    tariffCategoryId.detach();
+                </attribute>
+            </button>
+            <button label="Close" id="Close" onClick='tariffCategoryId.detach();'/>
+
+        </div>
+    </window>
+
+</zk>            

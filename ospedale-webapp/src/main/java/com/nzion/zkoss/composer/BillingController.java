@@ -59,7 +59,7 @@ public class BillingController extends OspedaleAutowirableComposer {
 
     private BigDecimal overallBalance;
 
-    private BigDecimal remainingAmount;
+    private BigDecimal remainingAmount = BigDecimal.ZERO.setScale(3,RoundingMode.HALF_UP);
 
     private BigDecimal writeOffAmount;
 

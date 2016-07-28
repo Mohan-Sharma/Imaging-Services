@@ -1,5 +1,6 @@
 package com.nzion.domain.product.common;
 
+import static java.math.BigDecimal.ROUND_HALF_UP;
 import static java.math.BigDecimal.ZERO;
 
 import java.io.IOException;
@@ -124,6 +125,7 @@ public final class Money implements Comparable<Money>, Serializable {
      */
     public Money(BigDecimal aAmount, Currency aCurrency, RoundingMode aRoundingStyle) {
         amount = aAmount;
+        amount.setScale(3,ROUND_HALF_UP);
         currency = aCurrency;
         fRounding = aRoundingStyle;
         validateState();
@@ -131,7 +133,7 @@ public final class Money implements Comparable<Money>, Serializable {
 
     
     public Money(String amount) {
-        this(new BigDecimal(amount));
+        this(new BigDecimal(amount).setScale(3,ROUND_HALF_UP));
     }
 
     /**
@@ -165,6 +167,7 @@ public final class Money implements Comparable<Money>, Serializable {
     }
 
     public void setAmount(BigDecimal amount) {
+        amount.setScale(3,RoundingMode.HALF_UP);
         this.amount = amount;
     }
 
@@ -381,7 +384,8 @@ public final class Money implements Comparable<Money>, Serializable {
      * always be suitable for display to an end user.
      */
     public String toString() {
-        return amount.toPlainString() + " " + currency.getCurrencyCode();
+        //return amount.toPlainString() + " " + currency.getCurrencyCode();
+        return amount.toPlainString() + " KD";
     }
 
     /**

@@ -240,14 +240,15 @@
                                                     onChange='Events.postEvent("onReload",amountLabel,null);Events.postEvent("onReload",remaingValueLabel,null);Events.postEvent("onReload",amountToBePaidLabel,null);'
                                                     constraint="no negative,no empty"/>
                                    -->                 
-                                      <decimalbox value="@{invoiceItem.priceValue}"
+                                      <!--<decimalbox value="@{invoiceItem.priceValue}"
                                                     readonly="true"
                                                     tooltiptext="@{invoiceItem,converter='com.nzion.view.component.BillingAmountConverter'}"
                                                     onChange='Events.postEvent("onReload",amountLabel,null);Events.postEvent("onReload",remaingValueLabel,null);Events.postEvent("onReload",amountToBePaidLabel,null);'
-                                                    constraint="no negative,no empty"/>
+                                                    constraint="no negative,no empty"/>-->
+                                        <label value="@{invoiceItem.priceValue}"/>
                                                
                                         <!--<label value="@{invoiceItem.price.currency.code}"></label>-->
-                                        <label style="font-weight:bold" value="KD"></label>
+                                        <label value="KD"></label>
                                     </listcell>
                                 </listitem>
                             </listbox>
@@ -343,7 +344,7 @@
                         <div>
                             <label value="Amount" mold="required"/>
                         </div>
-                        <decimalbox id="amountInpBox" 
+                        <decimalbox id="amountInpBox" format="#,##0.000"
                                     value="@{billingController.invoicePayment.amount.amount,load-after='addButton.onClick',save-when='addButton.onClick'}">
                                     <attribute name="onCreate">
                                       self.setValue(billingController.getRemainingAmount());

@@ -122,6 +122,7 @@ public class InvoiceItem extends IdGeneratingBaseEntity {
         this.taxLedgerName = taxLedgerName;
     }
 
+    @Column(precision = 19, scale = 3, columnDefinition = "DECIMAL(19,3)")
     public BigDecimal getFactor() {
         return factor;
     }

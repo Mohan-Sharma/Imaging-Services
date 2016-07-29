@@ -7,8 +7,8 @@
 </zscript>
 	<window id="labTestViewWindow">
 	<screen width="100%" listtitle="List of Radiology Tests" addpage="newLabTest"
-	entityclass="com.nzion.domain.emr.lab.LabTest" addmodepopup="true"  fields="testCode,testDescription,active"
-	labels="Test Code,Test Description,Active" searchfields="testCode,testDescription"
+	entityclass="com.nzion.domain.emr.lab.LabTest" addmodepopup="true"  fields="department,laboratory.laboratory,testDescription,testPneumonic,active"
+	labels="Department,Sub Department,Afya Test Name,Display Name,Active" searchfields="testCode,testDescription"
 	hideactivation="false" hidedeletebtn="true" hideaddbtn = "true" containername="contentArea"/>
 	</window>
 </zk>

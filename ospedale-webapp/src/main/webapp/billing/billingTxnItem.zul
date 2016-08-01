@@ -151,7 +151,7 @@
                             </div>
                         </div>
                         <div zclass="container-fluid">
-                            <label zclass="control-label" value="Referral Lab :"/>
+                            <label zclass="control-label" value="Referrral Clinic :"/>
 
                         </div>
                            <!--  <div if="${isInsurance}" zclass="control-group">
@@ -192,7 +192,7 @@
                             </div>
                         </div>
                         <div zclass="container-fluid">
-                            <label zclass="control-label" class="control-label" value="Referral Technician Name :"/>
+                            <label zclass="control-label" class="control-label" value="Referrral Doctor :"/>
 
                         </div>
                     </div>

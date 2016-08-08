@@ -46,7 +46,7 @@
 
         <tabbox width="100%" sclass="nav_tabs">
         <tabs id="tabs">
-            <tab label="Lab Results" onSelect="@command('OPDPATIENTSCOMPLETED')" />
+            <tab label="Lab Report" onSelect="@command('OPDPATIENTSCOMPLETED')" />
            <!--  <tab label="In Patient Lab Results" onSelect="@command('INPATIENT_LAB_COMPLETED')" /> -->
         </tabs>
         

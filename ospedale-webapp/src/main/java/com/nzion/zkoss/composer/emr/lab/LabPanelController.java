@@ -47,7 +47,9 @@ public class LabPanelController extends OspedaleAutowirableComposer {
 
 	private Set<LabTestPanel> labTestPanels;
 	
-	private Set<LabTest> labTests;
+	private Set<LabTest> labTests = new HashSet<LabTest>();
+
+	private LinkedList<LabTest> allLabTests = new LinkedList<LabTest>();
 
 	//private LabTestCpt labTestCpt;
 
@@ -65,6 +67,8 @@ public class LabPanelController extends OspedaleAutowirableComposer {
 		if (obj != null) {
 			labTestPanel = (LabTestPanel)obj;
 		}
+	List<LabTest> allLabTestsList = commonCrudService.getAll(com.nzion.domain.emr.lab.LabTest.class);
+	allLabTests.addAll(allLabTestsList);
 	if (labTestPanel == null) {
 		labTestPanel = new LabTestPanel();
 		//labTestCpt = new LabTestCpt();
@@ -75,6 +79,14 @@ public class LabPanelController extends OspedaleAutowirableComposer {
 	labTestPanel = commonCrudService.getById(LabTestPanel.class, labTestPanel.getId());
 	//panelTechnicianSet = labTestPanel.getPanelTechnicians();
 	labTests = labTestPanel.getTests();
+	if (UtilValidator.isNotEmpty(labTests)) {
+		allLabTests.clear();
+		if (UtilValidator.isNotEmpty(allLabTestsList)) {
+			allLabTestsList.removeAll(labTests);
+		}
+		allLabTests.addAll(labTests);
+		allLabTests.addAll(allLabTestsList);
+	}
 	//labTests = labTest.getLabTestPanels();
 	//labTestCpt = labTestPanel.getLabCpt();
 	}
@@ -83,11 +95,11 @@ public class LabPanelController extends OspedaleAutowirableComposer {
 		/*labTest.setInvestigations(labTests);
 		labTest.setTestPneumonic(labTest.getTestDescription());*/
 		//labService.saveLabTestPanel(labTestPanel);
-		labTestPanel.setTests(labTests);
-		LabTestPanel test = commonCrudService.save(labTestPanel);
-		test.setPanelCode("Panel " + test.getId());
-		commonCrudService.merge(test);
-		root.getFellowIfAny("addNewLabTestPanelWindow", true).detach();
+			labTestPanel.setTests(labTests);
+			LabTestPanel test = commonCrudService.save(labTestPanel);
+			//	test.setPanelCode("Panel " + test.getId());
+			commonCrudService.merge(test);
+	//	root.getFellowIfAny("addNewLabTestPanelWindow", true).detach();
 		UtilMessagesAndPopups.showSuccess();
 	}
 
@@ -244,5 +256,17 @@ public class LabPanelController extends OspedaleAutowirableComposer {
 
 	private static final long serialVersionUID = 1L;
 
+	public LinkedList<LabTest> getAllLabTests() {
+		return allLabTests;
+	}
 
+	public void setAllLabTests(LinkedList<LabTest> allLabTests) {
+		this.allLabTests = allLabTests;
+	}
+
+	public void updatedSelectedList(LabTest labTest){
+		if (labTests.contains(labTest)){
+			labTests.remove(labTest);
+		}
+	}
 }

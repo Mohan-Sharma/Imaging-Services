@@ -14,6 +14,11 @@
          List statuses= Arrays.asList(labStatusesArray);
         ]]>
     </zscript>
+    <style>
+        .display-inline {
+            display : inline !important;
+        }
+    </style>
 
     <window id="frontDeskLabOrderPortletWindow">
     <separator></separator>
@@ -23,13 +28,13 @@
                 <div zclass="span3">
                     <label value="Patient"/>
                     <patientlookup
-                            onChange="labOrderRequest.setPatient((com.nzion.domain.Patient)event.getOrigin().getData())"/>
+                            onChange="labOrderRequest.setPatient((com.nzion.domain.Patient)event.getOrigin().getData())" class="display-inline"/>
                 </div>
-                <!--<div zclass="span2">
+                <div zclass="span3">
                     <label value="Referral"/>
                     <referrallookup
-                            onChange="labOrderRequest.setReferral((com.nzion.domain.Referral)event.getOrigin().getData())"/>
-                </div>-->
+                            onChange="labOrderRequest.setReferral((com.nzion.domain.Referral)event.getOrigin().getData())" class="display-inline"/>
+                </div>
                 <div zclass="span2">
                     <label value="From Date"/>
                     <datebox id="fromDate" sclass="span12"/>
@@ -37,6 +42,10 @@
                 <div zclass="span2">
                     <label value="Thru Date"/>
                     <datebox id="thruDate" sclass="span12"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Referral Doctor Name"/>
+                    <textbox id="refDocName" sclass="span9"/>
                 </div>
 
 
@@ -58,7 +67,7 @@
                             fromDate.setValue(new java.util.Date());
                             thruDate.setValue(new java.util.Date());
                        }
-                       List labOrderList =billingService.getSearchByLabOrder(statuses,labOrderRequest.getPatient(),labOrderRequest.getReferral(),fromDate.getValue(),thruDate.getValue());
+                       List labOrderList =billingService.getSearchByLabOrder(statuses,labOrderRequest.getPatient(),labOrderRequest.getReferral(),fromDate.getValue(),thruDate.getValue(),refDocName.getValue());
 
                          /*   for(com.nzion.domain.emr.lab.LabOrderRequest lr:labOrderList){
                             if(lr.isHomeService()){
@@ -72,12 +81,12 @@
                     ]]>
                 </attribute>
             </button>
-            <button label="New Imaging Order" id="add">
+            <!--<button label="New Imaging Order" id="add">
                 <attribute name="onClick"><![CDATA[
                        com.nzion.zkoss.ext.Navigation.navigate("/portlets/frontDeskLabOrderRequest",null,frontDeskLabOrderPortletWindow);
                    ]]>
                 </attribute>
-            </button>
+            </button>-->
         </div>
         <separator></separator>
 
@@ -108,7 +117,8 @@
               <!--  <column label="Phlebotomist" width="10%"/>-->
 
                 <!--<column label="Doctor"/>-->
-                <!--<column label="Referral"/>-->
+                <column label="Referral"/>
+                <column label="Referral Doctor"/>
                 <column label="Status" />
                 <column label="Action" />
             </columns>
@@ -127,7 +137,8 @@
                 <label value="@{labOrderRequest.endTime converter='com.nzion.view.component.TimeConverter' }"/>
                <!-- <label value="@{labOrderRequest.phlebotomist.firstName}" width="10%"/>-->
                <!-- <name object="@{labOrderRequest.provider}"/>-->
-               <!-- <name object="@{labOrderRequest.referral}"/>-->
+                <name object="@{labOrderRequest.referral}"/>
+                <label value="@{labOrderRequest.referralDoctorName}"/>
                 <label value="@{labOrderRequest.orderStatus.description}" width="10%"/>
                 <vlayout>
                 <button label="View Order">

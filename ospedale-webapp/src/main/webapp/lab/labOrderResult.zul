@@ -77,12 +77,16 @@
                     com.nzion.util.UtilMessagesAndPopups.showError("Result Type and Upload File are mandatory");
                     }
                     try{
+                    if(labResultAttachments.getFile() != null){
                     labResultAttachments.setLabTest(labTestListbox.getSelectedItem().getValue());
                     labResultAttachments.setLabOrderRequest(labOrderRequest);
                     labResultAttachments.setResultType(resultTypeCombobox.getSelectedItem().getValue());
                     //labOrderRequest.setResultEntryDescription();
                     commonCrudService.save(labResultAttachments);
                     commonCrudService.save(labOrderRequest);
+                    vm.getLabResultAttachments().add(labResultAttachments);
+                    labResultAttachments = new com.nzion.domain.emr.lab.LabResultAttachments();
+                    }
                     }catch(Exception e){}
                 </attribute>
             </button>

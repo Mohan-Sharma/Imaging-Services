@@ -24,7 +24,7 @@
    
 <!--     portletDatas.add(new com.nzion.view.PortletData("New IP Lab Order", "/lab/inpatientLabRequests.zul", "../images/labresults.jpg", true)); -->
 </zscript>
-<window self="@{define(applicationContent)}" title="Phlebotomist/Technician Dashboard">
+<window self="@{define(applicationContent)}" title="Phlebotomist/Radiologist Dashboard">
 	<dashboard portlets="${portletDatas}" width="100%"/>
 </window>
 </zk>

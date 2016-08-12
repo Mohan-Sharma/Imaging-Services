@@ -56,7 +56,7 @@
             <listitem label="ADMIN" if="${rvo.admin}" value="${36028797018963968}"/>
             <listitem label="DOCTOR" if="${rvo.provider}" value="${2251799813685248}"/>
             <listitem label="NURSE" if="${rvo.nurse}" value="${8796093022208}"/>
-            <listitem label="TECHNICIAN" if="${rvo.technician}" value="${549755813888}"/>
+            <listitem label="RADIOLOGIST" if="${rvo.technician}" value="${549755813888}"/>
             <listitem label="RECEPTION" if="${rvo.reception}" value="${2147483648}"/>
             <listitem label="HOUSEKEEPING" if="${rvo.houseKeeping}" value="${2048}"/>
             <listitem label="OMS" if="${rvo.orderManagement}" value="${128}"/>
@@ -167,14 +167,14 @@
                                                         </n:ul>
                                                         <n:h5 id="patient">Patient</n:h5>
                                                         <n:ul>
-                                                            <n:li  >
+                                                            <!--<n:li  >
                                                                 <a  label="New Patient"  id="addpatient" >
                                                                     <attribute name="onClick">
                                                                         setTitleAndActivateMenu("People","New Patient", people);
                                                                         appendContent("patientAdd");
                                                                     </attribute>
                                                                 </a>
-                                                            </n:li>
+                                                            </n:li>-->
                                                             <!-- <n:li >
                                                                 <a  label="Search Patients" id="patientlist" >
                                                                     <attribute name="onClick">
@@ -355,23 +355,23 @@
                                                                     </attribute>
                                                                 </a>
                                                             </n:li>
-                                                           <!-- <n:li>
-                                                                <a  label="LAB Test Panel" >
+                                                           <n:li>
+                                                                <a  label="Health Package" >
                                                                     <attribute name="onClick">
-                                                                        setTitleAndActivateMenu("Master List","LAB Test Panel", masterList);
+                                                                        setTitleAndActivateMenu("Master List","Health Package", masterList);
                                                                         appendContent("labTestPanel");
                                                                     </attribute>
                                                                 </a>
                                                             </n:li>
-                                                            
-                                                            <n:li>
-                                                                <a  label="LAB Test Profile" >
-                                                                    <attribute name="onClick">
-                                                                        setTitleAndActivateMenu("Master List","LAB Test Profile", masterList);
-                                                                        appendContent("labTestProfile");
-                                                                    </attribute>
-                                                                </a>
-                                                            </n:li>-->
+
+                                                            <!--   <n:li>
+                                                                  <a  label="LAB Test Profile" >
+                                                                      <attribute name="onClick">
+                                                                          setTitleAndActivateMenu("Master List","LAB Test Profile", masterList);
+                                                                          appendContent("labTestProfile");
+                                                                      </attribute>
+                                                                  </a>
+                                                              </n:li>-->
                                                             
                                                             <!-- <n:li>
                                                                 <a  label="LAB Category" >
@@ -402,14 +402,14 @@
                                                                     </attribute>
                                                                 </a>
                                                             </n:li>
-                                                            <n:li>
+                                                            <!--<n:li>
                                                                 <a label="Outsourced Center ">
                                                                     <attribute name="onClick">
                                                                         setTitleAndActivateMenu("Master Data for LIS","Outsourced Center", masterList);
                                                                         appendContent("outsourcedCenter");
                                                                     </attribute>
                                                                 </a>
-                                                            </n:li>
+                                                            </n:li>-->
                                                             <n:li>
                                                                 <a label="Tariff Category ">
                                                                     <attribute name="onClick">

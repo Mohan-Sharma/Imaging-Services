@@ -68,9 +68,8 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 						<phonebox value="@{vo.practice.contacts.officePhone,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" />
 						</div>
 					 <div zclass="span2">
-						<label value="Fax" mold="required" />
-						<phonebox id="faxNumber" value="@{vo.practice.contacts.faxNumber,save-when='Save.onClick'}"
-							constraint="no empty"  sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+						<label value="Fax" />
+						<phonebox id="faxNumber" value="@{vo.practice.contacts.faxNumber,save-when='Save.onClick'}" sclass="span12" />
 					</div>
 					 <div zclass="span2">
 						 <label value="Imaging Service Availability Time"/>
@@ -94,7 +93,7 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 								 maxlength="30" sclass="span12"/>
 						</div>
 						<div zclass="span2">
-							<label value="Imaging Service Experience In years "  />
+							<label value="Year in Existence (Since) "  />
 							<textbox value="@{vo.practice.labExperience,save-when='Save.onClick'}"
 									 maxlength="30" sclass="span12"/>
 						</div>
@@ -115,9 +114,9 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 						<datebox id="validTo" onChange="dateValidation(validFrom,validTo)" format="dd/MM/yyyy" value="@{vo.practice.validThru,save-when='Save.onClick'}"
 						 sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
 						</div>-->
-						 <div zclass="span2" style="margin-left: 30px">
+						 <div zclass="span1-2" style="margin-left: 30px">
 							 <separator></separator><separator></separator>
-							 <button label="Upload Logo" upload="true">
+							 <button label="Upload Imaging Logo" upload="true">
 								 <attribute name="onUpload">
 									 org.zkoss.util.media.Media media = event.getMedia();
 									 if (media instanceof org.zkoss.image.Image) {
@@ -125,6 +124,7 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 									 //Practice prac = com.nzion.util.Infrastructure.getPractice();
 									 practice.setImageUrl("/images/"+media.getName());
 									 commonCrudService.save(practice);
+									 Executions.sendRedirect(null);
 									 com.nzion.util.UtilMessagesAndPopups.showSuccess();
 									 } else {
 									 Messagebox.show("Not an image: " + media, "Error", Messagebox.OK,Messagebox.ERROR);
@@ -132,6 +132,10 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 									 }
 								 </attribute>
 							 </button>
+						 </div>
+						 <div zclass="span2" style="margin-left : -20px">
+							<separator></separator><separator></separator>
+							<label value="@{vo.practice.imageUrl}" />
 						 </div>
 					</div> 
 					 <div zclass="row-fluid">

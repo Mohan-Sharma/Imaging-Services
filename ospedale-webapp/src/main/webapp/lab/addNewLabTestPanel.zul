@@ -7,7 +7,8 @@
 		import com.nzion.zkoss.composer.emr.lab.*;
 		import com.nzion.domain.emr.lab.LabTestCpt;
 		import com.nzion.domain.emr.lab.LabTestPanel;
-		 com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+		com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+		com.nzion.service.common.GenericHomeScreenService service = com.nzion.util.Infrastructure.getSpringBean("genericHomeScreenService");
 		com.nzion.zkoss.composer.emr.lab.LabPanelController labPanelController = new com.nzion.zkoss.composer.emr.lab.LabPanelController();
 		List labTests = commonCrudService.getAll(com.nzion.domain.emr.lab.LabTest.class);
 		List labCategoryList=commonCrudService.getAll(com.nzion.domain.emr.lab.Laboratories.class);
@@ -21,23 +22,28 @@
 		}*/
     	List specimenSources = commonCrudService.getAll(com.nzion.domain.emr.lab.LabSpecimenSource.class);
 		List locations = commonCrudService.getAll(com.nzion.domain.Location.class);
-//add lab test page
 	]]>
     </zscript>
     <window id="addNewLabTestPanelWindow" width="50%" apply="${labPanelController}" closable="true"
             position="center">
         <div style="padding:5px" zclass="page-header titled-well">
             <h:h1>
-                <h:small>New Lab Test Panel</h:small>
+                <h:small>Health Package</h:small>
                 <button type="button" zclass="close" onClick="addNewLabTestPanelWindow.detach();">×</button>
             </h:h1>
         </div>
         <div zclass="container-fluid">
             <div zclass="row-fluid">
                 <div zclass="span6">
-                    <label value="Test Panel Name" mold="required"/>
+                    <label value="Afya Health Package Name" mold="required"/>
                     <textbox value="@{labPanelController.labTestPanel.panelDescription,save-when='Save.onClick'}"
                              constraint="no empty:Panel Name Required" sclass="span12"
+                             w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                </div>
+                <div zclass="span6">
+                    <label value="Display Name" mold="required"/>
+                    <textbox value="@{labPanelController.labTestPanel.panelPneumonic,save-when='Save.onClick'}"
+                             constraint="no empty:Display Name Required" sclass="span12"
                              w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
                 </div>
                 <!--<div zclass="span2">
@@ -68,14 +74,39 @@
                 </div>&ndash;&gt;
 
             </div>-->
-             <div zclass="row-fluid">
-                            <div zclass="span6">
-                                <label value="Display Order" />
-                                  <!--<textbox value="@{labController.labTest.sortOrder,save-when='Save.onClick'}"
-                                                               sclass="span12" />-->
-                                <textbox sclass="span12" />
-                            </div>
-             </div>
+            <div zclass="row-fluid">
+                <div zclass="span4">
+                    <label value="Display Order" />
+                    <intbox value="@{labPanelController.labTestPanel.displayOrder,save-when='Save.onClick'}"
+                            sclass="span12" />
+                </div>
+                <div zclass="span4">
+                    <label value="Turn Around Time"/>
+                    <textbox value="@{labPanelController.labTestPanel.turnaroundTime,save-when='Save.onClick'}" sclass="span12"/>
+                </div>
+                <separator/> <separator/>
+                <div zclass="span4">
+                    <checkbox label=" Prescription Required" >
+                        <attribute name="onCreate">
+                            self.setChecked(labPanelController.labTestPanel.isPrescriptionRequired());
+                        </attribute>
+                        <attribute name="onCheck">
+                            if(self.isChecked()){
+                            labPanelController.labTestPanel.setPrescriptionRequired(true);
+                            } else {
+                            labPanelController.labTestPanel.setPrescriptionRequired(false);
+                            }
+                        </attribute>
+                    </checkbox>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span12">
+                    <label value="Special Instruction"/>
+                    <textbox value="@{labPanelController.labTestPanel.specialInstruction,save-when='Save.onClick'}" sclass="span12" rows="2" cols="50" maxlength="500"/>
+                </div>
+
+            </div>
         <separator height="10px"/>
         <tabbox>
             <tabs>
@@ -86,22 +117,47 @@
                 <tabpanel>
                     <h:table width="100%">
                         <h:tr>
-                            <h:td width="50%">
+                            <h:td width="100%">
                                 <label value="Lab Test"/>
+                                <div align="right">
+                                    <textbox name="search" id="txtSearch" sclass="span2 search-query"
+                                             onFocus="self.setValue(null);" onOK='Events.postEvent("onClick", searchBt, null);' />
+                                    <button type="submit" zclass="btn" id="searchBt" label="Search">
+                                        <attribute name="onClick"><![CDATA[
+                                        String s = txtSearch.getValue();
+                                        if (s == null || (s.trim().length() != 0 && s.trim().length() < 3)) {
+                                        com.nzion.util.UtilMessagesAndPopups.showError("Please enter atleast " + 3 + " characters to search.");
+                                        return;
+                                        }
+                                        labPanelController.getAllLabTests().clear();
+                                        labPanelController.getAllLabTests().addAll(service.search(s, com.nzion.domain.emr.lab.LabTest.class, "testDescription", true, new String[]{"testCode", "testDescription", "testPneumonic"}));
+                                        Events.postEvent("onReloadRequest", labTestListBox, null);
+                                    ]]></attribute>
+                                    </button>
+                                </div>
                             </h:td>
                         </h:tr>
                         <h:tr>
                             <h:td style="vertical-align:top;width:50%">
                                 <div style="overflow:auto">
                                 <paging id="paging" pageSize="20"></paging>
-                                    <listbox id="labTestListBox" model="@{labTests}" checkmark="true" multiple="true"
+                                    <listbox id="labTestListBox" model="@{labPanelController.allLabTests,load-after='searchBt.onClick,self.onReloadRequest'}" checkmark="true" multiple="true"
                                              selectedItem="@{labPanelController.labTests,converter=com.nzion.view.component.MultipleListitemBindingConverter,save-when='Save.onClick'}"
                                               mold="paging" paginal="${paging}">
                                         <listhead>
-                                            <listheader label="Test Name"/>
+                                            <listheader label="Test Name" sort="auto(testDescription)"/>
+                                            <listheader label="Department" sort="auto(department)"/>
+                                            <listheader label="Sub Department" sort="auto(laboratory.laboratory)"/>
                                         </listhead>
                                         <listitem self="@{each='labTest'}" value="@{labTest}">
                                             <listcell label="@{labTest.testDescription}" style="background:none"/>
+                                            <listcell label="@{labTest.department}" style="background:none"/>
+                                            <listcell label="@{labTest.laboratory.laboratory}" style="background:none"/>
+                                            <attribute name="onClick">
+                                                if(!self.isSelected()){
+                                                labPanelController.updatedSelectedList(self.getValue());
+                                                }
+                                            </attribute>
                                         </listitem>
                                     </listbox>
                                 </div>
@@ -155,7 +211,15 @@
         <div sclass="panelFoot">
             <button label="Save" id="Save" zclass="btn-success btn">
                 <attribute name="onClick">
+                    try{
                     labPanelController.saveNewLabTestPanel();
+                    com.nzion.zkoss.ext.Navigation.navigate("labTestPanel", null, contentArea);
+                    addNewLabTestPanelWindow.detach();
+                    com.nzion.util.UtilMessagesAndPopups.showSuccess();
+                    }
+                    catch(Exception e){
+                    com.nzion.util.UtilMessagesAndPopups.showError("Display Order :"+labPanelController.labTestPanel.getDisplayOrder()+"  is already exists");
+                    }
                 </attribute>
             </button>
             <button label="Cancel" forward="onClick=onCancel"/>

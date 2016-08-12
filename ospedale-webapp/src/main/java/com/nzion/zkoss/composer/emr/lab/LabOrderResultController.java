@@ -66,7 +66,9 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
     @NotifyChange("labResultAttachments")
     public void save(@BindingParam("labResultAttachment") LabResultAttachments labResultAttachment){
         try {
-            labResultAttachments.add(labResultAttachment);
+            if(labResultAttachment.getFile() != null) {
+                labResultAttachments.add(labResultAttachment);
+            }
         }catch (Exception e){}
     }
 
@@ -91,5 +93,7 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
         }
         return 0;
     }
+
+
 
 }

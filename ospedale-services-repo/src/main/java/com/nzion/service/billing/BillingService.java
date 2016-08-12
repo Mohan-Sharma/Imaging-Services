@@ -38,7 +38,7 @@ public interface BillingService {
 	
 	List<Invoice> getInvoice(List<InvoiceStatusItem> status,Patient patient,Employee emp,Date fromDate,Date thruDate,String ipNumber);
 	
-	List<LabOrderRequest> getSearchByLabOrder(List<LabOrderRequest.ORDERSTATUS> status,Patient patient,Referral referral,Date fromDate,Date thruDate);
+	List<LabOrderRequest> getSearchByLabOrder(List<LabOrderRequest.ORDERSTATUS> status,Patient patient,Referral referral,Date fromDate,Date thruDate,String refDocName);
 
 	ArrayList<InvoicePayment> getInvoicePaymentsByCriteria(Patient patient,Date fromDate,Date thruDate);
 	

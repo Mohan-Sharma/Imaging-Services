@@ -127,7 +127,7 @@ public class HibernateBillingRepository extends HibernateBaseRepository implemen
 		return criteria.list();
 	}
 		@Override
-	public List<LabOrderRequest> getSearchByLabOrder(List<LabOrderRequest.ORDERSTATUS> status, Patient patient, Referral referral,Date fromDate,Date thruDate) {
+	public List<LabOrderRequest> getSearchByLabOrder(List<LabOrderRequest.ORDERSTATUS> status, Patient patient, Referral referral,Date fromDate,Date thruDate,String refDocName) {
 		Criteria criteria = getSession().createCriteria(LabOrderRequest.class);
 		if (UtilValidator.isNotEmpty(status))
 			criteria.add(Restrictions.in("orderStatus", status));
@@ -143,6 +143,8 @@ public class HibernateBillingRepository extends HibernateBaseRepository implemen
 		if(thruDate != null)
 			criteria.add(Restrictions.or(Restrictions.le("startDate", thruDate), Restrictions.le("phlebotomistStartDate", thruDate)));
 			//criteria.add(Restrictions.le("startDate",thruDate));
+		if((refDocName!=null) && (refDocName != ""))
+			criteria.add(Restrictions.like("referralDoctorName", refDocName, MatchMode.ANYWHERE));
 		criteria.addOrder(Order.desc("createdTxTimestamp"));
 		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		return criteria.list();

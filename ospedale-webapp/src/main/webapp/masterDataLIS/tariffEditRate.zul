@@ -10,8 +10,8 @@
         com.nzion.domain.billing.TariffCategory tariffCategory = null;
         if(tariffCategory == null)
             tariffCategory = arg.get("entity");
-
-        List labTestList = commonCrudService.getAll(LabTest.class);
+        com.nzion.domain.emr.lab.LabTest lt = new com.nzion.domain.emr.lab.LabTest();
+        List labTestList = commonCrudService.findByEquality(LabTest.class,new String[]{"active"},new Object[]{lt.isActive()});
         billingService.getPriceForLabTest(labTestList);
 
 
@@ -64,31 +64,33 @@
             <panelchildren>
                 <listbox model="@{labTestList}" mold="paging" rows="12">
                     <listhead>
-                        <listheader label="Test Code"/>
-                        <listheader label="Description"/>
-                        <listheader>
+                        <listheader label="Test Code" sort="auto(testCode)"/>
+                        <listheader label="Department" sort="auto(department)"/>
+                        <listheader label="Description" sort="auto(testDescription)"/>
+                        <listheader sort="auto(homeServiceAmount)">
                             <vlayout>
                                 <label value="Premium Appointment"/>
                                 <label value="Amount (KD)"/>
                             </vlayout>
                         </listheader>
-                        <listheader>
+                        <!--<listheader>
                             <vlayout>
                                 <label value="Walk-in "/>
                                 <label value="Amount (KD)"/>
                             </vlayout>
-                        </listheader>
+                        </listheader>-->
                     </listhead>
                     <listitem self="@{each='lab'}" value="@{lab}">
                         <listcell label="@{lab.testCode}"/>
+                        <listcell label="@{lab.department}"/>
                         <listcell label="@{lab.testDescription}">
                         </listcell>
                         <listcell>
                             <decimalbox value="@{lab.homeServiceAmount,save-when='save.onClick'}"></decimalbox>
                         </listcell>
-                        <listcell>
+                        <!--<listcell>
                             <decimalbox value="@{lab.billableAmount,save-when='save.onClick'}"></decimalbox>
-                        </listcell>
+                        </listcell>-->
                     </listitem>
                 </listbox>
             </panelchildren>

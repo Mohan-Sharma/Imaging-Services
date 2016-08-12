@@ -163,7 +163,7 @@
 						
 						<h:tr style="width:100%;background:#F3F3F3;border:1px solid #DDDDDD;">
 							<h:td width="20%">
-								<label value="Imaging Department" zclass="labelReqNopad" />
+								<label value="Department" zclass="labelReqNopad" />
 								<n:strong class="labelReq" style="padding:4px;">*</n:strong>
 								<n:strong>:</n:strong>
 							</h:td>
@@ -210,7 +210,7 @@
 						</h:tr>
 						<h:tr style="width:100%">
 							<h:td width="20%">
-								<label value="Laboratories" zclass="labelReqNopad" />
+								<label value="Sub Department" zclass="labelReqNopad" />
 								<n:strong style="padding:12px;">:</n:strong>
 							</h:td>
 							<h:td width="80%">

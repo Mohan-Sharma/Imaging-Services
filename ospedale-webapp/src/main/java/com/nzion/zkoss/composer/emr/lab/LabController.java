@@ -143,7 +143,7 @@ public class LabController extends OspedaleAutowirableComposer {
 	public List<Person> getPersonForLocation(Location location) {
 	List<Person> filteredPersons = new ArrayList<Person>();
 	for (Person person : commonCrudService.getAll(Person.class))
-		if (UtilValidator.isNotEmpty(person.getLocations()) && person.getLocations().contains(location)&& person.getUserLogin()!=null&& person.getUserLogin().getAuthorization().hasRole(Roles.TECHNICIAN))
+		if (UtilValidator.isNotEmpty(person.getLocations()) && person.getLocations().contains(location)&& person.getUserLogin()!=null&& person.getUserLogin().getAuthorization().hasRole(Roles.RADIOLOGIST))
 			filteredPersons.add(person);
 	return filteredPersons;
 	}

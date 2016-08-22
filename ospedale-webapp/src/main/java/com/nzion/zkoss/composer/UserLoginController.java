@@ -196,14 +196,14 @@ public class UserLoginController extends AutowirableComposer {
                 userLogin.getGrantedSecurityPermissionGroups().clear();
                 userLogin.setGrantedSecurityPermissionGroups(securityGroups);
 
-                if(userLogin.hasRole(Roles.PHLEBOTOMIST) || userLogin.hasRole(Roles.TECHNICIAN)){
+                if(userLogin.hasRole(Roles.PHLEBOTOMIST) || userLogin.hasRole(Roles.RADIOLOGIST)){
                     if(UtilValidator.isEmpty(labDepartments)){
                         UtilMessagesAndPopups.showError("Please select atleast one lab department");
                         return;
                     }
                 }
 
-                if(userLogin.hasRole(Roles.PHLEBOTOMIST) || userLogin.hasRole(Roles.TECHNICIAN)){
+                if(userLogin.hasRole(Roles.PHLEBOTOMIST) || userLogin.hasRole(Roles.RADIOLOGIST)){
                     if(UtilValidator.isEmpty(laboratories)){
                         UtilMessagesAndPopups.showError("Please select atleast one laboratories");
                         return;

@@ -20,20 +20,20 @@
 
         <div style="padding:5px" zclass="page-header titled-well">
             <h:h1>
-                <h:small>Result Entry</h:small>
+                <h:small>Result Upload</h:small>
                 <button type="button" zclass="close" onClick="labOrderRequestWin.detach();">×</button>
             </h:h1>
         </div>
 
         <div zclass="container-fluid">
-            <div zclass="row-fluid">
+            <!--<div zclass="row-fluid">
                 <div zclass="span4">
                     <label value="Enter below in text area " mold="required"></label>
                     <textbox id="reasonDesc" sclass="span12" value="@{labOrderRequest.resultEntryDescription,save-when='Save.onClick'}" rows="2" cols="50"
                              w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty:Please Enter Results"/>
                 </div>
 
-            </div>
+            </div>-->
         <div zclass="row-fluid">
             <div zclass="span4">
                 <label value="Test Name" mold="required" class="z-label-bold"></label>
@@ -45,7 +45,7 @@
             </div>
             <div zclass="span4">
                 <label value="Result Type" mold="required"/>
-                <combobox id="resultTypeCombobox" constraint="no empty" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+                <combobox id="resultTypeCombobox" constraint="no empty" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" sclass="span12">
                     <comboitem value="KEYIMAGES" label="Key Images"/>
                     <comboitem value="TESTRESULTS" label="Test Results"/>
                 </combobox>
@@ -55,10 +55,11 @@
                 <button label="Upload" upload="true" id="uploadBtn">
                     <attribute name="onUpload">
                         org.zkoss.util.media.Media media = event.getMedia();
-                        //if (media instanceof org.zkoss.image.Image) {
+                        if(media.getByteData().length > 1*1000*1000) {
+                        com.nzion.util.UtilMessagesAndPopups.showError("You can upload file with a maximum size of 1MB");
+                        return;
+                        }
                         uploadAttachment(media);
-                        //com.nzion.util.UtilMessagesAndPopups.showSuccess();
-                        //}
                     </attribute>
                 </button>
             </div>
@@ -66,7 +67,7 @@
         </div>
         </div>
 
-
+        <div  align="center" style="color:green"><label value="Maximum file size of 1 MB can be uploaded."/></div>
         <div sclass="panelFoot" align="center">
             <button label="Save" id="Save" zclass="btn-success btn" onClick="@command('Save',labResultAttachment=labResultAttachments)">
                 <attribute name="onClick">

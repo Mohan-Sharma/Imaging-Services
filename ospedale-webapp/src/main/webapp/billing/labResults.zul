@@ -34,6 +34,10 @@
                     <label value="Thru Date"/>
                     <datebox id="thruDate" sclass="span12"/>
                 </div>
+                <div zclass="span2">
+                    <label value="Referral Doctor Name"/>
+                    <textbox id="refDocName" sclass="span9"/>
+                </div>
 
             </div>
         </div>
@@ -48,7 +52,7 @@
                             fromDate.setValue(new java.util.Date());
                             thruDate.setValue(new java.util.Date());
                        }
-                       List labOrderList =billingService.getSearchByLabOrder(statuses,labOrderRequest.getPatient(),labOrderRequest.getReferral(),fromDate.getValue(),thruDate.getValue());
+                       List labOrderList =billingService.getSearchByLabOrder(statuses,labOrderRequest.getPatient(),labOrderRequest.getReferral(),fromDate.getValue(),thruDate.getValue(),refDocName.getValue());
 
                          /*   for(com.nzion.domain.emr.lab.LabOrderRequest lr:labOrderList){
                             if(lr.isHomeService()){

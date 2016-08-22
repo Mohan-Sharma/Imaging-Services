@@ -58,11 +58,11 @@ public class RolesValueObject {
 	append(Roles.NURSE, nurse);
 	}
 	public boolean isTechnician(){
-	return authorization.hasRole(Roles.TECHNICIAN);
+	return authorization.hasRole(Roles.RADIOLOGIST);
 	}
 
 	public void setTechnician(boolean technician){
-	append(Roles.TECHNICIAN, technician);
+	append(Roles.RADIOLOGIST, technician);
 	}
 	public boolean isBilling(){
 	return authorization.hasRole(Roles.BILLING);

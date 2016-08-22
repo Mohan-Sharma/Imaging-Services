@@ -193,7 +193,7 @@ public class UserLoginDto {
         if(rolesValueObject.isMedicalAssistant())
             roles.add(Role.MEDICAL_ASSISTANT.toString());
         if(rolesValueObject.isTechnician())
-            roles.add(Role.TECHNICIAN.toString());
+            roles.add(Role.RADIOLOGIST.toString());
         if(rolesValueObject.isCaseManager())
             roles.add(Role.CASE_MANAGER.toString());
         if(rolesValueObject.isPatient())

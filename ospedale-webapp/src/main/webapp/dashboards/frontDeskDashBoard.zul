@@ -11,7 +11,7 @@
     portletDatas.add(new com.nzion.view.PortletData("Radiology Order", "/billing/labOrderPortlet.zul", "../images/radiologyorders.png",true));
     portletDatas.add(new com.nzion.view.PortletData("Referral Requests", "/referral/referralRequests.zul", "../images/referral.png",true));
     portletDatas.add(new com.nzion.view.PortletData("Lab Test Requests", "/lab/labRequisitionListView.zul", "../images/RadiologyTestRequest.png", true));
-    portletDatas.add(new com.nzion.view.PortletData("Imaging Report", "/billing/labResults.zul", "../images/radiologyreport.png",true));
+    portletDatas.add(new com.nzion.view.PortletData("Imaging Report", "/lab/labRequisitionListAll.zul", "../images/radiologyreport.png",true));
 
 
     <!--

@@ -6,7 +6,7 @@
     <window mode="modal" closable="true" height="400px" title="View Order" id="viewLabOrder" sclass="modalStyle"
             apply="org.zkoss.bind.BindComposer"
             viewModel="@id('vm') @init('com.nzion.zkoss.composer.emr.lab.LabOrderInvoiceViewModel')">
-        <listbox model="@bind(vm.labTestsOrdered)" id="patientLabOrderListBox" multiple="true" checkmark="true" selectedItems="@bind(vm.selected)">
+        <listbox model="@bind(vm.labTestsOrdered)" id="patientLabOrderListBox" multiple="true" checkmark="false" selectedItems="@bind(vm.selected)">
             <listhead>
                 <listheader>Test Panel</listheader>
                  <listheader>Status</listheader>
@@ -29,11 +29,11 @@
         </listbox>
 
         <div zclass="panelFoot">
-            <button label="Generate Invoice" sclass="btn-primary" onClick="@command('GenerateInvoice')"
-                    visible="@bind(vm.generateInvoice)" disabled="@bind(vm.allLabOrderCancelled)"></button>
+            <!--<button label="Generate Invoice" sclass="btn-primary" onClick="@command('GenerateInvoice')"
+                    visible="@bind(vm.generateInvoice)" disabled="@bind(vm.allLabOrderCancelled)"></button>-->
             <button label="Mark Invoice Ready" sclass="btn-primary" onClick="@command('MarkInvoiceAsFinal')"
                     visible="@bind(vm.invoiceReady &amp;&amp; !vm.enableReceipt)" ></button>
-            <button label="Cancel Order" sclass="btn-warning" visible="@bind(!vm.invoiceReady)" onClick="@command('CancelOrder')" disabled="@bind(vm.allLabOrderCancelled)"></button>
+            <!--<button label="Cancel Order" sclass="btn-warning" visible="@bind(!vm.invoiceReady)" onClick="@command('CancelOrder')" disabled="@bind(vm.allLabOrderCancelled)"></button>-->
              <button label="Cancel Invoice" sclass="btn-warning"   visible="@bind(vm.invoiceReady &amp;&amp; !vm.enableReceipt)" onClick="@command('cancelInvoice')" ></button>
             <button label="Create Receipt" visible="@bind(vm.enableReceipt)" sclass="btn btn-success"  onClick="@command('CreateReceipt')"></button>
             <button label="Close" onClick="viewLabOrder.detach()"></button>

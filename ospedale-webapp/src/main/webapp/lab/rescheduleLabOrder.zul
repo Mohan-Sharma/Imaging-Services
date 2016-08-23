@@ -117,8 +117,34 @@
             <button label="Cancel Order" sclass="btn-warning" visible="@bind(!vm.invoiceReady)" onClick="@command('CancelOrder')" disabled="@bind(vm.allLabOrderCancelled)"></button>
             <button label="Cancel Invoice" sclass="btn-warning"   visible="@bind(vm.invoiceReady &amp;&amp; !vm.enableReceipt)" onClick="@command('cancelInvoice')" ></button>
             <button label="Create Receipt" visible="@bind(vm.enableReceipt)" sclass="btn btn-success"  onClick="@command('CreateReceipt')"></button>-->
-            <button label="Reschedule">
+            <button label="Reschedule" sclass="btn-primary">
                 <attribute name="onClick"><![CDATA[
+                    com.nzion.domain.emr.lab.LabOrderRequest oldLabOrderRequest = vm.getLabOrderRequest();
+                    com.nzion.domain.emr.lab.LabRequisition labRequisition = commonCrudService.findUniqueByEquality(com.nzion.domain.emr.lab.LabRequisition.class, new String[]{"labOrderRequest"}, new Object[]{oldLabOrderRequest});
+                    if ((labRequisition != null) && (!com.nzion.domain.emr.lab.LabRequisition.LabRequisitionStatus.NEW.equals(labRequisition.getStatus()))) {
+                        com.nzion.util.UtilMessagesAndPopups.showError("A Lab order with NEW status can only be Rescheduled");
+                        return;
+                    }
+                    java.util.Date appointDate = oldLabOrderRequest.getStartDate();
+                    java.util.Date startTimeDate = oldLabOrderRequest.getStartTime();
+                    com.nzion.domain.RCMPreference rcmPreference = commonCrudService.getByPractice(com.nzion.domain.RCMPreference.class);
+                    com.nzion.domain.LabReschedulingPreference patientReschedulingPreference = commonCrudService.findUniqueByEquality(com.nzion.domain.LabReschedulingPreference.class, new String[]{"rcmPreference", "visitType"}, new Object[]{rcmPreference, com.nzion.domain.RCMPreference.RCMVisitType.HOME_PHLEBOTOMY});
+                    java.math.BigDecimal reScheduleTime = patientReschedulingPreference.getReschedulingTime() == null ? java.mathBigDecimal.ZERO : patientReschedulingPreference.getReschedulingTime();
+                    Date scheduleDateTime = null;
+                    if(oldLabOrderRequest.isHomeService()){
+                        scheduleDateTime = com.nzion.util.UtilDateTime.toDate(oldLabOrderRequest.getPhlebotomistStartDate().getMonth(), oldLabOrderRequest.getPhlebotomistStartDate().getDate(), oldLabOrderRequest.getPhlebotomistStartDate().getYear(),
+                            oldLabOrderRequest.getPhlebotomistStartTime().getHours(), oldLabOrderRequest.getPhlebotomistStartTime().getMinutes(), oldLabOrderRequest.getPhlebotomistStartTime().getSeconds());
+                    } else {
+                        scheduleDateTime = com.nzion.util.UtilDateTime.toDate(oldLabOrderRequest.getStartDate().getMonth(), oldLabOrderRequest.getStartDate().getDate(), oldLabOrderRequest.getStartDate().getYear(),
+                            oldLabOrderRequest.getStartTime().getHours(), oldLabOrderRequest.getStartTime().getMinutes(), oldLabOrderRequest.getStartTime().getSeconds());
+
+                    }
+                    java.math.BigDecimal hoursInterval = new java.math.BigDecimal(com.nzion.util.UtilDateTime.getIntervalInHours(new Date(), scheduleDateTime));
+                    if((oldLabOrderRequest.isMobileOrPatinetPortal()) && (hoursInterval.compareTo(reScheduleTime) < 0)){
+                        com.nzion.util.UtilMessagesAndPopups.showError("Sorry, appointment cant be rescheduled , please check Afya Policy.");
+                        return;
+                    }
+
                     if(vm.getLabOrderRequest().isHomeService()){
                     vm.getLabOrderRequest().setPhlebotomist(phlebotomistList.getSelectedItem().getValue());
                     vm.getLabOrderRequest().setPhlebotomistStartDate(phlebotomistAppointmentDate.getValue());

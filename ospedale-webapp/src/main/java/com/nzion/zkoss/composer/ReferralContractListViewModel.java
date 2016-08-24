@@ -43,8 +43,8 @@ public class ReferralContractListViewModel extends AutowirableComposer{
     @AfterCompose
     public void init(@ContextParam(ContextType.VIEW) Component view){
         Selectors.wireComponents(view, this, true);
-        initiatedReferralContractList = commonCrudService.findByEquality(ReferralContract.class, new String[]{"refereeClinicId"}, new Object[]{Infrastructure.getPractice().getTenantId()});
-        requestedReferralContractList = commonCrudService.findByEquality(ReferralContract.class, new String[]{"referralClinicId"}, new Object[]{Infrastructure.getPractice().getTenantId()});
+        initiatedReferralContractList = commonCrudService.findByEquality(ReferralContract.class, new String[]{"status"}, new Object[]{"Initiated"});
+        requestedReferralContractList = commonCrudService.findByEquality(ReferralContract.class, new String[]{"status"}, new Object[]{"Received"});
 
     }
 

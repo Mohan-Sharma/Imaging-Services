@@ -1,0 +1,53 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./labReportViewWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <zscript>
+        import java.util.*;
+        import com.nzion.service.common.CommonCrudService;
+        import com.nzion.util.Infrastructure;
+        import com.nzion.domain.emr.lab.LabOrderRequest;
+        LabOrderRequest labOrderRequest = arg.get("labOrderRequest");
+        labOrderRequest = commonCrudService.getById(LabOrderRequest.class,labOrderRequest.getId());
+        com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+        com.nzion.service.impl.FileBasedServiceImpl fileBasedServiceImpl = com.nzion.util.Infrastructure.getSpringBean("fileBasedServiceImpl");
+        Set patientLabOrderList = labOrderRequest.getPatientLabOrders();
+        com.nzion.domain.emr.lab.LabResultAttachments labResultAttachments = new com.nzion.domain.emr.lab.LabResultAttachments();
+        com.nzion.zkoss.composer.emr.lab.LabOrderResultController labOrderResultController = new com.nzion.zkoss.composer.emr.lab.LabOrderResultController();
+    </zscript>
+
+    <window id="labReportViewWin" mode="modal" position="center" width="40%"  closable="true" apply="org.zkoss.bind.BindComposer"  viewModel="@id('vm') @init('com.nzion.zkoss.composer.emr.lab.LabReportViewController')">
+
+        <div style="padding:5px" zclass="page-header titled-well" >
+            <h:h1>
+                <h:small>View Report</h:small>
+                <button type="button" zclass="close" onClick="labReportViewWin.detach();">×</button>
+            </h:h1>
+        </div>
+        <div>
+            <panel id="panelList">
+                <panelchildren>
+                    <listbox model="@bind(vm.labResultAttachments)">
+                        <listhead>
+                            <listheader label="Test Name"/>
+                            <listheader label="Result Type"/>
+                            <listheader label="File Name"/>
+                        </listhead>
+                        <template name="model" var="each">
+                            <listitem>
+                                <listcell label="@load(each.labTest.testDescription)"/>
+                                <listcell label="@load(each.resultType)"/>
+                                <listcell>
+                                    <a label="@load(each.file.fileName)" onClick="@command('downloadAttachment',fileObject=each)"/>
+                                </listcell>
+                            </listitem>
+                        </template>
+
+                    </listbox>
+
+                </panelchildren>
+            </panel>
+        </div>
+
+    </window>
+</zk>            

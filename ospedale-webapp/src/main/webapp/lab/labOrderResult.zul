@@ -4,12 +4,16 @@
     xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
 
     <zscript>
-        import com.nzion.domain.emr.lab.LabOrderRequest;
-        import com.nzion.service.common.CommonCrudService;
         import java.util.*;
-        LabOrderRequest labOrderRequest = arg.get("labOrderRequest");
-        labOrderRequest = commonCrudService.getById(LabOrderRequest.class,labOrderRequest.getId());
-        com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+        import com.nzion.service.common.CommonCrudService;
+        import com.nzion.util.Infrastructure;
+        import com.nzion.domain.emr.lab.LabRequisition;
+        import com.nzion.domain.emr.lab.LabOrderRequest;
+        LabRequisition labRequisition = arg.get("labRequisition");
+        labRequisition = commonCrudService.getById(LabRequisition.class,labRequisition.getId());
+        long labOrderRequestId = labRequisition.getLabOrderRequest().getId();
+        CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+        LabOrderRequest labOrderRequest = commonCrudService.getById(LabOrderRequest.class,new Long(labRequisition.getLabOrderRequest().getId()));
         com.nzion.service.impl.FileBasedServiceImpl fileBasedServiceImpl = com.nzion.util.Infrastructure.getSpringBean("fileBasedServiceImpl");
         Set patientLabOrderList = labOrderRequest.getPatientLabOrders();
         com.nzion.domain.emr.lab.LabResultAttachments labResultAttachments = new com.nzion.domain.emr.lab.LabResultAttachments();
@@ -26,14 +30,6 @@
         </div>
 
         <div zclass="container-fluid">
-            <!--<div zclass="row-fluid">
-                <div zclass="span4">
-                    <label value="Enter below in text area " mold="required"></label>
-                    <textbox id="reasonDesc" sclass="span12" value="@{labOrderRequest.resultEntryDescription,save-when='Save.onClick'}" rows="2" cols="50"
-                             w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty:Please Enter Results"/>
-                </div>
-
-            </div>-->
         <div zclass="row-fluid">
             <div zclass="span4">
                 <label value="Test Name" mold="required" class="z-label-bold"></label>
@@ -56,8 +52,8 @@
                     <attribute name="onUpload">
                         org.zkoss.util.media.Media media = event.getMedia();
                         if(media.getByteData().length > 1*1000*1000) {
-                        com.nzion.util.UtilMessagesAndPopups.showError("You can upload file with a maximum size of 1MB");
-                        return;
+                            com.nzion.util.UtilMessagesAndPopups.showError("You can upload file with a maximum size of 1MB");
+                            return;
                         }
                         uploadAttachment(media);
                     </attribute>
@@ -68,25 +64,25 @@
         </div>
 
         <div  align="center" style="color:green"><label value="Maximum file size of 1 MB can be uploaded."/></div>
-        <div sclass="panelFoot" align="center">
+        <div sclass="panelFoot" align="center" >
             <button label="Save" id="Save" zclass="btn-success btn" onClick="@command('Save',labResultAttachment=labResultAttachments)">
                 <attribute name="onClick">
                     if(labTestListbox.getSelectedItem() == null){
-                    com.nzion.util.UtilMessagesAndPopups.showError("Lab test is mandatory");
+                        com.nzion.util.UtilMessagesAndPopups.showError("Lab test is mandatory");
                     }
                     if(resultTypeCombobox.getSelectedItem() == null){
-                    com.nzion.util.UtilMessagesAndPopups.showError("Result Type and Upload File are mandatory");
+                        com.nzion.util.UtilMessagesAndPopups.showError("Result Type and Upload File are mandatory");
                     }
                     try{
-                    if(labResultAttachments.getFile() != null){
-                    labResultAttachments.setLabTest(labTestListbox.getSelectedItem().getValue());
-                    labResultAttachments.setLabOrderRequest(labOrderRequest);
-                    labResultAttachments.setResultType(resultTypeCombobox.getSelectedItem().getValue());
-                    //labOrderRequest.setResultEntryDescription();
-                    commonCrudService.save(labResultAttachments);
-                    commonCrudService.save(labOrderRequest);
-                    vm.getLabResultAttachments().add(labResultAttachments);
-                    labResultAttachments = new com.nzion.domain.emr.lab.LabResultAttachments();
+                        if(labResultAttachments.getFile() != null){
+                        labResultAttachments.setLabTest(labTestListbox.getSelectedItem().getValue());
+                        labResultAttachments.setLabOrderRequest(labOrderRequest);
+                        labResultAttachments.setResultType(resultTypeCombobox.getSelectedItem().getValue());
+                        //labOrderRequest.setResultEntryDescription();
+                        commonCrudService.save(labResultAttachments);
+                        commonCrudService.save(labOrderRequest);
+                        vm.getLabResultAttachments().add(labResultAttachments);
+                        labResultAttachments = new com.nzion.domain.emr.lab.LabResultAttachments();
                     }
                     }catch(Exception e){}
                 </attribute>
@@ -94,17 +90,17 @@
 
             <zscript>
                 void uploadAttachment(org.zkoss.util.media.Media media){
-                com.nzion.domain.File file = new com.nzion.domain.File();
-                file.setFileType(media.getContentType());
-                file.setInputStream(media.isBinary() ? media.getStreamData() : new StringBufferInputStream(media.getStringData()));
-                file.setFileName(media.getName());
+                    com.nzion.domain.File file = new com.nzion.domain.File();
+                    file.setFileType(media.getContentType());
+                    file.setInputStream(media.isBinary() ? media.getStreamData() : new StringBufferInputStream(media.getStringData()));
+                    file.setFileName(media.getName());
                 try{
-                fileBasedServiceImpl.createFilesForImageSection(file, labOrderRequest.getPatient());
-                labResultAttachments.setFile(file);
+                    fileBasedServiceImpl.createFilesForImageSection(file, labOrderRequest.getPatient());
+                    labResultAttachments.setFile(file);
                 }catch(Exception e){
-                fileBasedServiceImpl.createDefaultFolderStructure(labOrderRequest.getPatient());
-                fileBasedServiceImpl.createFilesForImageSection(file, labOrderRequest.getPatient());
-                labResultAttachments.setFile(file);
+                    fileBasedServiceImpl.createDefaultFolderStructure(labOrderRequest.getPatient());
+                    fileBasedServiceImpl.createFilesForImageSection(file, labOrderRequest.getPatient());
+                    labResultAttachments.setFile(file);
                 }
                 }
             </zscript>
@@ -117,7 +113,7 @@
                             <listheader label="Test Name"/>
                             <listheader label="Result Type"/>
                             <listheader label="File Name"/>
-                            <listheader label="Action"/>
+                            <listheader label="Action" />
                         </listhead>
                         <template name="model" var="each">
                         <listitem>
@@ -140,7 +136,7 @@
 
                 </panelchildren>
             </panel>
-            <div zclass="panelFoot" align="center">
+                <div zclass="panelFoot" align="center" >
                 <button label="Complete" zclass="btn-success btn">
                     <attribute name="onClick">
                         labOrderResultController.updateLabRequisitionStatus(labOrderRequest.getId());

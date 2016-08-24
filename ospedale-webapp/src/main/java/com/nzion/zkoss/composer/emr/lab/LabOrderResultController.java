@@ -1,7 +1,6 @@
 package com.nzion.zkoss.composer.emr.lab;
 
 import com.nzion.domain.File;
-import com.nzion.domain.emr.lab.LabOrderRequest;
 import com.nzion.domain.emr.lab.LabRequisition;
 import com.nzion.domain.emr.lab.LabResultAttachments;
 import com.nzion.service.common.CommonCrudService;
@@ -34,8 +33,9 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
 
 
     @Init
-    public void init(@ExecutionArgParam("labOrderRequest") LabOrderRequest labOrderRequest){
-        labResultAttachments = commonCrudService.findByEquality(LabResultAttachments.class, new String[]{"labOrderRequest.id"}, new Object[]{labOrderRequest.getId()});
+    public void init(@ExecutionArgParam("labRequisition") LabRequisition labRequisitionId){
+        labRequisitionId = commonCrudService.getById(LabRequisition.class,labRequisitionId.getId());
+        labResultAttachments = commonCrudService.findByEquality(LabResultAttachments.class, new String[]{"labOrderRequest.id"}, new Object[]{labRequisitionId.getLabOrderRequest().getId()});
     }
 
     public CommonCrudService getCommonCrudService() {

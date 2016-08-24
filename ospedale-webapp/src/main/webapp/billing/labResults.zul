@@ -124,10 +124,10 @@
                     <!-- <name object="@{labOrderRequest.referral}"/>-->
                     <label value="@{labOrderRequest.orderStatus.description}" width="10%"/>
                     <vlayout>
-                        <button label="Result Upload">
+                        <button label="View">
                             <attribute name="onClick">
                                 <![CDATA[
-                                     Executions.createComponents("/lab/labOrderResult.zul", null,com.nzion.util.UtilMisc.toMap("labOrderRequest",self.getParent().getParent().getValue()));
+                                     Executions.createComponents("/lab/labReportView.zul", null,com.nzion.util.UtilMisc.toMap("labOrderRequest",self.getParent().getParent().getValue()));
                                 ]]>
                             </attribute>
                         </button>

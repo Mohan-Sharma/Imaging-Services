@@ -3,8 +3,7 @@
 <window id="referralContractList" apply="org.zkoss.bind.BindComposer"
         viewModel="@id('vm') @init('com.nzion.zkoss.composer.ReferralContractListViewModel')" >
 
-	<!--Initiated Referral Contract List hidden -->
-	<!--<panel>
+	<panel>
 	 <caption label="Initiated Referral Contract List"/>
 	<panelchildren>
 
@@ -57,7 +56,7 @@
         </div>
 	</vlayout>
 	</panelchildren>
-	</panel>-->
+	</panel>
 
 	<panel>
     	 <caption label="Received Referral Contract List"/>

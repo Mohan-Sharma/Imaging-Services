@@ -2,13 +2,13 @@
 <?component name="screen" macro-uri="/home-grid-macro.zul"?>
 <zk>
 	<zscript>
-		setPageTitle("Doctors", "");
+		setPageTitle("Radiologists", "");
 	</zscript>
 	<div self="@{define(content)}" zclass="container-fluid">
-		<screen width="100%" listtitle="List of Doctors" addpage="newProvider" containername="contentArea"
+		<screen width="100%" listtitle="List of Radiologists" addpage="newProvider" containername="contentArea"
 			entityclass="com.nzion.domain.Provider" addmodepopup="true"
-			fields="accountNumber,firstName,lastName,gender.description,contacts.email,contacts.corporateEmail,contacts.officePhone"
-			labels="Code,First Name,Last Name,Gender,Email,Corporate Email,Office phone"
-			hidedeletebtn="true" />
+			fields="accountNumber,salutation,firstName,lastName,gender.description,contacts.email,contacts.mobileNumber,active"
+			labels="Code,Title,First Name,Last Name,Gender,Email,Mobile Number,Active"
+			hidedeletebtn="true" hideactivation="true" />
 	</div>
 </zk>

@@ -138,7 +138,7 @@
                                                 </a>
                                                 <n:ul class="sub sub2">
                                                     <n:li class="sub">
-                                                       <!--  <n:h5 id="provider">Doctor</n:h5> -->
+                                                         <n:h5 id="provider">Radiologist</n:h5>
                                                         <n:ul  >
                                                           <!--   <n:li id="newprovider">
                                                                 <a  label="New Doctor"  disabled="${!rvo.admin}">
@@ -156,14 +156,14 @@
                                                                     </attribute>
                                                                 </a>
                                                             </n:li> -->
-                                                            <!-- <n:li>
-                                                                <a  label="List Of Doctors"  disabled="${!rvo.admin}">
+                                                             <n:li>
+                                                                <a  label="List Of Radiologists"  disabled="${!rvo.admin}">
                                                                     <attribute name="onClick">
-                                                                        setTitleAndActivateMenu("People","List of Doctors", people);
+                                                                        setTitleAndActivateMenu("People","List of Radiologists", people);
                                                                         appendContent("providerList");
                                                                     </attribute>
                                                                 </a>
-                                                            </n:li> -->
+                                                            </n:li>
                                                         </n:ul>
                                                         <n:h5 id="patient">Patient</n:h5>
                                                         <n:ul>

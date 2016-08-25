@@ -5,8 +5,8 @@
 	<window self="@{define(content)}">
 		<screen width="100%" listtitle="List of Users" addpage="newUser"
 			entityclass="com.nzion.domain.Employee" addmodepopup="true" 
-			fields="accountNumber,firstName,lastName,gender.description,contacts.email,contacts.officePhone"
-			labels="Code,First Name,Last Name,Gender,Email,Office phone"
-			hidedeletebtn="true" containername="contentArea"/>
+			fields="accountNumber,salutation,firstName,lastName,gender.description,contacts.email,contacts.mobileNumber,active"
+			labels="Code,Title,First Name,Last Name,Gender,Email,Mobile Number,Active"
+			hidedeletebtn="true" containername="contentArea" hideactivation="true"/>
 	</window>
 </zk>

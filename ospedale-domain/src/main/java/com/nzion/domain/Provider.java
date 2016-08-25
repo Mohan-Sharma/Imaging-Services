@@ -21,6 +21,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.nzion.domain.emr.SpokenLanguage;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Cascade;
@@ -60,6 +61,18 @@ public class Provider extends Employee implements Comparable<Provider>{
 	private String comments;
 
 	private String qualifications;
+	private String qualificationEng;
+	private String qualificationAr;
+	private String expertise;
+	private String expertiseAr;
+	private String certificationEng;
+	private String certificationAr;
+	private String visitingHours;
+	private String nationality;
+	private String specialityToDisplayInEng;
+	private String specialityToDisplayInAr;
+	private Integer experience;
+	private Set<SpokenLanguage> providerSpokenLngs;
 	
 	private String regdNo;
 	
@@ -201,7 +214,112 @@ public class Provider extends Employee implements Comparable<Provider>{
 	public void setRoom(FixedAsset room) {
 	this.room = room;
 	}
-	
+
+	@ManyToMany(targetEntity = SpokenLanguage.class,fetch = FetchType.EAGER)
+	@JoinTable(name = "PROVIDER_SPOKEN_LANGUAGE", joinColumns = { @JoinColumn(name = "PROVIDER_ID") }, inverseJoinColumns = { @JoinColumn(name = "SPOKEN_LANGUAGE_ID") })
+	@Fetch(FetchMode.SELECT)
+	public Set<SpokenLanguage> getProviderSpokenLngs() {
+		return providerSpokenLngs;
+	}
+
+	public void setProviderSpokenLngs(Set<SpokenLanguage> spokenLanguages) {
+		this.providerSpokenLngs = spokenLanguages;
+	}
+
+	@Override
+	public String getQualificationEng() {
+		return qualificationEng;
+	}
+
+	@Override
+	public void setQualificationEng(String qualificationEng) {
+		this.qualificationEng = qualificationEng;
+	}
+
+	public String getQualificationAr() {
+		return qualificationAr;
+	}
+
+	public void setQualificationAr(String qualificationAr) {
+		this.qualificationAr = qualificationAr;
+	}
+
+	public String getExpertise() {
+		return expertise;
+	}
+
+	public void setExpertise(String expertise) {
+		this.expertise = expertise;
+	}
+
+	public String getExpertiseAr() {
+		return expertiseAr;
+	}
+
+	public void setExpertiseAr(String expertiseAr) {
+		this.expertiseAr = expertiseAr;
+	}
+
+	@Override
+	public String getCertificationEng() {
+		return certificationEng;
+	}
+
+	@Override
+	public void setCertificationEng(String certificationEng) {
+		this.certificationEng = certificationEng;
+	}
+
+	public String getCertificationAr() {
+		return certificationAr;
+	}
+
+	public void setCertificationAr(String certificationAr) {
+		this.certificationAr = certificationAr;
+	}
+
+	public String getVisitingHours() {
+		return visitingHours;
+	}
+
+	public void setVisitingHours(String visitingHours) {
+		this.visitingHours = visitingHours;
+	}
+
+	@Override
+	public String getNationality() {
+		return nationality;
+	}
+
+	@Override
+	public void setNationality(String nationality) {
+		this.nationality = nationality;
+	}
+
+	public String getSpecialityToDisplayInEng() {
+		return specialityToDisplayInEng;
+	}
+
+	public void setSpecialityToDisplayInEng(String specialityToDisplayInEng) {
+		this.specialityToDisplayInEng = specialityToDisplayInEng;
+	}
+
+	public String getSpecialityToDisplayInAr() {
+		return specialityToDisplayInAr;
+	}
+
+	public void setSpecialityToDisplayInAr(String specialityToDisplayInAr) {
+		this.specialityToDisplayInAr = specialityToDisplayInAr;
+	}
+
+	public Integer getExperience() {
+		return experience;
+	}
+
+	public void setExperience(Integer experience) {
+		this.experience = experience;
+	}
+
 	@Override
 	public String toString() {
 	StringBuilder buffer = new StringBuilder();

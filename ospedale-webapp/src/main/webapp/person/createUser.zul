@@ -3,9 +3,13 @@
 <zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
     xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
 	<zscript>
+	import com.nzion.util.RestServiceConsumer;
+	import com.nzion.service.common.CommonCrudService;
 	com.nzion.domain.Employee employee = arg.get("entity");
 	if(employee == null)
 	    employee = new com.nzion.domain.Employee();
+	List allNationality = RestServiceConsumer.getAllNationality();
+	List spokenLanguages = commonCrudService.getAll(com.nzion.domain.emr.SpokenLanguage.class);
 </zscript>
 	<window id="createEmployee"  mode="modal" width="50%" position="center,top" >
 	<div style="padding:5px" zclass="page-header titled-well">
@@ -16,60 +20,184 @@
     </div>
 	<div zclass="container-fluid">
 		 <div zclass="row-fluid">
-					 <div zclass="span6">
-						<label value="First Name" style="text-align:right;" mold="required" id="lblfirstName" />
-						<textbox value="@{employee.firstName,save-when='Save.onClick'}" id="firstName" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"
-							 maxlength="50" onChange="com.nzion.util.UtilDisplay.validateOnlyAlphaNumericAndWhiteSpaces(self)"/>
-					</div>
-					 <div zclass="span6">
-						<label value="Last Name" style="text-align:right;" id="lbllastName" mold="required"/>
-						<textbox value="@{employee.lastName,save-when='Save.onClick'}" id="lastName" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"
-						maxlength="50" onBlur="com.nzion.util.UtilDisplay.validateOnlyAlphaNumericAndWhiteSpaces(self)"/>
-					</div>
-					</div>
-					 <div zclass="row-fluid">
-					<div zclass="span6">
-					    <label value="Code" style="text-align:right;" />
-						<textbox  sclass="span12" value="@{employee.accountNumber,save-when='Save.onClick'}"
-							id="accountNumber"/>
-					</div>
-					 <div zclass="span6">
-						<label value="Gender"  id="lblgender" />
-						<enumeration id="gender" enumType="GENDER" sclass="span12" selectedItem="@{employee.gender,save-when='Save.onClick'}">
-						</enumeration>
-				  </div>
-				  </div>
-				  	<div zclass="row-fluid">
-				  	 <div zclass="span4">
-						<label value="e-mail" />
-						<email id="emailAddr" value="@{employee.contacts.email,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" />
-					</div>
-					 <div zclass="span4">
-				       <label value="Office phone" />
-						<phonebox value="@{employee.contacts.officePhone,save-when='Save.onClick'}" cols="10" sclass="span12" />
-						</div>
-						<!--<div zclass="span4">
-							<label value="Fax" />
-							<phonebox value="@{employee.contacts.faxNumber,save-when='Save.onClick'}" cols="10" sclass="span12" />
-						</div>-->
-						<div zclass="span4">
-							<separator></separator>
-							<separator></separator>
-							<checkbox label=" Radiologist" >
-								<attribute name="onCreate">
-									self.setChecked(employee.isPhlebotomist());
-								</attribute>
-								<attribute name="onCheck">
-									if(self.isChecked()){
-									employee.setPhlebotomist(true);
-									} else {
-									employee.setPhlebotomist(false);
-									}
-								</attribute>
-									</checkbox>
-						</div>
+			<div zclass="span2">
+				<vbox>
+					<h:div align="center" style="margin:4px">
+						<image id="frontImage" width="150px" height="120px">
+						</image>
+						<button label="Upload Picture" upload="true">
+							<attribute name="onUpload">
+								org.zkoss.util.media.Media media = event.getMedia();
+								if (media instanceof org.zkoss.image.Image) {
+								org.zkoss.zul.Image image = new org.zkoss.zul.Image();
+								image.setContent((org.zkoss.image.Image) media);
+								frontImage.setContent((org.zkoss.image.Image) media);
+								com.nzion.domain.DataResource fsrc = new com.nzion.domain.DataResource();
+								fsrc.setResource(org.hibernate.Hibernate.createBlob(media.getByteData()));
+								employee.setProfilePicture(fsrc);
+								} else {
+								Messagebox.show("Not an image: " + media, "Error", Messagebox.OK,
+								Messagebox.ERROR);
+								break; //not to show too many errors
+								}
+							</attribute>
+						</button>
+						<a sclass="delBtn" label="Remove Your Picture" id="newBtn">
+							<attribute name="onClick">
+								frontImage.setSrc(null);
+								frontImage.invalidate();
+								employee.setProfilePicture(null);
+							</attribute>
+						</a>
+					</h:div>
+					<label value="Best viewed in ‘size : 74px in width and 110px in height’"/>
+				</vbox>
 			</div>
-		       <div zclass="row-fluid">
+		 </div>
+		 <div zclass="row-fluid">
+			 <div zclass="span2">
+				 <label value="Title" style="text-align:left;"  />
+				 <combobox selectedItem="@{employee.salutation,save-when='Save.onClick'}"
+						   id="title"
+						   maxlength="20" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+					 <attribute name="onChange">
+						 <![CDATA[
+								if(self.getValue().equals("Mr") || self.getValue().equals("Sr"))
+								gender.setValue("Male");
+								if(self.getValue().equals("Ms") || self.getValue().equals("Miss") || self.getValue().equals("Mrs") || self.getValue().equals("Sra"))
+								gender.setValue("Female");
+								if(self.getValue().equals("Dr"))
+								gender.setValue(" ");
+								]]>
+					 </attribute>
+					 <comboitem label="Ms" value="Ms" />
+					 <comboitem label="Miss" value="Miss" />
+					 <comboitem label="Mr" value="Mr" />
+					 <comboitem label="Mrs" value="Mrs" />
+					 <comboitem label="Dr" value="Dr" />
+					 <comboitem label="Sr" value="Sr" />
+					 <comboitem label="Sra" value="Sra" />
+				 </combobox>
+			 </div>
+			 <div zclass="span5">
+				<label value="First Name" style="text-align:right;" mold="required" id="lblfirstName" />
+				<textbox value="@{employee.firstName,save-when='Save.onClick'}" id="firstName" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"
+					 maxlength="50" onChange="com.nzion.util.UtilDisplay.validateOnlyAlphaNumericAndWhiteSpaces(self)"/>
+			 </div>
+			 <div zclass="span5">
+				<label value="Last Name" style="text-align:right;" id="lbllastName" mold="required"/>
+				<textbox value="@{employee.lastName,save-when='Save.onClick'}" id="lastName" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"
+				maxlength="50" onBlur="com.nzion.util.UtilDisplay.validateOnlyAlphaNumericAndWhiteSpaces(self)"/>
+			</div>
+		 </div>
+		 <div zclass="row-fluid">
+			<div zclass="span2">
+				<label value="Code" style="text-align:right;" />
+				<textbox  sclass="span12" value="@{employee.accountNumber,save-when='Save.onClick'}"
+					id="accountNumber"/>
+			</div>
+			<div zclass="span2">
+				<label value="Gender"  id="lblgender" />
+				<enumeration id="gender" enumType="GENDER" sclass="span12" selectedItem="@{employee.gender,save-when='Save.onClick'}"/>
+		    </div>
+			<div></div>
+			<div zclass="span3" style="margin-top:20px; margin-left:25px;" >
+				 <checkbox checked="@{employee.active}"/>
+				 <label value="Active" id="lblActive" mold="required" />
+
+			</div>
+	     </div>
+		 <div zclass="row-fluid">
+			 <div zclass="span4">
+				<label value="e-mail" />
+				<email id="emailAddr" value="@{employee.contacts.email,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" />
+			 </div>
+			 <div zclass="span4">
+				 <label value="Mobile Number" />
+				 <phonebox value="@{employee.contacts.mobileNumber,save-when='Save.onClick'}" maxlength="11" sclass="span12" id="lblMobile"/>
+			 </div>
+		    <!--<div zclass="span4">
+		   		<label value="Office phone" />
+				<phonebox value="@{employee.contacts.officePhone,save-when='Save.onClick'}" cols="10" sclass="span12" />
+			</div>-->
+			<!--<div zclass="span4">
+				<label value="Fax" />
+				<phonebox value="@{employee.contacts.faxNumber,save-when='Save.onClick'}" cols="10" sclass="span12" />
+			</div>-->
+			<div zclass="span4">
+				<separator></separator>
+				<separator></separator>
+				<checkbox label=" Technician" >
+					<attribute name="onCreate">
+						self.setChecked(employee.isPhlebotomist());
+						if(!employee.isPhlebotomist()) {
+							PhlebotomistSection.setVisible(false);
+						}
+					</attribute>
+					<attribute name="onCheck">
+						if(self.isChecked()){
+							employee.setPhlebotomist(true);
+							PhlebotomistSection.setVisible(true);
+						} else {
+							employee.setPhlebotomist(false);
+							PhlebotomistSection.setVisible(false);
+						}
+					</attribute>
+						</checkbox>
+			</div>
+		 </div>
+		<div visible="@{employee.isPhlebotomist()}" id="PhlebotomistSection">
+			<div zclass="row-fluid">
+				<div zclass="span4">
+					<label value="Nationality"/>
+					<combobox readonly="true" id="nationalityBox" selectedItem="@{employee.nationality,save-when='Save.onClick'}" sclass="span12">
+						<comboitem self="@{each='nationality'}" value="@{nationality}" label="@{nationality.name}"/>
+						<comboitem forEach="${allNationality}" value="${each.nationality}" label="${each.nationality}"></comboitem>
+					</combobox>
+				</div>
+				<div zclass="span4">
+					<label value="Registration Number"/>
+					<textbox value="@{employee.registrationNo,save-when='Save.onClick'}" sclass="span12"/>
+				</div>
+				<div zclass="span4">
+					<label value="Certification In English"/>
+					<textbox value="@{employee.certificationEng,save-when='Save.onClick'}" sclass="span12"/>
+				</div>
+
+			</div>
+			<div zclass="row-fluid">
+				<div zclass="span6">
+					<label value="Certification In Arabic"/>
+					<textbox value="@{employee.certificationArb,save-when='Save.onClick'}" sclass="span12"/>
+				</div>
+				<div zclass="span6">
+					<label value="Spoken Language"/>
+					<listbox model="@{spokenLanguages}" sclass="span12" multiple="true" id="spokenLanguageListbox" rows="5"
+							 mold="select" sizedByContent="true" vflex="true"
+							 selectedItem="@{employee.spokenLanguages, converter=com.nzion.view.component.MultipleListitemBindingConverter}">
+						<listitem self="@{each}" value="@{each}" label="@{each.description}"></listitem>
+					</listbox>
+				</div>
+			</div>
+			<div zclass="row-fluid">
+				<div zclass="span4">
+					<label value="Qualification in English" id="lblqualificationeng"/>
+					<textbox value="@{employee.qualificationEng,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+							 id="qualificationEnglish"/>
+				</div>
+				<div zclass="span4">
+					<label value="Qualification in Arabic" id="lblqualificationarb"/>
+					<textbox value="@{employee.qualificationArb,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+							 id="qualificationArabic"/>
+				</div>
+				<div zclass="span4">
+					<label value="Experience (In Years)" id="lblexperience"/>
+					<textbox value="@{employee.experienceEn,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
+							 id="experience"/>
+				</div>
+			</div>
+		</div>
+		       <!--<div zclass="row-fluid">
 					 <div zclass="span6">
 					<label value="Address1" id="lbladdress1"  mold="required"/>
 						<textbox rows="2" cols="50" value="@{employee.contacts.postalAddress.address1,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"
@@ -90,7 +218,7 @@
 					</div>
 					 <div zclass="span4">
 						<label value="State" id="lblstate" mold="required"/>
-						<!--<enumeration id="state" enumType="STATE" itemRenderer="${stateRenderer}"-->
+						&lt;!&ndash;<enumeration id="state" enumType="STATE" itemRenderer="${stateRenderer}"&ndash;&gt;
 						<textbox id="state"  value="@{employee.contacts.postalAddress.stateProvinceGeo,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty" />
 					</div>
 					 <div zclass="span4">
@@ -98,10 +226,10 @@
 						<zipcodebox value="@{employee.contacts.postalAddress.postalCode,save-when='Save.onClick'}" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"
 							id="postalCode" constraint="no empty"/>
 					</div>
-					</div>
+					</div> -->
 					
 
-					</div>
+	</div>
 		
 		<div sclass="panelFoot">
 			<button label="Save" id="Save" visible="true" zclass="btn-success btn">
@@ -110,7 +238,6 @@
 				commonCrudService.save(employee);
 				createEmployee.detach();
 			    com.nzion.util.UtilMessagesAndPopups.showSuccess();
-				//createEmployee.detach();	
 				}catch(org.springframework.dao.DataIntegrityViolationException e){
 					throw new RuntimeException("User code'"+employee.getAccountNumber()+"' already exists.");
 				}

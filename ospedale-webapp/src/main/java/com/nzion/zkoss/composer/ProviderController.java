@@ -65,10 +65,10 @@ public class ProviderController extends OspedaleAutowirableComposer {
 	provider = null;
 	}
 
-	/*public ProviderController(Provider provider, boolean refresh) {
+	public ProviderController(Provider provider, boolean refresh) {
 	this();
 	this.provider = provider;
-	if (provider != null) {
+	/*if (provider != null) {
 		List<SoapModuleQATemplate> templates = providerService.getSoapModuleQATemplates(provider);
 		provider.setSoapModuleTemplates(new HashSet<SoapModuleQATemplate>(templates));
 		if (templates.size() == 0) {
@@ -80,11 +80,11 @@ public class ProviderController extends OspedaleAutowirableComposer {
 				provider.addSoapModuleTemplates(smqat);
 			}
 		}
-	}
+	}*/
 	if(provider != null && provider.getId()!=null)
 		this.provider = commonCrudService.getById(Provider.class, provider.getId());
 	this.refresh = refresh;
-	}*/
+	}
 
 	public List<Speciality> getSpecialities() {
 	return specialities;

@@ -3,57 +3,145 @@
     xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client">
     <zscript>
         import com.nzion.domain.Provider;
+        import com.nzion.util.RestServiceConsumer;
+        import com.nzion.service.common.CommonCrudService;
         com.nzion.domain.Provider providerArg = arg.get("entity");
-        com.nzion.zkoss.composer.ProviderController providerController = new
-        com.nzion.zkoss.composer.ProviderController(providerArg, false);
+        com.nzion.zkoss.composer.ProviderController providerController = new com.nzion.zkoss.composer.ProviderController(providerArg, false);
+        List allNationality = RestServiceConsumer.getAllNationality();
+        List spokenLanguages = commonCrudService.getAll(com.nzion.domain.emr.SpokenLanguage.class);
         List specialities = commonCrudService.getAll(com.nzion.domain.Speciality.class);
-        com.nzion.service.ScheduleService scheduleService =
-        com.nzion.util.Infrastructure.getSpringBean("scheduleService");
-        List fixedAssets =
-        fixedAssetService.getAllRoomsByLocation(com.nzion.util.Infrastructure.getUserLogin().getLocations());
+        com.nzion.service.ScheduleService scheduleService = com.nzion.util.Infrastructure.getSpringBean("scheduleService");
+       // List fixedAssets = fixedAssetService.getAllRoomsByLocation(com.nzion.util.Infrastructure.getUserLogin().getLocations());
+        boolean displayReason = false;
+        if(providerController.getProvider() != null)    {
+            displayReason = !(providerController.getProvider().isActive());
+        }
     </zscript>
     <window apply="${providerController}" id="providerWin" mode="modal" sclass="modalStyle" >
         <div style="padding:5px" zclass="page-header titled-well">
             <h:h1>
-                <h:small>New Doctor</h:small>
+                <h:small>New Radiologist</h:small>
                  <button type="button" zclass="close" onClick="providerWin.detach();">×</button>
             </h:h1>
         </div>
         <div zclass="container-fluid">
             <div zclass="row-fluid">
-                <div zclass="span6">
+                <div zclass="span2">
+                    <vbox>
+                        <h:div align="center" style="margin:4px">
+                            <image id="frontImage" width="150px" height="120px">
+                            </image>
+                            <button label="Upload Picture" upload="true">
+                                <attribute name="onUpload">
+                                    org.zkoss.util.media.Media media = event.getMedia();
+                                    if (media instanceof org.zkoss.image.Image) {
+                                    org.zkoss.zul.Image image = new org.zkoss.zul.Image();
+                                    image.setContent((org.zkoss.image.Image) media);
+                                    frontImage.setContent((org.zkoss.image.Image) media);
+                                    com.nzion.domain.DataResource fsrc = new com.nzion.domain.DataResource();
+                                    fsrc.setResource(org.hibernate.Hibernate.createBlob(media.getByteData()));
+                                    providerController.getProvider().setProfilePicture(fsrc);
+                                    } else {
+                                    Messagebox.show("Not an image: " + media, "Error", Messagebox.OK,
+                                    Messagebox.ERROR);
+                                    break; //not to show too many errors
+                                    }
+                                </attribute>
+                            </button>
+                            <a sclass="delBtn" label="Remove Your Picture" id="newBtn">
+                                <attribute name="onClick">
+                                    frontImage.setSrc(null);
+                                    frontImage.invalidate();
+                                    providerController.getProvider().setProfilePicture(null);
+                                </attribute>
+                            </a>
+                        </h:div>
+                        <label value="Best viewed in ‘size : 74px in width and 110px in height’"/>
+                    </vbox>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span2">
+                    <label value="Title" style="text-align:left;"  />
+                    <combobox selectedItem="@{providerController.provider.salutation,save-when='Save.onClick'}"
+                              id="title"
+                              maxlength="20" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+                        <attribute name="onChange">
+                            <![CDATA[
+                            if(self.getValue().equals("Mr") || self.getValue().equals("Sr"))
+                            gender.setValue("Male");
+                            if(self.getValue().equals("Ms") || self.getValue().equals("Miss") || self.getValue().equals("Mrs") || self.getValue().equals("Sra"))
+                            gender.setValue("Female");
+                            if(self.getValue().equals("Dr"))
+                            gender.setValue(" ");
+                            ]]>
+                        </attribute>
+                        <comboitem label="Ms" value="Ms" />
+                        <comboitem label="Miss" value="Miss" />
+                        <comboitem label="Mr" value="Mr" />
+                        <comboitem label="Mrs" value="Mrs" />
+                        <comboitem label="Dr" value="Dr" />
+                        <comboitem label="Sr" value="Sr" />
+                        <comboitem label="Sra" value="Sra" />
+                    </combobox>
+                </div>
+                <div zclass="span5">
                     <label value="First Name" mold="required"/>
                     <textbox value="@{providerController.provider.firstName,save-when='Save.onClick'}"
                              constraint="no empty" maxlength="50" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
                 </div>
-                <div zclass="span6">
+                <div zclass="span5">
                     <label value="Last Name" mold="required"/>
                     <textbox value="@{providerController.provider.lastName,save-when='Save.onClick'}"
                              maxlength="50" constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
                 </div>
             </div>
             <div zclass="row-fluid">
-            <div zclass="span6">
+                <div zclass="span6">
                     <label value="Regd No" />
                     <textbox value="@{providerController.provider.regdNo,save-when='Save.onClick'}" sclass="span12"></textbox>
-                </div> 
                 </div>
+                <div zclass="span4" style="margin-top:20px;" align="center">
+                    <checkbox checked="@{providerController.provider.active,save-when='Save.onClick'}"/>
+                    <label value="Active" id="lblActive" mold="required" />
+                </div>
+                <div zclass="span4" visible="@{displayReason}">
+                    <label value="Deactivation Reason" />
+                    <textbox value="@{providerController.provider.deactivationReason}" sclass="span12" readonly="true"></textbox>
+                </div>
+            </div>
             <div zclass="row-fluid">
-                <div zclass="span6">
+                <div zclass="span4">
                     <label value="e-mail" mold="required"/>
                     <email constraint="no empty"
                            value="@{providerController.provider.contacts.email,save-when='Save.onClick'}"
                            sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}"
                            w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
                 </div>
-                <div zclass="span6">
+                <!--<div zclass="span6">
                     <label value="Corporate e-mail" mold="required"/>
                     <email constraint="no empty"
                            value="@{providerController.provider.contacts.corporateEmail,save-when='Save.onClick'}"
                            sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                </div>-->
+                <div zclass="span4">
+                    <label value="Mobile Number"/>
+                    <phonebox value="@{providerController.provider.contacts.mobileNumber,save-when='Save.onClick'}" maxlength="11" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Gender" mold="required"/>
+                    <enumeration enumType="GENDER" selectedItem="@{providerController.provider.gender,save-when='Save.onClick'}" id="gender"
+                                 constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                </div>
+                <div zclass="span2">
+                    <label value="Nationality"/>
+                    <combobox readonly="true" id="nationalityBox" selectedItem="@{providerController.provider.nationality,save-when='Save.onClick'}" sclass="span12">
+                        <comboitem self="@{each='nationality'}" value="@{nationality}" label="@{nationality.name}"/>
+                        <comboitem forEach="${allNationality}" value="${each.nationality}" label="${each.nationality}"></comboitem>
+                    </combobox>
                 </div>
             </div>
-            <div zclass="row-fluid">
+            <!--<div zclass="row-fluid">
                 <div zclass="span6">
                     <label value="Mobile phone"/>
                     <phonebox value="@{providerController.provider.contacts.mobileNumber,save-when='Save.onClick'}"
@@ -65,25 +153,58 @@
                             value="@{providerController.provider.contacts.officePhone,save-when='Save.onClick'}"
                             sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
                 </div>
-                
+
+            </div>-->
+            <div zclass="row-fluid">
+                <div zclass="span4">
+                    <label value="Spoken Language"/>
+                    <listbox model="@{spokenLanguages}" sclass="span12" multiple="true" id="spokenLanguageListbox" rows="5"
+                             mold="select" sizedByContent="true" vflex="true"
+                             selectedItem="@{providerController.provider.spokenLanguages, converter=com.nzion.view.component.MultipleListitemBindingConverter}">
+                        <listitem self="@{each}" value="@{each}" label="@{each.description}"></listitem>
+                    </listbox>
+                </div>
+                <div zclass="span4">
+                    <label value="Specialities" mold="required"/>
+                    <listbox model="@{specialities}" sclass="span12" multiple="true" id="specialityListbox" rows="5"
+                             mold="select" sizedByContent="true" vflex="true"
+                             selectedItem="@{providerController.provider.specialities, converter=com.nzion.view.component.MultipleListitemBindingConverter}">
+                        <listitem self="@{each}" value="@{each}" label="@{each.description}"></listitem>
+                    </listbox>
+                </div>
+                <div zclass="span4">
+                    <label value="Experience in Years"></label>
+                    <intbox id="experience" width="30" sclass="span12" value="@{providerController.provider.experience,save-when='Save.onClick'}"/>
+                </div>
             </div>
             <div zclass="row-fluid">
-                <div zclass="span12">
+                <div zclass="span6">
+                    <label value="Speciality to be Displayed In English"/>
+                    <textbox id="specialityEnglish"  sclass="span12" value="@{providerController.provider.specialityToDisplayInEng,save-when='Save.onClick'}"/>
+                </div>
+                <div zclass="span6">
+                    <label value="Speciality to be Displayed In Arabic"/>
+                    <textbox id="specialityArabic"  sclass="span12" value="@{providerController.provider.specialityToDisplayInAr,save-when='Save.onClick'}"/>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <!--<div zclass="span12">
                     <label value="Address" id="lbladdress1" mold="required"/>
                     <textbox cols="50" rows="2"
                              value="@{providerController.provider.contacts.postalAddress.address1,save-when='Save.onClick'}"
                              constraint="no empty" id="address1" maxlength="200" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                </div>-->
+                <div zclass="span6">
+                    <label value="Qualification in English : "/>
+                    <textbox id="qualificationInEnglish" value="@{providerController.provider.qualificationEng,save-when='Save.onClick'}" sclass="span12" maxlength="255"/>
+                </div>
+                <div zclass="span6">
+                    <label value="Qualification in Arabic : "/>
+                    <textbox id="qualificationInArabic" value="@{providerController.provider.qualificationAr,save-when='Save.onClick'}" sclass="span12" maxlength="255"/>
                 </div>
             </div>
             
-            <div zclass="row-fluid">
-                <div zclass="span4">
-                    <label value="Gender" mold="required"/>
-                    <enumeration enumType="GENDER"
-                                 selectedItem="@{providerController.provider.gender,save-when='Save.onClick'}"
-                                 id="gender"
-                                 constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
-                </div>
+            <!--<div zclass="row-fluid">
                 <div zclass="span4">
                     <label value="Qualification"/>
                     <textbox cols="20" value="@{providerController.provider.qualifications,save-when='Save.onClick'}" sclass="span12"/>
@@ -97,8 +218,8 @@
                         <listitem self="@{each}" value="@{each}" label="@{each.description}"></listitem>
                     </listbox>
                 </div>
-            </div>
-            <div zclass="row-fluid">
+            </div>-->
+            <!--<div zclass="row-fluid">
                 <div zclass="span4">
                     <label value="City" id="lblcity" mold="required"/>
                     <textbox cols="20"
@@ -119,8 +240,8 @@
                             value="@{providerController.provider.contacts.postalAddress.postalCode,save-when='Save.onClick'}"
                             id="postalCode" constraint="no empty"  sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
                 </div>
-            </div>
-            <div zclass="row-fluid">
+            </div>-->
+            <!--<div zclass="row-fluid">
                 <div zclass="span4">
                     <label value="Default Visit Type"/>
                     <combobox readonly="true" id="visitTypebox" model="@{scheduleService.allSoapNoteTypes}"
@@ -137,15 +258,41 @@
                                    value="@{each}"/>
                     </combobox>
                 </div>
+            </div>-->
+            <div zclass="row-fluid">
+                <div zclass="span6">
+                    <label value="Expertise in English : "/>
+                    <textbox id="expertiseInEnglish" value="@{providerController.provider.expertise,save-when='Save.onClick'}" sclass="span12" maxlength="255"/>
+                </div>
+                <div zclass="span6">
+                    <label value="Expertise in Arabic : "/>
+                    <textbox id="expertiseInArabic" value="@{providerController.provider.expertiseAr,save-when='Save.onClick'}" sclass="span12" maxlength="255"/>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span6">
+                    <label value="Certification in English : "/>
+                    <textbox id="certificationInEnglish" value="@{providerController.provider.certificationEng,save-when='Save.onClick'}" sclass="span12" maxlength="255"/>
+                </div>
+                <div zclass="span6">
+                    <label value="Certification in Arabic : "/>
+                    <textbox id="certificationInArabic" value="@{providerController.provider.certificationAr,save-when='Save.onClick'}" sclass="span12" maxlength="255"/>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span12">
+                    <label value="Visiting Hours : "></label>
+                    <textbox cols="50" rows="2" value="@{providerController.provider.visitingHours,save-when='Save.onClick'}" sclass="span12" maxlength="200"></textbox>
+                </div>
             </div>
         </div>
         <div sclass="panelFoot">
             <button label="Save" id="Save" zclass="btn-success btn">
                 <attribute name="onClick">
-                    if (com.nzion.util.UtilValidator.isEmpty(providerController.getProvider().getSpecialities())) {
-                    com.nzion.util.UtilMessagesAndPopups.showError("Please select any of the Speciality");
-                    return;
-                    }
+                  /*  if (com.nzion.util.UtilValidator.isEmpty(providerController.getProvider().getSpecialities())) {
+                        com.nzion.util.UtilMessagesAndPopups.showError("Please select any of the Speciality");
+                        return;
+                    } */
                     providerController.save();
                     com.nzion.zkoss.ext.Navigation.navigate("providerList", null, contentArea);
                     providerWin.detach();

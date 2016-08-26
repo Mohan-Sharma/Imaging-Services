@@ -196,6 +196,20 @@ public class RestServiceConsumer {
 
     }
 
+    public static List<Map<String, Object>> getAllServiceMaster() {
+
+        RestTemplate restTemplate = new RestTemplate(getHttpComponentsClientHttpRequestFactory());
+        HttpHeaders httpHeaders = getHttpHeader();
+        HttpEntity<String> requestEntity = new HttpEntity<String>(httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(PORTAL_URL + "/anon/getAllService", HttpMethod.GET, requestEntity, String.class);
+        String json = responseEntity.getBody();
+        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        Gson gson = new GsonBuilder().serializeNulls().create();
+        result = (List<Map<String, Object>>) gson.fromJson(json, result.getClass());
+        return result;
+
+    }
+
     public static Map<String, Object> getNationalityByNationalityCode(String nationalityCode) {
         RestTemplate restTemplate = new RestTemplate(getHttpComponentsClientHttpRequestFactory());
         HttpHeaders httpHeaders = new HttpHeaders();

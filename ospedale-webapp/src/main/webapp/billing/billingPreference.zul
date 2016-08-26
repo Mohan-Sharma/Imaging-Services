@@ -9,16 +9,16 @@
 	List taxItems = commonCrudService.getAll(com.nzion.domain.billing.TaxItem.class);
 </zscript>
 	<window id="billingPreferenceWindow">
-	  <attribute name="onCreate">
+	  <!--<attribute name="onCreate">
 	     if(afterPatientMeetsDocRadioButton.isSelected())
          collectConsultationPatientVisitButton.setVisible(false);
-      </attribute>
+      </attribute>-->
 	<div style="padding:5px" zclass="page-header titled-well">
             <h:h1>
                 <h:small>Billing Preference</h:small>
             </h:h1>
          </div>
-         <div class="container-fluid">
+         <!--<div class="container-fluid">
 		       <div zclass="row-fluid">
                  <div zclass="span3">
               <label value="Company Currency"  />
@@ -87,6 +87,27 @@
       		commonCrudService.save(billingDisplayConfig);com.nzion.util.UtilMessagesAndPopups.showSuccess();
       	</attribute>
 	 </button>
+    </div>-->
+    <div zclass="span8">
+        <button label="Upload Imaging Tariff" upload="true"
+                id="uploadBtn">
+            <attribute name="onUpload">
+                org.zkoss.util.media.Media media = ((UploadEvent) event).getMedia();
+                if ("xlsx".equals(media.getFormat()) ) {
+                com.nzion.util.ExcelImportUtil.uploadExcel(media.getStreamData());
+                }
+            </attribute>
+        </button>
+        <button label="Export Imaging Tariff" id="ExportBtn">
+            <attribute name="onClick">
+                com.nzion.util.ExcelImportUtil.exportClinicTariff();
+            </attribute>
+        </button>
+        <button label="Truncate Imaging Tariff" id="truncateBtn">
+            <attribute name="onClick">
+                com.nzion.util.ExcelImportUtil.truncateClinicTariff();
+            </attribute>
+        </button>
     </div>
 	</window>
 </zk>

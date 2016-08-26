@@ -107,10 +107,10 @@
                 <prop key="hibernate.dialect">com.nzion.hibernate.ext.MySQLUTF8InnoDBDialect</prop>
                 <prop key="hibernate.hbm2ddl.auto">update</prop>
                 <prop key="hibernate.query.jpaql_strict_compliance">false</prop>
-                <prop key="hibernate.cache.use_second_level_cache">true</prop>
+                <prop key="hibernate.cache.use_second_level_cache">false</prop>
                 <prop key="hibernate.generate_statistics">false</prop>
-                <prop key="hibernate.cache.use_query_cache">true</prop>
-                <prop key="hibernate.cache.region.factory_class">net.sf.ehcache.hibernate.SingletonEhCacheRegionFactory</prop>
+                <prop key="hibernate.cache.use_query_cache">false</prop>
+                <!--<prop key="hibernate.cache.region.factory_class">net.sf.ehcache.hibernate.SingletonEhCacheRegionFactory</prop>-->
                 <prop key="hibernate.cache.region_prefix">tempdb</prop>
                 <prop key="hibernate.cache.use_structured_entries">true</prop>
                 <prop key="hibernate.default_batch_fetch_size">15</prop>
@@ -163,4 +163,5 @@
 	<bean name="billingRepository" class="com.nzion.repository.billing.impl.HibernateBillingRepository" parent="hibernateDaoSupport"/>
     <bean id="scheduleRepository" class="com.nzion.repository.impl.HibernateScheduleRepository"
           parent="hibernateDaoSupport"/>
+    <bean id="utilityFinder" class="com.nzion.service.utility.UtilityFinder"/>
 </beans>

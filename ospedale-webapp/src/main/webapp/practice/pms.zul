@@ -11,25 +11,25 @@
 
 						<!--Following tabs are hidden and can be used for later purpose-->
 						<!--<tab label="Document Management"  onClick="folderCategory.invalidate();"></tab>
-						<tab label="Naming Defaults" />
-						<tab label="Billing Preference" /> -->
+						<tab label="Naming Defaults" /> -->
 						<!--<tab label="RCM Preferences" />-->
+						<tab label="Invoice Preference" />
 					</tabs>
 					<tabpanels width="70%">
 						<tabpanel>
 							<include src="/practice/autoassign.zul"/>
 						</tabpanel>
-						<tabpanel>
+						<!--<tabpanel>
 							<include id="folderCategory" src="/practice/doccategory.zul"></include>
 						</tabpanel>
 						<tabpanel>
 							<include src="/practice/namingconfig.zul"/>
 						</tabpanel>
 						<tabpanel>
-							<include src="/billing/billingPreference.zul"/>
-						</tabpanel>
-						<tabpanel>
 						    <include src="/practice/rcmPreference.zul"/>
+						</tabpanel>-->
+						<tabpanel>
+							<include src="/billing/billingPreference.zul"/>
 						</tabpanel>
 					</tabpanels>
 				</tabbox>

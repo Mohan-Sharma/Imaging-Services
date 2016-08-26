@@ -27,6 +27,11 @@ public class ExcelHelper {
         return workbook;
     }
 
+    public static XSSFWorkbook createXSSFWorkbook() {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        return workbook;
+    }
+
     public static HSSFSheet createWorksheet(String workSheetName, HSSFWorkbook hssfWorkbook) {
         HSSFSheet workSheet = hssfWorkbook.createSheet(workSheetName);
         return workSheet;
@@ -162,6 +167,19 @@ public class ExcelHelper {
         return cell;
     }
 
+    public static Cell createStringCellWithXssf(int cellNumber, String cellValue, Row row,XSSFWorkbook workbook) {
+        XSSFCellStyle headerCellStyle = workbook.createCellStyle();
+        headerCellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
+        headerCellStyle.setBorderTop(XSSFCellStyle.BORDER_THIN);
+        headerCellStyle.setBorderRight(XSSFCellStyle.BORDER_THIN);
+        headerCellStyle.setBorderLeft(XSSFCellStyle.BORDER_THIN);
+
+        Cell cell = row.createCell(cellNumber);
+        cell.setCellValue(cellValue);
+        cell.setCellStyle(headerCellStyle);
+        return cell;
+    }
+
     public static Cell createSubHeadingStringCell(int cellNumber, String cellValue, Row row,HSSFWorkbook workbook){
         HSSFFont headerFont = workbook.createFont();
         headerFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
@@ -175,6 +193,25 @@ public class ExcelHelper {
 
         Cell cell = row.createCell(cellNumber);
         cell.setCellValue(cellValue);
+        cell.setCellStyle(headerCellStyle);
+        return cell;
+
+
+    }
+
+    public static Cell createNumberCellWithXssf(int cellNumber, Number cellValue, Row row,XSSFWorkbook workbook) {
+        XSSFCellStyle headerCellStyle = workbook.createCellStyle();
+        headerCellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
+        headerCellStyle.setBorderTop(XSSFCellStyle.BORDER_THIN);
+        headerCellStyle.setBorderRight(XSSFCellStyle.BORDER_THIN);
+        headerCellStyle.setBorderLeft(XSSFCellStyle.BORDER_THIN);
+        DataFormat format = workbook.createDataFormat();
+        headerCellStyle.setDataFormat(format.getFormat("#,##0.000"));
+
+        Cell cell = row.createCell(cellNumber);
+        if (cellValue != null) {
+            cell.setCellValue(cellValue.doubleValue());
+        }
         cell.setCellStyle(headerCellStyle);
         return cell;
 

@@ -3,8 +3,9 @@ package com.nzion.domain.masterDataLIS;
 import com.nzion.domain.base.IdGeneratingBaseEntity;
 
 
-
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 
 /**
@@ -24,6 +25,8 @@ public class Equipment extends IdGeneratingBaseEntity {
     private Integer stopBit;
     private String accessionNo;
     private String pcName;
+    private String briefDescription;
+    private String imageUrl;
 
     public String getPcName() {
         return pcName;
@@ -105,5 +108,23 @@ public class Equipment extends IdGeneratingBaseEntity {
 
     public void setEqpCode(Integer eqpCode) {
         this.eqpCode = eqpCode;
+    }
+
+    @Lob
+    @Column(name = "BRIEF_DESCRIPTION", length = 1024)
+    public String getBriefDescription() {
+        return briefDescription;
+    }
+
+    public void setBriefDescription(String briefDescription) {
+        this.briefDescription = briefDescription;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

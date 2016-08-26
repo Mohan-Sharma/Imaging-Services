@@ -7,8 +7,7 @@
     </zscript>
     <window>
         <screen width="100%" listtitle="List of Equipments" addpage="equipmentAdd" addmodepopup="true" entityclass="com.nzion.domain.masterDataLIS.Equipment"
-                fields="eqpCode,eqpName,eqpAlias,eqpType,baudRate,dataBit,parity,stopBit,accessionNo,pcName" labels="Equipment Code,Equipment Name,Equipment Alias,Equipment Type,
-                Baud Rate,Data Bit,Parity,Stop Bit,Accession No.,PC Name" hidedeletebtn="true" />
+                fields="eqpName,briefDescription,active" labels="Equipment Name,Brief Description,Active" hidedeletebtn="true" />
     </window>
 
 </zk>            

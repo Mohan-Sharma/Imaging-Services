@@ -5,6 +5,7 @@
     xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
 
     <zscript>
+        import java.io.*;
         import com.nzion.service.common.CommonCrudService;
         import com.nzion.domain.masterDataLIS.Equipment;
         Equipment equipment = arg.get("entity");
@@ -20,26 +21,66 @@
         </div>
         <div zclass="container-fluid">
             <div zclass="row-fluid">
-                <div zclass="span3">
+                <!--<div zclass="span3">
                     <label value="Equipment Code" style="text-align:right;" mold="required"/>
                     <intbox value="@{equipment.eqpCode,save-when='Save.onClick'}" id="eqpCode" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"
                             maxlength="3"/>
-                </div>
-                <div zclass="span3">
+                </div>-->
+                <div zclass="span6">
                     <label value="Equipment Name" style="text-align:right;" mold="required"/>
-                    <textbox value="@{equipment.eqpName,save-when='Save.onClick'}" id="eqpName" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"
-                            maxlength="30"/>
+                    <textbox value="@{equipment.eqpName,save-when='Save.onClick'}" id="eqpName" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" constraint="no empty"/>
                 </div>
+
                 <div zclass="span3">
+                    <separator/><separator/>
+                    <button label="Upload Image" upload="true" id="uploadBtn">
+                        <attribute name="onUpload">
+                            <![CDATA[
+                                org.zkoss.util.media.Media media = event.getMedia();
+                                if (media instanceof org.zkoss.image.Image) {
+									 uploadLogo(media);
+									 equipment.setImageUrl("/images/"+media.getName());
+									 commonCrudService.save(equipment);
+									 } else {
+									 Messagebox.show("Not an image: " + media, "Error", Messagebox.OK,Messagebox.ERROR);
+									 break; //not to show too many errors
+                                }
+                            ]]>
+                        </attribute>
+                    </button>
+                </div>
+                <zscript>
+                    void uploadLogo(org.zkoss.util.media.Media media){
+                        File newFile = new File("images/");
+                        try {
+                            if(!newFile.exists())
+                                newFile.mkdir();
+                            newFile = new File("images/"+media.getName());
+                            FileOutputStream fos = new FileOutputStream(newFile, false);
+                            org.apache.commons.io.IOUtils.copy(media.getStreamData(), fos);
+                            fos.flush();
+                            org.apache.commons.io.IOUtils.closeQuietly(fos);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                </zscript>
+                <!--<div zclass="span3">
                     <label value="Equipment Alias" style="text-align:right;" />
                     <textbox value="@{equipment.eqpAlias,save-when='Save.onClick'}" id="eqpAlias" sclass="span12" maxlength="10"/>
                 </div>
                 <div zclass="span3">
                     <label value="Equipment Type" style="text-align:right;" />
                     <textbox value="@{equipment.eqpType,save-when='Save.onClick'}" id="eqpType" sclass="span12" maxlength="10"/>
-                </div>
+                </div>-->
             </div>
             <div zclass="row-fluid">
+                <div zclass="span12">
+                    <label value="Brief Description" style="text-align:right;" />
+                    <textbox value="@{equipment.briefDescription,save-when='Save.onClick'}" id="briefDescription" sclass="span12" rows="2" cols="50"  maxlength="1024"/>
+                </div>
+            </div>
+            <!--<div zclass="row-fluid">
                 <div zclass="span3">
                     <label value="Baud Rate" style="text-align:right;" />
                     <textbox value="@{equipment.baudRate,save-when='Save.onClick'}" id="baudRate" sclass="span12" maxlength="20"/>
@@ -67,14 +108,15 @@
                     <label value="PC Name" style="text-align:right;" />
                     <textbox value="@{equipment.pcName,save-when='Save.onClick'}" id="pcName" sclass="span12" maxlength="20"/>
                 </div>
-            </div>
+            </div>-->
         </div>
         <div sclass="panelFoot">
-            <button label="Save" id="Save" visible="true">
+            <button label="Save" id="Save" visible="true" zclass="btn btn-success">
                 <attribute name="onClick">
-                    try{
+                   try{
                     commonCrudService.save(equipment);
                     createEquipment.detach();
+                    com.nzion.util.UtilMessagesAndPopups.showSuccess();
                     }catch(org.springframework.dao.DataIntegrityViolationException e){
                       throw new RuntimeException("Eqp code'"+equipment.getAccountNumber()+"' already exists.");
                     }

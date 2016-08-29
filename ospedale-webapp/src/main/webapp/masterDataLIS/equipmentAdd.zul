@@ -49,6 +49,22 @@
                         </attribute>
                     </button>
                 </div>
+                <div zclass="span3" style="margin-left: -25px">
+                    <separator></separator><separator></separator>
+                    <a label="@{equipment.imageUrl}">
+                        <attribute name="onClick">
+                            <![CDATA[
+                                String logoUrl = equipment.getImageUrl();
+                                logoUrl = logoUrl.replaceFirst("/","");
+                                try {
+                                java.io.File file = new java.io.File(logoUrl);
+                                org.zkoss.image.AImage image = new org.zkoss.image.AImage(file);
+                                org.zkoss.zul.Filedownload.save(image);
+                                } catch(Exception e) {}
+                            ]]>
+                        </attribute>
+                    </a>
+                </div>
                 <zscript>
                     void uploadLogo(org.zkoss.util.media.Media media){
                         File newFile = new File("images/");

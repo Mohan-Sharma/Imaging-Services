@@ -82,7 +82,7 @@ public class ExcelImportUtil {
                         case 0:
                             if (cell != null) {
                                 String type = cell.getStringCellValue();
-                                if (type.equals("Lab Test")){
+                                if (type.equals("Radiology Test")){
                                     Cell cell1 = nextRow.getCell(1);
                                     if (cell1.getCellType() == Cell.CELL_TYPE_STRING){
                                         query = query + "'" + cell1.getStringCellValue() + "'," + null + "," + null + ")";
@@ -197,7 +197,7 @@ public class ExcelImportUtil {
                         case 0:
                             String type = null;
                             if (map.get("LAB_TEST") != null) {
-                                type = "Lab Test";
+                                type = "Radiology Test";
                             } else if (map.get("LAB_PANEL") != null) {
                                 type = "Health Package";
                             } else if (map.get("LAB_PROFILE") != null) {
@@ -252,7 +252,7 @@ public class ExcelImportUtil {
                 Row row = realSheet.createRow(rownum++);
                 //Cell cell = row.createCell(0);
                 String name = labTestMap.get(labTest).getTestPneumonic();
-                String type = "Lab Test";
+                String type = "Radiology Test";
                 String code = labTestMap.get(labTest).getTestCode();
                 if ((labTest != null) && (labTest != "")) {
                     ExcelHelper.createStringCellWithXssf(0, UtilValidator.isNotEmpty(type) ? type : "", row, hssfWorkbook);

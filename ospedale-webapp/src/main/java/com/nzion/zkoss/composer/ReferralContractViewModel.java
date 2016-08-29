@@ -73,29 +73,25 @@ import java.util.*;
 
         @Command("save")
         public void save() {
-//if ((referralContract.getReferral() !=null) && (referralContract.getReferral().getTenantId() != null) && (Infrastructure.getPractice().getTenantId() != null)) {
-    List<ReferralContract> existingRefContract = commonCrudService.findByEquality(ReferralContract.class,
-            new String[]{"referralClinicId", "refereeClinicId"}, new Object[]{referralContract.getReferral().getTenantId(), Infrastructure.getPractice().getTenantId()});
-    for (ReferralContract refContract : existingRefContract) {
-        if (!"REJECTED".equals(refContract.getContractStatus())) {
-            Date contractDate = refContract.getContractDate();
-            Date expiryDate = refContract.getExpiryDate();
-            if (contractDate.compareTo(referralContract.getExpiryDate()) <= 0 && expiryDate.compareTo(referralContract.getContractDate()) >= 0
-                    && referralContract.getId() != null && !referralContract.getId().equals(refContract.getId())) {
-                UtilMessagesAndPopups.showError("Contract already exists.");
-                return;
-            } else if (contractDate.compareTo(referralContract.getExpiryDate()) <= 0 && expiryDate.compareTo(referralContract.getContractDate()) >= 0
-                    && referralContract.getId() == null) {
-                UtilMessagesAndPopups.showError("Contract already exists.");
-                return;
+        List<ReferralContract> existingRefContract = commonCrudService.findByEquality(ReferralContract.class,
+                new String[]{ "refereeClinicId","referralClinicId"}, new Object[]{referralContract.getReferral().getTenantId(),Infrastructure.getPractice().getTenantId()});
+        for (ReferralContract refContract : existingRefContract) {
+            if (!"REJECTED".equals(refContract.getContractStatus())) {
+                Date contractDate = refContract.getContractDate();
+                Date expiryDate = refContract.getExpiryDate();
+                if (contractDate.compareTo(referralContract.getExpiryDate()) <= 0 && expiryDate.compareTo(referralContract.getContractDate()) >= 0
+                        && referralContract.getId() != null && !referralContract.getId().equals(refContract.getId())) {
+                    UtilMessagesAndPopups.showError("Contract already exists.");
+                    return;
+                } else if (contractDate.compareTo(referralContract.getExpiryDate()) <= 0 && expiryDate.compareTo(referralContract.getContractDate()) >= 0
+                        && referralContract.getId() == null) {
+                    UtilMessagesAndPopups.showError("Contract already exists.");
+                    return;
+                }
             }
-        }
-  //  }
 }
             referralContract.setContractStatus("IN-PROGRESS");
             referralContract.setStatus("Initiated");
-           /* referralContract.setReferralClinicId(referralContract.getReferral().getTenantId());
-            referralContract.setRefereeClinicId(Infrastructure.getPractice().getTenantId());*/
             referralContract.setReferralClinicId(Infrastructure.getPractice().getTenantId());
             referralContract.setRefereeClinicId(referralContract.getReferral().getTenantId());
 
@@ -147,6 +143,7 @@ import java.util.*;
         public void submit(){
             save();
             ReferralContract refcon = commonCrudService.getById(ReferralContract.class, referralContract.getId());
+
             refcon.setContractStatus("SUBMIT");
             commonCrudService.save(refcon);
             updateReferralDb();
@@ -180,8 +177,6 @@ import java.util.*;
             refContract.setPercentageOnBill(referralContract.getPercentageOnBill());
             refContract.setDocument(referralContract.getDocument());
             refContract.setDocumentName(referralContract.getDocumentName());
-            /*refContract.setReferralClinicId(referralContract.getReferralClinicId());
-            refContract.setRefereeClinicId(referralContract.getRefereeClinicId());*/
             refContract.setReferralClinicId(referralContract.getReferralClinicId());
             refContract.setRefereeClinicId(referralContract.getRefereeClinicId());
             refContract.setStatus("Received");

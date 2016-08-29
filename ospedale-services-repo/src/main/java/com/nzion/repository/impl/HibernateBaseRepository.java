@@ -78,7 +78,12 @@ public class HibernateBaseRepository extends HibernateDaoSupport implements Base
             criteria.add(Restrictions.eq(fileds[i], values[i]));
         }
         criteria.setCacheable(true);
-        return (T) criteria.uniqueResult();
+        if(UtilValidator.isNotEmpty(criteria.list()) && criteria.list().size() == 1)
+            return (T) criteria.uniqueResult();
+        else if(UtilValidator.isNotEmpty(criteria.list()))
+            return (T) criteria.list().get(criteria.list().size() - 1);
+        else
+            return null;
     }
 
     /**

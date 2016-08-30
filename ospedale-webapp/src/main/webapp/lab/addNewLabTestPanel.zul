@@ -103,9 +103,14 @@
             <div zclass="row-fluid">
                 <div zclass="span12">
                     <label value="Special Instruction"/>
-                    <textbox value="@{labPanelController.labTestPanel.specialInstruction,save-when='Save.onClick'}" sclass="span12" rows="2" cols="50" maxlength="500"/>
+                    <textbox value="@{labPanelController.labTestPanel.specialInstruction,save-when='Save.onClick'}" sclass="span12" rows="2" cols="50" maxlength="10000"/>
                 </div>
-
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span12">
+                    <label value="Special Instruction in Arabic"/>
+                    <textbox value="@{labPanelController.labTestPanel.specialInstructionAr,save-when='Save.onClick'}" sclass="span12" rows="2" cols="50" maxlength="10000"/>
+                </div>
             </div>
         <separator height="10px"/>
         <tabbox>

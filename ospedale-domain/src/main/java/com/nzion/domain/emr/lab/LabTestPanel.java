@@ -26,6 +26,7 @@ public class LabTestPanel extends IdGeneratingBaseEntity implements Serializable
 
 	private boolean prescriptionRequired;
 	private String specialInstruction;
+	private String specialInstructionAr;
 	private String turnaroundTime;
 	private BigDecimal homeServiceAmount;
 	private BigDecimal billableAmount;
@@ -119,6 +120,14 @@ public class LabTestPanel extends IdGeneratingBaseEntity implements Serializable
 
 	public void setSpecialInstruction(String specialInstruction) {
 		this.specialInstruction = specialInstruction;
+	}
+
+	public String getSpecialInstructionAr() {
+		return specialInstructionAr;
+	}
+
+	public void setSpecialInstructionAr(String specialInstructionAr) {
+		this.specialInstructionAr = specialInstructionAr;
 	}
 
 	public String getTurnaroundTime() {

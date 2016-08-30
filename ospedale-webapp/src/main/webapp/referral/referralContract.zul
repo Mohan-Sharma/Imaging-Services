@@ -40,7 +40,7 @@
                              <div zclass="span2">
                                 <label mold="required"  value="Referral Type" />
                                 <combobox  width="120px" sclass="span12" readonly="true"
-                                 selectedItem="@bind(vm.referralContract.referralType)"
+                                 selectedItem="@bind(vm.referralContract.referralType)" id="lblReferralType"
                                  constraint="no empty" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
                                         <comboitem label="Clinic" value="CONSULTANT" />
                                      <!--   <comboitem label="Pharmacy" value="PHARMACY"/>
@@ -116,7 +116,7 @@
                                      </div>
                                       <div zclass="span2" style="margin-left:30px">
                                               <label  mold="required"  value="Payment Mode" />
-                                              <combobox  width="120px" sclass="span12" readonly="true" selectedItem="@bind(vm.referralContract.paymentMode)" constraint="no empty" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+                                              <combobox  width="120px" id="lblPaymentMode" sclass="span12" readonly="true" selectedItem="@bind(vm.referralContract.paymentMode)" constraint="no empty" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
                                                       <comboitem label="% of Bill Amount" value="PERCENTAGE_OF_BILL" />
                                                       <comboitem label="% of each Service" value="PERCENTAGE_SERVICE_ITEM"/>
                                                       <comboitem label="Fixed Amount for each Service" value="FIX_AMOUNT_PER_SERVICE"/>
@@ -151,8 +151,9 @@
                  </div>
                   <div zclass="row-fluid">
                                    <div id="percentageDiv" visible="@{vm.percentageRequired}" zclass="span2" >
-                                           <label mold="required" value="Pecentage"  />
-                                           <decimalbox  format="###.###" constraint="no empty" value="@bind(vm.referralContract.percentageOnBill)"/>
+                                           <label mold="required" value="Percentage"  />
+                                           <decimalbox  id="lblPercentage" format="###.###" constraint="no empty" value="@bind(vm.referralContract.percentageOnBill)"
+                                                        w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
                                     </div>
                   </div>
                   <div zclass="row-fluid">
@@ -182,7 +183,22 @@
     <div sclass="panelFoot">
                 <button label="Save" id="Save" zclass="btn-success btn" onClick="@command('save')">
                <attribute name="onClick">
-
+                   if(lblReferralType.getSelectedItem() == null) {
+                   com.nzion.util.UtilMessagesAndPopups.showError("Referral type is required");
+                   }
+                   if(contractDate.getValue() == null){
+                   com.nzion.util.UtilMessagesAndPopups.showError("Contract date is required");
+                   }
+                   if(expiryDate.getValue() == null) {
+                   com.nzion.util.UtilMessagesAndPopups.showError("Expiry date is required");
+                   }
+                   if(lblPaymentMode.getSelectedItem() == null) {
+                   com.nzion.util.UtilMessagesAndPopups.showError("Payment mode is required");
+                   return;
+                   }
+                   if(lblPercentage.getValue() == null) {
+                   com.nzion.util.UtilMessagesAndPopups.showError("Percentage is required");
+                   }
                        String value = referralContract.getPaymentMode();
                        if ("PERCENTAGE_OF_BILL".equals(value))  {
                           serviceDetailDiv.setVisible(false);

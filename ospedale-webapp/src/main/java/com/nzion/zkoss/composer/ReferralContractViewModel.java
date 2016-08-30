@@ -73,32 +73,33 @@ import java.util.*;
 
         @Command("save")
         public void save() {
-        List<ReferralContract> existingRefContract = commonCrudService.findByEquality(ReferralContract.class,
-                new String[]{ "refereeClinicId","referralClinicId"}, new Object[]{referralContract.getReferral().getTenantId(),Infrastructure.getPractice().getTenantId()});
-        for (ReferralContract refContract : existingRefContract) {
-            if (!"REJECTED".equals(refContract.getContractStatus())) {
-                Date contractDate = refContract.getContractDate();
-                Date expiryDate = refContract.getExpiryDate();
-                if (contractDate.compareTo(referralContract.getExpiryDate()) <= 0 && expiryDate.compareTo(referralContract.getContractDate()) >= 0
-                        && referralContract.getId() != null && !referralContract.getId().equals(refContract.getId())) {
-                    UtilMessagesAndPopups.showError("Contract already exists.");
-                    return;
-                } else if (contractDate.compareTo(referralContract.getExpiryDate()) <= 0 && expiryDate.compareTo(referralContract.getContractDate()) >= 0
-                        && referralContract.getId() == null) {
-                    UtilMessagesAndPopups.showError("Contract already exists.");
-                    return;
+        try {
+            List<ReferralContract> existingRefContract = commonCrudService.findByEquality(ReferralContract.class,
+                    new String[]{"refereeClinicId", "referralClinicId"}, new Object[]{referralContract.getReferral().getTenantId(), Infrastructure.getPractice().getTenantId()});
+            for (ReferralContract refContract : existingRefContract) {
+                if (!"REJECTED".equals(refContract.getContractStatus())) {
+                    Date contractDate = refContract.getContractDate();
+                    Date expiryDate = refContract.getExpiryDate();
+                    if (contractDate.compareTo(referralContract.getExpiryDate()) <= 0 && expiryDate.compareTo(referralContract.getContractDate()) >= 0
+                            && referralContract.getId() != null && !referralContract.getId().equals(refContract.getId())) {
+                        UtilMessagesAndPopups.showError("Contract already exists.");
+                        return;
+                    } else if (contractDate.compareTo(referralContract.getExpiryDate()) <= 0 && expiryDate.compareTo(referralContract.getContractDate()) >= 0
+                            && referralContract.getId() == null) {
+                        UtilMessagesAndPopups.showError("Contract already exists.");
+                        return;
+                    }
                 }
             }
-}
             referralContract.setContractStatus("IN-PROGRESS");
             referralContract.setStatus("Initiated");
             referralContract.setReferralClinicId(Infrastructure.getPractice().getTenantId());
             referralContract.setRefereeClinicId(referralContract.getReferral().getTenantId());
 
             Iterator<ReferralContractService> referralContractServiceIterator = referralContract.getReferralContractServices().iterator();
-            while (referralContractServiceIterator.hasNext()){
-                ReferralContractService referralContractService =  referralContractServiceIterator.next();
-                if(referralContract.getPercentageOnBill() != null){
+            while (referralContractServiceIterator.hasNext()) {
+                ReferralContractService referralContractService = referralContractServiceIterator.next();
+                if (referralContract.getPercentageOnBill() != null) {
                     referralContractService.setPaymentPercentage(referralContract.getPercentageOnBill());
                 }
             }
@@ -127,7 +128,7 @@ import java.util.*;
 
             try {
                 commonCrudService.save(referralContract);
-            }catch(Exception e) {
+            } catch (Exception e) {
                 try {
                     commonCrudService.merge(referralContract);
                 } catch (Exception e2) {
@@ -137,6 +138,7 @@ import java.util.*;
 
             Navigation.navigate("referralContractList", null, "contentArea");
             UtilMessagesAndPopups.showSuccess();
+        }catch (Exception e){}
         }
 
         @Command("submit")

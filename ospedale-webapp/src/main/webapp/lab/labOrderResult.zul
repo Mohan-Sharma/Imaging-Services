@@ -51,6 +51,12 @@
                 <button label="Upload" upload="true" id="uploadBtn">
                     <attribute name="onUpload">
                         org.zkoss.util.media.Media media = event.getMedia();
+                        String fileName = media.getName();
+                        String fileExtension = fileName.substring(fileName.lastIndexOf('.'));
+                        if(fileExtension.equals(".jpeg") || fileExtension.equals(".jpg") || fileExtension.equals(".png") || fileExtension.equals(".pdf")) {
+                        } else
+                            com.nzion.util.UtilMessagesAndPopups.showError("You can upload file formats of png/jpg/jpeg/pdf only");
+
                         if(media.getByteData().length > 1*1000*1000) {
                             com.nzion.util.UtilMessagesAndPopups.showError("You can upload file with a maximum size of 1MB");
                             return;
@@ -93,15 +99,19 @@
                     com.nzion.domain.File file = new com.nzion.domain.File();
                     file.setFileType(media.getContentType());
                     file.setInputStream(media.isBinary() ? media.getStreamData() : new StringBufferInputStream(media.getStringData()));
-                    file.setFileName(media.getName());
-                try{
-                    fileBasedServiceImpl.createFilesForImageSection(file, labOrderRequest.getPatient());
-                    labResultAttachments.setFile(file);
-                }catch(Exception e){
-                    fileBasedServiceImpl.createDefaultFolderStructure(labOrderRequest.getPatient());
-                    fileBasedServiceImpl.createFilesForImageSection(file, labOrderRequest.getPatient());
-                    labResultAttachments.setFile(file);
-                }
+                    String fileName = media.getName();
+                    String fileExtension = fileName.substring(fileName.lastIndexOf('.'));
+                    if(fileExtension.equals(".jpeg") || fileExtension.equals(".jpg") || fileExtension.equals(".png") || fileExtension.equals(".pdf")) {
+                        file.setFileName(media.getName());
+                        try {
+                            fileBasedServiceImpl.createFilesForImageSection(file, labOrderRequest.getPatient());
+                            labResultAttachments.setFile(file);
+                        } catch(Exception e){
+                            fileBasedServiceImpl.createDefaultFolderStructure(labOrderRequest.getPatient());
+                            fileBasedServiceImpl.createFilesForImageSection(file, labOrderRequest.getPatient());
+                            labResultAttachments.setFile(file);
+                        }
+                    }
                 }
             </zscript>
         </div>

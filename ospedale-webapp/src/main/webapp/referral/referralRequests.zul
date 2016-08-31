@@ -7,9 +7,9 @@
         import com.nzion.service.*;
         import com.nzion.domain.*;
         com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
-        List referralLists = new ArrayList();
+      /*  List referralLists = new ArrayList();
         com.nzion.domain.Practice practice = commonCrudService.getAll(Practice.class) != null ? commonCrudService.getAll(Practice.class).get(0) : null ;
-        referralLists = com.nzion.util.PortalRestServiceConsumer.fetchReferralOrder(practice.getTenantId());
+        referralLists = com.nzion.util.PortalRestServiceConsumer.fetchReferralOrder(practice.getTenantId()); */
     </zscript>
     <hlayout apply="org.zkoss.bind.BindComposer"  id="specimenCollWin"
              viewModel="@id('vm') @init('com.nzion.zkoss.composer.ReferralRequestController')">
@@ -22,6 +22,7 @@
                 <listheader label="Patient Mobile Number"/>
                 <listheader label="Visit Date"/>
                 <listheader label="Lab Test"/>
+                <listheader label="Status"/>
             </listhead>
             <template name="model" var="each">
                 <listitem>
@@ -31,6 +32,7 @@
                     <listcell label="@load(each.patientMobileNumber)"/>
                     <listcell label="@load(each.visitDate) @converter('formatedDate',format='dd/MM/yyyy')"/>
                     <listcell label="@load(each.labTest)"/>
+                    <listcell label="@load(each.status)"/>
                 </listitem>
             </template>
         </listbox>

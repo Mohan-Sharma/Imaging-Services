@@ -23,6 +23,7 @@ public class ReferralOrderDto {
     private String referralTenant;
     private String scheuleId;
     private String labOrderSectionId;
+    private String status;
 
     public String getReferralTenant() {
         return referralTenant;
@@ -120,6 +121,14 @@ public class ReferralOrderDto {
         this.labOrderSectionId = labOrderSectionId;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public void setPropertiesToReferralOrderDtoFromMap(Map<String, Object> resultMap){
         if(UtilValidator.isNotEmpty(resultMap.get("clinic_tenant_id")))
             this.setClinicTenantId(resultMap.get("clinic_tenant_id").toString());
@@ -151,5 +160,7 @@ public class ReferralOrderDto {
             this.setScheuleId(resultMap.get("schedule_id").toString());
         if(UtilValidator.isNotEmpty(resultMap.get("lab_order_section_id")))
             this.setLabOrderSectionId(resultMap.get("lab_order_section_id").toString());
+        if(UtilValidator.isNotEmpty(resultMap.get("status")))
+            this.setStatus(resultMap.get("status").toString());
     }
 }

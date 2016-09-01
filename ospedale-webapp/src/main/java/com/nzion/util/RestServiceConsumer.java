@@ -319,7 +319,7 @@ public class RestServiceConsumer {
         //return null;
     }
 
-    public static void updateImagingOrderInClinic(String tenantId, LabOrderDto labOrderDto){
+    public static String updateImagingOrderInClinic(String tenantId, LabOrderDto labOrderDto){
         labOrderDto.setAppointmentStartDate(null);
         labOrderDto.setAppointmentEndDate(null);
         Gson gson = new GsonBuilder().serializeNulls().setDateFormat("yyyy-MM-dd").create();
@@ -333,6 +333,24 @@ public class RestServiceConsumer {
 
             HttpEntity<String> requestEntity = new HttpEntity<String>(labInfJsonString, headers);
             ResponseEntity<String> responseEntity = restTemplate.exchange(CLINIC_URL+"/clinicMaster/updateImagingOrder?tenantId={tenantId}", HttpMethod.POST, requestEntity, String.class, tenantId);
+            String labInf = responseEntity.getBody();
+            return responseEntity.getHeaders().get("imagingOrderSoapSectionId").get(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static void updateImagingOrderInPortal(String tenantId, String imagingOrderSoapSectionId){
+        try {
+            RestTemplate restTemplate = new RestTemplate(getHttpComponentsClientHttpRequestFactory());
+            HttpHeaders headers = getHttpHeader();
+
+            restTemplate.getMessageConverters()
+                    .add(0, new StringHttpMessageConverter(Charset.forName("UTF-8")));
+
+            HttpEntity<String> requestEntity = new HttpEntity<String>(headers);
+            ResponseEntity<String> responseEntity = restTemplate.exchange(PORTAL_URL+"/anon/updateLabOrderInPortal?soapSectionId={imagingOrderSoapSectionId}&tenantId={tenantId}", HttpMethod.GET, requestEntity, String.class, imagingOrderSoapSectionId,tenantId);
             String labInf = responseEntity.getBody();
             //return providerId;
         } catch (Exception e) {

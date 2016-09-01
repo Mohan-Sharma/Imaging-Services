@@ -12,8 +12,10 @@
 		com.nzion.domain.UserLogin userLogin = com.nzion.util.Infrastructure.getUserLogin();
 		boolean isPhlebotomist = false;
 		boolean isTechnician = false;
+		boolean isReceptionist = false;
 		if(userLogin.hasRole(Roles.PHLEBOTOMIST)) isPhlebotomist = true;
 		if(userLogin.hasRole(Roles.RADIOLOGIST)) isTechnician = true;
+		if(userLogin.hasRole(Roles.RECEPTION)) isReceptionist = true;
 		Set laboratories = userLogin.getLaboratories();
 		]]></zscript> 
 		
@@ -119,20 +121,28 @@
                                        if(!isTechnician)	self.setVisible(false);
                                       </attribute>
                                       </button>-->
+                                <button label="Accession" sclass="btn-mini"
+                                        onClick="@command('Collection',arg1=requisition,arg2=outpatientTab)">
+                                    <attribute name="onCreate"> <![CDATA[
+                                            if((!isTechnician) && (!isPhlebotomist)){
+                                                self.setVisible(false);
+                                            }
+                                       ]]> </attribute>
+                                </button>
                                 <button label="Result Upload" sclass="btn-mini">
                                     <attribute name="onClick">
                                         <![CDATA[
                                               Executions.createComponents("/lab/labOrderResult.zul", null,com.nzion.util.UtilMisc.toMap("labRequisition",self.getParent().getParent().getValue()));
                                         ]]>
                                     </attribute>
-                                    <!--<attribute name="onCreate"><![CDATA[
+                                    <attribute name="onCreate"><![CDATA[
                                         com.nzion.domain.emr.lab.LabRequisition labRequisition = self.getParent().getParent().getValue();
                                         Boolean resultEntryStatus=(labRequisition.getStatus()!=com.nzion.domain.emr.lab.LabRequisition.LabRequisitionStatus.COLLECTION_DONE);
                                         if(resultEntryStatus) self.setDisabled(resultEntryStatus);
                                         if((!isTechnician) && (!isReceptionist)){
                                         self.setVisible(false);
                                         }
-                                    ]]></attribute>-->
+                                    ]]></attribute>
                                 </button>
                            
                             </listcell>

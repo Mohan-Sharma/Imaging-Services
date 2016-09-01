@@ -49,7 +49,7 @@
                 <div zclass="span6">
                     <label value="Display Name" mold="required"/>
                     <textbox value="@{labController.labTest.testPneumonic,save-when='Save.onClick'}"
-                             constraint="no empty:Test Name Required" sclass="span12"
+                             constraint="no empty:Display Name Required" sclass="span12"
                              w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
                 </div>
                 <!--<div zclass="span2">

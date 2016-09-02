@@ -115,7 +115,7 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 						 sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
 						</div>-->
 						 <div zclass="span1-2" style="margin-left: 30px">
-							 <separator></separator><separator></separator>
+							 <label value="Upload logo for Invoice"/>
 							 <button label="Upload Imaging Logo" upload="true">
 								 <attribute name="onUpload">
 									 org.zkoss.util.media.Media media = event.getMedia();

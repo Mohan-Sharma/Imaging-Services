@@ -17,7 +17,7 @@ import java.util.*;
  * Created by Saikiran Chepuri on 12-May-16.
  */
 public class PortalRestServiceConsumer {
-    static String PORTAL_URL = null;
+    public static String PORTAL_URL = null;
     static {
         Properties properties = new Properties();
         try {
@@ -156,5 +156,17 @@ public class PortalRestServiceConsumer {
             referralOrderDtos.add(referralOrderDto);
         }
         return referralOrderDtos;
+    }
+
+    public static List<Map<String ,Object>> getUserPrescriptionFileNames(String afyaId,Long orderId,String orderType) {
+        RestTemplate restTemplate = new RestTemplate(RestServiceConsumer.getHttpComponentsClientHttpRequestFactory());
+        HttpHeaders httpHeaders = getHttpHeader();
+        HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(PORTAL_URL +"/anon/getUserPrescriptionUploadFiles?afyaId={afyaId}&orderId={orderId}&orderType={orderType}",HttpMethod.GET,requestEntity,String.class,afyaId,orderId,"IMAGING");
+        String json = responseEntity.getBody();
+        List<Map<String, Object>> result = new ArrayList<>();
+        Gson gson = new GsonBuilder().serializeNulls().create();
+        result = (List<Map<String, Object>>) gson.fromJson(json, result.getClass());
+        return result;
     }
 }

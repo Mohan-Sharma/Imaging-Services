@@ -1,0 +1,49 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./labOrderRequestWin"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <zscript>
+        import com.nzion.domain.emr.lab.LabOrderRequest;
+        LabOrderRequest labOrderRequest = arg.get("labOrderRequest");
+        labOrderRequest = commonCrudService.getById(LabOrderRequest.class,labOrderRequest.getId());
+        com.nzion.util.PortalRestServiceConsumer portalRestServiceConsumer = new com.nzion.util.PortalRestServiceConsumer();
+        List result = new ArrayList();
+        result = portalRestServiceConsumer.getUserPrescriptionFileNames(labOrderRequest.patient.afyaId,labOrderRequest.getId(),"IMAGING");
+        Object r2 = result;
+        String portalServerUrl = portalRestServiceConsumer.PORTAL_URL;
+        portalServerUrl = portalServerUrl.substring(0,portalServerUrl.lastIndexOf("/"));
+    </zscript>
+    <window id="labOrderRequestWin" mode="modal" position="center" width="20%"  closable="true">
+
+        <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>File View :</h:small>
+                <button type="button" zclass="close" onClick="labOrderRequestWin.detach();">×</button>
+            </h:h1>
+        </div>
+
+        <div zclass="container-fluid">
+            <div zclass="row-fluid">
+                <div>
+                    <listbox model="@{result}" id="contsdactListBox">
+                        <template name="model" var="patientInvoiceItem">
+                            <listitem>
+                                <listcell>
+                                    <a>
+                                        <attribute name="onCreate">
+                                            self.setLabel(self.getParent().getParent().getValue().get("fileName"));
+                                        </attribute>
+                                        <attribute name="onClick">
+                                            Executions.getCurrent().sendRedirect(portalServerUrl+self.getParent().getParent().getValue().get("filePath"),"_blank");
+                                        </attribute>
+                                    </a>
+                                </listcell>
+                            </listitem>
+                        </template>
+                    </listbox>
+                </div>
+
+            </div>
+        </div>
+    </window>
+</zk>            

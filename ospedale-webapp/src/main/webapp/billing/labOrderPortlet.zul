@@ -153,6 +153,13 @@
                         ]]>
                     </attribute>
                 </button>
+                <button label="View">
+                    <attribute name="onClick">
+                        <![CDATA[
+                            Executions.createComponents("/lab/labOrderUserPrescriptionFiles.zul", null,com.nzion.util.UtilMisc.toMap("labOrderRequest",self.getParent().getParent().getValue()));
+                        ]]>
+                    </attribute>
+                </button>
                 <!--<button label="Result Entry">
                     <attribute name="onClick">
                         <![CDATA[

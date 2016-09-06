@@ -339,6 +339,16 @@
 		<url-pattern>/imagingServiceMaster/rescheduleLabAppointment</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>downloadAttachment</servlet-name>
+		<servlet-class>com.nzion.service.DownloadAttachmentServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>downloadAttachment</servlet-name>
+		<url-pattern>/imagingServiceMaster/downloadAttachment</url-pattern>
+	</servlet-mapping>
+
 	<welcome-file-list>
 		<welcome-file>home.zul</welcome-file>
 	</welcome-file-list>

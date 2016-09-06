@@ -359,4 +359,22 @@ public class RestServiceConsumer {
         //return null;
     }
 
+    public static void updateUserLoginInPortal(String userName, Boolean status){
+        try {
+            RestTemplate restTemplate = new RestTemplate(getHttpComponentsClientHttpRequestFactory());
+            HttpHeaders headers = getHttpHeader();
+
+            restTemplate.getMessageConverters()
+                    .add(0, new StringHttpMessageConverter(Charset.forName("UTF-8")));
+
+            HttpEntity<String> requestEntity = new HttpEntity<String>(headers);
+            ResponseEntity<String> responseEntity = restTemplate.exchange(PORTAL_URL+"/anon/updateUserLoginInPortal?userName={userName}&status={status}", HttpMethod.GET, requestEntity, String.class, userName, status);
+            String labInf = responseEntity.getBody();
+            //return providerId;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //return null;
+    }
+
 }

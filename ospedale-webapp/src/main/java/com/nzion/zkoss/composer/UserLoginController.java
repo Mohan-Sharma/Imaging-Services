@@ -1,9 +1,6 @@
 package com.nzion.zkoss.composer;
 
-import com.nzion.domain.Location;
-import com.nzion.domain.Practice;
-import com.nzion.domain.Roles;
-import com.nzion.domain.UserLogin;
+import com.nzion.domain.*;
 import com.nzion.domain.emr.lab.LabDepartment;
 import com.nzion.domain.emr.lab.Laboratories;
 import com.nzion.security.SecurityGroup;
@@ -23,11 +20,7 @@ import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.WrongValueException;
 import org.zkoss.zk.ui.event.Event;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class UserLoginController extends AutowirableComposer {
 
@@ -58,6 +51,8 @@ public class UserLoginController extends AutowirableComposer {
     private String secretAnswer;
 
     private CommonCrudService commonCrudService;
+
+    private Boolean duplicateUserName = false;
 
     public String getSecretQuestion() {
         return secretQuestion;
@@ -145,6 +140,26 @@ public class UserLoginController extends AutowirableComposer {
         }
 
         if (userLogin.getId() == null) {
+            Person person = commonCrudService.getById(Person.class, userLogin.getPerson().getId());
+            List<UserLogin> userLoginList = commonCrudService.findByEquality(UserLogin.class, new String[]{"person"}, new Object[]{person});
+            Infrastructure.getSessionFactory().getCurrentSession().evict(person);
+            boolean deactivated = true;
+            Iterator iterator = userLoginList.iterator();
+            while (iterator.hasNext()) {
+                UserLogin userLogin = (UserLogin) iterator.next();
+                if (userLogin.isActive()) {
+                    deactivated = false;
+                }
+                Infrastructure.getSessionFactory().getCurrentSession().evict(userLogin);
+            }
+
+            if (!deactivated) {
+                UtilMessagesAndPopups.showError("User Login already exist for this user");
+                return;
+            }
+        }
+
+        if (userLogin.getId() == null) {
             /*if (userLoginExists(userLogin.getUsername())) {
                 UtilMessagesAndPopups.showError("User Name already exists");
                 return;
@@ -159,8 +174,12 @@ public class UserLoginController extends AutowirableComposer {
             if(saveUserLoginInPortal(userLogin, null)) {
                 createUser();
                 Navigation.navigate("userLogin", null, "contentArea");
-            } else{
-                UtilMessagesAndPopups.showError("User Login cannot be created");
+            } else {
+                if (duplicateUserName){
+                    UtilMessagesAndPopups.showError("User Name already exists");
+                } else {
+                    UtilMessagesAndPopups.showError("User Login cannot be created");
+                }
             }
         } else {
             /*userLogin.getLocations().clear();
@@ -383,6 +402,11 @@ public class UserLoginController extends AutowirableComposer {
 
         //Raghu Bandi: Added the following logic to avoid double encryption when user role(s) are updated.
         Map<String, Object> userLoginMap = PortalRestServiceConsumer.getUserLoginDetailsForUserName(userLogin.getUsername());
+
+        if ((userLogin.getId() == null) && (UtilValidator.isNotEmpty(userLoginMap))){
+            duplicateUserName = true;
+            return false;
+        }
 
         if (!UtilValidator.isEmpty(userLoginMap)) {
             try {

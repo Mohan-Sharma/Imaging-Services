@@ -231,7 +231,7 @@ public class UserLogin 	extends IdGeneratingBaseEntity implements Serializable{
 	 *
 	 * @return the party
 	 */
-	@OneToOne(targetEntity = Person.class)
+	@ManyToOne(targetEntity = Person.class)
 	@JoinColumn(name = "PERSON_ID")
 	@Cascade(value = {CascadeType.SAVE_UPDATE,CascadeType.MERGE})
 	public Person getPerson() {

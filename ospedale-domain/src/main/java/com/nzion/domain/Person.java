@@ -5,23 +5,10 @@ package com.nzion.domain;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -89,6 +76,9 @@ public class Person extends Party implements Salutable {
 
 	private String salutation;
 
+	private List<UserLogin> userLogins;
+
+	@Transient
 	private UserLogin userLogin;
 
 	private Date dateOfDeath;
@@ -298,14 +288,14 @@ public class Person extends Party implements Salutable {
 	this.suffix = suffix;
 	}
 
-	@OneToOne(mappedBy = "person")
-	@Cascade(CascadeType.ALL)
-	public UserLogin getUserLogin() {
-	return userLogin;
+	@OneToMany(mappedBy = "person")
+	@Cascade(value = {CascadeType.ALL})
+	public List<UserLogin> getUserLogins() {
+		return userLogins;
 	}
 
-	public void setUserLogin(UserLogin userLogin) {
-	this.userLogin = userLogin;
+	public void setUserLogins(List<UserLogin> userLogins) {
+		this.userLogins = userLogins;
 	}
 
 	@Transient
@@ -350,6 +340,19 @@ public class Person extends Party implements Salutable {
 
 	protected void setCurrentAge(Integer timeElapsedAfterBirth) {
 	this.currentAge = timeElapsedAfterBirth;
+	}
+
+	@Transient
+	public UserLogin getUserLogin() {
+		if ((getUserLogins() != null) && (getUserLogins().size() > 0)){
+			return getUserLogins().get(0);
+		} else {
+			return null;
+		}
+	}
+
+	public void setUserLogin(UserLogin userLogin) {
+		this.userLogin = userLogin;
 	}
 
 }

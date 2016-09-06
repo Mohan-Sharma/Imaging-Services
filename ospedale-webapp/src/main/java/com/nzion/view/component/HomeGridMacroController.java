@@ -1,10 +1,11 @@
 package com.nzion.view.component;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import com.nzion.domain.Person;
+import com.nzion.domain.UserLogin;
+import com.nzion.service.common.CommonCrudService;
+import com.nzion.util.*;
 import org.apache.commons.collections.map.HashedMap;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
@@ -17,13 +18,6 @@ import org.zkoss.zul.*;
 
 import com.nzion.service.common.GenericHomeScreenSearchService;
 import com.nzion.service.common.GenericHomeScreenService;
-import com.nzion.util.Infrastructure;
-import com.nzion.util.UtilDisplay;
-import com.nzion.util.UtilMessagesAndPopups;
-import com.nzion.util.UtilMisc;
-import com.nzion.util.UtilReflection;
-import com.nzion.util.UtilValidator;
-import com.nzion.util.ViewUtil;
 import com.nzion.view.component.OspedalePagingListModel.PagedDataModelService;
 import com.nzion.zkoss.ext.CsvDataExporter;
 import com.nzion.zkoss.ext.DataExporter;
@@ -83,6 +77,8 @@ public class HomeGridMacroController extends GenericForwardComposer implements P
     private boolean defaultSortDesc;
 
     private int searchStrength = 3;
+
+    private CommonCrudService commonCrudService;
 
     private EventListener listitemDoubleClickListener = new EventListener() {
         public void onEvent(Event event) throws Exception {
@@ -286,6 +282,34 @@ public class HomeGridMacroController extends GenericForwardComposer implements P
             UtilMessagesAndPopups.displayError("Please select items to activate");
             return;
         }
+
+        Object object = toBeActivateds.get(0);
+        if (object instanceof UserLogin){
+            UserLogin userLogin = (UserLogin)object;
+            Person person = commonCrudService.getById(Person.class, userLogin.getPerson().getId());
+            List<UserLogin> userLoginList = commonCrudService.findByEquality(UserLogin.class, new String[]{"person"}, new Object[]{person});
+            Infrastructure.getSessionFactory().getCurrentSession().evict(person);
+            boolean deactivated = true;
+            Iterator iterator = userLoginList.iterator();
+            while (iterator.hasNext()){
+                UserLogin userLogin1 = (UserLogin)iterator.next();
+                if (userLogin1.isActive()){
+                    deactivated = false;
+                }
+                Infrastructure.getSessionFactory().getCurrentSession().evict(userLogin1);
+            }
+            if (!deactivated){
+                UtilMessagesAndPopups.showError("Active User Login already exist for this user");
+                return;
+            } else {
+                try {
+                    RestServiceConsumer.updateUserLoginInPortal(userLogin.getUsername(), true);
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }
+
         service.activate(toBeActivateds);
         refreshListbox();
         UtilMessagesAndPopups.showSuccess();
@@ -297,6 +321,17 @@ public class HomeGridMacroController extends GenericForwardComposer implements P
             UtilMessagesAndPopups.displayError("Please select items to deactivate");
             return;
         }
+
+        try{
+            Object object = toBeDeActivateds.get(0);
+            if (object instanceof UserLogin) {
+                UserLogin userLogin = (UserLogin) object;
+                RestServiceConsumer.updateUserLoginInPortal(userLogin.getUsername(), false);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
         service.deActivate(toBeDeActivateds, reason);
         refreshListbox();
         UtilMessagesAndPopups.showSuccess();

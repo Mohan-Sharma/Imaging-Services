@@ -93,7 +93,7 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 								 maxlength="30" sclass="span12"/>
 						</div>
 						<div zclass="span2">
-							<label value="Year in Existence (Since) "  />
+							<label value="Years in Existence (Since) "  />
 							<textbox value="@{vo.practice.labExperience,save-when='Save.onClick'}"
 									 maxlength="30" sclass="span12"/>
 						</div>

@@ -6,7 +6,7 @@
 	if (event.isOpen()) scheduleController.setSelectedComponent(event.getReference());
 	}
 	boolean drOrRec = Roles.hasAnyRole(new long[]{Roles.PROVIDER,Roles.RECEPTION, Roles.ADMIN});
-	boolean technician = Roles.hasRole(Roles.RADIOLOGIST);
+	boolean technician = Roles.hasRole(Roles.TECHNICIAN);
 </zscript>
 		<popup id="patientDetail" zclass="none" style="left:0;top:0;background-color: #F5F5B5;border: 1px solid #DECA7E;z-index:999999;display:none" onOpen="if(((OpenEvent)event).isOpen()) scheduleController.setSelectedComponent(event.getReference());">
 		<vlayout spacing="5px" sclass="tooltip">

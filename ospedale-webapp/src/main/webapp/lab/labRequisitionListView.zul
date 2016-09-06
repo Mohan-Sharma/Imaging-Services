@@ -14,7 +14,7 @@
 		boolean isTechnician = false;
 		boolean isReceptionist = false;
 		if(userLogin.hasRole(Roles.PHLEBOTOMIST)) isPhlebotomist = true;
-		if(userLogin.hasRole(Roles.RADIOLOGIST)) isTechnician = true;
+		if(userLogin.hasRole(Roles.TECHNICIAN)) isTechnician = true;
 		if(userLogin.hasRole(Roles.RECEPTION)) isReceptionist = true;
 		Set laboratories = userLogin.getLaboratories();
 		]]></zscript> 
@@ -22,7 +22,7 @@
 		  <div class="container-fluid">
             <div zclass="row-fluid">
                
-                <div zclass="span4">
+                <div zclass="span3">
                     <label value="Patient"/>
                     <patientlookup id="patientLookUpBox"
                             onChange="vm.setPatient(event.getOrigin().getData())" sclass="span12"/>

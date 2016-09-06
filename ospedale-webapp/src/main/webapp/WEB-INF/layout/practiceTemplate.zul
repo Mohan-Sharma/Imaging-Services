@@ -56,7 +56,7 @@
             <listitem label="ADMIN" if="${rvo.admin}" value="${36028797018963968}"/>
             <listitem label="DOCTOR" if="${rvo.provider}" value="${2251799813685248}"/>
             <listitem label="NURSE" if="${rvo.nurse}" value="${8796093022208}"/>
-            <listitem label="RADIOLOGIST" if="${rvo.technician}" value="${549755813888}"/>
+            <listitem label="TECHNICIAN" if="${rvo.technician}" value="${549755813888}"/>
             <listitem label="RECEPTION" if="${rvo.reception}" value="${2147483648}"/>
             <listitem label="HOUSEKEEPING" if="${rvo.houseKeeping}" value="${2048}"/>
             <listitem label="OMS" if="${rvo.orderManagement}" value="${128}"/>

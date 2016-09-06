@@ -26,7 +26,7 @@ public class HomePageHelper {
 		roleHomePageMap.put(Roles.PROVIDER, "/dashboards/providerDashboard.zul");
 		roleHomePageMap.put(Roles.NURSE, "/dashboards/nurseDashboard.zul");
 		roleHomePageMap.put(Roles.RECEPTION, "/dashboards/frontDeskDashBoard.zul");
-		roleHomePageMap.put(Roles.RADIOLOGIST, "/dashboards/labdashboard.zul");
+		roleHomePageMap.put(Roles.TECHNICIAN, "/dashboards/labdashboard.zul");
 		roleHomePageMap.put(Roles.PHLEBOTOMIST, "/dashboards/labdashboard.zul");
 		//roleHomePageMap.put(Roles.ADJUSTER, "/patient/patientList.zul");
 		roleHomePageMap.put(Roles.CASE_MANAGER, "/patient/patientList.zul");

@@ -47,10 +47,10 @@ public enum Role {
         public String toString() {
             return "MEDICAL_ASSISTANT";
         }
-    }, RADIOLOGIST{
+    }, TECHNICIAN{
         @Override
         public String toString() {
-            return "RADIOLOGIST";
+            return "TECHNICIAN";
         }
     }, CASE_MANAGER{
         @Override

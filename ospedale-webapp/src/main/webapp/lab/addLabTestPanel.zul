@@ -126,7 +126,7 @@
              </div>-->
              <div zclass="row-fluid">
                  <div zclass="span12">
-                     <label value="Special Instruction"/>
+                     <label value="Special Instruction in English"/>
                      <textbox value="@{labController.labTest.specialInstruction,save-when='Save.onClick'}" sclass="span12"  rows="2" cols="50" maxlength="10000"/>
                  </div>
              </div>

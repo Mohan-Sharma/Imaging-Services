@@ -120,8 +120,7 @@
 										laboratoriesBox.setVisible(event.isChecked());labtMsgBox.setVisible(!event.isChecked())">
 									</checkbox>	-->
 
-									<!--Label change : Technician to Radiologist, functionality remain same. (can use Technician specification)-->
-									<checkbox label=" Radiologist" checked="@{userLoginController.rolesVo.technician}"
+									<checkbox label=" Technician" checked="@{userLoginController.rolesVo.technician}"
 										style="padding:6px;" id="technician"
 										onCheck="labDeptBox.setVisible(event.isChecked());ldeptMsgBox.setVisible(!event.isChecked());
 										laboratoriesBox.setVisible(event.isChecked());labtMsgBox.setVisible(!event.isChecked())">

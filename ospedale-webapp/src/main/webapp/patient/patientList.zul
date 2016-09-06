@@ -15,6 +15,6 @@
 	]]></zscript>
 		<screen width="100%" listtitle="List of Patients" addpage="patientAdd" editpage="patientView" entityclass="com.nzion.domain.Patient"
 			fields="afyaId,civilId,lastName,firstName,contacts.postalAddress.city,gender.description,contacts.email,contacts.homePhone,active"
-			labels="Afya Id,Civil Id,Last Name,First Name,City,Gender,Email,Home phone,Active" lazy="true" hidedeletebtn="true" containername="contentArea" defaultSortDesc="true" defaultsort="createdTxTimestamp" />
+			labels="Afya Id,Civil Id,Last Name,First Name,City,Gender,Email,Home phone,Active" lazy="true" hidedeletebtn="true" hideaddbtn="true" containername="contentArea" defaultSortDesc="true" defaultsort="createdTxTimestamp" />
 	</window>
 </zk>

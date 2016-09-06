@@ -122,7 +122,7 @@
                     com.nzion.domain.emr.lab.LabOrderRequest oldLabOrderRequest = vm.getLabOrderRequest();
                     com.nzion.domain.emr.lab.LabRequisition labRequisition = commonCrudService.findUniqueByEquality(com.nzion.domain.emr.lab.LabRequisition.class, new String[]{"labOrderRequest"}, new Object[]{oldLabOrderRequest});
                     if ((labRequisition != null) && (!com.nzion.domain.emr.lab.LabRequisition.LabRequisitionStatus.NEW.equals(labRequisition.getStatus()))) {
-                        com.nzion.util.UtilMessagesAndPopups.showError("A Lab order with NEW status can only be Rescheduled");
+                        com.nzion.util.UtilMessagesAndPopups.showError("A Radiology order with NEW status can only be Rescheduled");
                         return;
                     }
                     java.util.Date appointDate = oldLabOrderRequest.getStartDate();

@@ -37,7 +37,8 @@
 								<label value="User Name" />
 								<label value="*" style="color:red" />
 							</div>
-							<textbox id="txtUserName" value="@{userLoginController.userLogin.username}">
+							<textbox id="txtUserName" value="@{userLoginController.userLogin.username}"
+									 onChanging="validateUserNameChanging(event.value)">
 								<attribute name="onBlur">
 									<![CDATA[
 										boolean result = validateUserName(self.getValue());
@@ -61,6 +62,14 @@
                                     return false;
                                 } else{
                                     return true;
+                                }
+                            }
+                            validateUserNameChanging(String value){
+                                Pattern numPtr = Pattern.compile("^[0-9]{11,11}$");
+                                if(numPtr.matcher(value).matches()){
+                                    saveUserLogin.setDisabled(false);
+                                } else {
+                                    saveUserLogin.setDisabled(true);
                                 }
                             }
                             ]]>
@@ -197,7 +206,7 @@
 								<div id="ldeptMsgBox">
 								<attribute name="onCreate">
 								//if(phlebotomist.isChecked() || technician.isChecked()) self.setVisible(false);
-								if(technician.isChecked()) self.setVisible(false);
+								if(technician.isChecked()) self.setVisible(true);
 								</attribute>
 									<label style="width:100%;font-size: 10px;">Only When Phlebotomist or Technician Role is Selected</label>
 								</div>

@@ -29,7 +29,7 @@
 		<n:p style="padding:3%;">
 			To Login again, please click
 			<!--<n:a href="login.zhtml">here</n:a>-->
-			<n:a href="/ospedale/logout">here</n:a>
+			<n:a href="/Imaging-Services/logout">here</n:a>
 		</n:p>
 	</n:div>
 </zk>

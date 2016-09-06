@@ -53,7 +53,7 @@
 		
         <tabbox width="100%" sclass="nav_tabs">
         <tabs id="tabs">
-            <tab label="Lab Request" id="outpatientTab" onSelect="@command('OPDPATIENTS')"/>
+            <tab label="Radiology Request" id="outpatientTab" onSelect="@command('OPDPATIENTS')"/>
             <!-- <tab label="In Patient Lab Request" id="inpatientTab" onSelect="@command('INPATIENT_LAB')" visible="false"/> -->
         </tabs>
         <tabpanels>

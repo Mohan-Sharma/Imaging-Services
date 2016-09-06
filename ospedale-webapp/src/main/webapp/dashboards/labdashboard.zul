@@ -12,7 +12,7 @@
 <zscript>
 	setPageTitle("Dashboard", "");
 	List portletDatas = new ArrayList();
-	portletDatas.add(new com.nzion.view.PortletData("Lab Test Requests", "/lab/labRequisitionListView.zul", "../images/RadiologyTestRequest.png", true));
+	portletDatas.add(new com.nzion.view.PortletData("Radiology Requests", "/lab/labRequisitionListView.zul", "../images/RadiologyTestRequest.png", true));
 
     <!-- portletDatas.add(new com.nzion.view.PortletData("Accession", "/lab/labResultEntry.zul", "../images/labresults.jpg", true)); -->
 

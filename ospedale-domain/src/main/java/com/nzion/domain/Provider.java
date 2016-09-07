@@ -98,13 +98,13 @@ public class Provider extends Employee implements Comparable<Provider>{
 
 	public Provider() {
 	super(PartyType.PROVIDER);
-	setSchedulable(true);
+	/*setSchedulable(false);*/
 	}
 
 	public Provider(Long id, String firstName, String lastName, ContactFields cf) {
 	super(id, firstName, lastName, cf);
 	setPartyType(PartyType.PROVIDER);
-	setSchedulable(true);
+	/*setSchedulable(false);*/
 	}
 
 	static {
@@ -145,7 +145,7 @@ public class Provider extends Employee implements Comparable<Provider>{
 
 	public void setProviderAssistant(boolean providerAssistant) {
 	this.providerAssistant = providerAssistant;
-	setSchedulable(!providerAssistant);
+	/*setSchedulable(!providerAssistant);*/
 	}
 
 	@OneToOne

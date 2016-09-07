@@ -51,7 +51,7 @@ public class ProviderServiceImpl implements ProviderService {
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
 	public void save(Provider provider) {
 	if(!provider.isProviderAssistant())
-		provider.setSchedulable(true);
+		provider.setSchedulable(false);
 	repository.save(provider);
 	}
 
@@ -60,7 +60,7 @@ public class ProviderServiceImpl implements ProviderService {
 	public void save(ProviderValueObject providerVO) {
 	Provider provider = providerVO.getProvider();
 	if(!provider.isProviderAssistant())
-		provider.setSchedulable(true);
+		provider.setSchedulable(false);
 	/*if (provider.getId() == null) {
 		EMRProviderInfo emrProvierInfo = new EMRProviderInfo();
 		emrProvierInfo.setProvider(provider);

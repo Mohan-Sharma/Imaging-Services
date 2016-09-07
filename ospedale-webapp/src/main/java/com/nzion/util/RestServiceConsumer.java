@@ -377,4 +377,125 @@ public class RestServiceConsumer {
         //return null;
     }
 
+    public static Map<String, Object> getRadiologyDetByRadiologyId(String radiologyId) {
+        RestTemplate restTemplate = new RestTemplate(getHttpComponentsClientHttpRequestFactory());
+        HttpHeaders httpHeaders = getHttpHeader();
+        HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
+        System.out.println("\n\n\ntenant = "+radiologyId+"\n\n\n");
+        ResponseEntity<String> responseEntity = restTemplate.exchange(PORTAL_URL+"/anon/getRadiologyDetByRadiologyId?radiologyId={radiologyId}", HttpMethod.GET, requestEntity, String.class, radiologyId);
+        String json = responseEntity.getBody();
+        Map<String, Object> result = new HashMap<>();
+        Gson gson = new GsonBuilder().serializeNulls().create();
+        result = (Map<String, Object>) gson.fromJson(json, result.getClass());
+        return result;
+    }
+
+    public static Map<String, Object> getUserLoginByUserName(String userName) {
+        RestTemplate restTemplate = new RestTemplate(getHttpComponentsClientHttpRequestFactory());
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        List<MediaType> mediaTypes = new ArrayList<MediaType>();
+        mediaTypes.add(MediaType.APPLICATION_JSON);
+        httpHeaders.setAccept(mediaTypes);
+        HttpEntity<String> requestEntity = new HttpEntity<String>(httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(PORTAL_URL+"/anon/getUserLoginByName?userName={userName}", HttpMethod.GET, requestEntity, String.class, userName);
+        String json = responseEntity.getBody();
+        Map<String, Object> result = new HashMap<String, Object>();
+        Gson gson = new GsonBuilder().serializeNulls().create();
+        result = (Map<String, Object>) gson.fromJson(json, result.getClass());
+        return result;
+    }
+
+    public static ArrayList<HashMap<String, Object>> getAllAdminByTenantId() {
+        String tenantId = Infrastructure.getPractice().getTenantId();
+        RestTemplate restTemplate = new RestTemplate(getHttpComponentsClientHttpRequestFactory());
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        List<MediaType> mediaTypes = new ArrayList<MediaType>();
+        mediaTypes.add(MediaType.APPLICATION_JSON);
+        httpHeaders.setAccept(mediaTypes);
+        HttpEntity<String> requestEntity = new HttpEntity<String>(httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(PORTAL_URL + "/anon/getAllAdminByTenantId?tenantId="+tenantId, HttpMethod.GET, requestEntity, String.class);
+        String json = responseEntity.getBody();
+        ArrayList<HashMap<String, Object>> result = new ArrayList<HashMap<String, Object>>();
+        Gson gson = new GsonBuilder().serializeNulls().create();
+        result = (ArrayList<HashMap<String, Object>>)gson.fromJson(json, result.getClass());
+        return result;
+    }
+
+    public static Map<String, Object> getSMSSenderNameForGivenTenant(String tenantId) {
+        RestTemplate restTemplate = new RestTemplate(getHttpComponentsClientHttpRequestFactory());
+        HttpHeaders httpHeaders = getHttpHeader();
+        HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(PORTAL_URL + "/anon/getSMSSenderNameForGivenTenant?tenantId={tenantId}", HttpMethod.GET, requestEntity, String.class, tenantId);
+        String json = responseEntity.getBody();
+        Gson gson = new GsonBuilder().serializeNulls().create();
+        return (Map<String, Object>) gson.fromJson(json, Map.class);
+    }
+
+    public static boolean checkIfSmsAvailableForTenant(String tenantId) {
+        RestTemplate restTemplate = new RestTemplate(getHttpComponentsClientHttpRequestFactory());
+        HttpHeaders httpHeaders = getHttpHeader();
+        HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(PORTAL_URL + "/anon/checkIfSmsAvailableForTenant?tenantId={tenantId}", HttpMethod.GET, requestEntity, String.class, tenantId);
+        String result = responseEntity.getBody();
+        if(UtilValidator.isEmpty(result))
+            return Boolean.FALSE;
+        return Boolean.valueOf(result);
+    }
+
+    public static List<Map<String, Object>> getPatientContactsFromAfyaIdAndType(String afyaId, String type) {
+        RestTemplate restTemplate = new RestTemplate(getHttpComponentsClientHttpRequestFactory());
+        HttpHeaders httpHeaders = getHttpHeader();
+        HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
+        ResponseEntity<String> responseEntity = null;
+        if (type != null) {
+            String contactCategory = "|" + type + "|";
+            responseEntity = restTemplate.exchange(PORTAL_URL + "/anon/getPatientContactsFromAfyaId?afyaId={afyaId}&filter="+contactCategory, HttpMethod.GET, requestEntity, String.class, afyaId);
+        } else {
+            responseEntity = restTemplate.exchange(PORTAL_URL + "/anon/getPatientContactsFromAfyaId?afyaId={afyaId}", HttpMethod.GET, requestEntity, String.class, afyaId);
+        }
+        String json = responseEntity.getBody();
+        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        Gson gson = new GsonBuilder().serializeNulls().create();
+        return (List<Map<String, Object>>) gson.fromJson(json, result.getClass());
+    }
+
+    public static boolean updateSMSCountForGivenTenant(String tenantId) {
+        RestTemplate restTemplate = new RestTemplate(getHttpComponentsClientHttpRequestFactory());
+        HttpHeaders httpHeaders = getHttpHeader();
+        HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(PORTAL_URL+"/anon/updateSMSCountForGivenTenant?tenantId={tenantId}", HttpMethod.POST, requestEntity, String.class, tenantId);
+        String result = responseEntity.getBody();
+        if(UtilValidator.isEmpty(result))
+            return Boolean.FALSE;
+        return Boolean.valueOf(result);
+    }
+
+    public static List<Map<String, Object>> getPatientContactsFromAfyaId(String afyaId) {
+        RestTemplate restTemplate = new RestTemplate(getHttpComponentsClientHttpRequestFactory());
+        HttpHeaders httpHeaders = getHttpHeader();
+        HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(PORTAL_URL + "/anon/getPatientContactsFromAfyaId?afyaId={afyaId}&filter=|ALTERNATE_CONTACT|", HttpMethod.GET, requestEntity, String.class, afyaId);
+        String json = responseEntity.getBody();
+        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        Gson gson = new GsonBuilder().serializeNulls().create();
+        return (List<Map<String, Object>>) gson.fromJson(json, result.getClass());
+    }
+
+    public static Map<String, Object> getPaymentGateWayTransactionDetByPaymentId(String paymentId) {
+        RestTemplate restTemplate = new RestTemplate(getHttpComponentsClientHttpRequestFactory());
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        List<MediaType> mediaTypes = new ArrayList<MediaType>();
+        mediaTypes.add(MediaType.APPLICATION_JSON);
+        httpHeaders.setAccept(mediaTypes);
+        HttpEntity<String> requestEntity = new HttpEntity<String>(httpHeaders);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(PORTAL_URL+"/anon/getPaymentGateWayTransactionDetByPaymentId?paymentId={paymentId}", HttpMethod.GET, requestEntity, String.class, paymentId);
+        String json = responseEntity.getBody();
+        Map<String, Object> result = new HashMap<String, Object>();
+        Gson gson = new GsonBuilder().serializeNulls().create();
+        result = (Map<String, Object>) gson.fromJson(json, result.getClass());
+        return result;
+    }
 }

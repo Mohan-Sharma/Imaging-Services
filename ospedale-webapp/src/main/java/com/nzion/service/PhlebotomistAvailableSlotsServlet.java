@@ -16,6 +16,9 @@ import com.nzion.domain.screen.BillingDisplayConfig;
 import com.nzion.domain.util.SlotAvailability;
 import com.nzion.hibernate.ext.multitenant.TenantIdHolder;
 import com.nzion.repository.PracticeRepository;
+import com.nzion.repository.notifier.utility.EmailUtil;
+import com.nzion.repository.notifier.utility.SmsUtil;
+import com.nzion.repository.notifier.utility.TemplateNames;
 import com.nzion.service.billing.BillingService;
 import com.nzion.service.common.CommonCrudService;
 import com.nzion.service.common.impl.EnumerationServiceImpl;
@@ -26,6 +29,7 @@ import com.nzion.service.impl.FileBasedServiceImpl;
 import com.nzion.util.*;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamSource;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import javax.servlet.ServletConfig;
@@ -56,6 +60,7 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
     private LabService labService;
     @Autowired
     EnumerationServiceImpl enumerationServiceImpl;
+    private String url;
 
     public void init(ServletConfig config) throws ServletException{
         super.init(config);
@@ -244,7 +249,10 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
             return;
         }
 
-        Map<String, Object> resultStatus = bookAppointment(response, patient, labOrderDto);
+        url = request.getRequestURL().toString();
+        url = url.substring(0, url.lastIndexOf("imagingServiceMaster"));
+
+        Map<String, Object> resultStatus = bookAppointment(response, patient, labOrderDto, tenantId);
 
         String status = (String)resultStatus.get("status");
         PrintWriter writer = response.getWriter();
@@ -434,7 +442,7 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
         }
     }
 
-    public Map<String, Object> bookAppointment(HttpServletResponse response, Patient patient, LabOrderDto labOrderDto) {
+    public Map<String, Object> bookAppointment(HttpServletResponse response, Patient patient, LabOrderDto labOrderDto, String tenantId) {
         //currentSchedule = new Schedule();
         LabOrderRequest labOrderRequest = new LabOrderRequest();
         List<LabOrderItemDto> labOrderItemDtoList = labOrderDto.getRows();
@@ -532,15 +540,74 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
             labOrderRequest.setReferralDoctorName(referralDoctorName);
 
         LabOrderRequest orderRequest = commonCrudService.save(labOrderRequest);
-
+        Invoice invoice = null;
         try{
-             Invoice invoice =  generateInvoice(labOrderRequest, labOrderDto);
+            invoice =  generateInvoice(labOrderRequest, labOrderDto);
         }catch (Exception e){
              e.printStackTrace();
         }
+            InputStreamSource inputStreamSource  = null;
+            if (invoice != null){
+                inputStreamSource = PDFGenerator.createWeeklyProviderRevenueReportPDFFile(invoice, labOrderDto.getPaymentId(), url);
+            }
 
         result.put("labOrder", orderRequest.getId());
         result.put("status", "created");
+            try {
+                Map<String, Object> radiologyDetails = RestServiceConsumer.getRadiologyDetByRadiologyId(tenantId);
+                //for owner
+                final Map adminUserLogin = RestServiceConsumer.getUserLoginByUserName(Infrastructure.getPractice().getAdminUserLogin().getUsername());
+                Object languagePreference = adminUserLogin.get("languagePreference");
+                radiologyDetails.put("languagePreference", languagePreference);
+                radiologyDetails.put("mobileNumber", adminUserLogin.get("mobile_number"));
+                radiologyDetails.put("key", TemplateNames.PLACE_LAB_ORDER_SMS_TO_LAB_ADMIN.name());
+                radiologyDetails.put("forAdmin", new Boolean(true));
+                SmsUtil.sendStatusSms(orderRequest, radiologyDetails);
+                //for admin
+                if ((Infrastructure.getPractice().getIsNotificationSentToAdmin() != null) && (Infrastructure.getPractice().getIsNotificationSentToAdmin().equals("yes"))){
+                    ArrayList<HashMap<String, Object>> adminList = RestServiceConsumer.getAllAdminByTenantId();
+                    radiologyDetails.put("key", TemplateNames.PLACE_LAB_ORDER_SMS_TO_LAB_ADMIN.name());
+                    radiologyDetails.put("forAdmin", new Boolean(true));
+                    radiologyDetails.put("isdCode", Infrastructure.getPractice().getAdminUserLogin().getPerson().getContacts().getIsdCode());
+                    Iterator iterator = adminList.iterator();
+                    while (iterator.hasNext()) {
+                        Map map = (Map) iterator.next();
+                        radiologyDetails.put("mobileNumber", map.get("mobile_number"));
+                        if (map.get("languagePreference") != null){
+                            radiologyDetails.put("languagePreference", map.get("languagePreference"));
+                        } else {
+                            radiologyDetails.put("languagePreference", languagePreference);
+                        }
+                        SmsUtil.sendStatusSms(orderRequest, radiologyDetails);
+                    }
+                }
+
+                String amount = invoice.getCollectedAmount().getAmount().setScale(3, BigDecimal.ROUND_HALF_UP).toString();
+                radiologyDetails.put("collectedAmount", amount);
+
+                radiologyDetails.put("key", TemplateNames.PLACE_LAB_ORDER_SMS_TO_PATIENT.name());
+                radiologyDetails.put("forAdmin", new Boolean(false));
+                SmsUtil.sendStatusSms(orderRequest, radiologyDetails);
+
+                //for email to patient
+                if (orderRequest.getPatient().getLanguage() != null) {
+                    radiologyDetails.put("languagePreference", orderRequest.getPatient().getLanguage().getEnumCode());
+                } else {
+                    radiologyDetails.put("languagePreference", languagePreference);
+                }
+                radiologyDetails.put("afyaId", orderRequest.getPatient().getAfyaId());
+                radiologyDetails.put("firstName", orderRequest.getPatient().getFirstName());
+                radiologyDetails.put("lastName", orderRequest.getPatient().getLastName());
+                radiologyDetails.put("subject", "Lab Order");
+                radiologyDetails.put("template", TemplateNames.PLACE_RADIOLOGY_ORDER_EMAIL_TO_PATIENT.name());
+                radiologyDetails.put("email", orderRequest.getPatient().getContacts().getEmail());
+                radiologyDetails.put("stream", inputStreamSource);
+                radiologyDetails.put("attachment", new Boolean(true));
+                radiologyDetails.put("patient", orderRequest.getPatient());
+                EmailUtil.sendNetworkContractStatusMail(radiologyDetails);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
 
         } catch (Exception e){
             result.put("labOrder", labOrderRequest);

@@ -86,11 +86,20 @@ public class Practice extends IdGeneratingBaseEntity {
 
 	private String labAvailabilityTime;
 
+	private String isNotificationSentToAdmin;
+
 	private String labExperience;
 
 	private BigDecimal turnaroundTime;
-	
-	
+
+	public String getIsNotificationSentToAdmin() {
+		return isNotificationSentToAdmin;
+	}
+
+	public void setIsNotificationSentToAdmin(String isNotificationSentToAdmin) {
+		this.isNotificationSentToAdmin = isNotificationSentToAdmin;
+	}
+
 	public String getServiceTaxNumber() {
 		return serviceTaxNumber;
 	}

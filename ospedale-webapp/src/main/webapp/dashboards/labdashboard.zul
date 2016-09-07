@@ -19,7 +19,7 @@
    <!-- portletDatas.add(new com.nzion.view.PortletData("Messages/Tasks", "/portlets/message-portlet-view.zul", "../images/mail-message-new-64.png", true));-->
     
    <!-- portletDatas.add(new com.nzion.view.PortletData("Imaging Report", "/lab/labRequisitionListAll.zul", "../images/radiologyreport.png", true));-->
-    portletDatas.add(new com.nzion.view.PortletData("Imaging Result", "/billing/labResults.zul", "../images/radiologyreport.png",true));
+    portletDatas.add(new com.nzion.view.PortletData("Imaging Report", "/billing/labResults.zul", "../images/radiologyreport.png",true));
     
  <!--  portletDatas.add(new com.nzion.view.PortletData("Lab Order", "/billing/labOrderPortlet.zul", "../images/labresults.jpg",true));-->
    

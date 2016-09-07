@@ -64,6 +64,8 @@
                     <listhead sizable="true">
                         <listheader forEach="${homeGridMacroController.labels}" label="${each}" sort="auto">
                             <attribute name="onCreate">
+                                if(self.getLabel().equals("Active"))
+                                    self.setWidth("100px");
                                 int index = self.getParent().getChildren().indexOf(self);
                                 self.setSortAscending(homeGridMacroController.getAscComparator(index));
                                 self.setSortDescending(homeGridMacroController.getDescComparator(index));

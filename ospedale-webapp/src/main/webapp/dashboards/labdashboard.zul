@@ -12,19 +12,19 @@
 <zscript>
 	setPageTitle("Dashboard", "");
 	List portletDatas = new ArrayList();
-	portletDatas.add(new com.nzion.view.PortletData("Radiology Requests", "/lab/labRequisitionListView.zul", "../images/RadiologyTestRequest.png", true));
+	portletDatas.add(new com.nzion.view.PortletData("Imaging Requests", "/lab/labRequisitionListView.zul", "../images/RadiologyTestRequest.png", true));
 
     <!-- portletDatas.add(new com.nzion.view.PortletData("Accession", "/lab/labResultEntry.zul", "../images/labresults.jpg", true)); -->
 
    <!-- portletDatas.add(new com.nzion.view.PortletData("Messages/Tasks", "/portlets/message-portlet-view.zul", "../images/mail-message-new-64.png", true));-->
     
-    portletDatas.add(new com.nzion.view.PortletData("Lab Report", "/lab/labRequisitionListAll.zul", "../images/radiologyreport.png", true));
+    portletDatas.add(new com.nzion.view.PortletData("Imaging Report", "/lab/labRequisitionListAll.zul", "../images/radiologyreport.png", true));
     
  <!--  portletDatas.add(new com.nzion.view.PortletData("Lab Order", "/billing/labOrderPortlet.zul", "../images/labresults.jpg",true));-->
    
 <!--     portletDatas.add(new com.nzion.view.PortletData("New IP Lab Order", "/lab/inpatientLabRequests.zul", "../images/labresults.jpg", true)); -->
 </zscript>
-<window self="@{define(applicationContent)}" title="Phlebotomist/Technician Dashboard">
+<window self="@{define(applicationContent)}" title="Technician Dashboard">
 	<dashboard portlets="${portletDatas}" width="100%"/>
 </window>
 </zk>

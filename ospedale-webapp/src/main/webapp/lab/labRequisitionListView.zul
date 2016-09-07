@@ -28,11 +28,11 @@
                             onChange="vm.setPatient(event.getOrigin().getData())" sclass="span12"/>
                 </div>
                 <div zclass="span2">
-                    <label value="Lab From Date"/>
+                    <label value="From Date"/>
                     <datebox id="fromDate" sclass="span12"/>
                 </div>
                 <div zclass="span2">
-                    <label value="Lab Thru Date"/>
+                    <label value="Thru Date"/>
                     <datebox id="thruDate" sclass="span12"/>
                 </div>
                 
@@ -53,7 +53,7 @@
 		
         <tabbox width="100%" sclass="nav_tabs">
         <tabs id="tabs">
-            <tab label="Radiology Request" id="outpatientTab" onSelect="@command('OPDPATIENTS')"/>
+            <tab label="Imaging Request" id="outpatientTab" onSelect="@command('OPDPATIENTS')"/>
             <!-- <tab label="In Patient Lab Request" id="inpatientTab" onSelect="@command('INPATIENT_LAB')" visible="false"/> -->
         </tabs>
         <tabpanels>
@@ -81,7 +81,7 @@
                                 <label value="End Time"/>
                             </vbox>
                         </listheader>
-                        <listheader label="Phlebotomist"/>
+                        <!--<listheader label="Phlebotomist"/>-->
                         <listheader label="Invoice Number"/>
                         <listheader label="Status"/>
                         <listheader label="Requested Date" />  
@@ -98,7 +98,7 @@
                             <listcell label="@load(requisition.labOrderRequest.startTime)@converter('formatedDate', format='hh:mm')"/>
                             <listcell label="@load(requisition.labOrderRequest.endTime)@converter('formatedDate', format='hh:mm')"/>
                            <!-- <listcell label="@load(requisition.labOrderRequest.endTime)@converter('com.nzion.view.component.TimeConverter')"/>-->
-                            <listcell label="@load(requisition.labOrderRequest.phlebotomist.firstName)"/>
+                           <!-- <listcell label="@load(requisition.labOrderRequest.phlebotomist.firstName)"/>-->
                             <listcell label="@load(requisition.invoiceNumber)"></listcell>
                             <listcell label="@load(requisition.status.description)"/>
                            <listcell >

@@ -16,11 +16,11 @@
                             onChange="vm.setPatient(event.getOrigin().getData())" sclass="span12"/>
                 </div>
                 <div zclass="span2">
-                    <label value="Lab From Date"/>
+                    <label value="From Date"/>
                     <datebox id="fromDate" sclass="span12"/>
                 </div>
                 <div zclass="span2">
-                    <label value="Lab Thru Date"/>
+                    <label value="Thru Date"/>
                     <datebox id="thruDate" sclass="span12"/>
                 </div>
               

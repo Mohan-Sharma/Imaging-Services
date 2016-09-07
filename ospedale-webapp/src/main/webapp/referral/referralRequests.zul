@@ -21,7 +21,7 @@
                 <listheader label="Patient Name"/>
                 <listheader label="Patient Mobile Number"/>
                 <listheader label="Visit Date"/>
-                <listheader label="Lab Test"/>
+                <listheader label="Test"/>
                 <listheader label="Status"/>
             </listhead>
             <template name="model" var="each">

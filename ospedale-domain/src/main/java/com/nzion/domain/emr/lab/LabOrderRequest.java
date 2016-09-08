@@ -106,7 +106,7 @@ public class LabOrderRequest extends IdGeneratingBaseEntity{
 	}
 
 	public static enum ORDERSTATUS{
-		BILLING_REQUIRED("New"),INVOICED("Invoiced"),BILLING_DONE("Billed"), INPATIENT_BILLING("Inpatient Billing"), INPROCESS("In Process"), COMPLETED("Completed"), CANCELLED("Cancelled");
+		BILLING_REQUIRED("Invoice Pending"),INVOICED("Payment Pending"),BILLING_DONE("Invoiced"), INPATIENT_BILLING("Inpatient Billing"), INPROCESS("In Process"), COMPLETED("Completed"), CANCELLED("Cancelled");
 
 		private String description;
 

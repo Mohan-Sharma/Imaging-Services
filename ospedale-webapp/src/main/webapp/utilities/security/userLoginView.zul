@@ -239,7 +239,7 @@
 								//if(phlebotomist.isChecked() || technician.isChecked()) self.setVisible(false);
 								if(technician.isChecked()) self.setVisible(true);
 								</attribute>
-									<label style="width:100%;font-size: 10px;">Only When Phlebotomist or Technician Role is Selected</label>
+									<label style="width:100%;font-size: 10px;">Only when Technician role is selected</label>
 								</div>
 								</h:td>
 						</h:tr>
@@ -264,7 +264,7 @@
 							//	if(phlebotomist.isChecked() || technician.isChecked()) self.setVisible(false);
 							if(technician.isChecked()) self.setVisible(false);
 						</attribute>
-									<label style="width:100%;font-size: 10px;">Only When Phlebotomist or Technician Role is Selected</label>
+									<label style="width:100%;font-size: 10px;">Only when Technician role is selected</label>
 						</div>
 							</h:td>
 						</h:tr>

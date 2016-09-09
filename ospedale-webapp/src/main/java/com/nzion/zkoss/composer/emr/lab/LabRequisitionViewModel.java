@@ -1,6 +1,7 @@
 package com.nzion.zkoss.composer.emr.lab;
 
 import com.nzion.domain.Patient;
+import com.nzion.domain.Roles;
 import com.nzion.domain.UserLogin;
 import com.nzion.domain.emr.lab.LabOrderRequest;
 import com.nzion.domain.emr.lab.LabRequisition;
@@ -152,13 +153,20 @@ public class LabRequisitionViewModel {
     @NotifyChange("requisitionList")
     public void fetchOPDPatientLabRequistions(@BindingParam("fromDate")Datebox fromDate,@BindingParam("thruDate")Datebox thruDate,@BindingParam("ipNumber")Textbox ipNumber){
     	inpatientRequestFetch=false;
-    	
+		boolean isPhlebotomist = false;
+		boolean isTechnician = false;
     	UserLogin login = Infrastructure.getUserLogin();
-    	Set <Laboratories>laboratories = login.getLaboratories();
-    	List<String> laboratoryIds = new ArrayList<String> ();
-    	for(Laboratories laboratory : laboratories){
-    		laboratoryIds.add(laboratory.getLaboratoryCode());
-    	}
+		List<String> laboratoryIds = new ArrayList<String>();
+
+		if(login.hasRole(Roles.PHLEBOTOMIST)) isPhlebotomist = true;
+		if(login.hasRole(Roles.TECHNICIAN)) isTechnician = true;
+
+		if((isTechnician) || (isPhlebotomist)) {
+			Set<Laboratories> laboratories = login.getLaboratories();
+			for (Laboratories laboratory : laboratories) {
+				laboratoryIds.add(laboratory.getLaboratoryCode());
+			}
+		}
     	
     	List<LabRequisition> labRequisitionList;
     	  
@@ -173,15 +181,19 @@ public class LabRequisitionViewModel {
     				UtilDateTime.getDayEnd(currentDate),patient,null,null);
     	
     	requisitionList = new ArrayList<LabRequisition>();
-        for(LabRequisition labRequisition: labRequisitionList){
-        	Set<Laboratories> laboratories2 = labRequisition.getLabOrderRequest().getLaboratories();
-        	for(Laboratories laboratories3 : laboratories2){
-        		if(laboratoryIds.contains(laboratories3.getLaboratoryCode())){
-        			requisitionList.add(labRequisition);
-        			break;
-        		}
-        	}
-      }
+		if((isTechnician) || (isPhlebotomist)) {
+			for (LabRequisition labRequisition : labRequisitionList) {
+				Set<Laboratories> laboratories2 = labRequisition.getLabOrderRequest().getLaboratories();
+				for (Laboratories laboratories3 : laboratories2) {
+					if (laboratoryIds.contains(laboratories3.getLaboratoryCode())) {
+						requisitionList.add(labRequisition);
+						break;
+					}
+				}
+			}
+		} else {
+			requisitionList.addAll(labRequisitionList);
+		}
  }
     
     @Command("INPATIENT_LAB_OR_OPDPATIENTS")

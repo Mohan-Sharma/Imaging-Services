@@ -168,33 +168,33 @@
          <label style="font-size:12px;font-weight:bold;font-family:Calibri; margin:20px 0px 0px 30px;" value="Service Contract List:" />
           <n:table class="personDet" style="align:center;width:100%;margin-left:30px " align="center" border="1px">
                                 <n:tr >
-                                                 <n:td style="width:30%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
+                                                 <n:td style="width:13%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
                                                     Type
                                                  </n:td>
-                                                 <n:td style="width:20%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
+                                                 <n:td style="width:65%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
                                                     Service Name
                                                  </n:td>
 
-                                                 <n:td style="width:20%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
+                                                 <n:td style="width:10%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
                                                      Payment Percentage
                                                  </n:td>
 
-                                                 <n:td style="width:20%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
+                                                 <n:td style="width:12%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
                                                      Payment Amount
                                                  </n:td>
 
                                 </n:tr>
                                 <n:tr forEach="${referralContract.referralContractServices}">
-                                                <n:td style="width:30%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
+                                                <n:td style="width:13%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
                                                     ${each.serviceSubGroupDescription}
                                                 </n:td>
-                                                <n:td style="width:20%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
+                                                <n:td style="width:65%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
                                                     ${each.serviceName}
                                                 </n:td>
-                                                <n:td style="width:20%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
+                                                <n:td style="width:10%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
                                                     ${each.paymentPercentage}
                                                 </n:td>
-                                                <n:td style="width:20%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
+                                                <n:td style="width:10%;font-size:12px;font-weight:normal;font-family:Calibri;text-align:center">
                                                     ${each.paymentAmount}
                                                 </n:td>
                                 </n:tr>

@@ -22,7 +22,7 @@
                         <textbox id="searchServiceTextBox" />
                          <button label="Search" zclass="btn-success btn" onClick="@command('search')" />
 
-                        <label value="Pecentage"  />
+                        <label value="Percentage"  />
                         <decimalbox id="percentageDecimalBox"  format="###.###" value="@{vm.paymentPercentage}">
                             <attribute name="onChange">
                                 vm.setPaymentAmount(0);
@@ -59,16 +59,26 @@
                 <panelchildren>
                         <listbox height="200px" id="serviceContractListBox" model="@{vm.referralContractServices, load-after='self.onReload'}">
                                 	<listhead>
-                                		<listheader label="Type"></listheader>
-                                		<listheader label="Service Name"></listheader>
-                                		<listheader label="Payment Percentage"></listheader>
-                                		<listheader label="Payment Amount"></listheader>
+                                        <listheader label="Type" width="13%"/>
+                                        <listheader label="Service Name"/>
+                                        <listheader width="12%">
+                                            <vbox>
+                                                <label value="Payment" zclass="z-listheader-cnt"/>
+                                                <label value="Percentage" zclass="z-listheader-cnt"/>
+                                            </vbox>
+                                        </listheader>
+                                        <listheader width="10%">
+                                            <vbox>
+                                                <label value="Payment" zclass="z-listheader-cnt"/>
+                                                <label value="Amount" zclass="z-listheader-cnt"/>
+                                            </vbox>
+                                        </listheader>
                                 	</listhead>
                                 <listitem self="@{each='svc'}" value="@{svc}">
                                         <listcell label="@{svc.serviceSubGroupDescription}"/>
                                         <listcell label="@{svc.serviceName}"/>
                                         <listcell>
-                                            <decimalbox value="@{svc.paymentPercentage}" format="###.###" constraint="no negative">
+                                            <decimalbox value="@{svc.paymentPercentage}" format="###.###" constraint="no negative" width="90%">
                                                 <attribute name="onCreate">
                                                 if ("PERCENTAGE_SERVICE_ITEM".equals(referralContract.getPaymentMode()))  {
                                                     self.setDisabled(false);
@@ -80,7 +90,7 @@
                                             </decimalbox>
                                         </listcell>
                                         <listcell>
-                                            <decimalbox value="@{svc.paymentAmount}" format="##########.###" constraint="no negative">
+                                            <decimalbox value="@{svc.paymentAmount}" format="##########.###" constraint="no negative" width="90%">
                                                 <attribute name="onCreate">
                                                     if ("FIX_AMOUNT_PER_SERVICE".equals(referralContract.getPaymentMode()))  {
                                                         self.setDisabled(false);

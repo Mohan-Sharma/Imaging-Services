@@ -120,7 +120,7 @@
                 <column label="Referral"/>
                 <column label="Referral Doctor"/>
                 <column label="Status" />
-                <column label="Action" />
+                <column label="Action" width="10%"/>
             </columns>
             <rows>
             <row self="@{each='labOrderRequest'}" value="@{labOrderRequest}">

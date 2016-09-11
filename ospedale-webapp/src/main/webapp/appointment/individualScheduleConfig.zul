@@ -182,7 +182,7 @@
 						<datebox constraint="no past" value="@{association.thruDate, save-when='saveAssocBtn.onClick', load-after='saveAssocBtn.onClick'}" id="endDatebox" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
 						</div>
 						<div zclass="span2" id="visitTypeDiv">
-							<label value="Calendar type/Visit type" mold="required"/>
+							<label value="Visit type" mold="required"/>
 							<combobox id="visitTypeCombo" disabled="true">
 								<comboitem value="WalkinAppointment" label="PREMIUM APPOINTMENT"/>
 								<comboitem value="HomePhlebotomy" label="HOME PHLEBOTOMY"/>

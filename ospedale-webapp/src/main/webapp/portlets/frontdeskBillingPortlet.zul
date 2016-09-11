@@ -59,11 +59,11 @@
                     <textbox id="ipNumber" sclass="span12"/>
                 </div>-->
                 <div zclass="span2">
-                    <label value="Invoice From Date"/>
+                    <label value="From Date"/>
                     <datebox id="fromDate" sclass="span12"/>
                 </div>
                 <div zclass="span2">
-                    <label value="Invoice To Date"/>
+                    <label value="To Date"/>
                     <datebox id="thruDate" sclass="span12"/>
                 </div>
                 

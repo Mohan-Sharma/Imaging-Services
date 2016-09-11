@@ -32,7 +32,7 @@
                     <listcell label="@load(each.patientMobileNumber)"/>
                     <listcell label="@load(each.visitDate) @converter('formatedDate',format='dd/MM/yyyy')"/>
                     <listcell label="@load(each.labTest)"/>
-                    <listcell label="@load(each.status)"/>
+                    <listcell label="@load(each.status.name)"/>
                 </listitem>
             </template>
         </listbox>

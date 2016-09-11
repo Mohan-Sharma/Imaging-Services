@@ -72,5 +72,6 @@ public interface BillingService {
 	List<LabTest> getPriceForLabTest(List<LabTest> labTests);
 
 	boolean updatePriceInLabTariff(List<LabTest> labTests);
-	
+	List<LabTestPanel> getPriceForLabTestPanel(List<LabTestPanel> labTestPanels);
+	boolean updatePriceInLabTariffForLabTestPanel(List<LabTestPanel> labTestPanels);
 }

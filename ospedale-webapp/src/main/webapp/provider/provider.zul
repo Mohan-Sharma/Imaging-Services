@@ -128,18 +128,12 @@
                     <label value="Mobile Number"/>
                     <phonebox value="@{providerController.provider.contacts.mobileNumber,save-when='Save.onClick'}" maxlength="11" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
                 </div>
-                <div zclass="span2">
+                <div zclass="span3">
                     <label value="Gender" mold="required"/>
                     <enumeration enumType="GENDER" selectedItem="@{providerController.provider.gender,save-when='Save.onClick'}" id="gender"
                                  constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
                 </div>
-                <div zclass="span2">
-                    <label value="Nationality"/>
-                    <combobox readonly="true" id="nationalityBox" selectedItem="@{providerController.provider.nationality,save-when='Save.onClick'}" sclass="span12">
-                        <comboitem self="@{each='nationality'}" value="@{nationality}" label="@{nationality.name}"/>
-                        <comboitem forEach="${allNationality}" value="${each.nationality}" label="${each.nationality}"></comboitem>
-                    </combobox>
-                </div>
+
             </div>
             <!--<div zclass="row-fluid">
                 <div zclass="span6">
@@ -156,7 +150,14 @@
 
             </div>-->
             <div zclass="row-fluid">
-                <div zclass="span4">
+                <div zclass="span3">
+                    <label value="Nationality"/>
+                    <combobox readonly="true" id="nationalityBox" selectedItem="@{providerController.provider.nationality,save-when='Save.onClick'}" sclass="span12">
+                        <comboitem self="@{each='nationality'}" value="@{nationality}" label="@{nationality.name}"/>
+                        <comboitem forEach="${allNationality}" value="${each.nationality}" label="${each.nationality}"></comboitem>
+                    </combobox>
+                </div>
+                <div zclass="span5">
                     <label value="Spoken Language"/>
                     <listbox model="@{spokenLanguages}" sclass="span12" multiple="true" id="spokenLanguageListbox" rows="5"
                              mold="select" sizedByContent="true" vflex="true"
@@ -164,14 +165,14 @@
                         <listitem self="@{each}" value="@{each}" label="@{each.description}"></listitem>
                     </listbox>
                 </div>
-                <div zclass="span4">
+                <!--<div zclass="span4">
                     <label value="Specialities" mold="required"/>
                     <listbox model="@{specialities}" sclass="span12" multiple="true" id="specialityListbox" rows="5"
                              mold="select" sizedByContent="true" vflex="true"
                              selectedItem="@{providerController.provider.specialities, converter=com.nzion.view.component.MultipleListitemBindingConverter}">
                         <listitem self="@{each}" value="@{each}" label="@{each.description}"></listitem>
                     </listbox>
-                </div>
+                </div>-->
                 <div zclass="span4">
                     <label value="Experience in Years"></label>
                     <intbox id="experience" width="30" sclass="span12" value="@{providerController.provider.experience,save-when='Save.onClick'}"/>
@@ -185,6 +186,16 @@
                 <div zclass="span6">
                     <label value="Speciality to be Displayed In Arabic"/>
                     <textbox id="specialityArabic"  sclass="span12" value="@{providerController.provider.specialityToDisplayInAr,save-when='Save.onClick'}"/>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span6">
+                    <label value="Expertise in English : "/>
+                    <textbox id="expertiseInEnglish" value="@{providerController.provider.expertise,save-when='Save.onClick'}" sclass="span12" maxlength="255"/>
+                </div>
+                <div zclass="span6">
+                    <label value="Expertise in Arabic : "/>
+                    <textbox id="expertiseInArabic" value="@{providerController.provider.expertiseAr,save-when='Save.onClick'}" sclass="span12" maxlength="255"/>
                 </div>
             </div>
             <div zclass="row-fluid">
@@ -259,16 +270,7 @@
                     </combobox>
                 </div>
             </div>-->
-            <div zclass="row-fluid">
-                <div zclass="span6">
-                    <label value="Expertise in English : "/>
-                    <textbox id="expertiseInEnglish" value="@{providerController.provider.expertise,save-when='Save.onClick'}" sclass="span12" maxlength="255"/>
-                </div>
-                <div zclass="span6">
-                    <label value="Expertise in Arabic : "/>
-                    <textbox id="expertiseInArabic" value="@{providerController.provider.expertiseAr,save-when='Save.onClick'}" sclass="span12" maxlength="255"/>
-                </div>
-            </div>
+
             <div zclass="row-fluid">
                 <div zclass="span6">
                     <label value="Certification in English : "/>

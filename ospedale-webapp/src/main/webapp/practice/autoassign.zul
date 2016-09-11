@@ -34,7 +34,13 @@
 					}
 				]]>
 				</attribute>
-					<listcell label="@{seq.description}" />
+					<listcell label="@{seq.description}">
+						<attribute name="onCreate">
+							if(self.getParent().getValue().getDescription().equals("OPD Billing")){
+							self.setLabel("Bill No");
+							}
+						</attribute>
+					</listcell>
 					<listcell>
 						<textbox value="@{seq.prefix}"/>
 					</listcell>

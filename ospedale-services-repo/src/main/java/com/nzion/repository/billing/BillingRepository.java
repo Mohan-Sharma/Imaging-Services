@@ -67,4 +67,7 @@ public interface BillingRepository extends BaseRepository {
 
 	boolean updatePriceInLabTariff(List<LabTest> labTests);
 
+	List<LabTestPanel> getPriceForLabTestPanel(List<LabTestPanel> labTestPanels);
+	boolean updatePriceInLabTariffForLabTestPanel(List<LabTestPanel> labTestPanels);
+
 }

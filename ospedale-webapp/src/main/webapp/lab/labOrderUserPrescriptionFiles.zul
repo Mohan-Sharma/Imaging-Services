@@ -17,7 +17,7 @@
 
         <div style="padding:5px" zclass="page-header titled-well">
             <h:h1>
-                <h:small>File View :</h:small>
+                <h:small>Prescription View :</h:small>
                 <button type="button" zclass="close" onClick="labOrderRequestWin.detach();">×</button>
             </h:h1>
         </div>

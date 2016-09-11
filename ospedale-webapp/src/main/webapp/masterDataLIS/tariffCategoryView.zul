@@ -6,7 +6,7 @@
     </zscript>
     <window>
         <screen width="100%" listtitle="List of Tariff Categories" addpage="tariffCategoryAdd" editpage="tariffRate" addmodepopup="true" entityclass="com.nzion.domain.billing.TariffCategory"
-                fields="tariffName,patientCategory" labels="Tariff Name,Patient Type" hidedeletebtn="true" hideactivation="true" hideaddbtn="true"
+                fields="tariffName,patientCategory" labels="Tariff Name,Payment Type" hidedeletebtn="true" hideactivation="true" hideaddbtn="true"
                 hidedeactivation="true"/>
 
     </window>

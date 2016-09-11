@@ -10,7 +10,7 @@
 		//com.nzion.domain.screen.ScheduleConfig screenDisplay = scheduleService.getAppointmentDisplayScreen();
 		List persons = scheduleService.getSchedulablePersons();
 		com.nzion.domain.Person person = new com.nzion.domain.Person();
-		person.setFirstName("IMAGING WALKIN");
+		person.setFirstName("IMAGING CENTER");
 		persons.add(person);
 
 		EntityDropdownRenderer dropdownRenderer = new EntityDropdownRenderer(new EntityDropDownPersonNameAdapter());
@@ -21,13 +21,13 @@
 	</zscript>
 	<div style="padding:5px" zclass="page-header titled-well">
             <h:h1>
-                <h:small>Personal Calendar</h:small>
+                <h:small>Imaging Center Calendar</h:small>
             </h:h1>
          </div>
 			<div class="container-fluid">
 		       <div zclass="row-fluid">
                  <div zclass="span2">
-						<label value="Person"/>
+						<label value="Imaging Center"/>
 						<label value=" *" zclass="labelReq"/>
 						<!--<combobox selectedItem="@{association.person, save-when='saveAssocBtn.onClick', load-after='saveAssocBtn.onClick'}" readonly="true"
 											id="personCombo" constraint="no empty, no past" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" model="@{persons}" itemRenderer="${dropdownRenderer}">
@@ -44,7 +44,7 @@
 							 <!--<attribute name="onCreate">
 								 if(persons.size() == 1) {
 								 self.getParent().setSelectedItem(self);
-								 if(self != null) {
+							/*	 if(self != null) {
 								 association.setPerson((com.nzion.domain.Person)self.getValue());
 								 associations = scheduleService.getAllCalendarAssociationsFor(self.getValue());
 								 }
@@ -52,7 +52,7 @@
 								 if(com.nzion.util.UtilValidator.isEmpty(locations)){
 								 List locationsList = commonCrudService.getAll(Location.class, "name");
 								 locations.addAll(locationsList);
-								 }
+								 } */
 								 //visitTypeSoapModules = commonCrudService.findByEquality(VisitTypeSoapModule.class, new String[]{"provider.id"}, new Object[]{association.getPerson().getId()});
 
 								 }
@@ -182,9 +182,9 @@
 						<datebox constraint="no past" value="@{association.thruDate, save-when='saveAssocBtn.onClick', load-after='saveAssocBtn.onClick'}" id="endDatebox" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
 						</div>
 						<div zclass="span2" id="visitTypeDiv">
-							<label value="Visit Type" mold="required"/>
+							<label value="Calendar type/Visit type" mold="required"/>
 							<combobox id="visitTypeCombo" disabled="true">
-								<comboitem value="WalkinAppointment" label="WALKIN APPOINTMENT"/>
+								<comboitem value="WalkinAppointment" label="PREMIUM APPOINTMENT"/>
 								<comboitem value="HomePhlebotomy" label="HOME PHLEBOTOMY"/>
 							</combobox>
 						</div>

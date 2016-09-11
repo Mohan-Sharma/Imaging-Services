@@ -24,7 +24,7 @@
 
         <div style="padding:5px" zclass="page-header titled-well">
             <h:h1>
-                <h:small>Result Upload</h:small>
+                <h:small>Report Upload</h:small>
                 <button type="button" zclass="close" onClick="labOrderRequestWin.detach();">×</button>
             </h:h1>
         </div>
@@ -40,7 +40,7 @@
                 </listbox>
             </div>
             <div zclass="span4">
-                <label value="Result Type" mold="required"/>
+                <label value="Report Type" mold="required"/>
                 <combobox id="resultTypeCombobox" constraint="no empty" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" sclass="span12">
                     <comboitem value="KEYIMAGES" label="Key Images"/>
                     <comboitem value="TESTRESULTS" label="Test Results"/>
@@ -121,7 +121,7 @@
                     <listbox model="@bind(vm.labResultAttachments)">
                         <listhead>
                             <listheader label="Test Name"/>
-                            <listheader label="Result Type"/>
+                            <listheader label="Report Type"/>
                             <listheader label="File Name"/>
                             <listheader label="Action" />
                         </listhead>

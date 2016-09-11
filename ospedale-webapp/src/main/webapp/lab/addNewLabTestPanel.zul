@@ -123,7 +123,7 @@
                     <h:table width="100%">
                         <h:tr>
                             <h:td width="100%">
-                                <label value="Lab Test"/>
+                                <label value="Test"/>
                                 <div align="right">
                                     <textbox name="search" id="txtSearch" sclass="span2 search-query"
                                              onFocus="self.setValue(null);" onOK='Events.postEvent("onClick", searchBt, null);' />

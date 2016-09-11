@@ -13,6 +13,7 @@
 						<!--<tab label="Document Management"  onClick="folderCategory.invalidate();"></tab>
 						<tab label="Naming Defaults" /> -->
 						<!--<tab label="RCM Preferences" />-->
+						<tab label="Notification Preferences"/>
 						<tab label="Invoice Preference" />
 					</tabs>
 					<tabpanels width="70%">
@@ -28,6 +29,9 @@
 						<tabpanel>
 						    <include src="/practice/rcmPreference.zul"/>
 						</tabpanel>-->
+						<tabpanel>
+							<include src="/practice/notificationSettingPreference.zul"/>
+						</tabpanel>
 						<tabpanel>
 							<include src="/billing/billingPreference.zul"/>
 						</tabpanel>

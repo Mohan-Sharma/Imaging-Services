@@ -17,6 +17,7 @@ public class Equipment extends IdGeneratingBaseEntity {
     private static final long serialVersionUID = 1L;
     private Integer eqpCode;
     private String eqpName;
+    private String eqpNameForPatient;
     private String eqpAlias;
     private String eqpType;
     private String baudRate;
@@ -26,6 +27,8 @@ public class Equipment extends IdGeneratingBaseEntity {
     private String accessionNo;
     private String pcName;
     private String briefDescription;
+    private String briefDescriptionForPatientEng;
+    private String briefDescriptionForPatientAr;
     private String imageUrl;
 
     public String getPcName() {
@@ -110,6 +113,14 @@ public class Equipment extends IdGeneratingBaseEntity {
         this.eqpCode = eqpCode;
     }
 
+    public String getEqpNameForPatient() {
+        return eqpNameForPatient;
+    }
+
+    public void setEqpNameForPatient(String eqpNameForPatient) {
+        this.eqpNameForPatient = eqpNameForPatient;
+    }
+
     @Lob
     @Column(name = "BRIEF_DESCRIPTION", length = 1024)
     public String getBriefDescription() {
@@ -118,6 +129,26 @@ public class Equipment extends IdGeneratingBaseEntity {
 
     public void setBriefDescription(String briefDescription) {
         this.briefDescription = briefDescription;
+    }
+
+    @Lob
+    @Column(name = "BRIEF_DESCRIPTION_FOR_PATIENT_ENG", length = 1024)
+    public String getBriefDescriptionForPatientEng() {
+        return briefDescriptionForPatientEng;
+    }
+
+    public void setBriefDescriptionForPatientEng(String briefDescriptionForPatientEng) {
+        this.briefDescriptionForPatientEng = briefDescriptionForPatientEng;
+    }
+
+    @Lob
+    @Column(name = "BRIEF_DESCRIPTION_FOR_PATIENT_AR", length = 1024)
+    public String getBriefDescriptionForPatientAr() {
+        return briefDescriptionForPatientAr;
+    }
+
+    public void setBriefDescriptionForPatientAr(String briefDescriptionForPatientAr) {
+        this.briefDescriptionForPatientAr = briefDescriptionForPatientAr;
     }
 
     public String getImageUrl() {

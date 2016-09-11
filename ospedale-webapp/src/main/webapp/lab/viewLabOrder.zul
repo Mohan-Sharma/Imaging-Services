@@ -8,7 +8,7 @@
             viewModel="@id('vm') @init('com.nzion.zkoss.composer.emr.lab.LabOrderInvoiceViewModel')">
         <listbox model="@bind(vm.labTestsOrdered)" id="patientLabOrderListBox" multiple="true" checkmark="false" selectedItems="@bind(vm.selected)">
             <listhead>
-                <listheader>Test Panel</listheader>
+                <listheader>Test/Profile/Package</listheader>
                  <!--<listheader>Status</listheader>
                 <listheader>Price</listheader>-->
             </listhead >

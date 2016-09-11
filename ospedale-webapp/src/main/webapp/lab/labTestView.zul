@@ -3,10 +3,10 @@
 <zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
 	xmlns:n="http://www.zkoss.org/2005/zk/native">
 	<zscript>
-		setPageTitle("Lab Test", "");
+		setPageTitle("Test", "");
 </zscript>
 	<window id="labTestViewWindow">
-	<screen width="100%" listtitle="List of Radiology Tests" addpage="newLabTest"
+	<screen width="100%" listtitle="List of Tests" addpage="newLabTest"
 	entityclass="com.nzion.domain.emr.lab.LabTest" addmodepopup="true"  fields="department,laboratory.laboratory,testDescription,testPneumonic,active"
 	labels="Department,Sub Department,Afya Test Name,Display Name,Active" searchfields="testCode,testDescription"
 	hideactivation="false" hidedeletebtn="true" hideaddbtn = "true" containername="contentArea"/>

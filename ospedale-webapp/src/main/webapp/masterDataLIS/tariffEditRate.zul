@@ -6,6 +6,7 @@
         <![CDATA[
         import com.nzion.service.common.CommonCrudService;
         import com.nzion.domain.emr.lab.LabTest;
+        import com.nzion.domain.emr.lab.LabTestPanel;
         com.nzion.service.billing.BillingService billingService = com.nzion.util.Infrastructure.getSpringBean("billingService");
         com.nzion.domain.billing.TariffCategory tariffCategory = null;
         if(tariffCategory == null)
@@ -13,11 +14,14 @@
         com.nzion.domain.emr.lab.LabTest lt = new com.nzion.domain.emr.lab.LabTest();
         List labTestList = commonCrudService.findByEquality(LabTest.class,new String[]{"active"},new Object[]{lt.isActive()});
         billingService.getPriceForLabTest(labTestList);
+        com.nzion.domain.emr.lab.LabTestPanel ltPanel = new com.nzion.domain.emr.lab.LabTestPanel();
+        List labTestPanelList = commonCrudService.findByEquality(LabTestPanel.class,new String[]{"active"},new Object[]{ltPanel.isActive()});
+        labTestPanelList = billingService.getPriceForLabTestPanel(labTestPanelList);
 
 
          ]]>
     </zscript>
-    <window id="tariffRateId" mode="modal" width="50%" position="center,top">
+    <window id="tariffRateId" mode="modal" width="60%" position="center,top">
         <div style="padding:5px" zclass="page-header titled-well">
             <h:h1>
                 <h:small>Edit Tariff Rate</h:small>
@@ -28,23 +32,23 @@
             <div zclass="row-fluid">
                 <div zclass="span4">
                     <label value="Tariff Code"/>
-                    <textbox value="${tariffCategory.tariffCode}" sclass="span12"/>
+                    <textbox value="${tariffCategory.tariffCode}" sclass="span12" readonly="true"/>
                 </div>
                 <div zclass="span4">
                     <label value="Tariff Name"/>
-                    <textbox value="${tariffCategory.tariffName}" sclass="span12"/>
+                    <textbox value="${tariffCategory.tariffName}" sclass="span12" readonly="true"/>
                 </div>
                 <div zclass="span4">
-                    <label value="Patient Type"/>
-                    <textbox value="${tariffCategory.patientCategory}" sclass="span12"/>
+                    <label value="Payment Type"/>
+                    <textbox value="${tariffCategory.patientCategory}" sclass="span12" readonly="true"/>
                 </div>
             </div>
             <div zclass="row-fluid">
                 <div zclass="span4">
                     <separator/><separator/>
-                    <combobox sclass="span12" id="editRate" readonly="true" constraint="no empty" autodrop="true"
+                    <combobox placeholder="Select Imaging Category" sclass="span12" id="editRate" readonly="true" constraint="no empty" autodrop="true"
                               w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
-                        <comboitem label="Radiology Test" value="LAB_TEST" id="labTestItem"/>
+                        <comboitem label="Test" value="LAB_TEST" id="labTestItem"/>
                         <comboitem label="Health Package" value="HEALTH_PACKAGE" id="labPanelItem"/>
                     </combobox>
                 </div>
@@ -60,19 +64,15 @@
 
         <separator/>
         <panel id="radiologyTest" visible="false">
-            <caption label="Radiology Test"/>
+            <caption label="Test"/>
             <panelchildren>
                 <listbox model="@{labTestList}" mold="paging" rows="12">
                     <listhead>
-                        <listheader label="Test Code" sort="auto(testCode)"/>
+                        <listheader label="CPT Code" sort="auto(testCode)"/>
                         <listheader label="Department" sort="auto(department)"/>
-                        <listheader label="Description" sort="auto(testDescription)"/>
-                        <listheader sort="auto(homeServiceAmount)">
-                            <vlayout>
-                                <label value="Premium Appointment"/>
-                                <label value="Amount (KD)"/>
-                            </vlayout>
-                        </listheader>
+                        <listheader label="Sub Department" sort="auto(laboratory.laboratory)"/>
+                        <listheader label="Display Name" sort="auto(testPneumonic)" width="45%"/>
+                        <listheader label="Afya Rate (KD)"/>
                         <!--<listheader>
                             <vlayout>
                                 <label value="Walk-in "/>
@@ -83,10 +83,11 @@
                     <listitem self="@{each='lab'}" value="@{lab}">
                         <listcell label="@{lab.testCode}"/>
                         <listcell label="@{lab.department}"/>
-                        <listcell label="@{lab.testDescription}">
+                        <listcell label="@{lab.laboratory.laboratory}"/>
+                        <listcell label="@{lab.testPneumonic}">
                         </listcell>
                         <listcell>
-                            <decimalbox value="@{lab.homeServiceAmount,save-when='save.onClick'}"></decimalbox>
+                            <decimalbox value="@{lab.homeServiceAmount,save-when='save.onClick'}" width="90%"></decimalbox>
                         </listcell>
                         <!--<listcell>
                             <decimalbox value="@{lab.billableAmount,save-when='save.onClick'}"></decimalbox>
@@ -98,34 +99,29 @@
         <panel id="healthPackage" visible="false">
             <caption label="Health Package"/>
             <panelchildren>
-                <!--<listbox model="@{labTestPanelList}">
+                <listbox model="@{labTestPanelList}">
                     <listhead>
-                        <listheader label="Test Code"/>
-                        <listheader label="Description" sort="auto(panelDescription)"/>
-                        <listheader>
-                            <vlayout>
-                                <label value="Home Service"/>
-                                <label value="Amount (KD)"/>
-                            </vlayout>
-                        </listheader>
-                        <listheader>
+                       <!-- <listheader label="Test Code"/>-->
+                        <listheader label="Display Name" sort="auto(panelPneumonic)" width="85%"/>
+                        <listheader label="Afya Rate (KD)"/>
+                        <!--<listheader>
                             <vlayout>
                                 <label value="Walk-in "/>
                                 <label value="Amount (KD)"/>
                             </vlayout>
-                        </listheader>
+                        </listheader>-->
                     </listhead>
                     <listitem self="@{each='labb'}" value="@{labb}">
-                        <listcell label="@{labb.panelCode}"/>
-                        <listcell label="@{labb.panelDescription}"/>
+                       <!-- <listcell label="@{labb.panelCode}"/>-->
+                        <listcell label="@{labb.panelPneumonic}"/>
                         <listcell>
-                            <decimalbox value="@{labb.homeServiceAmount,save-when='save.onClick'}"></decimalbox>
+                            <decimalbox value="@{labb.homeServiceAmount,save-when='save.onClick'}" width="90%"></decimalbox>
                         </listcell>
-                        <listcell>
+                       <!-- <listcell>
                             <decimalbox value="@{labb.billableAmount,save-when='save.onClick'}"></decimalbox>
-                        </listcell>
+                        </listcell>-->
                     </listitem>
-                </listbox>-->
+                </listbox>
             </panelchildren>
         </panel>
         </div>
@@ -135,9 +131,9 @@
                     if("LAB_TEST".equals(editRate.getSelectedItem().getValue())){
                     billingService.updatePriceInLabTariff(labTestList);
                     }
-                /*    if("HEALTH_PACKAGE".equals(editRate.getSelectedItem().getValue())){
+                    if("HEALTH_PACKAGE".equals(editRate.getSelectedItem().getValue())){
                     billingService.updatePriceInLabTariffForLabTestPanel(labTestPanelList);
-                    }  */
+                    }
                     com.nzion.util.UtilMessagesAndPopups.showSuccess();
                     tariffRateId.detach();
                 </attribute>

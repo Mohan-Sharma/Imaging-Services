@@ -32,7 +32,7 @@
                     <datebox id="fromDate" sclass="span12"/>
                 </div>
                 <div zclass="span2">
-                    <label value="Thru Date"/>
+                    <label value="To Date"/>
                     <datebox id="thruDate" sclass="span12"/>
                 </div>
                 
@@ -62,7 +62,7 @@
                     <listhead>
                         <listheader label="Token" width="50px"/>
                         <listheader label="Patient Name"/>
-                        <listheader label="Mobile Number"/>
+                       <!-- <listheader label="Mobile Number"/>-->
                         <listheader>
                             <vbox>
                                 <label value="Appointment"/>
@@ -82,7 +82,7 @@
                             </vbox>
                         </listheader>
                         <!--<listheader label="Phlebotomist"/>-->
-                        <listheader label="Invoice Number"/>
+                       <!-- <listheader label="Invoice Number"/>-->
                         <listheader label="Status"/>
                         <listheader label="Requested Date" />  
                         <listheader label="Action"/>
@@ -93,13 +93,13 @@
                             <listcell>
                                 <name value="@load(requisition.patient.firstName)"/>
                             </listcell>
-                            <listcell label="@load(requisition.patient.contacts.mobileNumber)"/>
+                          <!--  <listcell label="@load(requisition.patient.contacts.mobileNumber)"/>-->
                             <listcell label="@load(requisition.labOrderRequest.startDate)@converter('formatedDate', format='dd/MM/yyyy') "/>
                             <listcell label="@load(requisition.labOrderRequest.startTime)@converter('formatedDate', format='hh:mm')"/>
                             <listcell label="@load(requisition.labOrderRequest.endTime)@converter('formatedDate', format='hh:mm')"/>
                            <!-- <listcell label="@load(requisition.labOrderRequest.endTime)@converter('com.nzion.view.component.TimeConverter')"/>-->
                            <!-- <listcell label="@load(requisition.labOrderRequest.phlebotomist.firstName)"/>-->
-                            <listcell label="@load(requisition.invoiceNumber)"></listcell>
+                         <!--   <listcell label="@load(requisition.invoiceNumber)"></listcell>-->
                             <listcell label="@load(requisition.status.description)"/>
                            <listcell >
                             <label value="@load(requisition.createdTxTimestamp)@converter('formatedDate', format='dd/MM/yyyy')"/>
@@ -129,7 +129,7 @@
                                             }
                                        ]]> </attribute>
                                 </button>-->
-                                <button label="Result Upload" sclass="btn-mini">
+                                <button label="Report Upload" sclass="btn-mini">
                                     <attribute name="onClick">
                                         <![CDATA[
                                               Executions.createComponents("/lab/labOrderResult.zul", null,com.nzion.util.UtilMisc.toMap("labRequisition",self.getParent().getParent().getValue()));

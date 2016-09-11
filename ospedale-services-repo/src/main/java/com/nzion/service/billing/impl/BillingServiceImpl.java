@@ -569,5 +569,15 @@ public class BillingServiceImpl implements BillingService {
         return billingRepository.updatePriceInLabTariff(labTests);
     }
 
+    public  List<LabTestPanel> getPriceForLabTestPanel(List<LabTestPanel> labTestPanels){
+
+        return billingRepository.getPriceForLabTestPanel(labTestPanels);
+    }
+
+    public boolean updatePriceInLabTariffForLabTestPanel(List<LabTestPanel> labTestPanels){
+        return billingRepository.updatePriceInLabTariffForLabTestPanel(labTestPanels);
+    }
+
+
 
 }

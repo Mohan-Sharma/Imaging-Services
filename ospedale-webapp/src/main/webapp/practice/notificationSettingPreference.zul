@@ -1,0 +1,76 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./notificationPreferenceWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <zscript>
+        com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+        com.nzion.domain.Practice practice = commonCrudService.getByPractice(com.nzion.domain.Practice.class);
+    </zscript>
+    <window id="notificationPreferenceWindow" hflex="1" apply="org.zkoss.bind.BindComposer" viewModel="@id('vm') @init('com.nzion.view.practice.NotificationSettingVM')">
+        <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Notification Setting</h:small>
+            </h:h1>
+        </div>
+        <div id="notificationDiv">
+            <listbox>
+                <listhead>
+                    <listheader label="Notification"/>
+                    <listheader label="By SMS" align="center"/>
+                    <listheader label="By Email" align="center"/>
+                </listhead>
+                <listitem>
+                    <listcell>When appointment is given</listcell>
+                    <listcell>
+                        <checkbox checked="@bind(vm.appointmentGiven.bySMS)"/>
+                    </listcell>
+                    <listcell>
+                        <checkbox checked="@bind(vm.appointmentGiven.byEmail)"/>
+                    </listcell>
+                </listitem>
+
+                <listitem>
+                    <listcell>When appointment is rescheduled</listcell>
+                    <listcell>
+                        <checkbox checked="@bind(vm.appointmentRescheduled.bySMS)"/>
+                    </listcell>
+                    <listcell>
+                        <checkbox checked="@bind(vm.appointmentRescheduled.byEmail)"/>
+                    </listcell>
+                </listitem>
+            </listbox>
+        </div>
+        <!--<div>
+            &lt;!&ndash;<radiogroup  id="notification" selectedItem="@bind(vm.practice.notificationRequired,converter='com.nzion.view.component.RadioGroupBinder')">
+                <hbox>
+                    <label value="Do you want Notifications to be sent to Admin :"  />
+                    <radio style="vertical-align: middle"  label="Yes" value="yes"/>
+                    <radio style="vertical-align: middle" label="No" value="no"/>
+                </hbox>
+            </radiogroup>&ndash;&gt;
+            <checkbox checked="@bind(vm.practice.notificationRequired)"/>
+        </div>-->
+        <div sclass="panelFoot"  align="center" style="margin-top: 20px;">
+            <button label="Save" id="saveNotification"  zclass="btn-success btn" onClick="@command('saveNotification')"/>
+        </div>
+        <separator/>
+        <div>
+            <radiogroup  id="notificationSentToAdmin" selectedItem="@{practice.isNotificationSentToAdmin,converter='com.nzion.view.component.RadioGroupBinder'}">
+                <hbox>
+                    <label value="Do you want Notifications to be sent to Admin :"  />
+                    <radio style="vertical-align: middle"  label="Yes" value="yes"/>
+                    <radio style="vertical-align: middle" label="No" value="no"/>
+                </hbox>
+            </radiogroup>
+        </div>
+        <div sclass="panel Foot" align="left">
+            <button label="Save" id="send"  zclass="btn-success btn">
+                <attribute name="onClick">
+                    commonCrudService.save(practice);
+                    com.nzion.util.UtilMessagesAndPopups.showSuccess();
+                </attribute>
+            </button>
+        </div>
+    </window>
+
+</zk>            

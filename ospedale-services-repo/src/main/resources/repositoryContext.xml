@@ -164,4 +164,5 @@
     <bean id="scheduleRepository" class="com.nzion.repository.impl.HibernateScheduleRepository"
           parent="hibernateDaoSupport"/>
     <bean id="utilityFinder" class="com.nzion.service.utility.UtilityFinder"/>
+    <bean id = "notificationRepository" class="com.nzion.repository.impl.NotificationRepositoryImpl" parent="hibernateDaoSupport"/>
 </beans>

@@ -34,7 +34,7 @@
             position="center">
         <div style="padding:5px" zclass="page-header titled-well">
             <h:h1>
-                <h:small>Radiology Test Description</h:small>
+                <h:small>Test Description</h:small>
                 <button type="button" zclass="close" onClick="addLabTestPanelWindow.detach();">×</button>
             </h:h1>
         </div>

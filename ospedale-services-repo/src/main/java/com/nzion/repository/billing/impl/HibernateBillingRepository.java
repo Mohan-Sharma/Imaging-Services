@@ -8,6 +8,7 @@ import com.nzion.domain.emr.lab.LabTest;
 import com.nzion.domain.emr.lab.LabTestProfile;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
@@ -345,6 +346,56 @@ public List<AcctgTransactionEntry> searchAcctgTransactionEntryForLabReportExport
 				int count = q.executeUpdate();
 				if((count == 0) && ((labTest.getBillableAmount() != null) || (labTest.getHomeServiceAmount() != null))){
 					String insertQuery = "INSERT INTO lab_tariff (SERVICE_MAIN_GROUP,SERVICE_SUB_GROUP,INS_SERVICE_ID,TARIF_CATEGORY,PATIENT_CATEGORY,LABORATORY_SHARE,DOCTOR_SHARE,TECHNICIAN_SHARE,TEST_COST,MARKUP_AMOUNT,BILLABLE_AMOUNT,home_service,FROM_DATE,THRU_DATE,LOCATION_ID,LAB_TEST) VALUES ('07','009',262,'01','01',125.00,100.00,30.00,255.00,50.00,"+labTest.getBillableAmount()+","+labTest.getHomeServiceAmount()+",'"+UtilDateTime.nowDateString("yyyy-MM-dd")+"','2018-12-31',10001,'"+labTest.getTestCode()+"')";
+					Query iq = getSession().createSQLQuery(insertQuery);
+					int insertCount = iq.executeUpdate();
+				}
+			}
+		} catch (Exception e){
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+
+
+	public  List<LabTestPanel> getPriceForLabTestPanel(List<LabTestPanel> labTestPanels){
+		Iterator iterator = labTestPanels.iterator();
+		Session session = getSession();
+		try {
+			while (iterator.hasNext()) {
+				LabTestPanel labTest = (LabTestPanel) iterator.next();
+				String testCode = labTest.getPanelCode();
+
+				String query = "SELECT BILLABLE_AMOUNT, home_service FROM lab_tariff where LAB_PANEL = '" + testCode + "'";
+				Query q = session.createSQLQuery(query);
+				List l = q.list();
+				if (UtilValidator.isNotEmpty(l)) {
+					Object[] data = (Object[]) l.get(0);
+					labTest.setBillableAmount((BigDecimal) data[0]);
+					labTest.setHomeServiceAmount((BigDecimal) data[1]);
+				}
+			}
+			return labTestPanels;
+		} catch (Exception e){
+			e.printStackTrace();
+			return Collections.EMPTY_LIST;
+		} finally {
+			if (session != null){
+				releaseSession(session);
+			}
+		}
+	}
+
+	public  boolean updatePriceInLabTariffForLabTestPanel(List<LabTestPanel> labTestPanels){
+		try {
+			Iterator iterator = labTestPanels.iterator();
+			while (iterator.hasNext()){
+				LabTestPanel labTest = (LabTestPanel)iterator.next();
+				String query = "UPDATE lab_tariff SET BILLABLE_AMOUNT = " + labTest.getBillableAmount() + ", home_service = " + labTest.getHomeServiceAmount() + " WHERE LAB_PANEL = '" + labTest.getPanelCode() + "'";
+				Query q = getSession().createSQLQuery(query);
+				int count = q.executeUpdate();
+				if((count == 0) && ((labTest.getBillableAmount() != null) || (labTest.getHomeServiceAmount() != null))){
+					String insertQuery = "INSERT INTO lab_tariff (SERVICE_MAIN_GROUP,SERVICE_SUB_GROUP,INS_SERVICE_ID,TARIF_CATEGORY,PATIENT_CATEGORY,LABORATORY_SHARE,DOCTOR_SHARE,TECHNICIAN_SHARE,TEST_COST,MARKUP_AMOUNT,BILLABLE_AMOUNT,home_service,FROM_DATE,THRU_DATE,LOCATION_ID,LAB_PANEL) VALUES ('07','009',262,'01','01',125.00,100.00,30.00,255.00,50.00,"+labTest.getBillableAmount()+","+labTest.getHomeServiceAmount()+",'"+UtilDateTime.nowDateString("yyyy-MM-dd")+"','2018-12-31',10001,'"+labTest.getPanelCode()+"')";
 					Query iq = getSession().createSQLQuery(insertQuery);
 					int insertCount = iq.executeUpdate();
 				}

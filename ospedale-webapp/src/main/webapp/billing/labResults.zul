@@ -31,7 +31,7 @@
                     <datebox id="fromDate" sclass="span12"/>
                 </div>
                 <div zclass="span2">
-                    <label value="Thru Date"/>
+                    <label value="To Date"/>
                     <datebox id="thruDate" sclass="span12"/>
                 </div>
                 <div zclass="span2">

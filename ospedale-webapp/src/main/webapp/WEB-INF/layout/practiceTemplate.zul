@@ -348,9 +348,9 @@
                                                                 </a>
                                                             </n:li>-->
                                                             <n:li>
-                                                                <a  label="Radiology Test" >
+                                                                <a  label="Test" >
                                                                     <attribute name="onClick">
-                                                                        setTitleAndActivateMenu("Master List","Radiology Test", masterList);
+                                                                        setTitleAndActivateMenu("Master List","Test", masterList);
                                                                         appendContent("labTest");
                                                                     </attribute>
                                                                 </a>
@@ -433,7 +433,7 @@
                                             <n:li class="top-li has-sub" if="${rvo.admin}">
                                                 <a zclass="top-a" id="setup">Setup
                                                     <attribute name="onClick">
-                                                        setTitleAndActivateMenu("Setup","Personal Calendar", setup);
+                                                        setTitleAndActivateMenu("Setup","Imaging Center Calendar", setup);
                                                         appendContent("individualScheduleConfig");
                                                     </attribute>
                                                 </a>
@@ -442,7 +442,7 @@
                                                         <n:h5>Scheduling</n:h5>
                                                         <n:ul>
                                                             <n:li>
-                                                                <a  label="Personal Calendar" >
+                                                                <a  label="Imaging Center Calendar" >
                                                                     <attribute name="onClick">
                                                                         setTitleAndActivateMenu("Setup","Personal Calendar", setup);
                                                                         appendContent("individualScheduleConfig");

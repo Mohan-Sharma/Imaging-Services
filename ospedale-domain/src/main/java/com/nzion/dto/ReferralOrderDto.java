@@ -23,7 +23,7 @@ public class ReferralOrderDto {
     private String referralTenant;
     private String scheuleId;
     private String labOrderSectionId;
-    private String status;
+    private STATUS status;
 
     public String getReferralTenant() {
         return referralTenant;
@@ -121,11 +121,11 @@ public class ReferralOrderDto {
         this.labOrderSectionId = labOrderSectionId;
     }
 
-    public String getStatus() {
+    public STATUS getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(STATUS status) {
         this.status = status;
     }
 
@@ -160,7 +160,29 @@ public class ReferralOrderDto {
             this.setScheuleId(resultMap.get("schedule_id").toString());
         if(UtilValidator.isNotEmpty(resultMap.get("lab_order_section_id")))
             this.setLabOrderSectionId(resultMap.get("lab_order_section_id").toString());
-        if(UtilValidator.isNotEmpty(resultMap.get("status")))
-            this.setStatus(resultMap.get("status").toString());
+        if(UtilValidator.isNotEmpty(resultMap.get("status"))){
+            for(STATUS status1 : STATUS.values()){
+                if (STATUS.valueOf(resultMap.get("status").toString().toUpperCase()).equals(status1)) {
+                    this.setStatus(status1);
+                    break;
+                }
+                else if (STATUS.valueOf(resultMap.get("status").toString().toUpperCase()).equals(status1)){
+                    this.setStatus(status1);
+                    break;
+                }
+
+            }
+        }
+    }
+
+    public enum STATUS {
+        ACTIVE("Request Pending"),ORDERED("Request Availed"),REJECTED("Rejected");
+        private String name;
+        STATUS(String name){
+            this.name = name;
+        }
+        public String getName(){
+            return this.name;
+        }
     }
 }

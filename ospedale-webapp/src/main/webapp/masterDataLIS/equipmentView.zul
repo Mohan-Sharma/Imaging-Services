@@ -7,7 +7,8 @@
     </zscript>
     <window>
         <screen width="100%" listtitle="List of Equipments" addpage="equipmentAdd" addmodepopup="true" entityclass="com.nzion.domain.masterDataLIS.Equipment"
-                fields="eqpName,briefDescription,active" labels="Equipment Name,Brief Description,Active" hidedeletebtn="true" />
+                fields="eqpName,eqpNameForPatient,briefDescription,briefDescriptionForPatientEng,briefDescriptionForPatientAr,active"
+                labels="Equipment Name for Provider,Equipment Name for Patient,Brief Description for Provider,Brief Description for Patient(English),Brief Description for Patient(Arabic),Active" hidedeletebtn="true" />
     </window>
 
 </zk>            

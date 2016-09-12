@@ -158,7 +158,7 @@ public class ExcelImportUtil {
 			/*String[] columnNameArr = new String[]{"Procedure", "Visit Type", "Doctor", "Tariff Category", "Service Cost", "Billable Min Amount", "Billable amount", "Billable Max amount",
 					"From Date \nyyyy-mm-dd", "Thru Date \nyyyy-mm-dd", "Service ID"};*/
 
-            String[] columnNameArr = new String[]{"Type","Code","Name","Afya Amount"};
+            String[] columnNameArr = new String[]{"Type","Code","Display Name","Afya Amount"};
 
             XSSFWorkbook hssfWorkbook = ExcelHelper.createXSSFWorkbook();
 
@@ -169,22 +169,29 @@ public class ExcelImportUtil {
             com.nzion.service.utility.UtilityFinder utilityFinder = Infrastructure.getSpringBean("utilityFinder");
             List<Map<String, Object>> mapList = utilityFinder.getAllLabTariff();
 
-            List<LabTest> labTests = commonCrudService.findByEquality(LabTest.class, new String[]{"active"}, new Object[]{Boolean.TRUE});
-            List<LabTestPanel> labTestPanels = commonCrudService.findByEquality(LabTestPanel.class, new String[]{"active"}, new Object[]{Boolean.TRUE});
-            List<LabTestProfile> labTestProfiles = commonCrudService.findByEquality(LabTestProfile.class, new String[]{"active"}, new Object[]{Boolean.TRUE});
+            List<LabTest> labTests = commonCrudService.findByEquality(LabTest.class, new String[]{"active"}, new Object[]{Boolean.FALSE});
+            List<LabTestPanel> labTestPanels = commonCrudService.findByEquality(LabTestPanel.class, new String[]{"active"}, new Object[]{Boolean.FALSE});
+            List<LabTestProfile> labTestProfiles = commonCrudService.findByEquality(LabTestProfile.class, new String[]{"active"}, new Object[]{Boolean.FALSE});
+
+            List<LabTest> labTests1 = commonCrudService.getAll(LabTest.class);
+            List<LabTestPanel> labTestPanels1 = commonCrudService.getAll(LabTestPanel.class);
+            List<LabTestProfile> labTestProfiles1 = commonCrudService.getAll(LabTestProfile.class);
+            labTests1.removeAll(labTests);
+            labTestPanels1.removeAll(labTestPanels);
+            labTestProfiles1.removeAll(labTestProfiles);
 
             Map<String, LabTest> labTestMap = new HashMap<>();
-            for (LabTest labTest : labTests){
+            for (LabTest labTest : labTests1){
                 labTestMap.put(labTest.getTestCode(), labTest);
             }
 
             Map<String, LabTestPanel> testPanelMap = new HashMap<>();
-            for (LabTestPanel labTest : labTestPanels){
+            for (LabTestPanel labTest : labTestPanels1){
                 testPanelMap.put(labTest.getPanelCode(), labTest);
             }
 
             Map<String, LabTestProfile> testProfileMap = new HashMap<>();
-            for (LabTestProfile labTest : labTestProfiles){
+            for (LabTestProfile labTest : labTestProfiles1){
                 testProfileMap.put(labTest.getProfileCode(), labTest);
             }
 

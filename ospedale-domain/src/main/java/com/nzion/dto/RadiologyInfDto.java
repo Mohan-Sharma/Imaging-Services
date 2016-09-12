@@ -16,6 +16,7 @@ public class RadiologyInfDto {
     private Set<LabServiceTypeDto> labServiceTypeDtos = new HashSet<LabServiceTypeDto>();
     private String tenantId;
     private String labAvailabilityTime;
+    private String labExperience;
 
     public Set<AccreditationDto> getAccreditations() {
         return accreditations;
@@ -65,6 +66,14 @@ public class RadiologyInfDto {
         this.labAvailabilityTime = labAvailabilityTime;
     }
 
+    public String getLabExperience() {
+        return labExperience;
+    }
+
+    public void setLabExperience(String labExperience) {
+        this.labExperience = labExperience;
+    }
+
     public void setPropertiesToLabInfDto(Practice practice) {
         Set<AccreditationDto> accreditationDtos = new HashSet<AccreditationDto>();
         AccreditationDto accreditationDto = null;
@@ -91,6 +100,7 @@ public class RadiologyInfDto {
         this.turnaroundTime = practice.getTurnaroundTime();
         this.tenantId = practice.getTenantId();
         this.labAvailabilityTime = practice.getLabAvailabilityTime();
+        this.labExperience = practice.getLabExperience();
     }
 
     private class AccreditationDto {

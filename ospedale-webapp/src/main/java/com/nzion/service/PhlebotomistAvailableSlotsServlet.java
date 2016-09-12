@@ -598,7 +598,7 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
                 radiologyDetails.put("afyaId", orderRequest.getPatient().getAfyaId());
                 radiologyDetails.put("firstName", orderRequest.getPatient().getFirstName());
                 radiologyDetails.put("lastName", orderRequest.getPatient().getLastName());
-                radiologyDetails.put("subject", "Lab Order");
+                radiologyDetails.put("subject", "Imaging Order");
                 radiologyDetails.put("template", TemplateNames.PLACE_RADIOLOGY_ORDER_EMAIL_TO_PATIENT.name());
                 radiologyDetails.put("email", orderRequest.getPatient().getContacts().getEmail());
                 radiologyDetails.put("stream", inputStreamSource);

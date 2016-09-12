@@ -56,11 +56,19 @@ public class Laboratories{
 	        result = false;
 	    } else {
 	        Laboratories laboratories = (Laboratories) object;
-	        if (this.laboratoryCode == laboratories.getLaboratoryCode()){
+	        if (this.laboratoryCode.equals(laboratories.getLaboratoryCode())){
 	            result = true;
 	        }
 	    }
 	    return result;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (this.getLaboratoryCode().hashCode());
+		return result;
 	}
 
 }

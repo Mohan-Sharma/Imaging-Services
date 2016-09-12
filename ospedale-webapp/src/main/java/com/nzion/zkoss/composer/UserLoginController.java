@@ -379,8 +379,13 @@ public class UserLoginController extends AutowirableComposer {
     public void addOrRemoveLabDepartment(LabDepartment  labDepartment, boolean add){
 		if(add)
 			labDepartments.add(labDepartment);
-		else
+		else{
 			labDepartments.remove(labDepartment);
+            List<Laboratories> laboratoryList = commonCrudService.findByEquality(com.nzion.domain.emr.lab.Laboratories.class, new String[] { "department" }, new Object[] {labDepartment.getDepartment()});
+            for(com.nzion.domain.emr.lab.Laboratories lab : laboratoryList){
+                addOrRemoveLaboratories(lab, false);
+            }
+        }
 	}
 	
 	public void addOrRemoveLaboratories(Laboratories  laboratory, boolean add){

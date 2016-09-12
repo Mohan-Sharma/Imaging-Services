@@ -91,16 +91,22 @@ public class LabPanelController extends OspedaleAutowirableComposer {
 	//labTestCpt = labTestPanel.getLabCpt();
 	}
 
-	public void saveNewLabTestPanel() {
+	public boolean saveNewLabTestPanel() {
 		/*labTest.setInvestigations(labTests);
 		labTest.setTestPneumonic(labTest.getTestDescription());*/
 		//labService.saveLabTestPanel(labTestPanel);
 			labTestPanel.setTests(labTests);
+		if(labTests.size() >= 2) {
 			LabTestPanel test = commonCrudService.save(labTestPanel);
 			//	test.setPanelCode("Panel " + test.getId());
 			commonCrudService.merge(test);
-	//	root.getFellowIfAny("addNewLabTestPanelWindow", true).detach();
-		UtilMessagesAndPopups.showSuccess();
+			//	root.getFellowIfAny("addNewLabTestPanelWindow", true).detach();
+			UtilMessagesAndPopups.showSuccess();
+		} else {
+			UtilMessagesAndPopups.showError("For single test package cannot be created");
+			return false;
+		}
+		return true;
 	}
 
 	/*public void saveLabTestPanel() {

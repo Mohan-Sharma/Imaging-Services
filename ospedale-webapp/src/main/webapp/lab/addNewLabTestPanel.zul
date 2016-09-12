@@ -216,14 +216,17 @@
         <div sclass="panelFoot">
             <button label="Save" id="Save" zclass="btn-success btn">
                 <attribute name="onClick">
-                    try{
-                    labPanelController.saveNewLabTestPanel();
-                    com.nzion.zkoss.ext.Navigation.navigate("labTestPanel", null, contentArea);
-                    addNewLabTestPanelWindow.detach();
-                    com.nzion.util.UtilMessagesAndPopups.showSuccess();
+                    try {
+                        boolean b = labPanelController.saveNewLabTestPanel();
+                    if(!b){
+                        return;
+                    }
+                        com.nzion.zkoss.ext.Navigation.navigate("labTestPanel", null, contentArea);
+                        addNewLabTestPanelWindow.detach();
+                        com.nzion.util.UtilMessagesAndPopups.showSuccess();
                     }
                     catch(Exception e){
-                    com.nzion.util.UtilMessagesAndPopups.showError("Display Order :"+labPanelController.labTestPanel.getDisplayOrder()+"  is already exists");
+                        com.nzion.util.UtilMessagesAndPopups.showError("Display Order :"+labPanelController.labTestPanel.getDisplayOrder()+"  is already exists");
                     }
                 </attribute>
             </button>

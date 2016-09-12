@@ -14,7 +14,7 @@
 	</zscript>
 	<panel title="Automatic Assignment" id="autoAssignPanel">
 		<panelchildren style="overflow:auto;height:400px; border:1px solid #86A4BE;border-left:0px;border-right:0px;">
-			<listbox model="@{sequences}" id="autoAssignListbox">
+			<listbox model="@{sequences,load-after='saveBtn.onClick'}" id="autoAssignListbox">
 				<listhead>
 					<listheader label="Description" />
 					<listheader label="Prefix" />
@@ -37,7 +37,7 @@
 					<listcell label="@{seq.description}">
 						<attribute name="onCreate">
 							if(self.getParent().getValue().getDescription().equals("OPD Billing")){
-							self.setLabel("Bill No");
+								self.setLabel("Bill No");
 							}
 						</attribute>
 					</listcell>
@@ -59,7 +59,7 @@
 	</panel>
 	<separator></separator>
 	<div align="center">
-	<button label="Save" zclass="btn btn-success" onClick="service.save(sequences);com.nzion.util.UtilMessagesAndPopups.showSuccess();"/>
+	<button label="Save" zclass="btn btn-success" onClick="service.save(sequences);com.nzion.util.UtilMessagesAndPopups.showSuccess();" id="saveBtn"/>
 	</div>
 </window>
 </zk>

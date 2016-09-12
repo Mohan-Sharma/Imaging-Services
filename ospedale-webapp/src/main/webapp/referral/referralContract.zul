@@ -152,8 +152,14 @@
                   <div zclass="row-fluid">
                                    <div id="percentageDiv" visible="@{vm.percentageRequired}" zclass="span2" >
                                            <label mold="required" value="Percentage"  />
-                                           <decimalbox  id="lblPercentage" format="###.###" constraint="no empty" value="@bind(vm.referralContract.percentageOnBill)"
-                                                        w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                                           <decimalbox  id="lblPercentage" format="###.###" value="@bind(vm.referralContract.percentageOnBill)"
+                                                        w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+                                               <attribute name="onCreate">
+                                                       if(vm.percentageRequired){
+                                                       self.setConstraint("no empty");
+                                                       }
+                                               </attribute>
+                                                   </decimalbox>
                                     </div>
                   </div>
                   <div zclass="row-fluid">
@@ -196,11 +202,11 @@
                    com.nzion.util.UtilMessagesAndPopups.showError("Payment mode is required");
                    return;
                    }
-                   if(lblPercentage.getValue() == null) {
-                   com.nzion.util.UtilMessagesAndPopups.showError("Percentage is required");
-                   }
                        String value = referralContract.getPaymentMode();
                        if ("PERCENTAGE_OF_BILL".equals(value))  {
+                           if(lblPercentage.getValue() == null) {
+                           com.nzion.util.UtilMessagesAndPopups.showError("Percentage is required");
+                           }
                           serviceDetailDiv.setVisible(false);
                        } else {
                           serviceDetailDiv.setVisible(true);

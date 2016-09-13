@@ -9,14 +9,14 @@
 				<n:td>
 					<checkbox  value="${each}"
 							   onCheck='userLoginController.addOrRemoveLaboratories(((Listbox)self.getParent().getPreviousSibling()).getSelectedItem().getValue(), event.isChecked())'>
-						<attribute name="onCreate">
-							if (userLoginController.getUserLogin().getId() == null){
+						<attribute name="onCreate"><![CDATA[
+							if ((userLoginController.getUserLogin().getId() == null) || ((userLoginController.getUserLogin().getId() != null) && (com.nzion.util.UtilValidator.isEmpty(userLoginController.getUserLogin().getLabDepartments())))){
 							self.setChecked(true);
 							userLoginController.addOrRemoveLaboratories(((Listbox)self.getParent().getPreviousSibling()).getSelectedItem().getValue(), true);
 							} else {
 							self.setChecked(userLoginController.getLaboratories().contains(((Listbox)self.getParent().getPreviousSibling()).getSelectedItem().getValue()));
 							}
-						</attribute>
+						]]></attribute>
 					</checkbox>
 					<label value="${each.laboratory}"/>
 					[<label value="${each.department}"/>]

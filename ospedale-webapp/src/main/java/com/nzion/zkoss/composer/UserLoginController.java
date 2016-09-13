@@ -228,9 +228,13 @@ public class UserLoginController extends AutowirableComposer {
                         return;
                     }
                 }
-
-                userLogin.setLabDepartments(labDepartments)	;
-                userLogin.setLaboratories(laboratories);
+                if (userLogin.hasRole(Roles.TECHNICIAN)) {
+                    userLogin.setLabDepartments(labDepartments);
+                    userLogin.setLaboratories(laboratories);
+                } else {
+                    userLogin.setLabDepartments(null);
+                    userLogin.setLaboratories(null);
+                }
 
                 userLoginService.save(userLogin);
                 Navigation.navigate("userLogin", null, "contentArea");
@@ -246,8 +250,13 @@ public class UserLoginController extends AutowirableComposer {
 
         userLogin.getPerson().setLocations(locations);
         userLogin.setGrantedSecurityPermissionGroups(securityGroups);
-        userLogin.setLabDepartments(labDepartments)	;
-        userLogin.setLaboratories(laboratories);
+        if (userLogin.hasRole(Roles.TECHNICIAN)){
+            userLogin.setLabDepartments(labDepartments)	;
+            userLogin.setLaboratories(laboratories);
+        } else {
+            userLogin.setLabDepartments(null)	;
+            userLogin.setLaboratories(null);
+        }
        
         userLogin = userLoginService.createUserLogin(userLogin);
     }

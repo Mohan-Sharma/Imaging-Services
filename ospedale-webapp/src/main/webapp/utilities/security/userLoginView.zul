@@ -22,7 +22,15 @@
 	List labDepartments  = commonCrudService.getAll(com.nzion.domain.emr.lab.LabDepartment.class);
 	List laboratoriessList = commonCrudService.getAll(com.nzion.domain.emr.lab.Laboratories.class);
 	//Set laboratories = com.nzion.util.UtilValidator.isNotEmpty(laboratoriessList)? new HashSet(laboratoriessList):Collections.emptySet();
-	Set laboratories = userLoginController.getUserLogin().getLaboratories() == null ? Collections.emptySet(): userLoginController.getUserLogin().getLaboratories();
+	//Set laboratories = userLoginController.getUserLogin().getLaboratories() == null ? Collections.emptySet(): userLoginController.getUserLogin().getLaboratories();
+
+	Set laboratories = new HashSet();
+	if(userLoginController.getUserLogin().getLabDepartments() != null){
+	for(com.nzion.domain.emr.lab.LabDepartment dept :userLoginController.getUserLogin().getLabDepartments()){
+	laboratories.addAll(commonCrudRepository.findByEquality(com.nzion.domain.emr.lab.Laboratories.class, new String[] { "department" }, new Object[] {dept.getDepartment()}));
+	}
+	}
+
 	if(UtilValidator.isNotEmpty(allLocations.get(0)))
 			userLoginController.addOrRemoveLocation((Location)allLocations.get(0), true);
 ]]>
@@ -215,8 +223,8 @@
 											laboratoriesInc.setDynamicProperty("userLoginController", userLoginController);
 											laboratoriesInc.setSrc("/utilities/security/laboratory-include-userlogin.zul");
 										</attribute>
-										<attribute name="onCreate">
-											if (userLoginController.getUserLogin().getId() == null){
+										<attribute name="onCreate"><![CDATA[
+											if ((userLoginController.getUserLogin().getId() == null) || ((userLoginController.getUserLogin().getId() != null) && (com.nzion.util.UtilValidator.isEmpty(userLoginController.getUserLogin().getLabDepartments())))){
 											self.setChecked(true);
 											userLoginController.addOrRemoveLabDepartment(((Listbox) self.getPreviousSibling()).getSelectedItem().getValue(), true);
 
@@ -230,7 +238,7 @@
 											} else {
 											self.setChecked(userLoginController.getLabDepartments().contains(((Listbox)self.getPreviousSibling()).getSelectedItem().getValue()));
 											}
-										</attribute>
+										]]></attribute>
 										</checkbox>
 									</div>
 								</hbox>	

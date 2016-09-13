@@ -169,35 +169,41 @@ public class ExcelImportUtil {
             com.nzion.service.utility.UtilityFinder utilityFinder = Infrastructure.getSpringBean("utilityFinder");
             List<Map<String, Object>> mapList = utilityFinder.getAllLabTariff();
 
-            List<LabTest> labTests = commonCrudService.findByEquality(LabTest.class, new String[]{"active"}, new Object[]{Boolean.FALSE});
-            List<LabTestPanel> labTestPanels = commonCrudService.findByEquality(LabTestPanel.class, new String[]{"active"}, new Object[]{Boolean.FALSE});
-            List<LabTestProfile> labTestProfiles = commonCrudService.findByEquality(LabTestProfile.class, new String[]{"active"}, new Object[]{Boolean.FALSE});
-
-            List<LabTest> labTests1 = commonCrudService.getAll(LabTest.class);
-            List<LabTestPanel> labTestPanels1 = commonCrudService.getAll(LabTestPanel.class);
-            List<LabTestProfile> labTestProfiles1 = commonCrudService.getAll(LabTestProfile.class);
-            labTests1.removeAll(labTests);
-            labTestPanels1.removeAll(labTestPanels);
-            labTestProfiles1.removeAll(labTestProfiles);
+            List<LabTest> labTests = commonCrudService.findByEquality(LabTest.class, new String[]{"active"}, new Object[]{Boolean.TRUE});
+            List<LabTestPanel> labTestPanels = commonCrudService.findByEquality(LabTestPanel.class, new String[]{"active"}, new Object[]{Boolean.TRUE});
+            List<LabTestProfile> labTestProfiles = commonCrudService.findByEquality(LabTestProfile.class, new String[]{"active"}, new Object[]{Boolean.TRUE});
 
             Map<String, LabTest> labTestMap = new HashMap<>();
-            for (LabTest labTest : labTests1){
+            for (LabTest labTest : labTests){
                 labTestMap.put(labTest.getTestCode(), labTest);
             }
 
             Map<String, LabTestPanel> testPanelMap = new HashMap<>();
-            for (LabTestPanel labTest : labTestPanels1){
+            for (LabTestPanel labTest : labTestPanels){
                 testPanelMap.put(labTest.getPanelCode(), labTest);
             }
 
             Map<String, LabTestProfile> testProfileMap = new HashMap<>();
-            for (LabTestProfile labTest : labTestProfiles1){
+            for (LabTestProfile labTest : labTestProfiles){
                 testProfileMap.put(labTest.getProfileCode(), labTest);
             }
 
             int rownum = 1;
             for (Map map : mapList) {
-                Row row = realSheet.createRow(rownum++);
+                String desc = null;
+                Row row = null;
+                if (map.get("LAB_TEST") != null) {
+                    desc = labTestMap.get(map.get("LAB_TEST")) != null ? labTestMap.get(map.get("LAB_TEST").toString()).getTestPneumonic() : null;
+                } else if (map.get("LAB_PANEL") != null) {
+                    desc = testPanelMap.get(map.get("LAB_PANEL")) != null ? testPanelMap.get(map.get("LAB_PANEL").toString()).getPanelPneumonic() : null;
+                } else if (map.get("LAB_PROFILE") != null) {
+                    desc = testProfileMap.get(map.get("LAB_PROFILE")) != null ? testProfileMap.get(map.get("LAB_PROFILE").toString()).getProfileNeumonic() : null;
+                }
+                if (desc != null) {
+                    row = realSheet.createRow(rownum++);
+                } else {
+                    continue;
+                }
                 for (int i = 0; i <= 2; i++) {
                     //Cell cell = row.createCell(i);
                     switch (i) {

@@ -76,7 +76,7 @@ public class ReferralContractServiceViewModel {
         referralContract = (ReferralContract) referralContractServiceWin.getAttribute("referralContract");
         //int serviceMainGroupId = "PHARMACY".equals(referralContract.getReferralType()) ? 2 : 1;  (better add one more comboitem of "Lab"
         //int serviceMainGroupId = "CLINIC".equals(referralContract.getReferralType()) ? 3 : 1;
-        int serviceMainGroupId = 3;
+        int serviceMainGroupId = 4;
         allservices = RestServiceConsumer.getAllServiceMaster(serviceMainGroupId);
         if(UtilValidator.isNotEmpty(referralContract.getReferralContractServices())){
             referralContractServices.addAll(referralContract.getReferralContractServices());

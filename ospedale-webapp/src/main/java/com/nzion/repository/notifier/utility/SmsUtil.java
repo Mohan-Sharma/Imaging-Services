@@ -283,7 +283,7 @@ public class SmsUtil {
             message = MessageFormat.format(message, arguments);
             message = message.substring(1, message.length() - 1);
         } else if (detail.get("key").toString().equals("RESCHEDULE_LAB_ORDER_SMS_TO_LAB_ADMIN")) {
-            Object[] arguments = {detail.get("doctorNameWithSalutation"), detail.get("patientName"), detail.get("patientMobNumber"), detail.get("oldDate"), detail.get("oldTime"), detail.get("date"), detail.get("time")};
+            Object[] arguments = {detail.get("patientName"), detail.get("patientMobNumber"), detail.get("oldDate"), detail.get("oldTime"), detail.get("date"), detail.get("time")};
 
             message = messageSource.getMessage((String) detail.get("key"), null, locale);
             message = MessageFormat.format(message, arguments);

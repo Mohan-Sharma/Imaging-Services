@@ -10,11 +10,16 @@ import com.nzion.hibernate.ext.multitenant.TenantIdHolder;
 import com.nzion.repository.PatientRepository;
 import com.nzion.repository.PersonRepository;
 import com.nzion.repository.PracticeRepository;
+import com.nzion.repository.notifier.utility.SmsUtil;
+import com.nzion.repository.notifier.utility.TemplateNames;
 import com.nzion.service.billing.BillingService;
 import com.nzion.service.common.CommonCrudService;
 import com.nzion.service.common.impl.EnumerationServiceImpl;
 import com.nzion.service.dto.LabOrderDto;
 import com.nzion.service.impl.FileBasedServiceImpl;
+import com.nzion.util.Infrastructure;
+import com.nzion.util.RestServiceConsumer;
+import com.nzion.util.UtilDateTime;
 import com.nzion.util.UtilValidator;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,12 +90,67 @@ public class RescheduleLabOrderServlet extends HttpServlet{
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid date, cannot place order from past");
             return;
         }*/
+        LabOrderRequest oldLabOrderRequest = commonCrudService.getById(LabOrderRequest.class, Long.parseLong(labOrderDto.getScheduleId().toString()));
+        String date = constructDate(oldLabOrderRequest.getStartTime(), oldLabOrderRequest.getStartDate());
+        String time =  constructTime(oldLabOrderRequest.getStartTime(), oldLabOrderRequest.getStartDate());
+
+        RCMPreference rcmPreference = commonCrudService.getByPractice(RCMPreference.class);
+        PatientReschedulingPreference patientReschedulingPreference = commonCrudService.findUniqueByEquality(PatientReschedulingPreference.class, new String[]{"rcmPreference", "visitType"}, new Object[]{rcmPreference, RCMPreference.RCMVisitType.HOME_PHLEBOTOMY});
+        BigDecimal reScheduleTime = patientReschedulingPreference.getReschedulingTime() == null ? BigDecimal.ZERO : patientReschedulingPreference.getReschedulingTime();
+        Date scheduleDateTime = UtilDateTime.toDate(oldLabOrderRequest.getStartDate().getMonth(), oldLabOrderRequest.getStartDate().getDate(), oldLabOrderRequest.getStartDate().getYear(),
+                oldLabOrderRequest.getStartTime().getHours(), oldLabOrderRequest.getStartTime().getMinutes(), oldLabOrderRequest.getStartTime().getSeconds());
+        BigDecimal hoursInterval = new BigDecimal(UtilDateTime.getIntervalInHours(new Date(), scheduleDateTime));
+
+        PrintWriter writer = response.getWriter();
+
+        if(hoursInterval.compareTo(reScheduleTime) < 0){
+            //writer.print( "Appointment cannot be rescheduled within " + reScheduleTime + " hrs");
+            writer.print( "Sorry, appointment cant be rescheduled , please check Afya Policy.");
+            writer.close();
+            return;
+        }
+
 
         Map<String, Object> resultStatus = reschedule(response, labOrderDto);
 
         String status = (String)resultStatus.get("status");
-        PrintWriter writer = response.getWriter();
         if(status.equals("updated")) {
+            try {
+                LabOrderRequest labOrderRequest = commonCrudService.getById(LabOrderRequest.class, Long.parseLong(resultStatus.get("labOrder").toString()));
+                Map<String, Object> clinicDetails = RestServiceConsumer.getRadiologyDetByRadiologyId(tenantId);
+
+                final Map adminUserLogin = RestServiceConsumer.getUserLoginByUserName(Infrastructure.getPractice().getAdminUserLogin().getUsername());
+                Object languagePreference = adminUserLogin.get("languagePreference");
+                clinicDetails.put("languagePreference", languagePreference);
+                clinicDetails.put("oldDate", date);
+                clinicDetails.put("oldTime", time);
+                clinicDetails.put("mobileNumber", adminUserLogin.get("mobile_number"));
+                clinicDetails.put("key", TemplateNames.RESCHEDULE_LAB_ORDER_SMS_TO_LAB_ADMIN.name());
+                clinicDetails.put("forAdmin", new Boolean(true));
+                SmsUtil.sendStatusSms(labOrderRequest, clinicDetails);
+
+                /*clinicDetails.put("key", TemplateNames.RESCHEDULE_LAB_ORDER_SMS_TO_PHLEBOTOMIST.name());
+                clinicDetails.put("forDoctor", new Boolean(true));
+                clinicDetails.put("forAdmin", new Boolean(false));
+                SmsUtil.sendStatusSms(labOrderRequest, clinicDetails);*/
+
+                //for admin
+                if ((Infrastructure.getPractice().getIsNotificationSentToAdmin() != null) && (Infrastructure.getPractice().getIsNotificationSentToAdmin().equals("yes"))){
+                    ArrayList<HashMap<String, Object>> adminList = RestServiceConsumer.getAllAdminByTenantId();
+                    clinicDetails.put("key", TemplateNames.RESCHEDULE_LAB_ORDER_SMS_TO_LAB_ADMIN.name());
+                    clinicDetails.put("forAdmin", new Boolean(true));
+                    clinicDetails.put("isdCode", Infrastructure.getPractice().getAdminUserLogin().getPerson().getContacts().getIsdCode());
+                    Iterator iterator = adminList.iterator();
+                    while (iterator.hasNext()) {
+                        Map map = (Map) iterator.next();
+                        clinicDetails.put("mobileNumber", map.get("mobile_number"));
+                        clinicDetails.put("languagePreference", map.get("languagePreference"));
+                        SmsUtil.sendStatusSms(labOrderRequest, clinicDetails);
+                    }
+                }
+            } catch (Exception e){
+                e.printStackTrace();
+            }
             response.setStatus(HttpServletResponse.SC_OK, "order rescheduled");
 
             String resultString = "{" +
@@ -183,5 +243,27 @@ public class RescheduleLabOrderServlet extends HttpServlet{
         return calendar.getTime();
     }
 
+    private static String constructTime(Date date, Date scheduleDate){
+        LocalDate localDate = new LocalDate(scheduleDate);
+        Calendar calendar = Calendar.getInstance(Locale.ENGLISH);
+        calendar.setTime(date);
+        calendar.set(Calendar.YEAR, localDate.getYear());
+        calendar.set(Calendar.MONTH, localDate.getMonthOfYear());
+        calendar.set(Calendar.DAY_OF_MONTH, localDate.getDayOfMonth());
+        Date furnishedDate = calendar.getTime();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("h:mm a");
+        return dateFormat.format(furnishedDate);
+    }
 
+    private static String constructDate(Date date, Date scheduleDate){
+        LocalDate localDate = new LocalDate(scheduleDate);
+        Calendar calendar = Calendar.getInstance(Locale.ENGLISH);
+        calendar.setTime(date);
+        calendar.set(Calendar.YEAR, localDate.getYear());
+        calendar.set(Calendar.MONTH, localDate.getMonthOfYear()-1);
+        calendar.set(Calendar.DAY_OF_MONTH, localDate.getDayOfMonth());
+        Date furnishedDate = calendar.getTime();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE dd,MMMM yyyy");
+        return dateFormat.format(furnishedDate);
+    }
 }

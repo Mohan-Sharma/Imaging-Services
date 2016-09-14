@@ -158,6 +158,7 @@
 
                     commonCrudService.merge(vm.getLabOrderRequest());
                     com.nzion.util.UtilMessagesAndPopups.displaySuccess();
+                    vm.notifyRescheduleLabOrder(oldLabOrderRequest, appointDate, startTimeDate);
                     rescheduleLabOrder.detach();
                     //com.nzion.zkoss.ext.Navigation.navigate("/billing/labOrderPortlet",null,rescheduleLabOrder);
                     ]]></attribute>

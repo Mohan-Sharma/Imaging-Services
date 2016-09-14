@@ -610,6 +610,7 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
             }
 
         } catch (Exception e){
+            e.printStackTrace();
             result.put("labOrder", labOrderRequest);
             result.put("status", "failed");
         }

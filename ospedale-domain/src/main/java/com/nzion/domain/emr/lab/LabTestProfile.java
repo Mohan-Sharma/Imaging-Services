@@ -27,6 +27,7 @@ public class LabTestProfile extends IdGeneratingBaseEntity implements Serializab
 	private boolean prescriptionRequired;
 	private BigDecimal homeServiceAmount;
 	private BigDecimal billableAmount;
+	private String department;
 	
 
 	@ManyToMany(targetEntity = LabTest.class,fetch = FetchType.EAGER)
@@ -93,5 +94,13 @@ public class LabTestProfile extends IdGeneratingBaseEntity implements Serializab
 
 	public void setBillableAmount(BigDecimal billableAmount) {
 		this.billableAmount = billableAmount;
+	}
+
+	public String getDepartment() {
+		return department;
+	}
+
+	public void setDepartment(String department) {
+		this.department = department;
 	}
 }

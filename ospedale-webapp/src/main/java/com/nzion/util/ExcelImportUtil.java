@@ -57,18 +57,18 @@ public class ExcelImportUtil {
                     query = query + ",";
                 }
 
-                for (int i = 3; i >= 0; i--) {
-                    if ((i == 2) || (i == 1)){
+                for (int i = 4; i >= 0; i--) {
+                    if ((i == 2) || (i == 1) || (i == 3)){
                         continue;
                     }
 
                     Cell cell = nextRow.getCell(i);
-                    if ((i == 3) && ((cell == null) || (cell.getNumericCellValue() == 0))){
+                    if ((i == 4) && ((cell == null) || (cell.getNumericCellValue() == 0))){
                         break;
                     }
                     //query = query + "('07','009','262',";
                     switch (i) {
-                        case 3:
+                        case 4:
                             query = query + "('07','009','262','01','01',125.00,100.00,30.00,255.00,50.00,10001,'2016-01-01','2018-12-31',";
                             if (query.charAt(query.length() - 1) == ')') {
                                 query = query + ",";
@@ -158,7 +158,7 @@ public class ExcelImportUtil {
 			/*String[] columnNameArr = new String[]{"Procedure", "Visit Type", "Doctor", "Tariff Category", "Service Cost", "Billable Min Amount", "Billable amount", "Billable Max amount",
 					"From Date \nyyyy-mm-dd", "Thru Date \nyyyy-mm-dd", "Service ID"};*/
 
-            String[] columnNameArr = new String[]{"Type","Code","Display Name","Afya Amount"};
+            String[] columnNameArr = new String[]{"Type","Code","Display Name","Department","Afya Amount"};
 
             XSSFWorkbook hssfWorkbook = ExcelHelper.createXSSFWorkbook();
 
@@ -221,29 +221,36 @@ public class ExcelImportUtil {
                         case 1:
                             String code = null;
                             String name = null;
+                            String department = null;
                             if (map.get("LAB_TEST") != null) {
                                 code = map.get("LAB_TEST").toString();
                                 d = map.get("LAB_TEST").toString();
                                 name = labTestMap.get(map.get("LAB_TEST").toString()).getTestPneumonic();
+                                department = labTestMap.get(map.get("LAB_TEST").toString()).getDepartment();
                                 if ((name != null) && (name != "")) {
                                     ExcelHelper.createStringCellWithXssf(1, UtilValidator.isNotEmpty(code) ? code : "", row, hssfWorkbook);
                                     ExcelHelper.createStringCellWithXssf(2, UtilValidator.isNotEmpty(name) ? name : "", row, hssfWorkbook);
+                                    ExcelHelper.createStringCellWithXssf(3, UtilValidator.isNotEmpty(department) ? department : "", row, hssfWorkbook);
                                     labTestMap.remove(map.get("LAB_TEST").toString());
                                 }
                             } else if (map.get("LAB_PANEL") != null) {
                                 code = map.get("LAB_PANEL").toString();
                                 name = testPanelMap.get(map.get("LAB_PANEL").toString()).getPanelPneumonic();
+                                department = testPanelMap.get(map.get("LAB_PANEL").toString()).getDepartment();
                                 if ((name != null) && (name != "")) {
                                     ExcelHelper.createStringCellWithXssf(1, UtilValidator.isNotEmpty(code) ? code : "", row, hssfWorkbook);
                                     ExcelHelper.createStringCellWithXssf(2, UtilValidator.isNotEmpty(name) ? name : "", row, hssfWorkbook);
+                                    ExcelHelper.createStringCellWithXssf(3, UtilValidator.isNotEmpty(department) ? department : "", row, hssfWorkbook);
                                     testPanelMap.remove(map.get("LAB_PANEL").toString());
                                 }
                             } else if (map.get("LAB_PROFILE") != null) {
                                 code = map.get("LAB_PROFILE").toString();
                                 name = testProfileMap.get(map.get("LAB_PROFILE").toString()).getProfileNeumonic();
+                                department = testProfileMap.get(map.get("LAB_PROFILE").toString()).getProfileNeumonic();
                                 if ((name != null) && (name != "")) {
                                     ExcelHelper.createStringCellWithXssf(1, UtilValidator.isNotEmpty(code) ? code : "", row, hssfWorkbook);
                                     ExcelHelper.createStringCellWithXssf(2, UtilValidator.isNotEmpty(name) ? name : "", row, hssfWorkbook);
+                                    ExcelHelper.createStringCellWithXssf(3, UtilValidator.isNotEmpty(department) ? department : "", row, hssfWorkbook);
                                     testProfileMap.remove(map.get("LAB_PROFILE").toString());
                                 }
                             }
@@ -253,7 +260,7 @@ public class ExcelImportUtil {
                             if (map.get("home_service") != null) {
                                 billableAmount = (BigDecimal) map.get("home_service");
                             }
-                            ExcelHelper.createNumberCellWithXssf(3, UtilValidator.isNotEmpty(billableAmount) ? billableAmount : null, row, hssfWorkbook);
+                            ExcelHelper.createNumberCellWithXssf(4, UtilValidator.isNotEmpty(billableAmount) ? billableAmount : null, row, hssfWorkbook);
                             break;
                     }
                 }
@@ -267,10 +274,12 @@ public class ExcelImportUtil {
                 String name = labTestMap.get(labTest).getTestPneumonic();
                 String type = "Radiology Test";
                 String code = labTestMap.get(labTest).getTestCode();
+                String department = labTestMap.get(labTest).getDepartment();
                 if ((labTest != null) && (labTest != "")) {
                     ExcelHelper.createStringCellWithXssf(0, UtilValidator.isNotEmpty(type) ? type : "", row, hssfWorkbook);
                     ExcelHelper.createStringCellWithXssf(1, UtilValidator.isNotEmpty(code) ? code : "", row, hssfWorkbook);
                     ExcelHelper.createStringCellWithXssf(2, UtilValidator.isNotEmpty(name) ? name : "", row, hssfWorkbook);
+                    ExcelHelper.createStringCellWithXssf(3, UtilValidator.isNotEmpty(department) ? department : "", row, hssfWorkbook);
                 }
             }
 
@@ -282,10 +291,12 @@ public class ExcelImportUtil {
                 String name = testPanelMap.get(labTestPanel).getPanelPneumonic();
                 String type = "Health Package";
                 String code = testPanelMap.get(labTestPanel).getPanelCode();
+                String department = testPanelMap.get(labTestPanel).getDepartment();
                 if ((labTestPanel != null) && (labTestPanel != "")) {
                     ExcelHelper.createStringCellWithXssf(0, UtilValidator.isNotEmpty(type) ? type : "", row, hssfWorkbook);
                     ExcelHelper.createStringCellWithXssf(1, UtilValidator.isNotEmpty(code) ? code : "", row, hssfWorkbook);
                     ExcelHelper.createStringCellWithXssf(2, UtilValidator.isNotEmpty(name) ? name : "", row, hssfWorkbook);
+                    ExcelHelper.createStringCellWithXssf(3, UtilValidator.isNotEmpty(department) ? department : "", row, hssfWorkbook);
                 }
             }
 
@@ -297,10 +308,12 @@ public class ExcelImportUtil {
                 String name = testProfileMap.get(labTestProfile).getProfileNeumonic();
                 String type = "Profile";
                 String code = testProfileMap.get(labTestProfile).getProfileCode();
+                String department = testProfileMap.get(labTestProfile).getDepartment();
                 if ((labTestProfile != null) && (labTestProfile != "")) {
                     ExcelHelper.createStringCellWithXssf(0, UtilValidator.isNotEmpty(type) ? type : "", row, hssfWorkbook);
                     ExcelHelper.createStringCellWithXssf(1, UtilValidator.isNotEmpty(code) ? code : "", row, hssfWorkbook);
                     ExcelHelper.createStringCellWithXssf(2, UtilValidator.isNotEmpty(name) ? name : "", row, hssfWorkbook);
+                    ExcelHelper.createStringCellWithXssf(3, UtilValidator.isNotEmpty(department) ? department : "", row, hssfWorkbook);
                 }
             }
 

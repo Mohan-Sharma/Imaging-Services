@@ -31,6 +31,8 @@ public class OspedalePagingListModel extends AbstractListModel implements ListMo
 	private int currentStartIndex;
 	
 	private int currentEndIndex;
+
+	private List all;
 	
 	private PagedDataModelService pagedService;
 	
@@ -39,7 +41,9 @@ public class OspedalePagingListModel extends AbstractListModel implements ListMo
 		this.totalSizeInDataStore = totalSizeInDataStore;
 		this.pagedService = pagedService;
 		currentStartIndex = 0;
-		list = pagedService.getData(currentStartIndex, pageSize);
+		//list = pagedService.getData(currentStartIndex, pageSize);
+		all = pagedService.getData(0, (int) (long) this.totalSizeInDataStore);
+		list = all.subList(currentStartIndex, getEndIndex(currentStartIndex, pageSize));
 		if(UtilValidator.isNotEmpty(list))
 			currentEndIndex = list.size() - 1;
 	}
@@ -53,7 +57,10 @@ public class OspedalePagingListModel extends AbstractListModel implements ListMo
 	if(index < currentStartIndex || index > currentEndIndex){
 		currentStartIndex = (index / pageSize) * pageSize;
 		currentEndIndex = currentStartIndex + pageSize;
-		list = pagedService.getData(currentStartIndex, pageSize);
+		//list = pagedService.getData(currentStartIndex, pageSize);
+		list = all.subList(currentStartIndex, getEndIndex(currentStartIndex, pageSize));
+	} else {
+		list = all.subList(currentStartIndex, getEndIndex(currentStartIndex, pageSize));
 	}
 	return list.get(index % pageSize);
 	}
@@ -74,7 +81,8 @@ public class OspedalePagingListModel extends AbstractListModel implements ListMo
 
     @Override
 	public void sort(Comparator cmpr, boolean ascending) {
-		Collections.sort(list, cmpr);
+		//Collections.sort(list, cmpr);
+		Collections.sort(all, cmpr);
 		refresh();
 	}
 	
@@ -85,7 +93,14 @@ public class OspedalePagingListModel extends AbstractListModel implements ListMo
 	public List<?> getAll(){
 	return pagedService.getData(0, (int)totalSizeInDataStore);
 	}
-	
+
+	public int getEndIndex(int start, int pageSize){
+		int endIndex = start + pageSize;
+		if(endIndex > all.size())
+			endIndex = all.size();
+		return endIndex;
+	}
+
 	private static class InMemoryPagedDataModelService implements PagedDataModelService {
 
 		private List<?> list;

@@ -148,11 +148,29 @@
             </panel>
                 <div zclass="panelFoot" align="center" >
                 <button label="Complete" zclass="btn-success btn">
-                    <attribute name="onClick">
-                        labOrderResultController.updateLabRequisitionStatus(labOrderRequest.getId());
+                    <attribute name="onClick"><![CDATA[
+                    Set testSet = new HashSet();
+                    for(com.nzion.domain.emr.lab.LabResultAttachments labResultAttachment : vm.getLabResultAttachments()){
+                    String testName = labResultAttachment.getLabTest() != null ? labResultAttachment.getLabTest().getTestPneumonic() : null;
+                    if(testName != null){
+                        testSet.add(testName);
+                        }
+                    }
+                    boolean check = true;
+                    for(com.nzion.domain.emr.soap.PatientLabOrder patientLabOrder : patientLabOrderList){
+                        if(!testSet.contains(patientLabOrder.getLabTest().getTestPneumonic())){
+                            check = false;
+                            break;
+                        }
+                    }
+                    if(check){
+                            labOrderResultController.updateLabRequisitionStatus(labOrderRequest.getId(), true);
+                        } else {
+                            labOrderResultController.updateLabRequisitionStatus(labOrderRequest.getId(), false);
+                        }
                         labOrderRequestWin.detach();
                         com.nzion.util.UtilMessagesAndPopups.showSuccess();
-                    </attribute>
+                    ]]></attribute>
                 </button>
             </div>
 

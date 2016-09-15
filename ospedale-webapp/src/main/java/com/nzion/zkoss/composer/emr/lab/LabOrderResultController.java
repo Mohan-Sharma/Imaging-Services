@@ -4,11 +4,16 @@ import com.nzion.domain.File;
 import com.nzion.domain.emr.lab.LabRequisition;
 import com.nzion.domain.emr.lab.LabResultAttachments;
 import com.nzion.service.common.CommonCrudService;
+import com.nzion.util.Infrastructure;
+import com.nzion.util.UtilMessagesAndPopups;
 import com.nzion.zkoss.composer.OspedaleAutowirableComposer;
+import org.hibernate.classic.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.zkoss.bind.annotation.*;
+import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zul.Filedownload;
 import javax.sql.DataSource;
 import java.io.FileInputStream;
@@ -30,6 +35,7 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
 
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private static final String setLabRequisitionStatus = "UPDATE `lab_requisition` SET `status` =:status, `updated_tx_timestamp` = :nowDate WHERE `laborderrequest` = :labOrderRequestId";
+    private static final String setLabRequisitionWithoutStatus = "UPDATE `lab_requisition` SET `updated_tx_timestamp` = :nowDate WHERE `laborderrequest` = :labOrderRequestId";
 
 
     @Init
@@ -83,14 +89,41 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
     }
 
 
-    public int updateLabRequisitionStatus(Long labOrderRequestId){
-        int updateRow;
-        java.sql.Timestamp nowDate = new java.sql.Timestamp(new java.util.Date().getTime());
-        try{
-            return updateRow = namedParameterJdbcTemplate.update(setLabRequisitionStatus, new MapSqlParameterSource("labOrderRequestId",labOrderRequestId).addValue("nowDate",nowDate).addValue("status", LabRequisition.LabRequisitionStatus.COMPLETED.name()));
-        }catch (Exception e){
-            e.printStackTrace();
+    public int updateLabRequisitionStatus(final Long labOrderRequestId, boolean check){
+        if (!check) {
+            UtilMessagesAndPopups.showConfirmation("Number of results uploaded does not match the number of tests. Do you want to mark the order as complete ?", new EventListener() {
+                @Override
+                public void onEvent(Event evt) throws Exception {
+                    if ("onYes".equalsIgnoreCase(evt.getName())) {
+                        try{
+                            int updateRow;
+                            java.sql.Timestamp nowDate = new java.sql.Timestamp(new java.util.Date().getTime());
+                            updateRow = namedParameterJdbcTemplate.update(setLabRequisitionStatus, new MapSqlParameterSource("labOrderRequestId",labOrderRequestId).addValue("nowDate",nowDate).addValue("status", LabRequisition.LabRequisitionStatus.COMPLETED.name()));
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                    if ("onNo".equalsIgnoreCase(evt.getName()))
+                        try{
+                            int updateRow;
+                            java.sql.Timestamp nowDate = new java.sql.Timestamp(new java.util.Date().getTime());
+                            updateRow = namedParameterJdbcTemplate.update(setLabRequisitionWithoutStatus, new MapSqlParameterSource("labOrderRequestId",labOrderRequestId).addValue("nowDate", nowDate));
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                }
+            });
+        } else {
+            try{
+                int updateRow1;
+                java.sql.Timestamp nowDate = new java.sql.Timestamp(new java.util.Date().getTime());
+                updateRow1 = namedParameterJdbcTemplate.update(setLabRequisitionStatus, new MapSqlParameterSource("labOrderRequestId",labOrderRequestId).addValue("nowDate",nowDate).addValue("status", LabRequisition.LabRequisitionStatus.COMPLETED.name()));
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
+
+
         return 0;
     }
 

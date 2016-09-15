@@ -148,7 +148,11 @@ try {
 		try {
 			image = Image.getInstance(resourceUrl);
 			image.setAlignment(Element.ALIGN_CENTER);
-			image.scalePercent(10f);
+
+			int indentation = 0;
+			float scaler = ((document.getPageSize().getWidth() - document.leftMargin()- document.rightMargin() - indentation) / image.getWidth()) * 30;
+			image.scalePercent(scaler);
+			//image.scalePercent(10f);
 		} catch (Exception e){}
 		Paragraph receipt = new Paragraph("Receipt", FontFactory.getFont(FontFactory.HELVETICA, 15.0f, Font.UNDEFINED, java.awt.Color.black));
 		receipt.setAlignment(Element.ALIGN_CENTER);

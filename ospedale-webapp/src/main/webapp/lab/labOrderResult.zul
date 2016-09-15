@@ -152,7 +152,7 @@
                     Set testSet = new HashSet();
                     for(com.nzion.domain.emr.lab.LabResultAttachments labResultAttachment : vm.getLabResultAttachments()){
                     String testName = labResultAttachment.getLabTest() != null ? labResultAttachment.getLabTest().getTestPneumonic() : null;
-                    if(testName != null){
+                    if((testName != null) && (labResultAttachment.getResultType().equals("TESTRESULTS"))){
                         testSet.add(testName);
                         }
                     }

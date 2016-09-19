@@ -63,14 +63,14 @@
 									 association.setPerson((com.nzion.domain.Person)self.getParent().getSelectedItem().getValue());
 									 if(((com.nzion.domain.Person)self.getParent().getSelectedItem().getValue()).getId() == null){
 									 //visitTypeDiv.setVisible(true);
-									 //visitsPerIntervDiv.setVisible(true);
+									 visitsPerIntervDiv.setVisible(true);
 									 visitTypeCombo.setSelectedIndex(0);
 									 associations = scheduleService.getAllCalendarAssociationsFor(null);
 									 Events.postEvent("onReload",calenderList,null);
 									 } else {
 									 //visitTypeDiv.setVisible(false);
 									 visitTypeCombo.setSelectedIndex(1);
-									 //visitsPerIntervDiv.setVisible(false);
+									 visitsPerIntervDiv.setVisible(false);
 									 associations = scheduleService.getAllCalendarAssociationsFor(self.getSelectedItem().getValue());
 									 Events.postEvent("onReload",calenderList,null);
 									 }

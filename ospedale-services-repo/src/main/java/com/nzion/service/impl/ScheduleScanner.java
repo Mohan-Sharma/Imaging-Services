@@ -1,15 +1,15 @@
 package com.nzion.service.impl;
 
-import com.nzion.domain.CalendarResourceAssoc;
-import com.nzion.domain.CalendarSlot;
-import com.nzion.domain.Schedule;
-import com.nzion.domain.ScheduleBreak;
+import com.nzion.domain.*;
 import com.nzion.domain.base.Weekdays;
 import com.nzion.domain.emr.lab.LabOrderRequest;
 import com.nzion.domain.util.SlotAvailability;
+import com.nzion.repository.ScheduleRepository;
+import com.nzion.util.Infrastructure;
 import com.nzion.util.UtilDateTime;
 import com.nzion.util.UtilValidator;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class ScheduleScanner {
@@ -28,6 +28,8 @@ public class ScheduleScanner {
 	private Collection<LabOrderRequest> bookedSchedules;
 	
 	private Collection<ScheduleBreak> breaks;
+
+	ScheduleRepository scheduleRepository = Infrastructure.getSpringBean("scheduleRepository");
 	
 	public ScheduleScanner(Date fromDate, Date thruDate, Date startTime, Date endTime, Weekdays choosenDays) {
 	this.fromDate = fromDate == null ? null : UtilDateTime.getDayStart(fromDate);
@@ -83,8 +85,27 @@ public class ScheduleScanner {
 	public void subtract(){
 	availableSlots.addAll(allSlots);
 	if(UtilValidator.isNotEmpty(bookedSchedules)){
+		Map<SlotAvailability, String> map = new HashMap<SlotAvailability, String>();
 		for(LabOrderRequest schedule : bookedSchedules){
-			availableSlots.remove(new SlotAvailability(schedule));
+			SlotAvailability slotAvailability = new SlotAvailability(schedule);
+			CalendarResourceAssoc calendarResourceAssoc = checkCalendarCollision(slotAvailability.getSlot().getAssociation());
+			if (calendarResourceAssoc.getVisitsPerInterval() > 1){
+				String s = map.get(slotAvailability);
+				if (s != null){
+					int i = Integer.parseInt(s.substring(0,s.indexOf("&")));
+					int j = Integer.parseInt(s.substring(s.indexOf("&")+1));
+					if (i+1 == j){
+						availableSlots.remove(slotAvailability);
+					} else {
+						i = i+1;
+						map.put(slotAvailability, i+"&"+calendarResourceAssoc.getVisitsPerInterval());
+					}
+				} else {
+					map.put(slotAvailability, 1+"&"+calendarResourceAssoc.getVisitsPerInterval());
+				}
+			} else {
+				availableSlots.remove(slotAvailability);
+			}
 		}
 	}
 	// Respecting breaks..
@@ -176,5 +197,15 @@ public class ScheduleScanner {
 				return o1.getSlot().getAssociation().getLocation().compareTo(o2.getSlot().getAssociation().getLocation());
 			}
 		}
-	}; 
+	};
+
+	public CalendarResourceAssoc checkCalendarCollision(CalendarResourceAssoc newAssociation){
+		Person person = null;
+		List selectedDays = new ArrayList();
+		String day = new SimpleDateFormat("EEE").format(newAssociation.getFromDate());
+		selectedDays.add(day);
+		List<CalendarResourceAssoc> assocs = scheduleRepository.getApplicableCalendarAssociations(person, newAssociation.getFromDate()
+				, newAssociation.getThruDate(), newAssociation.getStartTime(), newAssociation.getEndTime(), selectedDays, newAssociation.getLocation());
+		return UtilValidator.isEmpty(assocs) ? null : assocs.get(0);
+	}
 }

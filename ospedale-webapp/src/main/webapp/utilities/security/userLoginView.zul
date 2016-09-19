@@ -101,8 +101,8 @@
 							<checkbox checked="@{userLoginController.userLogin.accountExpired}" label="Account Expired" />
 							<checkbox checked="@{userLoginController.userLogin.credentialsExpired}"
 								label="Credentials Expired" />
-							<checkbox checked="@{userLoginController.userLogin.requirePasswordChange}"
-								label="Required Password Change" />
+							<!--<checkbox checked="@{userLoginController.userLogin.requirePasswordChange}"
+								label="Required Password Change" />-->
 						</hbox>
 						<div style="margin-left:10px">
 							<label value="Successive Failed Logins"></label>

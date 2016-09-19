@@ -96,6 +96,13 @@
 						</div>
 					</div>
 					<div unless="${userLoginController.userLogin.id == null}">
+						<div style="margin-left:5px;margin-top:10px">
+							<label value="User Name:" style="font-weight:bold;font-size:14px"/>
+							<label value="@{userLoginController.userLogin.username}" style="font-size:14px"/>
+							<label value="Person Name:" style="font-weight:bold;font-size:14px;margin-left:10px"/>
+							<label value="@{userLoginController.userLogin.person.firstName}" style="font-size:14px"/>
+							<label value="@{userLoginController.userLogin.person.lastName}" style="font-size:14px"/>
+						</div>
 						<hbox>
 							<checkbox checked="@{userLoginController.userLogin.accountLocked}" label="Account Locked" />
 							<checkbox checked="@{userLoginController.userLogin.accountExpired}" label="Account Expired" />

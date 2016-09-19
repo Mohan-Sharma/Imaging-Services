@@ -38,7 +38,7 @@
 								//visitTypeCombo.setSelectedIndex(1);
 							</attribute>
 						</combobox>-->
-					 <combobox selectedItem="@{association.person, save-when='saveAssocBtn.onClick'}" readonly="true"
+					 <combobox selectedItem="@{association.person, save-when='saveAssocBtn.onClick'}" readonly="true" disabled="true"
 							   id="personCombo" constraint="no empty, no past" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" >
 						 <comboitem forEach="${persons}" value="${each}" label="${each.firstName}" >
 							 <!--<attribute name="onCreate">
@@ -57,8 +57,27 @@
 
 								 }
 							 </attribute>-->
+							 <attribute name="onCreate"><![CDATA[
+								 if(persons.size() > 0) {
+									self.getParent().setSelectedItem(self);
+									 association.setPerson((com.nzion.domain.Person)self.getParent().getSelectedItem().getValue());
+									 if(((com.nzion.domain.Person)self.getParent().getSelectedItem().getValue()).getId() == null){
+									 //visitTypeDiv.setVisible(true);
+									 //visitsPerIntervDiv.setVisible(true);
+									 visitTypeCombo.setSelectedIndex(0);
+									 associations = scheduleService.getAllCalendarAssociationsFor(null);
+									 Events.postEvent("onReload",calenderList,null);
+									 } else {
+									 //visitTypeDiv.setVisible(false);
+									 visitTypeCombo.setSelectedIndex(1);
+									 //visitsPerIntervDiv.setVisible(false);
+									 associations = scheduleService.getAllCalendarAssociationsFor(self.getSelectedItem().getValue());
+									 Events.postEvent("onReload",calenderList,null);
+									 }
+								 }
+							 ]]></attribute>
 						 </comboitem>
-						 <attribute name="onChange">
+						 <!--<attribute name="onChange">
 							 if(self.getSelectedItem() != null){
 							 association.setPerson((com.nzion.domain.Person)self.getSelectedItem().getValue());
 							 if(((com.nzion.domain.Person)self.getSelectedItem().getValue()).getId() == null){
@@ -73,13 +92,13 @@
 							 associations = scheduleService.getAllCalendarAssociationsFor(self.getSelectedItem().getValue());
 							 }
 							 }
-							 <!--locations  = association.getPerson().getLocations();
+							 locations  = association.getPerson().getLocations();
 							 if(com.nzion.util.UtilValidator.isEmpty(locations)){
 							 List locationsList = commonCrudService.getAll(com.nzion.domain.Location.class);
 							 locations.addAll(locationsList);
-							 }-->
+							 }
 							 //visitTypeSoapModules = commonCrudService.findByEquality(VisitTypeSoapModule.class, new String[]{"provider.id"}, new Object[]{association.getPerson().getId()});
-						 </attribute>
+						 </attribute>-->
 					 </combobox>
 						</div>
 						 <!--<div zclass="span2">

@@ -35,7 +35,17 @@
                         </listhead>
                         <template name="model" var="each">
                             <listitem>
-                                <listcell label="@load(each.labTest.testDescription)"/>
+                                <!--<listcell label="@load(each.labTest.testDescription)"/>-->
+                                <listcell>
+                                <attribute name="onCreate"><![CDATA[
+                                //alert(self.getParent().getValue().getId());
+                                if(self.getParent().getValue().getLabTest() != null){
+                                self.setLabel(self.getParent().getValue().getLabTest().getTestDescription());
+                                } else if(self.getParent().getValue().getLabTestPanel() != null){
+                                self.setLabel(self.getParent().getValue().getLabTestPanel().getPanelDescription());
+                                }
+                                ]]></attribute>
+                                </listcell>
                                 <listcell label="@load(each.resultType)"/>
                                 <listcell>
                                     <a label="@load(each.file.fileName)" onClick="@command('downloadAttachment',fileObject=each)"/>

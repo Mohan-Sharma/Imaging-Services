@@ -35,8 +35,19 @@
                 <label value="Test Name" mold="required" class="z-label-bold"></label>
                 <listbox mold="select" model="@{patientLabOrderList}"
                          id="labTestListbox" zclass="span10" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
-                    <listitem self="@{each='test'}"
-                              label="@{test.labTest.testDescription}" value="@{test.labTest}"></listitem>
+                    <listitem self="@{each='test'}">
+                        <custom-attributes ca="@{test}"/>
+                        <attribute name="onCreate">
+                            //label="@{test.labTest.testDescription}" value="@{test.labTest}"
+                            if(ca.getLabTest() != null){
+                                self.setLabel(ca.getLabTest().getTestDescription());
+                                self.setValue(ca.getLabTest());
+                            } else if(ca.getLabTestPanel() != null){
+                                self.setLabel(ca.getLabTestPanel().getPanelDescription());
+                                self.setValue(ca.getLabTestPanel());
+                            }
+                        </attribute>
+                    </listitem>
                 </listbox>
             </div>
             <div zclass="span4">
@@ -81,7 +92,12 @@
                     }
                     try{
                         if(labResultAttachments.getFile() != null){
-                        labResultAttachments.setLabTest(labTestListbox.getSelectedItem().getValue());
+                        if(labTestListbox.getSelectedItem().getValue() instanceof com.nzion.domain.emr.lab.LabTest){
+                            labResultAttachments.setLabTest(labTestListbox.getSelectedItem().getValue());
+                        }
+                        if(labTestListbox.getSelectedItem().getValue() instanceof com.nzion.domain.emr.lab.LabTestPanel){
+                            labResultAttachments.setLabTestPanel(labTestListbox.getSelectedItem().getValue());
+                        }
                         labResultAttachments.setLabOrderRequest(labOrderRequest);
                         labResultAttachments.setResultType(resultTypeCombobox.getSelectedItem().getValue());
                         //labOrderRequest.setResultEntryDescription();
@@ -90,7 +106,9 @@
                         vm.getLabResultAttachments().add(labResultAttachments);
                         labResultAttachments = new com.nzion.domain.emr.lab.LabResultAttachments();
                     }
-                    }catch(Exception e){}
+                    }catch(Exception e){
+                    e.printStackTrace();
+                    }
                 </attribute>
             </button>
 
@@ -127,7 +145,17 @@
                         </listhead>
                         <template name="model" var="each">
                         <listitem>
-                            <listcell label="@load(each.labTest.testDescription)"/>
+                            <!--<listcell label="@load(each.labTest.testDescription)"/>-->
+                            <listcell>
+                                <attribute name="onCreate"><![CDATA[
+                                //alert(self.getParent().getValue().getId());
+                                if(self.getParent().getValue().getLabTest() != null){
+                                self.setLabel(self.getParent().getValue().getLabTest().getTestDescription());
+                                } else if(self.getParent().getValue().getLabTestPanel() != null){
+                                self.setLabel(self.getParent().getValue().getLabTestPanel().getPanelDescription());
+                                }
+                                ]]></attribute>
+                            </listcell>
                             <listcell label="@load(each.resultType)"/>
                             <listcell>
                                 <a label="@load(each.file.fileName)" onClick="@command('downloadAttachment',fileObject=each)"/>
@@ -152,16 +180,27 @@
                     Set testSet = new HashSet();
                     for(com.nzion.domain.emr.lab.LabResultAttachments labResultAttachment : vm.getLabResultAttachments()){
                     String testName = labResultAttachment.getLabTest() != null ? labResultAttachment.getLabTest().getTestPneumonic() : null;
+                    String panelName = labResultAttachment.getLabTestPanel() != null ? labResultAttachment.getLabTestPanel().getPanelPneumonic() : null;
                     if((testName != null) && (labResultAttachment.getResultType().equals("TESTRESULTS"))){
                         testSet.add(testName);
                         }
-                    }
+                    if((panelName != null) && (labResultAttachment.getResultType().equals("TESTRESULTS"))){
+                        testSet.add(panelName);
+                        }
+                        }
                     boolean check = true;
                     for(com.nzion.domain.emr.soap.PatientLabOrder patientLabOrder : patientLabOrderList){
+                    if(patientLabOrder.getLabTest() != null){
                         if(!testSet.contains(patientLabOrder.getLabTest().getTestPneumonic())){
                             check = false;
                             break;
                         }
+                    } else if (patientLabOrder.getLabTestPanel() != null){
+                        if(!testSet.contains(patientLabOrder.getLabTestPanel().getPanelPneumonic())){
+                            check = false;
+                            break;
+                        }
+                    }
                     }
                     if(check){
                             labOrderResultController.updateLabRequisitionStatus(labOrderRequest.getId(), true);

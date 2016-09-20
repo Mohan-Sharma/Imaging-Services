@@ -3,9 +3,10 @@ package com.nzion.domain.emr.lab;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.io.Serializable;
 
 @Entity
-public class Laboratories{
+public class Laboratories implements Serializable {
 
 	@Id
 	@Column(name="LABORATORY_CODE")

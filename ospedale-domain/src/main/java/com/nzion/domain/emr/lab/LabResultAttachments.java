@@ -21,6 +21,7 @@ public class LabResultAttachments extends IdGeneratingBaseEntity{
 	private LabOrderRequest labOrderRequest;
 	private File file;
 	private LabTest labTest;
+	private LabTestPanel labTestPanel;
 	private String resultType;
 
 	@OneToOne
@@ -58,5 +59,14 @@ public class LabResultAttachments extends IdGeneratingBaseEntity{
 
 	public void setResultType(String resultType) {
 		this.resultType = resultType;
+	}
+
+	@OneToOne
+	public LabTestPanel getLabTestPanel() {
+		return labTestPanel;
+	}
+
+	public void setLabTestPanel(LabTestPanel labTestPanel) {
+		this.labTestPanel = labTestPanel;
 	}
 }

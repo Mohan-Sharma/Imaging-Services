@@ -215,8 +215,6 @@ public class SmsUtil {
 
             }
 
-            locale = new Locale("en");//temporarily added
-
             if (locale.getDisplayLanguage().equals("Arabic")) {
                 language = "A";
             }

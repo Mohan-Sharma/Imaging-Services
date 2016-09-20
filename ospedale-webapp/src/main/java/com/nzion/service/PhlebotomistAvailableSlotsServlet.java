@@ -15,6 +15,7 @@ import com.nzion.domain.product.common.Money;
 import com.nzion.domain.screen.BillingDisplayConfig;
 import com.nzion.domain.util.SlotAvailability;
 import com.nzion.hibernate.ext.multitenant.TenantIdHolder;
+import com.nzion.repository.PatientRepository;
 import com.nzion.repository.PracticeRepository;
 import com.nzion.repository.notifier.utility.EmailUtil;
 import com.nzion.repository.notifier.utility.SmsUtil;
@@ -61,6 +62,8 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
     @Autowired
     EnumerationServiceImpl enumerationServiceImpl;
     private String url;
+    @Autowired
+    PatientRepository patientRepository;
 
     public void init(ServletConfig config) throws ServletException{
         super.init(config);
@@ -379,29 +382,20 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
     }
 
     public Patient checkIfPatientAlreadyExistOrPersist(LabOrderDto labOrderDto) throws IOException {
-        Patient oldPatientList = commonCrudService.getByUniqueValue(Patient.class, "afyaId", labOrderDto.getAfyaId());
-        //List<Patient> patientList = commonCrudService.findByEquality(Patient.class, new String[]{"firstName", "lastName", "contacts.mobileNumber", "dateOfBirth"}, new Object[]{labOrderDto.getFirstName(), labOrderDto.getLastName(), labOrderDto.getMobileNumber(), labOrderDto.getDateOfBirth()});
-        /*if(patientList.size() > 0)
-            oldPatientList = patientList.get(0);*/
-        if(oldPatientList != null){
-            /*if(oldPatientList.getContacts() != null) {
-                oldPatientList.getContacts().setEmail(labOrderDto.getEmailId());
+        Patient oldPatient = commonCrudService.getByUniqueValue(Patient.class, "afyaId", labOrderDto.getAfyaId());
+        Map<String, Object> patientDetailsFromPortal = RestServiceConsumer.getPatientDetailsByAfyaId(labOrderDto.getAfyaId());
+        if(oldPatient != null){
+            if(oldPatient.getContacts() != null) {
+                oldPatient.getContacts().setEmail(patientDetailsFromPortal.get("emailId").toString());
+                oldPatient.getContacts().setMobileNumber(patientDetailsFromPortal.get("mobileNumber").toString());
             }
-            if ((oldPatientList.getLanguage() == null) || (!oldPatientList.getLanguage().getEnumCode().equals(labOrderDto.getPreferredLanguage()))){
-                Enumeration enumeration = commonCrudService.findUniqueByEquality(Enumeration.class, new String[]{"enumType", "enumCode"}, new Object[]{"LANGUAGE", labOrderDto.getPreferredLanguage()});
-                oldPatientList.setLanguage(enumeration);
-                patientRepository.merge(oldPatientList);
-            }*/
-            return oldPatientList;
+            if(patientDetailsFromPortal.get("languagePreference") != null) {
+                Enumeration enumeration = commonCrudService.findUniqueByEquality(Enumeration.class, new String[]{"enumType", "enumCode"}, new Object[]{"LANGUAGE", patientDetailsFromPortal.get("languagePreference").toString()});
+                oldPatient.setLanguage(enumeration);
+            }
+            oldPatient = patientRepository.merge(oldPatient);
+            return oldPatient;
         } else {
-            /*Enumeration gender = getGenderEnumerationForPatient(labOrderDto.getGender());
-            if(gender == null){
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "gender cannot be null");
-                return null;
-            }*/
-
-            Map<String, Object> patientDetailsFromPortal = RestServiceConsumer.getPatientDetailsByAfyaId(labOrderDto.getAfyaId());
-
             Patient patient = new Patient();
             patient.setFirstName(patientDetailsFromPortal.get("firstName").toString());
             if (patientDetailsFromPortal.get("middleName") != null){
@@ -433,9 +427,13 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
             //patient.setCivilId(labOrderDto.getCivilId());
             patient.setNotificationRequired("YES");
 
-            //Enumeration enumeration = commonCrudService.findUniqueByEquality(Enumeration.class, new String[]{"enumType", "enumCode"}, new Object[]{"LANGUAGE", labOrderDto.getPreferredLanguage()});
-
-            //patient.setLanguage(enumeration);
+            if(patientDetailsFromPortal.get("languagePreference") != null) {
+                Enumeration enumeration = commonCrudService.findUniqueByEquality(Enumeration.class, new String[]{"enumType", "enumCode"}, new Object[]{"LANGUAGE", patientDetailsFromPortal.get("languagePreference").toString()});
+                patient.setLanguage(enumeration);
+            } else {
+                Enumeration enumeration = commonCrudService.findUniqueByEquality(Enumeration.class, new String[]{"enumType", "enumCode"}, new Object[]{"LANGUAGE", "en"});
+                patient.setLanguage(enumeration);
+            }
             patient = commonCrudService.save(patient);
             fileBasedServiceImpl.createDefaultFolderStructure(patient);
             return patient;

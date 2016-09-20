@@ -246,8 +246,6 @@ public class EmailUtil {
             locale = new Locale(details.get("languagePreference").toString());
         }
 
-        locale = new Locale("en");//temporarily added
-
         String response = "success";
         Properties properties = new Properties();
         properties.load(EmailUtil.class.getClassLoader().getResourceAsStream("mailContent.properties"));

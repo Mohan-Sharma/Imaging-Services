@@ -53,8 +53,8 @@
             <div zclass="span4">
                 <label value="Report Type" mold="required"/>
                 <combobox id="resultTypeCombobox" constraint="no empty" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" sclass="span12">
-                    <comboitem value="KEYIMAGES" label="Key Images"/>
-                    <comboitem value="TESTRESULTS" label="Test Results"/>
+                    <comboitem value="TESTRESULTS" label="Test Report"/>
+                    <comboitem value="KEYIMAGES" label="Key Image"/>
                 </combobox>
             </div>
             <separator/><separator/>

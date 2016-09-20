@@ -348,6 +348,10 @@ public List<AcctgTransactionEntry> searchAcctgTransactionEntryForLabReportExport
 					String insertQuery = "INSERT INTO lab_tariff (SERVICE_MAIN_GROUP,SERVICE_SUB_GROUP,INS_SERVICE_ID,TARIF_CATEGORY,PATIENT_CATEGORY,LABORATORY_SHARE,DOCTOR_SHARE,TECHNICIAN_SHARE,TEST_COST,MARKUP_AMOUNT,BILLABLE_AMOUNT,home_service,FROM_DATE,THRU_DATE,LOCATION_ID,LAB_TEST) VALUES ('07','009',262,'01','01',125.00,100.00,30.00,255.00,50.00,"+labTest.getBillableAmount()+","+labTest.getHomeServiceAmount()+",'"+UtilDateTime.nowDateString("yyyy-MM-dd")+"','2018-12-31',10001,'"+labTest.getTestCode()+"')";
 					Query iq = getSession().createSQLQuery(insertQuery);
 					int insertCount = iq.executeUpdate();
+				} else if ((count == 1) && (labTest.getHomeServiceAmount() == null)){
+					String insertQuery = "DELETE FROM lab_tariff WHERE LAB_TEST="+labTest.getTestCode();
+					Query iq = getSession().createSQLQuery(insertQuery);
+					int insertCount = iq.executeUpdate();
 				}
 			}
 		} catch (Exception e){
@@ -396,6 +400,10 @@ public List<AcctgTransactionEntry> searchAcctgTransactionEntryForLabReportExport
 				int count = q.executeUpdate();
 				if((count == 0) && ((labTest.getBillableAmount() != null) || (labTest.getHomeServiceAmount() != null))){
 					String insertQuery = "INSERT INTO lab_tariff (SERVICE_MAIN_GROUP,SERVICE_SUB_GROUP,INS_SERVICE_ID,TARIF_CATEGORY,PATIENT_CATEGORY,LABORATORY_SHARE,DOCTOR_SHARE,TECHNICIAN_SHARE,TEST_COST,MARKUP_AMOUNT,BILLABLE_AMOUNT,home_service,FROM_DATE,THRU_DATE,LOCATION_ID,LAB_PANEL) VALUES ('07','009',262,'01','01',125.00,100.00,30.00,255.00,50.00,"+labTest.getBillableAmount()+","+labTest.getHomeServiceAmount()+",'"+UtilDateTime.nowDateString("yyyy-MM-dd")+"','2018-12-31',10001,'"+labTest.getPanelCode()+"')";
+					Query iq = getSession().createSQLQuery(insertQuery);
+					int insertCount = iq.executeUpdate();
+				} else if ((count == 1) && (labTest.getHomeServiceAmount() == null)){
+					String insertQuery = "DELETE FROM lab_tariff WHERE LAB_PANEL="+labTest.getPanelCode();
 					Query iq = getSession().createSQLQuery(insertQuery);
 					int insertCount = iq.executeUpdate();
 				}

@@ -49,12 +49,12 @@
 				 </combobox>
 			</div>
 		    <div zclass="span2">
-			   <label value="Invoice Date From" mold="required" />
+			   <label value="Invoice From Date" mold="required" />
 			   <datebox id="fromDate"   value="@{billingSearchController.billingSearchVO.fromDate}" sclass="span12" constraint="no empty, no future"
 						w:showError_="function(msg) {displayError(this,msg);}" w:clearErrorMessage="function(revalidate, remainError) {clearErrorMessage(remainError,this);}"/>
 		    </div>
 		    <div zclass="span2">
-			   <label value="Invoice Date Thru" mold="required" />
+			   <label value="Invoice To Date" mold="required" />
 			   <datebox id="thruDate" value="@{billingSearchController.billingSearchVO.thruDate}" sclass="span12" constraint="no empty, no future"
 						w:showError_="function(msg) {displayError(this,msg);}" w:clearErrorMessage="function(revalidate, remainError) {clearErrorMessage(remainError,this);}"/>
 		    </div>

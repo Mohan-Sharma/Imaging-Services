@@ -278,13 +278,14 @@
                <!-- <div visible="${billingController.paymentReceived}" id="paymentSection">-->
             <div id="paymentSection">
                 <div sclass="panelCont" height="40px" visible="${!billingController.paymentReceived}">
+                  <div width="100%">
                     <div>
                         <div width="120px" align="right">
                             <label value="Payment Mode" mold="required"/>
                         </div>
                         <enumeration enumType="PAYMENT_MODE"
                                      selectedItem="@{billingController.invoicePayment.paymentMethod,save-when='addButton.onClick',load-after='addButton.onClick'}"
-                                     constraint="no empty:Payment Mode Require" id="paymentModeBox">
+                                     constraint="no empty:Payment Mode Require" id="paymentModeBox" width="140px" readonly="true">
                                        <attribute name="onCreate">
                                       self.setValue("Cash");
                                        </attribute>
@@ -341,33 +342,34 @@
                         </enumeration>
                     </div>
                     <div>
-                        <div>
+                        <div width="120px" align="right">
                             <label value="Amount" mold="required"/>
                         </div>
-                        <decimalbox id="amountInpBox" format="#,##0.000"
-                                    value="@{billingController.invoicePayment.amount.amount,load-after='addButton.onClick',save-when='addButton.onClick'}">
-                                    <attribute name="onCreate">
-                                      self.setValue(billingController.getRemainingAmount());
-                                       </attribute>
-                                    
-                                    </decimalbox>
+                        <decimalbox id="amountInpBox" format="#,##0.000" width="135px"
+                            value="@{billingController.invoicePayment.amount.amount,load-after='addButton.onClick',save-when='addButton.onClick'}">
+                            <attribute name="onCreate">
+                              self.setValue(billingController.getRemainingAmount());
+                               </attribute>
+                        </decimalbox>
                     </div>
+                  </div>
+                  <div width="100%">
                     <div id="bankNameDiv" visible="false">
-                        <div>
+                        <div width="120px" align="right">
                             <label value="Bank Name" mold="required"/>
                         </div>
                         <textbox id="bankNameBox"
                                  value="@{billingController.invoicePayment.bankName,load-after='addButton.onClick',save-when='addButton.onClick'}"/>
                     </div>
                     <div id="transactionNumbDiv" visible="false">
-                        <div>
+                        <div width="120px" align="right">
                             <label value="Transaction Number" mold="required"/>
                         </div>
                         <textbox id="transactionNumbInp"
                                  value="@{billingController.invoicePayment.transactionNumb,load-after='addButton.onClick',save-when='addButton.onClick'}"/>
                     </div>
                     <div id="chequeOrDDNumbDiv" visible="false">
-                        <div>
+                        <div width="120px" align="right">
                             <label value="Cheque Number" mold="required"/>
                         </div>
                         <textbox id="chequeOrDDNumbBox"
@@ -375,28 +377,27 @@
 
                     </div>
                     <div id="chequeOrDDDateDiv" visible="false">
-                        <div>
+                        <div align="right">
                             <label value="Cheque Date" mold="required"/>
                         </div>
                         <datebox id="chequeOrDDDateBox"
                                  value="@{billingController.invoicePayment.chequeOrDdDate,load-after='addButton.onClick',save-when='addButton.onClick'}"/>
                     </div>
-                     		<div id="policyNoDiv" visible="false">
-                        <div>
+                    <div id="policyNoDiv" visible="false">
+                        <div width="120px" align="right">
                             <label value="Policy No" mold="required"/>
                         </div>
                         <textbox id="policyNoBox"
-                                 value="@{billingController.invoicePayment.policyNo,load-after='addButton.onClick',save-when='addButton.onClick'}"/>
-                    	</div>
-                      <div id="insuranceNameDiv" visible="false">
-                        <div>
+                             value="@{billingController.invoicePayment.policyNo,load-after='addButton.onClick',save-when='addButton.onClick'}"/>
+                    </div>
+                    <div id="insuranceNameDiv" visible="false">
+                        <div width="120px" align="right">
                             <label value="Insurance Name" mold="required"/>
                         </div>
                         <textbox id="insuranceNameBox"
                                  value="@{billingController.invoicePayment.insuranceName,load-after='addButton.onClick',save-when='addButton.onClick'}"/>
-                    	</div>
-				
-                    
+                    </div>
+                  </div>
                 </div>
                 <div style="margin:auto;width:100%" align="center">
                     <hlayout style="clear:both;width:100%" spacing="20px">

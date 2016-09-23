@@ -60,8 +60,13 @@ try {
 
 	//URL resourceUrl = Thread.currentThread().getContextClassLoader().getResource("/images/logo_256.png");
 	//URL resourceUrl = new URL(url+"images/logo.png");
-	File file = new File(com.nzion.util.Infrastructure.getPractice().getImageUrl().replaceFirst("/", ""));
-	URL resourceUrl = file.toURI().toURL();
+	String imgUrl = com.nzion.util.Infrastructure.getPractice().getImageUrl() != null ? com.nzion.util.Infrastructure.getPractice().getImageUrl().replaceFirst("/", "") : null;
+	URL resourceUrl = null;
+	if (imgUrl != null){
+		File file = new File(imgUrl);
+		resourceUrl = file.toURI().toURL();
+	}
+
 	String heading1 = "Patient Invoice";
 	/*if (billingController.isPaymentReceived())
 		heading1 = heading1 + " and Receipt";*/
@@ -146,6 +151,7 @@ try {
 		PdfWriter.getInstance(document, outputStream);
 		document.open();
 		try {
+			if (resourceUrl != null) {
 			image = Image.getInstance(resourceUrl);
 			image.setAlignment(Element.ALIGN_CENTER);
 
@@ -153,7 +159,12 @@ try {
 			float scaler = ((document.getPageSize().getWidth() - document.leftMargin()- document.rightMargin() - indentation) / image.getWidth()) * 30;
 			image.scalePercent(scaler);
 			//image.scalePercent(10f);
-		} catch (Exception e){}
+			} else {
+				image = null;
+			}
+		} catch (Exception e){
+			e.printStackTrace();
+		}
 		Paragraph receipt = new Paragraph("Receipt", FontFactory.getFont(FontFactory.HELVETICA, 15.0f, Font.UNDEFINED, java.awt.Color.black));
 		receipt.setAlignment(Element.ALIGN_CENTER);
 

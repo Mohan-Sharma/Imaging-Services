@@ -330,7 +330,7 @@ public class EmailUtil {
         messageBodyPartForBody = new MimeBodyPart();
         ByteArrayDataSource ds = new ByteArrayDataSource(inputStream.getInputStream(), "application/pdf");
         messageBodyPartForBody.setDataHandler(new DataHandler(ds));
-        messageBodyPartForBody.setFileName("Report.pdf");
+        messageBodyPartForBody.setFileName("Receipt.pdf");
         multipart.addBodyPart(messageBodyPartForBody);
 
         msg.setContent(multipart);

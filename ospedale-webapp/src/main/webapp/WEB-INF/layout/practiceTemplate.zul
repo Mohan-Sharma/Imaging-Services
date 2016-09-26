@@ -12,12 +12,25 @@
     </script>
     <zscript>
         import org.zkoss.zkplus.spring.*;
+        import com.nzion.domain.*;
+        import com.nzion.util.*;
         import com.nzion.domain.Person;
         com.nzion.domain.UserLogin userLogin = com.nzion.util.Infrastructure.getUserLogin();
         String passwordExpirationWarningMessage = Executions.getCurrent().getSession().getAttribute("passwordExpirationWarningMessage");
         com.nzion.service.UserLoginService userLoginService = com.nzion.util.Infrastructure.getSpringBean("userLoginService");
         com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
         com.nzion.view.RolesValueObject rvo = new com.nzion.view.RolesValueObject(com.nzion.util.Infrastructure.getUserLogin().getAuthorization());
+        List reportsConfigurationList = commonCrudService.getAll(ReportsConfiguration.class,"id");
+        Map m = new java.util.HashMap();
+        for(com.nzion.domain.ReportsConfiguration repConfig : reportsConfigurationList){
+            if(rvo.isAdmin()){if(repConfig.isAdmin()){m.put(repConfig.getId(),new java.lang.Boolean(true)); continue;}
+            }
+            if(rvo.isTechnician()){if(repConfig.isTechnician()){m.put(repConfig.getId(),new java.lang.Boolean(true)); continue;}
+            }
+            if(rvo.isReception()){if(repConfig.isReception()){m.put(repConfig.getId(),new java.lang.Boolean(true)); continue;}
+            }
+        }
+
         String roleName = com.nzion.domain.Roles.getRoleName((Long)Sessions.getCurrent().getAttribute("_role"));
         if (userLogin.isLocked()) Executions.createComponents("/lock.zul", null, null);
 
@@ -582,7 +595,7 @@
                                                     </n:li>
                                                 </n:ul>
                                             </n:li>
-                                            <n:li class="top-li" if="${rvo.admin}">
+                                            <n:li class="top-li">
                                                 <a zclass="top-a" id="reportsMenu">Reports
                                                     <attribute name="onClick">
                                                         setTitleAndActivateMenu("Report","",reportsMenu);
@@ -601,7 +614,7 @@
                                                                     </attribute>
                                                                 </a>
                                                             </n:li>-->
-                                                            <n:li>
+                                                            <n:li if="${m.get(10001)}" >
                                                                 <a label="Invoice Report" >
                                                                     <attribute name="onClick">
                                                                         setTitleAndActivateMenu("Invoice","",reportsMenu);
@@ -609,8 +622,8 @@
                                                                     </attribute>
                                                                 </a>
                                                             </n:li>
-                                                            <n:li>
-                                                                <a label="Collection Report" >
+                                                            <n:li  if="${m.get(10002)}">
+                                                                <a label="Collection Report">
                                                                     <attribute name="onClick">
                                                                         setTitleAndActivateMenu("Invoice","",reportsMenu);
                                                                         appendContent("/report/invoiceCollectionReport");

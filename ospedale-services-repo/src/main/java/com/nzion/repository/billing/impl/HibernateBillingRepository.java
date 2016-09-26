@@ -237,6 +237,28 @@ public class HibernateBillingRepository extends HibernateBaseRepository implemen
 	return criteria.list();
 	}
 
+	@Override
+	public List<Invoice> searchReferralInvoiceBy(BillingSearchVO billingSearchVO, Date fromDate, Date thruDate) {
+		Criteria criteria = getSession().createCriteria(Invoice.class);
+		criteria.add(Restrictions.gt("totalReferralAmountTobePaid", new BigDecimal(0.0)));
+		if (billingSearchVO.getConsultant() != null)
+			criteria.add(Restrictions.eq("consultant", billingSearchVO.getConsultant()));
+		if (fromDate != null)
+			criteria.add(Restrictions.ge("invoiceDate", UtilDateTime.getDayStart(fromDate)));
+		if (thruDate != null)
+			criteria.add(Restrictions.le("invoiceDate", UtilDateTime.getDayEnd(thruDate)));
+		if (billingSearchVO.getSelectedReferralDoctor() != null)
+			criteria.add(Restrictions.eq("referralDoctorFirstName", billingSearchVO.getSelectedReferralDoctor().getFirstName()));
+		if (billingSearchVO.getSelectedReferralDoctor() != null)
+			criteria.add(Restrictions.eq("referralDoctorLastName", billingSearchVO.getSelectedReferralDoctor().getLastName()));
+		//criteria.createAlias("referralContract","referralContractAlias");
+		if(billingSearchVO.getReferral() != null)
+			//criteria.add(Restrictions.eq("referralContractAlias.referral",billingSearchVO.getReferral()));
+			criteria.add(Restrictions.eq("referralConsultantId", billingSearchVO.getReferral().getId()));
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		return criteria.list();
+	}
+
     @Override
     public BigDecimal[] getInvoiceTotal(Invoice invoice) {
         Criteria criteria = getSession().createCriteria(InvoiceItem.class, "item");

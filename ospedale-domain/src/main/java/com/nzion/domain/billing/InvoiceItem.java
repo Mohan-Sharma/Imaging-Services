@@ -1,6 +1,7 @@
 package com.nzion.domain.billing;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 
 import javax.persistence.*;
@@ -29,6 +30,8 @@ public class InvoiceItem extends IdGeneratingBaseEntity {
     private BigDecimal unitPrice;
     private Long providerId;
     private Long referralId;
+    private BigDecimal referral_amountPaid;
+    private BigDecimal referral_amountTobePaid;
 
 
     public Long getReferralId() {
@@ -249,6 +252,23 @@ public class InvoiceItem extends IdGeneratingBaseEntity {
     public void setTaxAmount(BigDecimal taxAmount) {
         this.taxAmount = taxAmount;
     }
+    public BigDecimal getReferral_amountTobePaid() {
+        if(referral_amountTobePaid==null)
+            referral_amountTobePaid=BigDecimal.ZERO.setScale(3, RoundingMode.HALF_UP);
 
+        return referral_amountTobePaid;
+    }
+
+    public void setReferral_amountTobePaid(BigDecimal referral_amountTobePaid) {
+        this.referral_amountTobePaid = referral_amountTobePaid;
+    }
+
+    public BigDecimal getReferral_amountPaid() {
+        return referral_amountPaid;
+    }
+
+    public void setReferral_amountPaid(BigDecimal referral_amountPaid) {
+        this.referral_amountPaid = referral_amountPaid;
+    }
 
 }

@@ -30,6 +30,8 @@ public interface BaseRepository {
 
     <T> List<T> getAll(Class<T> klass);
 
+    <T> List<T> getAll(Class<T> klass, String sortColumn);
+
     <T> List<T> getAll(Class<T> klass,boolean onlyEnabled);
 
     <T> List<T> simulateExampleSearch(String[] searchFields, Object exampleObject);

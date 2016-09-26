@@ -1,6 +1,7 @@
 package com.nzion.domain.billing;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -10,16 +11,13 @@ import java.util.Set;
 
 import javax.persistence.*;
 
+import com.nzion.domain.*;
 import com.nzion.domain.emr.lab.LabOrderRequest;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
 
-import com.nzion.domain.Employee;
-import com.nzion.domain.Location;
-import com.nzion.domain.Patient;
-import com.nzion.domain.Referral;
 import com.nzion.domain.annot.AccountNumberField;
 import com.nzion.domain.base.IdGeneratingBaseEntity;
 import com.nzion.domain.base.LocationAware;
@@ -95,6 +93,7 @@ public class Invoice extends IdGeneratingBaseEntity implements LocationAware,Com
     private Date generatedOn;
 
     private LabOrderRequest labOrderId;
+    private ReferralContract referralContract;
     
     @Temporal(TemporalType.DATE)
     public Date getGeneratedOn() {
@@ -140,6 +139,16 @@ public class Invoice extends IdGeneratingBaseEntity implements LocationAware,Com
     private Money writtenOffAmount;
 
     private String writtenOffReason;
+
+    private BigDecimal totalReferralAmountTobePaid;
+
+    private BigDecimal totalReferralAmountPaid;
+
+    private ReferralContractStatus referralContractStatus;
+
+    private String referralDoctorFirstName;
+
+    private String referralDoctorLastName;
 
     /* If this is true then It will shows that
       * payment received as Advance for in-patient while admission.
@@ -424,5 +433,73 @@ public class Invoice extends IdGeneratingBaseEntity implements LocationAware,Com
 
     public void setLabOrderId(LabOrderRequest labOrderId) {
         this.labOrderId = labOrderId;
+    }
+
+    @OneToOne(fetch=FetchType.EAGER)
+    public ReferralContract getReferralContract() {
+        return referralContract;
+    }
+
+    public void setReferralContract(ReferralContract referralContract) {
+        this.referralContract = referralContract;
+    }
+
+
+    public BigDecimal getTotalReferralAmountTobePaid() {
+        if(UtilValidator.isEmpty(totalReferralAmountTobePaid))
+            totalReferralAmountTobePaid = BigDecimal.ZERO.setScale(3, RoundingMode.HALF_UP);
+        return totalReferralAmountTobePaid;
+    }
+
+    public void setTotalReferralAmountTobePaid(BigDecimal totalReferralAmountTobePaid) {
+        this.totalReferralAmountTobePaid = totalReferralAmountTobePaid;
+    }
+
+    @Column(precision = 19, scale = 3 ,columnDefinition="DECIMAL(19,3)")
+    public BigDecimal getTotalReferralAmountPaid() {
+        if(totalReferralAmountPaid == null){
+            totalReferralAmountPaid = BigDecimal.ZERO.setScale(3, RoundingMode.HALF_UP);
+        }
+        return totalReferralAmountPaid;
+    }
+
+    public void setTotalReferralAmountPaid(BigDecimal totalReferralAmountPaid) {
+        this.totalReferralAmountPaid = totalReferralAmountPaid;
+    }
+
+    public String getReferralDoctorFirstName() {
+        return referralDoctorFirstName;
+    }
+
+    public void setReferralDoctorFirstName(String referralDoctorFirstName) {
+        this.referralDoctorFirstName = referralDoctorFirstName;
+    }
+
+    public String getReferralDoctorLastName() {
+        return referralDoctorLastName;
+    }
+
+    public void setReferralDoctorLastName(String referralDoctorLastName) {
+        this.referralDoctorLastName = referralDoctorLastName;
+    }
+
+    @Enumerated(EnumType.STRING)
+    public ReferralContractStatus getReferralContractStatus() {
+        return referralContractStatus;
+    }
+
+    public void setReferralContractStatus(ReferralContractStatus referralContractStatus) {
+        this.referralContractStatus = referralContractStatus;
+    }
+
+    public enum ReferralContractStatus{
+        INPROCESS("In Process"),COMPLETED("Completed");
+        private String name;
+        ReferralContractStatus(String name){
+            this.name = name;
+        }
+        public String getName(){
+            return name;
+        }
     }
 }

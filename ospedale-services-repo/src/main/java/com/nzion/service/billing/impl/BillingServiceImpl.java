@@ -265,6 +265,12 @@ public class BillingServiceImpl implements BillingService {
         return billingRepository.searchInvoiceBy(billingSearchVO, fromDate, thruDate);
     }
 
+
+    @Override
+    public List<Invoice> searchReferralInvoiceBy(BillingSearchVO billingSearchVO, Date fromDate, Date thruDate) {
+        return billingRepository.searchReferralInvoiceBy(billingSearchVO, fromDate, thruDate);
+    }
+
     @Override
     public Map<String, Set<Invoice>> getGroupedItems(String item, Set<Invoice> invoices) {
         if (InvoiceType.OPD_PROCEDURE.name().equals(item))

@@ -50,6 +50,8 @@ public interface BillingService {
 
 	List<Invoice> searchInvoiceBy(BillingSearchVO billingSearchVO,Date fromDate,Date thruDate);
 
+	List<Invoice> searchReferralInvoiceBy(BillingSearchVO billingSearchVO,Date fromDate,Date thruDate);
+
 	Map<String, Set<Invoice>>  getGroupedItems(String item, Set<Invoice> invoices);
 	
 	void exportInPatientInvoicesInDetail(List<Invoice> invoices,

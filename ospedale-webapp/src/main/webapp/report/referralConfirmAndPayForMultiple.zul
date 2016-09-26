@@ -1,0 +1,96 @@
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./confirmAndPayMultipleWin"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <zscript>
+        Set selectedItems = arg.get("selectedItems");
+        Button searchButton = arg.get("searchButton");
+        Date currentDate = new Date();
+    </zscript>
+    <window id="confirmAndPayMultipleWin" style="margin-top:0px;" mode="modal" sclass="modalStyle">
+        <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Confirm And Pay</h:small>
+                <button type="button" zclass="close" onClick="confirmAndPayMultipleWin.detach();">×</button>
+            </h:h1>
+        </div>
+
+        <separator/>
+
+        <div>
+            <n:div style="text-align:left;width:90%;">
+                <label style="font-size:12px;font-weight:bold;font-family:Calibri; margin:20px 0px 0px 30px;" value="Payment Details:"/>
+                <n:table class="personDet" style="align:center;width:100%;margin-left:30px " align="center" border="1px">
+                    <n:tr >
+                        <n:td style="width:30%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
+                            <label value="Mode of Payment" mold="required"/>
+                        </n:td>
+                        <n:td style="text-align:right;">
+                            <combobox id="modeOfPaymentCombobox" constraint="no empty" readonly="true" style="margin-right:3px;">
+                                <comboitem label="Cash" value="CASH"/>
+                                <comboitem label="Cheque" value="CHEQUE"/>
+                                <comboitem label="Credit Card" value="CREDIT_CARD"/>
+                                <comboitem label="Debit Card" value="DEBIT_CARD"/>
+                            </combobox>
+                        </n:td>
+                    </n:tr>
+
+                    <n:tr>
+                        <n:td style="width:30%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
+                            <label value="Payment Date" mold="required"/>
+                        </n:td>
+                        <n:td style="text-align:right;">
+                            <datebox value="${currentDate}" id="depositDateDateBox" style="margin-right:12px;"/>
+                        </n:td>
+                    </n:tr>
+
+                    <n:tr>
+                        <n:td style="width:30%;font-size:12px;font-weight:bold;font-family:Calibri;text-align:center">
+                            <label value="Notes"/>
+                        </n:td>
+                        <n:td style="text-align:right;">
+                            <textbox id="notesTextbox" style="margin-right:2px;" width="330px" rows="3"/>
+                        </n:td>
+                    </n:tr>
+                </n:table>
+            </n:div>
+        </div>
+
+        <separator/>
+
+        <div sclass="panelFoot"  align="center" style="margin-top: 20px;">
+            <button label="Pay" zclass="btn-success btn" >
+                <attribute name="onClick">
+                    modeOfPaymentCombobox.getValue();
+                    java.util.Iterator itr = selectedItems.iterator();
+                    while(itr.hasNext()){
+                    com.nzion.domain.billing.Invoice invoice = itr.next().getValue();
+                    if( !com.nzion.domain.billing.Invoice.ReferralContractStatus.COMPLETED.equals(invoice.getReferralContractStatus())){
+                    invoice.setReferralContractStatus(com.nzion.domain.billing.Invoice.ReferralContractStatus.COMPLETED);
+                    invoice.setTotalReferralAmountPaid(invoice.getTotalReferralAmountTobePaid());
+                    commonCrudService.save(invoice);
+                    com.nzion.domain.billing.ReferralContractPayment refeContractPayment = new com.nzion.domain.billing.ReferralContractPayment();
+                    refeContractPayment.setAmountPaid(invoice.getTotalReferralAmountPaid());
+                    refeContractPayment.setReferralContract(invoice.getReferralContract());
+                    refeContractPayment.setInvoice(invoice);
+                    refeContractPayment.setModeOfPaymentType(modeOfPaymentCombobox.getSelectedItem().getValue().toString());
+                    refeContractPayment.setPaymentDate(depositDateDateBox.getValue());
+                    refeContractPayment.setNotes(notesTextbox.getValue());
+                    commonCrudService.save(refeContractPayment);
+                    java.util.Iterator invoiceItemItr = invoice.getInvoiceItems().iterator();
+                    while(invoiceItemItr.hasNext()){
+                    com.nzion.domain.billing.InvoiceItem invoiceItem = (com.nzion.domain.billing.InvoiceItem)invoiceItemItr.next();
+                    invoiceItem.setReferral_amountPaid(invoiceItem.getReferral_amountTobePaid());
+                    commonCrudService.save(invoiceItem);
+                    }
+                    }
+                    }
+                    com.nzion.util.UtilMessagesAndPopups.showSuccess();
+                    Events.postEvent("onClick",searchButton,null);
+                    confirmAndPayMultipleWin.detach();
+                </attribute>
+            </button>
+        </div>
+    </window>
+</zk>            

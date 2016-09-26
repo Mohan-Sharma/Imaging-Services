@@ -25,7 +25,7 @@
                     <comboitem label="Insurance" value="INSURANCE"/>
                     <comboitem label="Corporate" value="CORPORATE"/>
                 </combobox>
-            </div>-->Lab Result Entry
+            </div>-->
 
             <div zclass="span2" style="margin-left:112px;">
                 <label value="From Date"  />

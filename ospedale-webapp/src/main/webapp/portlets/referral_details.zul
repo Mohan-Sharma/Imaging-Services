@@ -1,0 +1,197 @@
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./referralReportWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <zscript>
+        <![CDATA[
+             import com.nzion.util.UtilValidator;
+             import  com.nzion.util.RestServiceConsumer;
+             import com.nzion.domain.Referral;
+             com.nzion.zkoss.composer.emr.BillingSearchController billingSearchController = new com.nzion.zkoss.composer.emr.BillingSearchController();
+             com.nzion.service.billing.BillingService billingService = com.nzion.util.Infrastructure.getSpringBean("billingService");
+             StringBuilder content = null;
+             List  allReferrals = commonCrudService.getAll(com.nzion.domain.Referral.class);
+              Map referralMap = new HashMap();
+              for(int i=0; i < allReferrals.size(); i++)    {
+                 com.nzion.domain.Referral _referral = (com.nzion.domain.Referral)allReferrals.get(i);
+                 referralMap.put(new Long(_referral.getId()),_referral);
+              }
+             com.nzion.zkoss.ext.EntityDropdownRenderer dropdownRenderer = new com.nzion.zkoss.ext.EntityDropdownRenderer(new com.nzion.zkoss.ext.EntityDropDownPersonNameAdapter());
+		]]>
+    </zscript>
+    <window id="referralReportWindow" apply="${billingSearchController}">
+        <div class="container-fluid">
+            <div zclass="row-fluid">
+                <!--<div zclass="span2" >
+                    <label value="Doctor"/>
+                    <providerlookup id="empLookup" onChange="billingSearchController.getBillingSearchVO().setConsultant(event.getOrigin().getData())" />
+                </div>-->
+                <div zclass="span2">
+                    <label value="From Date"/>
+                    <datebox id="fromDate"   value="@{billingSearchController.billingSearchVO.fromDate}" sclass="span12"/>
+                </div>
+                <div zclass="span2">
+                    <label value="To Date"/>
+                    <datebox id="thruDate" value="@{billingSearchController.billingSearchVO.thruDate}" sclass="span12"/>
+                </div>
+
+                <div zclass="span2" visible="true" id="referralDiv">
+                    <label value="Referral Clinic"  />
+                    <combobox id="referralComboBox" model="@{allReferrals}"
+                              selectedItem="@bind(billingSearchController.billingSearchVO.referral)" sclass="span12">
+                        <comboitem self="@{each='referral'}" label="@{referral.clinicName}" value="@{referral}"/>
+                    </combobox>
+                </div>
+            </div>
+        </div>
+        <div align="center" sclass="panelFoot"  >
+            <button label="Search Invoice" id="searchButton" zclass="btn btn-primary"  >
+                <attribute name="onClick">
+                    <![CDATA[
+                        content = new StringBuilder();
+                        if(UtilValidator.isNotEmpty (billingSearchController.getBillingSearchVO().getConsultant())){
+                            content.append("Doctor :"+billingSearchController.getBillingSearchVO().getConsultant()).append(" | ");
+                        }
+                        if(UtilValidator.isNotEmpty (billingSearchController.getBillingSearchVO().getFromDate())){
+                            content.append("Invoice Date From: "+com.nzion.util.UtilDateTime.format( billingSearchController.getBillingSearchVO().getFromDate())).append(" | ");
+                        }
+                        if(UtilValidator.isNotEmpty (billingSearchController.getBillingSearchVO().getThruDate())){
+                            content.append("Invoice Date Thru: "+com.nzion.util.UtilDateTime.format(billingSearchController.getBillingSearchVO().getThruDate())).append(" | ");
+                        }
+                        billingSearchController.searchReferralInvoiceBy(fromDate.getValue(),thruDate.getValue());
+                            searchResults.setVisible(true);
+                            searchResultsSplitter.setVisible(true);
+                            searchResultGrid.setVisible(true);
+						]]>
+                </attribute>
+            </button>
+        </div>
+        <separator></separator>
+        <space height="5px" />
+        <hlayout width="100%" style="text-align:center;background-color:grey" id="searchResultsSplitter" visible="false">
+            <image src="/images/collapse-content.png" style="text-align:center">
+                <attribute w:name="onClick">
+                    jq(this.$f('searchForm')).slideToggle(1000);
+                </attribute>
+                <attribute name="onClick">
+                    if(self.getSrc().contains("expand")){
+                    self.setSrc("/images/collapse-content.png");
+                    }
+                    else if(self.getSrc().contains("collapse")){
+                    self.setSrc("/images/expand-content.png");
+                    }
+                </attribute>
+            </image>
+        </hlayout>
+        <space height="5px" />
+        <panel visible="false" id="searchResults" title="Search Results" width="100%" >
+            <caption height="15px">
+                <div style="float:right; margin-right: 5%;width: 5%;text-align: center;text-decoration: none;">
+                    <button label="Pay">
+                        <attribute name="onClick">
+                            if(searchResultGrid.getSelectedItems().size() == 0){
+                            com.nzion.util.UtilMessagesAndPopups.showError("Please Select atleast one invoice to make payment");
+                            return;
+                            } else {
+                            java.util.Set set = searchResultGrid.getSelectedItems();
+                            java.util.Iterator itr = set.iterator();
+                            while(itr.hasNext()){
+                            com.nzion.domain.billing.Invoice inv = itr.next().getValue();
+                            if( com.nzion.domain.billing.Invoice.ReferralContractStatus.COMPLETED.equals(inv.getReferralContractStatus())){
+                            com.nzion.util.UtilMessagesAndPopups.showError("You have selected invoices for which referral is already paid. Please remove them from your selection");
+                            return;
+                            }
+                            }
+                            }
+                            Executions.createComponents("/report/referralConfirmAndPayForMultiple.zul", null,com.nzion.util.UtilMisc.toMap("selectedItems",searchResultGrid.getSelectedItems(),"searchButton",searchButton));
+                        </attribute>
+                    </button>
+                </div>
+            </caption>
+            <panelchildren>
+                <hlayout spacing="20px" style="padding:10px" width="50%">
+                    <div/><div/>
+                </hlayout>
+                <div id="gridViewDiv">
+                    <div height="500px" style="overflow:auto" id="searchResultDiv">
+                        <listbox  id="searchResultGrid" model="@{billingSearchController.invoices,load-after='searchButton.onClick'}"
+                                  checkmark="true" multiple="true">
+                            <listhead>
+                                <listheader label="Invoice Date"
+                                            onCreate='billingSearchController.setAscendingComparator(self,"invoiceDate");billingSearchController.setDescendingComparator(self,"invoiceDate")'/>
+                                <listheader label="Invoice Number"
+                                            onCreate='billingSearchController.setAscendingComparator(self,"ipNumber");billingSearchController.setDescendingComparator(self,"ipNumber")' />
+                                <listheader label="Referred Clinic"/>
+                                <listheader label="Referred Doctor"/>
+                                <listheader label="Doctor Name"
+                                            onCreate='billingSearchController.setAscendingComparator(self,"consultant.firstName");billingSearchController.setDescendingComparator(self,"consultant.firstName")' />
+                                <listheader label="Invoice Amount" width="120px"
+                                            onCreate='billingSearchController.setAscendingComparator(self,"totalAmount.amount");billingSearchController.setDescendingComparator(self,"totalAmount.amount")' />
+                                <listheader label="Referral Amount" width="120px"/>
+                                <listheader label="Referral Paid" width="100px"/>
+                                <listheader label="Action" />
+                            </listhead>
+                            <listitem self="@{each='invoice'}" value="@{invoice}">
+                                <listcell label="@{invoice.invoiceDate,converter='com.nzion.view.component.DateConverter'}" />
+                                <listcell>
+                                    <label value="@{invoice.invoiceNumber}" />
+                                </listcell>
+                                <listcell label="@{invoice.referralConsultantId}">
+                                    <attribute name="onCreate">
+                                        <![CDATA[
+                                              if(self.getParent().getValue() instanceof com.nzion.domain.billing.Invoice){
+                                                 Long referralId = ((com.nzion.domain.billing.Invoice)self.getParent().getValue()).getReferralConsultantId();
+                                                  com.nzion.domain.Referral _referal = (com.nzion.domain.Referral)referralMap.get(referralId);
+                                                 if (_referal != null)
+                                                      self.setLabel(_referal.getClinicName());
+                                              }
+                                            ]]>
+                                    </attribute>
+                                </listcell>
+                                <listcell>
+                                    <label value="@{invoice.referralDoctorFirstName} "/>
+                                    <label value="@{invoice.referralDoctorLastName}"/>
+                                </listcell>
+                                <listcell>
+                                    <name object="@{invoice.consultant}" />
+                                </listcell>
+                                <listcell label="@{invoice.totalAmount.amount}" style="text-align:right"/>
+                                <listcell label="@{invoice.totalReferralAmountTobePaid}" style="text-align:right"/>
+                                <listcell label="@{invoice.totalReferralAmountPaid}" style="text-align:right"/>
+                                <listcell>
+                                    <button label="Invoice">
+                                        <attribute name="onClick">
+                                            com.nzion.domain.billing.Invoice invoice = self.getParent().getParent().getValue();
+                                            if("IPD".equals(invoice.getInvoiceType().name())){
+                                            Executions.getCurrent().sendRedirect("/billing/billingTxnItemInpatient.zul?invoiceId=" + self.getParent().getParent().getValue().getId(),"_BillSoapNote");
+                                            }
+                                            else{
+                                            Executions.getCurrent().sendRedirect("/billing/billingTxnItem.zul?invoiceId=" + self.getParent().getParent().getValue().getId(),"_BillSoapNote");
+                                            }
+                                        </attribute>
+                                    </button>
+                                    <button label="Payment">
+                                        <attribute name="onCreate">
+                                            if( com.nzion.domain.billing.Invoice.ReferralContractStatus.COMPLETED.equals(self.getParent().getParent().getValue().getReferralContractStatus())){
+                                            self.setVisible(false);
+                                            } else {
+                                            self.setVisible(true);
+                                            }
+                                        </attribute>
+                                        <attribute name="onClick">
+                                            Executions.createComponents("/report/referralConfirmAndPay.zul", null,com.nzion.util.UtilMisc.toMap("invoice",self.getParent().getParent().getValue(),"searchButton",searchButton));
+                                        </attribute>
+                                    </button>
+                                </listcell>
+                            </listitem>
+                        </listbox>
+
+                    </div>
+                </div>
+            </panelchildren>
+        </panel>
+
+    </window>
+
+</zk>            

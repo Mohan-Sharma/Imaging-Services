@@ -46,6 +46,8 @@ public interface BillingRepository extends BaseRepository {
 	List<Contract>  getContractForInsPro(InsuranceProvider insuPro);
 
 	List<Invoice> searchInvoiceBy(BillingSearchVO billingSearchVO,Date fromDate,Date thruDate);
+
+	List<Invoice> searchReferralInvoiceBy(BillingSearchVO billingSearchVO,Date fromDate,Date thruDate);
 	
 	List<AcctgTransaction> searchAcctgTransactionBy(AcctgTransTypeEnum chargeType,Date fromDate,Date thruDate);
 	

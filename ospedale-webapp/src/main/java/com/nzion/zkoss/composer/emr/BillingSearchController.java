@@ -102,6 +102,11 @@ public class BillingSearchController extends OspedaleAutowirableComposer {
 	return invoices;
 	}
 
+	public List<Invoice> searchReferralInvoiceBy(Date fromDate,Date thruDate) {
+		invoices =  billingService.searchReferralInvoiceBy(billingSearchVO,fromDate,thruDate);
+		return invoices;
+	}
+
 	public BillingSearchVO getBillingSearchVO() {
 	return billingSearchVO;
 	}

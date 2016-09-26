@@ -33,6 +33,8 @@ public interface CommonCrudService {
 
 	<T> List<T> getAll(Class<T> klass);
 
+	<T> List<T> getAll(Class<T> klass,String sortColumn);
+
 	<T> List<T> searchByExample(T t);
 
 	void save(Collection<?> collection);

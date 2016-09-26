@@ -14,6 +14,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
@@ -137,8 +138,22 @@ public class HibernateBaseRepository extends HibernateDaoSupport implements Base
         return list;
     }
 
+    public <T> List<T> getAll(Class<T> klass, boolean onlyEnabled,String sortColumn) {
+        if (!onlyEnabled) {
+            getHibernateTemplate().setFilterNames(new String[]{});
+            getSession().disableFilter("EnabledFilter");
+        }
+        Criteria criteria = getSession().createCriteria(klass).addOrder(Order.asc(sortColumn));
+        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+        return criteria.list();
+    }
+
     public <T> List<T> getAll(Class<T> klass) {
         return getAll(klass, true);
+    }
+
+    public <T> List<T> getAll(Class<T> klass,String sortColumn) {
+        return getAll(klass, true,sortColumn);
     }
 
     public void save(Collection<?> collection) {

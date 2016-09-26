@@ -103,6 +103,11 @@ public class CommonCrudServiceImpl implements CommonCrudService, GenericHomeScre
 	}
 
 	@Override
+	public <T> List<T> getAll(Class<T> klass, String sortColumn) {
+		return commonCrudRepository.getAll(klass,sortColumn);
+	}
+
+	@Override
 	public <T> List<T> searchByExample(T t) {
 	return commonCrudRepository.searchByExample(t);
 	}

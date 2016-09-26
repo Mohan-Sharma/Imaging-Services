@@ -2,9 +2,7 @@ package com.nzion.report.search.view;
 
 import java.util.Date;
 
-import com.nzion.domain.Employee;
-import com.nzion.domain.Enumeration;
-import com.nzion.domain.Patient;
+import com.nzion.domain.*;
 import com.nzion.domain.product.common.Money;
 
 public class BillingSearchVO {
@@ -37,6 +35,10 @@ public class BillingSearchVO {
 	private Enumeration paymentMethod;
 	
 	private String collectedByUser;
+
+	private Referral referral;
+
+	private Provider selectedReferralDoctor;
 	
 	
 
@@ -155,5 +157,21 @@ public class BillingSearchVO {
 
 	public void setHighEndAmtQuantifier(String highEndAmtQuantifier) {
 	this.highEndAmtQuantifier = highEndAmtQuantifier;
+	}
+
+	public Referral getReferral() {
+		return referral;
+	}
+
+	public void setReferral(Referral referral) {
+		this.referral = referral;
+	}
+
+	public Provider getSelectedReferralDoctor() {
+		return selectedReferralDoctor;
+	}
+
+	public void setSelectedReferralDoctor(Provider selectedReferralDoctor) {
+		this.selectedReferralDoctor = selectedReferralDoctor;
 	}
 }

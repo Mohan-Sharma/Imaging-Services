@@ -298,6 +298,12 @@ public class SmsUtil {
             message = messageSource.getMessage((String) detail.get("key"), null, locale);
             message = MessageFormat.format(message, arguments);
             message = message.substring(1, message.length() - 1);
+        } else if (detail.get("key").toString().equals("IMAGING_UPLOAD_REPORTS_SMS_TO_PATIENT")) {
+            Object[] arguments = {detail.get("patientName"), detail.get("radiologyName"),detail.get("link")};
+
+            message = messageSource.getMessage((String) detail.get("key"), null, locale);
+            message = MessageFormat.format(message, arguments);
+            message = message.substring(1, message.length() - 1);
         }
         builder.append(message);
         //    builder.append("Thanks for registering with Afyaarabia. OTP for completing your registration process is " + detail.get("token") + ".\nThanks\nCommunity Care\nAfyaarabia");

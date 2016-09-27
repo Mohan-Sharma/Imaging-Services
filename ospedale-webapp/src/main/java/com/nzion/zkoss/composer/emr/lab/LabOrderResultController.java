@@ -1,10 +1,14 @@
 package com.nzion.zkoss.composer.emr.lab;
 
 import com.nzion.domain.File;
+import com.nzion.domain.emr.lab.LabOrderRequest;
 import com.nzion.domain.emr.lab.LabRequisition;
 import com.nzion.domain.emr.lab.LabResultAttachments;
+import com.nzion.repository.notifier.utility.SmsUtil;
+import com.nzion.repository.notifier.utility.TemplateNames;
 import com.nzion.service.common.CommonCrudService;
 import com.nzion.util.Infrastructure;
+import com.nzion.util.PortalRestServiceConsumer;
 import com.nzion.util.UtilMessagesAndPopups;
 import com.nzion.zkoss.composer.OspedaleAutowirableComposer;
 import org.hibernate.classic.Session;
@@ -19,7 +23,9 @@ import javax.sql.DataSource;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Nthdimenzion on 22-Jul-16.
@@ -89,7 +95,7 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
     }
 
 
-    public int updateLabRequisitionStatus(final Long labOrderRequestId, boolean check){
+    public int updateLabRequisitionStatus(final LabOrderRequest labOrderRequest, boolean check){
         if (!check) {
             UtilMessagesAndPopups.showConfirmation("Number of results uploaded does not match the number of tests. Do you want to mark the order as complete ?", new EventListener() {
                 @Override
@@ -98,7 +104,22 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
                         try{
                             int updateRow;
                             java.sql.Timestamp nowDate = new java.sql.Timestamp(new java.util.Date().getTime());
-                            updateRow = namedParameterJdbcTemplate.update(setLabRequisitionStatus, new MapSqlParameterSource("labOrderRequestId",labOrderRequestId).addValue("nowDate",nowDate).addValue("status", LabRequisition.LabRequisitionStatus.COMPLETED.name()));
+                            updateRow = namedParameterJdbcTemplate.update(setLabRequisitionStatus, new MapSqlParameterSource("labOrderRequestId",labOrderRequest.getId()).addValue("nowDate",nowDate).addValue("status", LabRequisition.LabRequisitionStatus.COMPLETED.name()));
+                            try {
+                                String portalUrl = PortalRestServiceConsumer.PORTAL_URL;
+                                Map<String, Object> clinicDetails = new HashMap<String, Object>();
+                                clinicDetails.put("key", TemplateNames.IMAGING_UPLOAD_REPORTS_SMS_TO_PATIENT.name());
+                                clinicDetails.put("forDoctor", new Boolean(false));
+                                clinicDetails.put("forAdmin", new Boolean(false));
+                                clinicDetails.put("radiologyName", Infrastructure.getPractice().getPracticeName());
+
+                                String link = portalUrl+"/web_pages/member_area/patient/ImagingReport.html?imagingCenterOrderId="+labOrderRequest.getId()+"&imagingId="+Infrastructure.getPractice().getTenantId()+"&afyaId="+labOrderRequest.getPatient().getAfyaId();
+                                clinicDetails.put("link", link);
+
+                                SmsUtil.sendStatusSms(labOrderRequest, clinicDetails);
+                            } catch (Exception e){
+                                e.printStackTrace();
+                            }
                         }catch (Exception e){
                             e.printStackTrace();
                         }
@@ -107,7 +128,7 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
                         try{
                             int updateRow;
                             java.sql.Timestamp nowDate = new java.sql.Timestamp(new java.util.Date().getTime());
-                            updateRow = namedParameterJdbcTemplate.update(setLabRequisitionWithoutStatus, new MapSqlParameterSource("labOrderRequestId",labOrderRequestId).addValue("nowDate", nowDate));
+                            updateRow = namedParameterJdbcTemplate.update(setLabRequisitionWithoutStatus, new MapSqlParameterSource("labOrderRequestId",labOrderRequest.getId()).addValue("nowDate", nowDate));
                         }catch (Exception e){
                             e.printStackTrace();
                         }
@@ -117,7 +138,22 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
             try{
                 int updateRow1;
                 java.sql.Timestamp nowDate = new java.sql.Timestamp(new java.util.Date().getTime());
-                updateRow1 = namedParameterJdbcTemplate.update(setLabRequisitionStatus, new MapSqlParameterSource("labOrderRequestId",labOrderRequestId).addValue("nowDate",nowDate).addValue("status", LabRequisition.LabRequisitionStatus.COMPLETED.name()));
+                updateRow1 = namedParameterJdbcTemplate.update(setLabRequisitionStatus, new MapSqlParameterSource("labOrderRequestId",labOrderRequest.getId()).addValue("nowDate",nowDate).addValue("status", LabRequisition.LabRequisitionStatus.COMPLETED.name()));
+                try {
+                    String portalUrl = PortalRestServiceConsumer.PORTAL_URL;
+                    Map<String, Object> clinicDetails = new HashMap<String, Object>();
+                    clinicDetails.put("key", TemplateNames.IMAGING_UPLOAD_REPORTS_SMS_TO_PATIENT.name());
+                    clinicDetails.put("forDoctor", new Boolean(false));
+                    clinicDetails.put("forAdmin", new Boolean(false));
+                    clinicDetails.put("radiologyName", Infrastructure.getPractice().getPracticeName());
+
+                    String link = portalUrl+"/web_pages/member_area/patient/ImagingReport.html?imagingCenterOrderId="+labOrderRequest.getId()+"&imagingId="+Infrastructure.getPractice().getTenantId()+"&afyaId="+labOrderRequest.getPatient().getAfyaId();
+                    clinicDetails.put("link", link);
+
+                    SmsUtil.sendStatusSms(labOrderRequest, clinicDetails);
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
             }catch (Exception e){
                 e.printStackTrace();
             }

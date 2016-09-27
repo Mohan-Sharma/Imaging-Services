@@ -9,6 +9,7 @@ import com.nzion.repository.notifier.utility.TemplateNames;
 import com.nzion.service.common.CommonCrudService;
 import com.nzion.util.Infrastructure;
 import com.nzion.util.PortalRestServiceConsumer;
+import com.nzion.util.RestServiceConsumer;
 import com.nzion.util.UtilMessagesAndPopups;
 import com.nzion.zkoss.composer.OspedaleAutowirableComposer;
 import org.hibernate.classic.Session;
@@ -95,7 +96,7 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
     }
 
 
-    public int updateLabRequisitionStatus(final LabOrderRequest labOrderRequest, boolean check){
+    public int updateLabRequisitionStatus(final LabRequisition labRequisition, boolean check){
         if (!check) {
             UtilMessagesAndPopups.showConfirmation("Number of results uploaded does not match the number of tests. Do you want to mark the order as complete ?", new EventListener() {
                 @Override
@@ -104,7 +105,14 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
                         try{
                             int updateRow;
                             java.sql.Timestamp nowDate = new java.sql.Timestamp(new java.util.Date().getTime());
-                            updateRow = namedParameterJdbcTemplate.update(setLabRequisitionStatus, new MapSqlParameterSource("labOrderRequestId",labOrderRequest.getId()).addValue("nowDate",nowDate).addValue("status", LabRequisition.LabRequisitionStatus.COMPLETED.name()));
+                            updateRow = namedParameterJdbcTemplate.update(setLabRequisitionStatus, new MapSqlParameterSource("labOrderRequestId",labRequisition.getLabOrderRequest().getId()).addValue("nowDate",nowDate).addValue("status", LabRequisition.LabRequisitionStatus.COMPLETED.name()));
+                            if((labRequisition.getLabOrderRequest().getReferral() != null) && (labRequisition.getLabOrderRequest().isMobileOrPatinetPortal())){
+                                try {
+                                    RestServiceConsumer.updateResultInClinic(labRequisition);
+                                } catch (Exception e){
+                                    e.printStackTrace();
+                                }
+                            }
                             try {
                                 String portalUrl = PortalRestServiceConsumer.PORTAL_URL;
                                 Map<String, Object> clinicDetails = new HashMap<String, Object>();
@@ -113,10 +121,10 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
                                 clinicDetails.put("forAdmin", new Boolean(false));
                                 clinicDetails.put("radiologyName", Infrastructure.getPractice().getPracticeName());
 
-                                String link = portalUrl+"/web_pages/member_area/patient/ImagingReport.html?imagingCenterOrderId="+labOrderRequest.getId()+"&imagingId="+Infrastructure.getPractice().getTenantId()+"&afyaId="+labOrderRequest.getPatient().getAfyaId();
+                                String link = portalUrl+"/web_pages/member_area/patient/ImagingReport.html?imagingCenterOrderId="+labRequisition.getLabOrderRequest().getId()+"&imagingId="+Infrastructure.getPractice().getTenantId()+"&afyaId="+labRequisition.getLabOrderRequest().getPatient().getAfyaId();
                                 clinicDetails.put("link", link);
 
-                                SmsUtil.sendStatusSms(labOrderRequest, clinicDetails);
+                                SmsUtil.sendStatusSms(labRequisition.getLabOrderRequest(), clinicDetails);
                             } catch (Exception e){
                                 e.printStackTrace();
                             }
@@ -128,7 +136,7 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
                         try{
                             int updateRow;
                             java.sql.Timestamp nowDate = new java.sql.Timestamp(new java.util.Date().getTime());
-                            updateRow = namedParameterJdbcTemplate.update(setLabRequisitionWithoutStatus, new MapSqlParameterSource("labOrderRequestId",labOrderRequest.getId()).addValue("nowDate", nowDate));
+                            updateRow = namedParameterJdbcTemplate.update(setLabRequisitionWithoutStatus, new MapSqlParameterSource("labOrderRequestId",labRequisition.getLabOrderRequest().getId()).addValue("nowDate", nowDate));
                         }catch (Exception e){
                             e.printStackTrace();
                         }
@@ -138,7 +146,14 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
             try{
                 int updateRow1;
                 java.sql.Timestamp nowDate = new java.sql.Timestamp(new java.util.Date().getTime());
-                updateRow1 = namedParameterJdbcTemplate.update(setLabRequisitionStatus, new MapSqlParameterSource("labOrderRequestId",labOrderRequest.getId()).addValue("nowDate",nowDate).addValue("status", LabRequisition.LabRequisitionStatus.COMPLETED.name()));
+                updateRow1 = namedParameterJdbcTemplate.update(setLabRequisitionStatus, new MapSqlParameterSource("labOrderRequestId",labRequisition.getLabOrderRequest().getId()).addValue("nowDate",nowDate).addValue("status", LabRequisition.LabRequisitionStatus.COMPLETED.name()));
+                if((labRequisition.getLabOrderRequest().getReferral() != null) && (labRequisition.getLabOrderRequest().isMobileOrPatinetPortal())){
+                    try {
+                        RestServiceConsumer.updateResultInClinic(labRequisition);
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
                 try {
                     String portalUrl = PortalRestServiceConsumer.PORTAL_URL;
                     Map<String, Object> clinicDetails = new HashMap<String, Object>();
@@ -147,10 +162,10 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
                     clinicDetails.put("forAdmin", new Boolean(false));
                     clinicDetails.put("radiologyName", Infrastructure.getPractice().getPracticeName());
 
-                    String link = portalUrl+"/web_pages/member_area/patient/ImagingReport.html?imagingCenterOrderId="+labOrderRequest.getId()+"&imagingId="+Infrastructure.getPractice().getTenantId()+"&afyaId="+labOrderRequest.getPatient().getAfyaId();
+                    String link = portalUrl+"/web_pages/member_area/patient/ImagingReport.html?imagingCenterOrderId="+labRequisition.getLabOrderRequest().getId()+"&imagingId="+Infrastructure.getPractice().getTenantId()+"&afyaId="+labRequisition.getLabOrderRequest().getPatient().getAfyaId();
                     clinicDetails.put("link", link);
 
-                    SmsUtil.sendStatusSms(labOrderRequest, clinicDetails);
+                    SmsUtil.sendStatusSms(labRequisition.getLabOrderRequest(), clinicDetails);
                 } catch (Exception e){
                     e.printStackTrace();
                 }

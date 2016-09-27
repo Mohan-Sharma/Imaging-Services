@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import com.nzion.domain.Patient;
 import com.nzion.domain.PatientInsurance;
 import com.nzion.domain.Practice;
+import com.nzion.domain.emr.lab.LabRequisition;
 import com.nzion.dto.*;
 import com.nzion.service.dto.LabOrderDto;
 import com.nzion.service.dto.ServiceMasterDto;
@@ -497,5 +498,28 @@ public class RestServiceConsumer {
         Gson gson = new GsonBuilder().serializeNulls().create();
         result = (Map<String, Object>) gson.fromJson(json, result.getClass());
         return result;
+    }
+
+    public static void updateResultInClinic(LabRequisition labRequisition){
+        NetworkOrderResultDto networkOrderResultDto = new NetworkOrderResultDto();
+        networkOrderResultDto.setPropertiesToDto(labRequisition);
+        String tenantId = labRequisition.getLabOrderRequest().getReferral().getTenantId();
+        Gson gson = new GsonBuilder().serializeNulls().setDateFormat("yyyy-MM-dd").create();
+        String labInfJsonString = gson.toJson(networkOrderResultDto);
+        try {
+            RestTemplate restTemplate = new RestTemplate(getHttpComponentsClientHttpRequestFactory());
+            HttpHeaders headers = getHttpHeader();
+
+            restTemplate.getMessageConverters()
+                    .add(0, new StringHttpMessageConverter(Charset.forName("UTF-8")));
+
+            HttpEntity<String> requestEntity = new HttpEntity<String>(labInfJsonString, headers);
+            ResponseEntity<String> responseEntity = restTemplate.exchange(CLINIC_URL+"/clinicMaster/updateTestResult?tenantId={tenantId}", HttpMethod.POST, requestEntity, String.class, tenantId);
+            String labInf = responseEntity.getBody();
+            //return providerId;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //return null;
     }
 }

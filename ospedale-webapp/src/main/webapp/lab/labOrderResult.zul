@@ -203,9 +203,9 @@
                     }
                     }
                     if(check){
-                            labOrderResultController.updateLabRequisitionStatus(labOrderRequest, true);
+                            labOrderResultController.updateLabRequisitionStatus(labRequisition, true);
                         } else {
-                            labOrderResultController.updateLabRequisitionStatus(labOrderRequest, false);
+                            labOrderResultController.updateLabRequisitionStatus(labRequisition, false);
                         }
                         labOrderRequestWin.detach();
                         com.nzion.util.UtilMessagesAndPopups.showSuccess();

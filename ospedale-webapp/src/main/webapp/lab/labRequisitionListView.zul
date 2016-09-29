@@ -84,7 +84,8 @@
                         <!--<listheader label="Phlebotomist"/>-->
                        <!-- <listheader label="Invoice Number"/>-->
                         <listheader label="Status"/>
-                        <listheader label="Requested Date" />  
+                        <listheader label="Requested Date" />
+                        <listheader label="Test/Panel/Profile" width="30%"/>
                         <listheader label="Action"/>
                     </listhead>
                     <template name="model" var="requisition">
@@ -103,6 +104,32 @@
                             <listcell label="@load(requisition.status.description)"/>
                            <listcell >
                             <label value="@load(requisition.createdTxTimestamp)@converter('formatedDate', format='dd/MM/yyyy')"/>
+                            </listcell>
+                            <listcell>
+                                <vlayout>
+                                    <attribute name="onCreate">
+                                        <![CDATA[
+                                            List patientLabOrderList = commonCrudService.findByEquality(com.nzion.domain.emr.soap.PatientLabOrder.class, new String[]{"labOrderRequest"}, new Object[]{self.getParent().getParent().getValue().getLabOrderRequest()});
+                                            for(com.nzion.domain.emr.soap.PatientLabOrder patientLabOrder : patientLabOrderList){
+                                            if(patientLabOrder.getLabTest()!=null) {
+                                                Label l1 = new Label();
+                                                l1.setValue(patientLabOrder.labTest.testPneumonic);
+                                                self.appendChild(l1);
+                                            } else if(patientLabOrder.getLabTestPanel()!=null) {
+                                                Label l1 = new Label();
+                                                l1.setValue(patientLabOrder.labTestPanel.panelPneumonic);
+                                                self.appendChild(l1);
+                                            } else {
+                                                if(patientLabOrder.getLabTestProfile()!=null) {
+                                                Label l1 = new Label();
+                                                l1.setValue(patientLabOrder.labTestProfile.profileNeumonic);
+                                                self.appendChild(l1);
+                                                }
+                                            }
+                                            }
+                                      ]]>
+                                    </attribute>
+                                </vlayout>
                             </listcell>
                             <listcell>
                                 <!--<button label="Accession" sclass="btn-mini"

@@ -104,7 +104,7 @@
                 <!--<column label="Doctor"/>-->
                 <!--<column label="Referral"/>-->
                 <column label="Status" />
-                <column label="Action" />
+                <column label="Action" width="20%" />
             </columns>
             <rows>
                 <row self="@{each='labOrderRequest'}" value="@{labOrderRequest}">
@@ -124,6 +124,20 @@
                     <!-- <name object="@{labOrderRequest.referral}"/>-->
                     <label value="@{labOrderRequest.orderStatus.description}" width="10%"/>
                     <vlayout>
+                        <attribute name="onCreate">
+                            import java.util.*;
+                            com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
+                            List labResultAttachmentsFileList = commonCrudService.findByEquality(com.nzion.domain.emr.lab.LabResultAttachments.class, new String[]{"labOrderRequest"}, new Object[]{self.getParent().getValue()});
+                            for(com.nzion.domain.emr.lab.LabResultAttachments fileList : labResultAttachmentsFileList){
+                            if(fileList.getFile() != null){
+                            Label l1 = new Label();
+                            l1.setValue(fileList.file.fileName);
+                            self.appendChild(l1);
+                            }
+                            }
+                        </attribute>
+                    </vlayout>
+                    <!--<vlayout>
                         <button label="View">
                             <attribute name="onClick">
                                 <![CDATA[
@@ -131,7 +145,7 @@
                                 ]]>
                             </attribute>
                         </button>
-                    </vlayout>
+                    </vlayout>-->
                 </row>
             </rows>
         </grid>

@@ -85,7 +85,7 @@
                        <!-- <listheader label="Invoice Number"/>-->
                         <listheader label="Status"/>
                         <listheader label="Requested Date" />
-                        <listheader label="Test/Panel/Profile" width="30%"/>
+                        <listheader label="Test/Package" width="30%"/>
                         <listheader label="Action"/>
                     </listhead>
                     <template name="model" var="requisition">
@@ -119,13 +119,13 @@
                                                 Label l1 = new Label();
                                                 l1.setValue(patientLabOrder.labTestPanel.panelPneumonic);
                                                 self.appendChild(l1);
-                                            } else {
+                                            }/* else {
                                                 if(patientLabOrder.getLabTestProfile()!=null) {
                                                 Label l1 = new Label();
                                                 l1.setValue(patientLabOrder.labTestProfile.profileNeumonic);
                                                 self.appendChild(l1);
                                                 }
-                                            }
+                                            } */
                                             }
                                       ]]>
                                     </attribute>

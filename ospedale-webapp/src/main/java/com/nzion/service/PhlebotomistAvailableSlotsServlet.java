@@ -41,6 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -627,6 +628,31 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
                 labOrderRequest.getPatient(), labOrderRequest.getLocation());
         invoice.setInvoiceType(InvoiceType.OPD);
 
+        Referral referral = labOrderRequest.getReferral();
+        ReferralContract referralContract = null;
+        if(referral != null) {
+            List referralContractList = commonCrudService.findByEquality(ReferralContract.class, new String[]{"refereeClinicId"}, new Object[]{referral.getTenantId()});
+            Iterator iterator = referralContractList.iterator();
+
+            while (iterator.hasNext()) {
+                ReferralContract activeReferralContract = (ReferralContract) iterator.next();
+                if ((activeReferralContract.getExpiryDate().after(labOrderRequest.getStartDate())) &&
+                        (activeReferralContract.getContractDate().before(labOrderRequest.getStartDate()))) {
+                    referralContract = activeReferralContract;
+                    break;
+                }
+            }
+        }
+        if (referralContract != null) {
+            if (!"ACCEPTED".equals(referralContract.getContractStatus())) {
+                referralContract = null;
+            }else{
+                invoice.setReferralContract(referralContract);
+                invoice.setReferralConsultantId(referral.getId());
+                invoice.setReferralDoctorFirstName(labOrderRequest.getReferralDoctorName());
+            }
+        }
+
         List<LabOrderItemDto> labOrderItems = labOrderDto.getRows();
         for (LabOrderItemDto labOrderItem : labOrderItems){
             String description = "";
@@ -649,10 +675,17 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
                     description, 1, null, LabOrderRequest.class.getName());
             invItem.init(new BigDecimal(labOrderItem.getHomeServiceCost().toString()).setScale(2), "KD", new Money(new BigDecimal(labOrderItem.getHomeServiceCost().toString()).setScale(2), convertTo()), 1);
             invoice.addInvoiceItem(invItem);
-            if(invoice.getTotalAmount() != null && invoice.getTotalAmount().getAmount() != null)
-                invoice.setTotalAmount(new com.nzion.domain.product.common.Money(invoice.getTotalAmount().getAmount().add(new BigDecimal(labOrderItem.getHomeServiceCost().toString()).setScale(2)),convertTo()));
-            else
-                invoice.setTotalAmount(new com.nzion.domain.product.common.Money(new BigDecimal(labOrderItem.getHomeServiceCost().toString()).setScale(2),convertTo()));
+            if(invoice.getTotalAmount() != null && invoice.getTotalAmount().getAmount() != null) {
+                invoice.setTotalAmount(new com.nzion.domain.product.common.Money(invoice.getTotalAmount().getAmount().add(new BigDecimal(labOrderItem.getHomeServiceCost().toString()).setScale(2)), convertTo()));
+                if ((description != null) && (description != "")) {
+                    updateReferralAmountForService(invoice, invItem, referralContract, description, new BigDecimal(labOrderItem.getHomeServiceCost().toString()).setScale(2));
+                }
+            } else {
+                invoice.setTotalAmount(new com.nzion.domain.product.common.Money(new BigDecimal(labOrderItem.getHomeServiceCost().toString()).setScale(2), convertTo()));
+                if ((description != null) && (description != "")) {
+                    updateReferralAmountForService(invoice, invItem, referralContract, description, new BigDecimal(labOrderItem.getHomeServiceCost().toString()).setScale(2));
+                }
+            }
         }
         invoice.setLocation(labOrderRequest.getLocation());
         invoice.setCollectedAmount(invoice.getTotalAmount());
@@ -663,6 +696,7 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
         InvoicePayment invoicePayment = new InvoicePayment(paymentMethod, invoice, invoice.getTotalAmount(), PaymentType.ONLINE_PAYMENT);
         invoice.addInvoicePayment(invoicePayment);
         invoice.setLabOrderId(labOrderRequest);
+        invoice.setMobileOrPatinetPortal(true);
         Invoice inv = commonCrudService.save(invoice);
         //billingService.saveInvoiceStatus(invoice, InvoiceStatusItem.RECEIVED);
         labService.createLabRequisition(labOrderRequest, invoice);
@@ -685,5 +719,39 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
                 return enumeration;
         }
         return null;
+    }
+
+    void updateReferralAmountForService(Invoice invoice, InvoiceItem item, ReferralContract referralContract, String serviceName, BigDecimal amount) {
+        if (referralContract == null)
+            return;
+        com.nzion.domain.ReferralContractService referralContractService = commonCrudService.findUniqueByEquality(com.nzion.domain.ReferralContractService.class, new String[]{"serviceName", "referralContract.id"}, new Object[]{serviceName, referralContract.getId()});
+        if (referralContractService != null) {
+            if (referralContract.getPaymentMode().equals(ReferralContract.PAYMENT_MODE_ENUM.PERCENTAGE_SERVICE_ITEM.toString())) {
+                BigDecimal percentage = new BigDecimal(referralContractService.getPaymentPercentage());
+                BigDecimal referralAmount = amount.multiply(percentage).divide(new BigDecimal(100.0));
+                referralAmount = referralAmount.setScale(2, RoundingMode.HALF_UP);
+                item.setReferral_amountTobePaid(referralAmount);
+                if (invoice.getTotalReferralAmountTobePaid() != null)
+                    invoice.setTotalReferralAmountTobePaid(invoice.getTotalReferralAmountTobePaid().add(referralAmount));
+                else
+                    invoice.setTotalReferralAmountTobePaid(referralAmount);
+            } else if (referralContract.getPaymentMode().equals(ReferralContract.PAYMENT_MODE_ENUM.FIX_AMOUNT_PER_SERVICE.toString())) {
+                BigDecimal paymentAmount = new BigDecimal(referralContractService.getPaymentAmount());
+                item.setReferral_amountTobePaid(paymentAmount);
+                if (invoice.getTotalReferralAmountTobePaid() != null)
+                    invoice.setTotalReferralAmountTobePaid(invoice.getTotalReferralAmountTobePaid().add(paymentAmount));
+                else
+                    invoice.setTotalReferralAmountTobePaid(paymentAmount);
+            }else if(referralContract.getPaymentMode().equals(ReferralContract.PAYMENT_MODE_ENUM.PERCENTAGE_OF_BILL.toString()) ){
+                BigDecimal percentage = new BigDecimal(referralContract.getPercentageOnBill());
+                BigDecimal referralAmount = amount.multiply(percentage).divide(new BigDecimal(100.0));
+                referralAmount = referralAmount.setScale(2, RoundingMode.HALF_UP);
+                item.setReferral_amountTobePaid(referralAmount);
+                if (invoice.getTotalReferralAmountTobePaid() != null)
+                    invoice.setTotalReferralAmountTobePaid(invoice.getTotalReferralAmountTobePaid().add(referralAmount));
+                else
+                    invoice.setTotalReferralAmountTobePaid(referralAmount);
+            }
+        }
     }
 }

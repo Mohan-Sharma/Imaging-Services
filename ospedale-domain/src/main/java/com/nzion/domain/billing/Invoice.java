@@ -93,8 +93,11 @@ public class Invoice extends IdGeneratingBaseEntity implements LocationAware,Com
     private Date generatedOn;
 
     private LabOrderRequest labOrderId;
+
+    private boolean mobileOrPatinetPortal;
+
     private ReferralContract referralContract;
-    
+
     @Temporal(TemporalType.DATE)
     public Date getGeneratedOn() {
 		return generatedOn;
@@ -433,6 +436,14 @@ public class Invoice extends IdGeneratingBaseEntity implements LocationAware,Com
 
     public void setLabOrderId(LabOrderRequest labOrderId) {
         this.labOrderId = labOrderId;
+    }
+
+    public boolean isMobileOrPatinetPortal() {
+        return mobileOrPatinetPortal;
+    }
+
+    public void setMobileOrPatinetPortal(boolean mobileOrPatinetPortal) {
+        this.mobileOrPatinetPortal = mobileOrPatinetPortal;
     }
 
     @OneToOne(fetch=FetchType.EAGER)

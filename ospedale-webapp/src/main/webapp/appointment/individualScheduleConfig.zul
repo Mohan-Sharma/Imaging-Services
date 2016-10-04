@@ -71,7 +71,7 @@
 									 //visitTypeDiv.setVisible(false);
 									 visitTypeCombo.setSelectedIndex(1);
 									 visitsPerIntervDiv.setVisible(false);
-									 associations = scheduleService.getAllCalendarAssociationsFor(self.getSelectedItem().getValue());
+									 associations = scheduleService.getAllCalendarAssociationsFor(self.getValue());
 									 Events.postEvent("onReload",calenderList,null);
 									 }
 								 }
@@ -308,9 +308,9 @@
 					</listhead>
 					<listitem self="@{each='assoc'}">
 						<custom-attributes calendarAssoc="@{assoc}"/>
-						<attribute name="onDoubleClick">
+						<!--<attribute name="onDoubleClick">
 							Executions.createComponents("/appointment/editPersonalCalendarAssociation.zul", null, com.nzion.util.UtilMisc.toMap("calendarAssoc",calendarAssoc));
-						</attribute>
+						</attribute>-->
 						<!--<listcell>
 							<label value="@{assoc.location.name}"/>					
 						</listcell>-->

@@ -153,6 +153,10 @@ public class Invoice extends IdGeneratingBaseEntity implements LocationAware,Com
 
     private String referralDoctorLastName;
 
+    private String invoiceDateString;
+
+    private BigDecimal outStandingAmountString;
+
     /* If this is true then It will shows that
       * payment received as Advance for in-patient while admission.
       */
@@ -512,5 +516,19 @@ public class Invoice extends IdGeneratingBaseEntity implements LocationAware,Com
         public String getName(){
             return name;
         }
+    }
+
+    @Transient
+    public String getInvoiceDateString() {
+        if(getCreatedTxTimestamp() != null){
+            String d = com.nzion.util.UtilDateTime.formatDate(getCreatedTxTimestamp());
+            return d;
+        }
+        return "";
+    }
+
+    @Transient
+    public BigDecimal getOutStandingAmountString() {
+        return totalReferralAmountTobePaid.subtract(totalReferralAmountPaid).setScale(3,RoundingMode.HALF_UP);
     }
 }

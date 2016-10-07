@@ -630,6 +630,14 @@
                                                                     </attribute>
                                                                 </a>
                                                             </n:li>
+                                                            <n:li if="${m.get(10003)}">
+                                                                <a label="Referral Report" >
+                                                                    <attribute name="onClick">
+                                                                        setTitleAndActivateMenu("Referral","",reportsMenu);
+                                                                        appendContent("/report/referral-report");
+                                                                    </attribute>
+                                                                </a>
+                                                            </n:li>
                                                             <!--<n:li>
                                                                 <a label="MLC" >
                                                                     <attribute name="onClick">

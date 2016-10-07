@@ -1,0 +1,232 @@
+<?page title="Imaging Services" contentType="text/html;charset=UTF-8"?>
+<?variable-resolver class="org.zkoss.zkplus.spring.DelegatingVariableResolver"?>
+<?init class="org.zkoss.zkplus.databind.AnnotateDataBinderInit" root="./referralReportWindow"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml" xmlns:a="http://www.zkoss.org/2005/zk/annotation"
+    xmlns:n="http://www.zkoss.org/2005/zk/native" xmlns:w="http://www.zkoss.org/2005/zk/client"
+    xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <zscript>
+        <![CDATA[
+             import com.nzion.util.UtilValidator;
+             import com.nzion.domain.Referral;
+             import com.nzion.domain.Provider;
+             com.nzion.zkoss.ext.DataExporter exporter = new com.nzion.zkoss.ext.CsvDataExporter();
+             com.nzion.zkoss.composer.emr.BillingSearchController billingSearchController = new com.nzion.zkoss.composer.emr.BillingSearchController();
+             com.nzion.service.billing.BillingService billingService=com.nzion.util.Infrastructure.getSpringBean("billingService");
+             StringBuilder content = null;
+             StringBuilder header = null;
+             List  allReferrals = commonCrudService.getAll(com.nzion.domain.Referral.class);
+              Map referralMap = new HashMap();
+              for(int i=0; i < allReferrals.size(); i++)    {
+                 com.nzion.domain.Referral _referral = (com.nzion.domain.Referral)allReferrals.get(i);
+                 referralMap.put(new Long(_referral.getId()),_referral);
+              }
+
+              List providers = new ArrayList();
+              boolean admin = com.nzion.domain.Roles.hasRole(com.nzion.domain.Roles.ADMIN);
+              if(admin) {
+                  providers = commonCrudService.getAll(com.nzion.domain.Provider.class);
+              } else if(com.nzion.domain.Roles.hasRole(com.nzion.domain.Roles.PHLEBOTOMIST)) {
+                 providers.add((com.nzion.domain.Provider)com.nzion.util.Infrastructure.getLoggedInPerson());
+              }
+		]]>
+    </zscript>
+    <window id="referralReportWindow" apply="${billingSearchController}" >
+        <div style="padding:5px" zclass="page-header titled-well">
+            <h:h1>
+                <h:small>Referral Report</h:small>
+            </h:h1>
+        </div>
+        <div class="container-fluid">
+
+            <div zclass="row-fluid">
+                <div zclass="span2" >
+                    <label value="Referred to"/>
+                    <combobox id = "providerId" selectedItem = "@save(billingSearchController.billingSearchVO.consultant)" readonly="true" >
+                        <comboitem value="" label="" if="${admin}" />
+                        <comboitem forEach = "${providers}" value = "${each}" label = "${each}" >
+                            <attribute name = "onCreate">
+                                if(providers.size() == 1) {
+                                self.getParent().setSelectedItem(self);
+                                billingSearchController.getBillingSearchVO().setConsultant(self.getValue());
+                                }
+                            </attribute>
+                        </comboitem>
+                        <attribute name = "onSelect">
+                            if("".equals(providerId.getSelectedItem().getValue())){
+                                billingSearchController.getBillingSearchVO().setConsultant(null);
+                            } else {
+                                billingSearchController.getBillingSearchVO().setConsultant(self.getSelectedItem().getValue());
+                            }
+                        </attribute>
+                    </combobox>
+                </div>
+                <div zclass="span2" style="margin-left: 10px;">
+                    <label value="Invoice Date From"  />
+                    <datebox id="fromDate"   value="@{billingSearchController.billingSearchVO.fromDate}" sclass="span9"/>
+                </div>
+                <div zclass="span2" style="margin-left: 10px;">
+                    <label value="Invoice Date To"  />
+                    <datebox id="thruDate" value="@{billingSearchController.billingSearchVO.thruDate}" sclass="span9"/>
+                </div>
+
+                <div zclass="span2" visible="true" id="referralDiv">
+                    <label value="Referral Source Name"  />
+                    <combobox id="referralComboBox" model="@{allReferrals}"
+                              selectedItem="@bind(billingSearchController.billingSearchVO.referral)">
+                        <comboitem self="@{each='referral'}" label="@{referral.clinicName}" value="@{referral}"/>
+                        <!--<attribute name="onSelect">
+                            billingSearchController.updateClinicDoctor();
+                            Events.postEvent("onReload",referralDoctorComboBox,null);
+                        </attribute>-->
+                    </combobox>
+                </div>
+                <div zclass="span2" visible="false" id="referralDoctorDiv">
+                    <label value="Referred By Person"  />
+                    <combobox id="referralDoctorComboBox" model="@{billingSearchController.referralClinicDoctors, load-after='self.onReload'}"
+                              selectedItem="@{billingSearchController.billingSearchVO.selectedReferralDoctor}" >
+                        <comboitem self="@{each='ref'}" label="@{ref.firstName}"  value="@{ref}"/>
+                    </combobox>
+                </div>
+            </div>
+        </div>
+        <div align="center" sclass="panelFoot"  >
+            <button label="Search Invoice" id="searchButton" zclass="btn btn-primary"  >
+                <attribute name="onClick">
+                    <![CDATA[
+                        content = new StringBuilder();
+                        if(UtilValidator.isNotEmpty (billingSearchController.getBillingSearchVO().getConsultant())){
+                            content.append("Doctor :"+billingSearchController.getBillingSearchVO().getConsultant()).append(" | ");
+                        }
+                        if(UtilValidator.isNotEmpty (billingSearchController.getBillingSearchVO().getFromDate())){
+                            content.append("Invoice Date From: "+com.nzion.util.UtilDateTime.format( billingSearchController.getBillingSearchVO().getFromDate())).append(" | ");
+                        }
+                        if(UtilValidator.isNotEmpty (billingSearchController.getBillingSearchVO().getThruDate())){
+                            content.append("Invoice Date To: "+com.nzion.util.UtilDateTime.format(billingSearchController.getBillingSearchVO().getThruDate())).append(" | ");
+                        }
+                        billingSearchController.searchReferralInvoiceBy(fromDate.getValue(),thruDate.getValue());
+                        searchResults.setVisible(true);
+                        searchResultsSplitter.setVisible(true);
+                        searchResultGrid.setVisible(true);
+					]]>
+                </attribute>
+            </button>
+        </div>
+        <separator></separator>
+        <space height="5px" />
+        <hlayout width="100%" style="text-align:center;background-color:grey" id="searchResultsSplitter" visible="false">
+            <image src="/images/collapse-content.png" style="text-align:center">
+                <attribute w:name="onClick">
+                    jq(this.$f('searchForm')).slideToggle(1000);
+                </attribute>
+                <attribute name="onClick">
+                    if(self.getSrc().contains("expand")){
+                    self.setSrc("/images/collapse-content.png");
+                    }
+                    else if(self.getSrc().contains("collapse")){
+                    self.setSrc("/images/expand-content.png");
+                    }
+                </attribute>
+            </image>
+        </hlayout>
+        <space height="5px" />
+        <panel visible="false" id="searchResults" title="Search Results" width="100%" >
+            <caption height="15px">
+                <div visible="true" style="float:right; margin-right: 2%; background-color: white;width: 15%;text-align: center;text-decoration: none;">
+                    <a  tooltiptext="Export" label="Export" sclass="reminderBtn">
+                        <attribute name="onClick">
+                            exportData();
+                        </attribute>
+                    </a>
+                </div>
+            </caption>
+            <panelchildren>
+                <hlayout spacing="20px" style="padding:10px" width="50%">
+                    <div/><div/>
+                </hlayout>
+                <div id="gridViewDiv">
+                    <div height="500px" style="overflow:auto" id="searchResultDiv">
+                        <listbox  id="searchResultGrid" model="@{billingSearchController.invoices,load-after='searchButton.onClick'}"
+                                  checkmark="false" multiple="true">
+                            <listhead>
+                                <listheader label="Invoice Date" width="110px"
+                                            onCreate='billingSearchController.setAscendingComparator(self,"invoiceDate");billingSearchController.setDescendingComparator(self,"invoiceDate")'/>
+                                <listheader label="Invoice No."
+                                            onCreate='billingSearchController.setAscendingComparator(self,"invoiceNumber");billingSearchController.setDescendingComparator(self,"invoiceNumber")' />
+                                <listheader label="Referred Clinic"/>
+                                <listheader label="Referred Doctor" width="110px" />
+                                <listheader label="Doctor Name"
+                                            onCreate='billingSearchController.setAscendingComparator(self,"consultant.firstName");billingSearchController.setDescendingComparator(self,"consultant.firstName")' />
+                                <listheader label="Afya ID" />
+                                <listheader label="Patient Name"/>
+                                <listheader label="Civil ID" />
+                                <listheader label="File No." />
+                                <listheader label="Invoice Amount" width="110px"
+                                            onCreate='billingSearchController.setAscendingComparator(self,"totalAmount.amount");billingSearchController.setDescendingComparator(self,"totalAmount.amount")' />
+                                <listheader label="Referral Amount" width="110px"/>
+                                <listheader label="Referral Paid"/>
+                                <listheader label="Outstanding Amount" width="130px"/>
+                            </listhead>
+                            <listitem self="@{each='invoice'}" value="@{invoice}">
+                                <listcell label="@{invoice.invoiceDate,converter='com.nzion.view.component.DateConverter'}" />
+                                <listcell>
+                                    <label value="@{invoice.invoiceNumber}" />
+                                </listcell>
+                                <listcell label="@{invoice.referralConsultantId}">
+                                    <attribute name="onCreate">
+                                        <![CDATA[
+                                              if(self.getParent().getValue() instanceof com.nzion.domain.billing.Invoice){
+                                                 Long referralId = ((com.nzion.domain.billing.Invoice)self.getParent().getValue()).getReferralConsultantId();
+                                                  com.nzion.domain.Referral _referal = (com.nzion.domain.Referral)referralMap.get(referralId);
+                                                 if (_referal != null)
+                                                      self.setLabel(_referal.getClinicName());
+                                              }
+                                            ]]>
+                                    </attribute>
+                                </listcell>
+                                <listcell>
+                                    <label value="@{invoice.referralDoctorFirstName} "/>
+                                    <label value="@{invoice.referralDoctorLastName}"/>
+                                </listcell>
+                                <listcell>
+                                    <name object="@{invoice.consultant}" />
+                                </listcell>
+                                <listcell label="@{invoice.patient.afyaId}"/>
+                                <listcell label="@{invoice.patient}"/>
+                                <listcell label="@{invoice.patient.civilId}"/>
+                                <listcell label="@{invoice.patient.fileNo}"/>
+                                <listcell label="@{invoice.totalAmount.amount}" style="text-align:right"/>
+                                <listcell label="@{invoice.totalReferralAmountTobePaid}" style="text-align:right"/>
+                                <listcell label="@{invoice.totalReferralAmountPaid}" style="text-align:right"/>
+                                <listcell style="text-align:right">
+                                    <attribute name="onCreate">
+                                        if(self.getParent().getValue() instanceof com.nzion.domain.billing.Invoice){
+                                        java.math.BigDecimal outstandingAmount = ((com.nzion.domain.billing.Invoice)self.getParent().getValue()).getTotalReferralAmountTobePaid().subtract(((com.nzion.domain.billing.Invoice)self.getParent().getValue()).getTotalReferralAmountPaid());
+                                        self.setLabel(outstandingAmount.toString());
+                                        }
+                                    </attribute>
+                                </listcell>
+                            </listitem>
+                        </listbox>
+
+                    </div>
+                </div>
+            </panelchildren>
+        </panel>
+        <zscript>
+            void exportData() {
+            List items = new ArrayList();
+            if(UtilValidator.isNotEmpty(searchResultGrid.getSelectedItems())){
+            for(Object itm : searchResultGrid.getSelectedItems()){
+            com.nzion.domain.billing.Invoice invoice = (com.nzion.domain.billing.Invoice)((Listitem)itm).getValue();
+            items.add(invoice);
+            }
+            }
+            else {
+            items = billingSearchController.getInvoices();
+            }
+            if(com.nzion.util.UtilValidator.isNotEmpty(items))
+            exporter.export(items, new String[]{"invoiceDateString","invoiceNumber","labOrderId.referral.clinicName","referralDoctorFirstName","consultant","patient.afyaId","patient","patient.civilId","patient.fileNo","totalAmount.amount","totalReferralAmountTobePaid","totalReferralAmountPaid","outStandingAmountString"}, new String[]{"Invoice Date","Invoice No.","Referred Clinic","Referred Doctor","Doctor Name","Afya ID","Patient Name","Civil ID","File No.","Invoice Amount","Referral Amount","Referral Paid","Outstanding Amount"}, "referralReport.csv");
+            }
+        </zscript>
+    </window>
+</zk>            

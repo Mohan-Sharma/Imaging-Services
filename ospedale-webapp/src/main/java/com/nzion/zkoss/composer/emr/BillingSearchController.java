@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.nzion.domain.Provider;
+import com.nzion.hibernate.ext.multitenant.TenantIdHolder;
+import com.nzion.util.Infrastructure;
 import com.nzion.zkoss.composer.OspedaleAutowirableComposer;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Page;
@@ -51,6 +54,8 @@ public class BillingSearchController extends OspedaleAutowirableComposer {
 	private List<Invoice> invoices;
 
 	private Map<String, Set<Invoice>> invoiceMap = new HashMap<String, Set<Invoice>>();
+
+	private List<Provider> referralClinicDoctors = new ArrayList<Provider>();
 	
 	private Map<String, Set<InvoiceItem>> invoiceCptItemMap =  new HashMap<String, Set<InvoiceItem>>();
 	
@@ -485,7 +490,21 @@ public class BillingSearchController extends OspedaleAutowirableComposer {
 		returnMap.add(0,finalMap);
 		return returnMap;
 		}
-		
-	
+
+	public List<Provider> getReferralClinicDoctors() {
+		return referralClinicDoctors;
+	}
+
+	public void setReferralClinicDoctors(List<Provider> referralClinicDoctors) {
+		this.referralClinicDoctors = referralClinicDoctors;
+	}
+
+	public void updateClinicDoctor() {
+		if (getBillingSearchVO().getReferral() != null) {
+			TenantIdHolder.setTenantId(getBillingSearchVO().getReferral().getTenantId());
+			referralClinicDoctors = commonCrudService.getAll(Provider.class);
+			TenantIdHolder.setTenantId(Infrastructure.getPractice().getTenantId());
+		}
+	}
 }
 	

@@ -71,6 +71,8 @@ public class UtilDateTime {
 	public static SimpleDateFormat FULL_DATE_FORMATTER = new SimpleDateFormat("MMM,dd,yyyy");
 	
 	public static final String DATE_TIME_FORMATS = "dd-MM-yyyy HH:mm:ss a";
+
+	public static final String STANDARD_DATE = "dd/MM/yyyy";
 	
 	public static int compareByMonths(Date from, Date thru, int months){
 	int yearDiff = thru.getYear() - from.getYear();  
@@ -1151,6 +1153,15 @@ public class UtilDateTime {
 		String dateString = dateFormat.format(date);
 		return dateString;
 		}
+
+	public static String formatDate(Date date) {
+		if(date == null)
+			return " ";
+		SimpleDateFormat dateFormat = new SimpleDateFormat(STANDARD_DATE);
+		String dateString = dateFormat.format(date);
+		return dateString;
+	}
+
 	public static Date toDate(int month, int day, int year, int hour, int minute,
 							  int second) {
 		java.util.Date newDate = new Date(year, month, day, hour, minute, second);

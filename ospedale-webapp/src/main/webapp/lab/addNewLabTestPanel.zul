@@ -81,8 +81,8 @@
                             sclass="span12" />
                 </div>
                 <div zclass="span4">
-                    <label value="Turn Around Time"/>
-                    <textbox value="@{labPanelController.labTestPanel.turnaroundTime,save-when='Save.onClick'}" sclass="span12"/>
+                    <label value="Turn Around Time  (in hrs)"/>
+                    <intbox value="@{labPanelController.labTestPanel.turnaroundTime,save-when='Save.onClick'}" sclass="span12"/>
                 </div>
                 <separator/> <separator/>
                 <div zclass="span4">

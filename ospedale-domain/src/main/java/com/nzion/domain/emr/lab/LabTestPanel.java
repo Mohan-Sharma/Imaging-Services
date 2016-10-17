@@ -135,6 +135,6 @@ public class LabTestPanel extends IdGeneratingBaseEntity implements Serializable
 	}
 
 	public void setTurnaroundTime(String turnaroundTime) {
-		this.turnaroundTime = turnaroundTime;
+		this.turnaroundTime = turnaroundTime != null ? turnaroundTime.equals("") ? null : turnaroundTime : turnaroundTime;
 	}
 }

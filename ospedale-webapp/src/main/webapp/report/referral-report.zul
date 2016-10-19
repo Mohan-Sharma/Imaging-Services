@@ -39,7 +39,7 @@
         <div class="container-fluid">
 
             <div zclass="row-fluid">
-                <div zclass="span2" >
+                <!--<div zclass="span2" >
                     <label value="Referred to"/>
                     <combobox id = "providerId" selectedItem = "@save(billingSearchController.billingSearchVO.consultant)" readonly="true" >
                         <comboitem value="" label="" if="${admin}" />
@@ -59,7 +59,7 @@
                             }
                         </attribute>
                     </combobox>
-                </div>
+                </div>-->
                 <div zclass="span2" style="margin-left: 10px;">
                     <label value="Invoice Date From"  />
                     <datebox id="fromDate"   value="@{billingSearchController.billingSearchVO.fromDate}" sclass="span9"/>
@@ -69,7 +69,7 @@
                     <datebox id="thruDate" value="@{billingSearchController.billingSearchVO.thruDate}" sclass="span9"/>
                 </div>
 
-                <div zclass="span2" visible="true" id="referralDiv">
+                <div zclass="span2" visible="true" id="referralDiv" style="margin-left: 10px;">
                     <label value="Referral Source Name"  />
                     <combobox id="referralComboBox" model="@{allReferrals}"
                               selectedItem="@bind(billingSearchController.billingSearchVO.referral)">
@@ -150,16 +150,16 @@
                             <listhead>
                                 <listheader label="Invoice Date" width="110px"
                                             onCreate='billingSearchController.setAscendingComparator(self,"invoiceDate");billingSearchController.setDescendingComparator(self,"invoiceDate")'/>
-                                <listheader label="Invoice No."
+                                <listheader label="Invoice Number"
                                             onCreate='billingSearchController.setAscendingComparator(self,"invoiceNumber");billingSearchController.setDescendingComparator(self,"invoiceNumber")' />
                                 <listheader label="Referred Clinic"/>
                                 <listheader label="Referred Doctor" width="110px" />
-                                <listheader label="Doctor Name"
-                                            onCreate='billingSearchController.setAscendingComparator(self,"consultant.firstName");billingSearchController.setDescendingComparator(self,"consultant.firstName")' />
+                                <!--<listheader label="Doctor Name"
+                                            onCreate='billingSearchController.setAscendingComparator(self,"consultant.firstName");billingSearchController.setDescendingComparator(self,"consultant.firstName")' />-->
                                 <listheader label="Afya ID" />
                                 <listheader label="Patient Name"/>
                                 <listheader label="Civil ID" />
-                                <listheader label="File No." />
+                                <listheader label="File Number" />
                                 <listheader label="Invoice Amount" width="110px"
                                             onCreate='billingSearchController.setAscendingComparator(self,"totalAmount.amount");billingSearchController.setDescendingComparator(self,"totalAmount.amount")' />
                                 <listheader label="Referral Amount" width="110px"/>
@@ -187,9 +187,9 @@
                                     <label value="@{invoice.referralDoctorFirstName} "/>
                                     <label value="@{invoice.referralDoctorLastName}"/>
                                 </listcell>
-                                <listcell>
+                                <!--<listcell>
                                     <name object="@{invoice.consultant}" />
-                                </listcell>
+                                </listcell>-->
                                 <listcell label="@{invoice.patient.afyaId}"/>
                                 <listcell label="@{invoice.patient}"/>
                                 <listcell label="@{invoice.patient.civilId}"/>
@@ -225,7 +225,7 @@
             items = billingSearchController.getInvoices();
             }
             if(com.nzion.util.UtilValidator.isNotEmpty(items))
-            exporter.export(items, new String[]{"invoiceDateString","invoiceNumber","labOrderId.referral.clinicName","referralDoctorFirstName","consultant","patient.afyaId","patient","patient.civilId","patient.fileNo","totalAmount.amount","totalReferralAmountTobePaid","totalReferralAmountPaid","outStandingAmountString"}, new String[]{"Invoice Date","Invoice No.","Referred Clinic","Referred Doctor","Doctor Name","Afya ID","Patient Name","Civil ID","File No.","Invoice Amount","Referral Amount","Referral Paid","Outstanding Amount"}, "referralReport.csv");
+            exporter.export(items, new String[]{"invoiceDateString","invoiceNumber","labOrderId.referral.clinicName","referralDoctorFirstName","patient.afyaId","patient","patient.civilId","patient.fileNo","totalAmount.amount","totalReferralAmountTobePaid","totalReferralAmountPaid","outStandingAmountString"}, new String[]{"Invoice Date","Invoice Number","Referred Clinic","Referred Doctor","Afya ID","Patient Name","Civil ID","File Number","Invoice Amount","Referral Amount","Referral Paid","Outstanding Amount"}, "referralReport.csv");
             }
         </zscript>
     </window>

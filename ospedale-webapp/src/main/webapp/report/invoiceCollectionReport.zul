@@ -45,23 +45,38 @@
         <button label="Search" zclass="btn btn-primary" id="searchButton" onClick="@command('search')"/>
     </div>
     <separator></separator>
-    <panel id="searchResults" title="Search Results" width="100%" visible="false" >
+    <panel id="searchResults" title="Search Results" width="100%" visible="false">
+        <caption height="15px">
+            <div style="float:right; margin-right: 2%; background-color: white;width: 15%;text-align: center;text-decoration: none;">
+                <a tooltiptext="Export" label="Export" sclass="reminderBtn">
+                    <attribute name="onClick">
+                        exportData();
+                    </attribute>
+                </a>
+            </div>
+        </caption>
         <panelchildren>
             <listbox model="@bind(vm.paymentList)">
                <listhead>
-                   <listheader label="Receipt Number"></listheader>
-                   <listheader label="Date"/>
+                   <listheader label="Receipt Number" width="110px"/>
+                   <listheader label="Date"  width="90px"/>
                    <listheader label="Afya ID"/>
-                   <listheader label="File No."/>
-                   <listheader label="Civil ID"/>
-                   <listheader label="Invoice Number"/>
-                   <listheader label="Patient Name"/>
-                   <listheader label="Invoice Amount"/>
-                   <listheader label="Paid Amount"/>
+                   <listheader>
+                       <vbox>
+                           <label value="File" zclass=" z-listheader-cnt"/>
+                           <label value="Number" zclass=" z-listheader-cnt"/>
+                       </vbox>
+                   </listheader>
+                   <listheader label="Civil ID" width="80px"/>
+                   <listheader label="Invoice Number"  width="120px"/>
+                   <listheader label="Patient Name" width="110px"/>
+                   <listheader label="Invoice Amount"  width="120px"/>
+                   <listheader label="Paid Amount" width="110px"/>
                    <listheader label="Mode"/>
                    <listheader label="TransRef/CheckNum" width="130px"/>
                    <listheader label="Bank"/>
-                   <listheader label="Cheque Date"/>
+                   <listheader label="Cheque Date" width="110px"/>
+                   <listheader label="Policy Number" width="110px"/>
                </listhead>
                <template name="model" var="invoicePayment">
                <listitem>
@@ -75,17 +90,20 @@
                    <listcell>
                        <div align="right">
                            <label value="@bind(invoicePayment.billableAmount)" />
+                           <label value="KD"/>
                        </div>
                    </listcell>
                    <listcell>
                        <div align="right">
                            <label value="@bind(invoicePayment.paidAmount)" />
+                           <label value="KD"/>
                        </div>
                    </listcell>
                    <listcell label="@bind(invoicePayment.modeDescription)"></listcell>
                    <listcell label="@bind(invoicePayment.transRefOrCheckNumber)"></listcell>
                    <listcell label="@bind(invoicePayment.bankName)"></listcell>
                    <listcell label="@bind(invoicePayment.checkDate) @converter('formatedDate', format='dd/MM/yyyy')"></listcell>
+                   <listcell label="@bind(invoicePayment.policyNumber)"/>
                </listitem>
 
             </template>
@@ -129,6 +147,32 @@
             </div>
         </panelchildren>
     </panel>
+    <zscript>
+        com.nzion.zkoss.ext.DataExporter exporter = new com.nzion.zkoss.ext.CsvDataExporter();
+        void exportData(){
+        Set keySet=new LinkedHashSet();
+        keySet.add("receiptNumber");
+        keySet.add("paymentDate");
+        keySet.add("afyaId");
+        keySet.add("fileNo");
+        keySet.add("civilId");
+        keySet.add("invoiceNumber");
+        keySet.add("patientName");
+        keySet.add("billableAmount");
+        keySet.add("paidAmount");
+        keySet.add("modeDescription");
+        keySet.add("transRefOrCheckNumber");
+        keySet.add("bankName");
+        keySet.add("checkDate");
+        keySet.add("policyNumber");
+        StringBuilder builder = new StringBuilder();
+        builder.append("Invoice Collection");
+        if(com.nzion.util.UtilValidator.isNotEmpty(vm.paymentList))
+        exporter.exportWithHeader(builder,vm.paymentList,null,
+        new String[]{"Receipt Number", "Date", "Afya ID", "File Number", "Civil ID", "Invoice Number","Patient Name","Invoice Amount", "Paid Amount", "Mode", "TransRef/CheckNum", "Bank", "Cheque Date","Policy Number"},
+        "invoiceCollection.xlsx","INVOICE COLLECTION REPORT",keySet);
+        }
+    </zscript>
 </window>
 
 </zk>            

@@ -44,6 +44,7 @@ public class InvoiceCollectionReportViewModel {
     private List<Map<String, Object>> paymentList = new ArrayList<Map<String,Object>>();
     private BigDecimal totalBillableAmount = BigDecimal.ZERO.setScale(3, RoundingMode.HALF_UP);
     private BigDecimal totalPaidAmount = BigDecimal.ZERO.setScale(3, RoundingMode.HALF_UP);
+    private BigDecimal totalInsuranceAmount = BigDecimal.ZERO.setScale(3, RoundingMode.HALF_UP);
     private String totalDescriptionFooter1 = new String();
 
     private String totalDescriptionFooter2 = new String();
@@ -55,11 +56,12 @@ public class InvoiceCollectionReportViewModel {
     }
 
     @Command("search")
-    @NotifyChange({"paymentList","totalBillableAmount","totalPaidAmount","totalDescriptionFooter1","totalDescriptionFooter2"})
+    @NotifyChange({"paymentList","totalBillableAmount","totalPaidAmount","totalInsuranceAmount","totalDescriptionFooter1","totalDescriptionFooter2"})
     public void search(){
         paymentList = new ArrayList<Map<String, Object>>();
         totalBillableAmount = BigDecimal.ZERO.setScale(3, RoundingMode.HALF_UP);
         totalPaidAmount = BigDecimal.ZERO.setScale(3, RoundingMode.HALF_UP);
+        totalInsuranceAmount = BigDecimal.ZERO.setScale(3, RoundingMode.HALF_UP);
         BigDecimal totalPatientAccount = BigDecimal.ZERO.setScale(3, RoundingMode.HALF_UP);
         BigDecimal totalCashCollection = BigDecimal.ZERO.setScale(3, RoundingMode.HALF_UP);
         BigDecimal totalDebitCardCollection = BigDecimal.ZERO.setScale(3, RoundingMode.HALF_UP);
@@ -69,7 +71,13 @@ public class InvoiceCollectionReportViewModel {
         updateListByPatientCondition(invoicePayments);
 
         List<Map<String, Object>> listOfMap = buildListOfMap(invoicePayments);
+        String oldInvoiceId = new String();
         for(Map<String,Object> m : listOfMap) {
+            if(m.get("invoiceId").toString().equals(oldInvoiceId)){
+                m.put("billableAmount", BigDecimal.ZERO.setScale(3, RoundingMode.HALF_UP));
+            } else {
+                oldInvoiceId = m.get("invoiceId").toString();
+            }
             if("OPD_ADVANCE_AMOUNT".equals(m.get("mode").toString())){
                 totalPatientAccount = totalPatientAccount.add((BigDecimal) m.get("paidAmount")).setScale(3, RoundingMode.HALF_UP);
             }
@@ -84,6 +92,9 @@ public class InvoiceCollectionReportViewModel {
             }
             if("OPD_PERSONAL_CHEQUE".equals(m.get("mode").toString())){
                 totalCheckCollection = totalCheckCollection.add((BigDecimal)m.get("paidAmount")).setScale(3, RoundingMode.HALF_UP);
+            }
+            if("OPD_INSURANCE_CARD".equals(m.get("mode").toString())){
+                totalInsuranceAmount = totalInsuranceAmount.add((BigDecimal)m.get("paidAmount")).setScale(3, RoundingMode.HALF_UP);
             }
             totalBillableAmount = totalBillableAmount.add((BigDecimal) m.get("billableAmount")).setScale(3, RoundingMode.HALF_UP);
             totalPaidAmount = totalPaidAmount.add((BigDecimal) m.get("paidAmount")).setScale(3, RoundingMode.HALF_UP);
@@ -100,8 +111,8 @@ public class InvoiceCollectionReportViewModel {
         buffer2.append("Cash Collected = " + totalCashCollection + " KD ");
         buffer2.append("Debit Card = " + totalDebitCardCollection + " KD ");
         buffer2.append("Credit Card = " + totalCreditCardCollection + " KD ");
-        /*buffer2.append("Insurance Credit = " + totalInsuranceAmount + " KD ");
-        buffer2.append("Corporate Credit = " + totalCorporateAmount + " KD ");*/
+        buffer2.append("Insurance Credit = " + totalInsuranceAmount + " KD ");
+//        buffer2.append("Corporate Credit = " + totalCorporateAmount + " KD ");
 
         buffer2.append("Check Collected = " + totalCheckCollection + " KD ");
 
@@ -148,7 +159,7 @@ public class InvoiceCollectionReportViewModel {
             map.put("transRefOrCheckNumber", tranNum);
             map.put("bankName", invoicePayment.getBankName());
             map.put("checkDate", invoicePayment.getChequeOrDdDate());
-
+            map.put("policyNumber", invoicePayment.getPolicyNo());
             map.put("invoiceId", invoicePayment.getInvoice().getId());
             map.put("billableAmount", invoicePayment.getInvoice().getTotalAmount().getAmount());
             map.put("paidAmount",BigDecimal.ZERO.setScale(3, RoundingMode.HALF_UP));
@@ -160,10 +171,12 @@ public class InvoiceCollectionReportViewModel {
             map.put("fileNumber", invoicePayment.getInvoice().getPatient().getFileNo());*/
             if("OPD_CASH".equals(invoicePayment.getPaymentType().toString())){
                 map.put("paidAmount", invoicePayment.getAmount().getAmount().setScale(3, RoundingMode.HALF_UP) );
-            }
-            if("OPD_PERSONAL_CHEQUE".equals(invoicePayment.getPaymentType().toString())){
+            } else {
                 map.put("paidAmount", invoicePayment.getAmount().getAmount().setScale(3, RoundingMode.HALF_UP) );
             }
+          /*  if("OPD_PERSONAL_CHEQUE".equals(invoicePayment.getPaymentType().toString())){
+                map.put("paidAmount", invoicePayment.getAmount().getAmount().setScale(3, RoundingMode.HALF_UP) );
+            }*/
          /*   if("OPD_INSURANCE_AMOUNT".equals(invoicePayment.getPaymentType().toString())){
                 map.put("insuranceAmount",invoicePayment.getAmount().getAmount().setScale(3, RoundingMode.HALF_UP) );
             }else if("OPD_CORPORATE_AMOUNT".equals(invoicePayment.getPaymentType().toString())){
@@ -175,6 +188,11 @@ public class InvoiceCollectionReportViewModel {
 
             listOfMap.add(map);
         }
+        Collections.sort(listOfMap, new Comparator<Map<String, Object>>() {
+            public int compare(Map<String, Object> m1, Map<String, Object> m2) {
+                return ((Long)m1.get("invoiceId")).compareTo((Long)m2.get("invoiceId"));
+            }
+        });
         return listOfMap;
 
     }
@@ -289,5 +307,13 @@ public class InvoiceCollectionReportViewModel {
 
     public void setTotalDescriptionFooter2(String totalDescriptionFooter2) {
         this.totalDescriptionFooter2 = totalDescriptionFooter2;
+    }
+
+    public BigDecimal getTotalInsuranceAmount() {
+        return totalInsuranceAmount;
+    }
+
+    public void setTotalInsuranceAmount(BigDecimal totalInsuranceAmount) {
+        this.totalInsuranceAmount = totalInsuranceAmount;
     }
 }

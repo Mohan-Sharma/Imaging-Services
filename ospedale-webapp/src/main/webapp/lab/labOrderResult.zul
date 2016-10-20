@@ -4,20 +4,28 @@
     xmlns:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
 
     <zscript>
+        <![CDATA[
         import java.util.*;
         import com.nzion.service.common.CommonCrudService;
         import com.nzion.util.Infrastructure;
         import com.nzion.domain.emr.lab.LabRequisition;
         import com.nzion.domain.emr.lab.LabOrderRequest;
         LabRequisition labRequisition = arg.get("labRequisition");
+        Listbox listbox = Executions.getCurrent().getArg().get("listbox");
+        ListModelList lml = null;
+        if(listbox != null){
+        lml = (ListModelList)listbox.getModel();
+        }
         labRequisition = commonCrudService.getById(LabRequisition.class,labRequisition.getId());
         long labOrderRequestId = labRequisition.getLabOrderRequest().getId();
+
         CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
         LabOrderRequest labOrderRequest = commonCrudService.getById(LabOrderRequest.class,new Long(labRequisition.getLabOrderRequest().getId()));
         com.nzion.service.impl.FileBasedServiceImpl fileBasedServiceImpl = com.nzion.util.Infrastructure.getSpringBean("fileBasedServiceImpl");
         Set patientLabOrderList = labOrderRequest.getPatientLabOrders();
         com.nzion.domain.emr.lab.LabResultAttachments labResultAttachments = new com.nzion.domain.emr.lab.LabResultAttachments();
         com.nzion.zkoss.composer.emr.lab.LabOrderResultController labOrderResultController = new com.nzion.zkoss.composer.emr.lab.LabOrderResultController();
+        ]]>
     </zscript>
 
     <window id="labOrderRequestWin" mode="modal" position="center" width="40%"  closable="true" apply="org.zkoss.bind.BindComposer"  viewModel="@id('vm') @init('com.nzion.zkoss.composer.emr.lab.LabOrderResultController')">
@@ -207,6 +215,10 @@
                         } else {
                             labOrderResultController.updateLabRequisitionStatus(labRequisition, false);
                         }
+                    if(lml != null){
+                      if (lml.indexOf(labRequisition) == -1) {}
+                        lml.remove(labRequisition);
+                    }
                         labOrderRequestWin.detach();
                         com.nzion.util.UtilMessagesAndPopups.showSuccess();
                     ]]></attribute>

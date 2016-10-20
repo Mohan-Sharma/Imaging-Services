@@ -159,7 +159,7 @@
                                 <button label="Report Upload" sclass="btn-mini">
                                     <attribute name="onClick">
                                         <![CDATA[
-                                              Executions.createComponents("/lab/labOrderResult.zul", null,com.nzion.util.UtilMisc.toMap("labRequisition",self.getParent().getParent().getValue()));
+                                              Executions.createComponents("/lab/labOrderResult.zul", null,com.nzion.util.UtilMisc.toMap("labRequisition",self.getParent().getParent().getValue(),"listbox",self.getParent().getParent().getParent()));
                                         ]]>
                                     </attribute>
                                    <!-- <attribute name="onCreate"><![CDATA[

@@ -123,7 +123,7 @@
                     <!-- <name object="@{labOrderRequest.provider}"/>-->
                     <!-- <name object="@{labOrderRequest.referral}"/>-->
                     <label value="@{labOrderRequest.orderStatus.description}" width="10%"/>
-                    <vlayout>
+                    <!--<vlayout>
                         <attribute name="onCreate">
                             import java.util.*;
                             com.nzion.service.common.CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
@@ -136,16 +136,16 @@
                             }
                             }
                         </attribute>
-                    </vlayout>
-                    <!--<vlayout>
-                        <button label="View">
+                    </vlayout>-->
+                    <vlayout>
+                        <button label="View Report">
                             <attribute name="onClick">
                                 <![CDATA[
                                      Executions.createComponents("/lab/labReportView.zul", null,com.nzion.util.UtilMisc.toMap("labOrderRequest",self.getParent().getParent().getValue()));
                                 ]]>
                             </attribute>
                         </button>
-                    </vlayout>-->
+                    </vlayout>
                 </row>
             </rows>
         </grid>

@@ -137,6 +137,21 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 							<separator></separator><separator></separator>
 							<label value="@{vo.practice.imageUrl}" />
 						 </div>
+						<div zclass="span2">
+							<separator/><separator/>
+							<checkbox label=" Print address in output header" >
+								<attribute name="onCreate">
+									self.setChecked(vo.practice.isLogoWithAddress());
+								</attribute>
+								<attribute name="onCheck">
+									if(self.isChecked()){
+									vo.practice.setLogoWithAddress(true);
+									} else {
+									vo.practice.setLogoWithAddress(false);
+									}
+								</attribute>
+							</checkbox>
+						</div>
 					</div> 
 					 <div zclass="row-fluid">
 					 <div zclass="span3">
@@ -335,7 +350,7 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 			} */
 
 			public void validatePasswordAndConfirmPassword() {
-			com.nzion.util.UtilDisplay.validateCharacters(passwordTxtBox);
+		//	com.nzion.util.UtilDisplay.validateCharacters(passwordTxtBox);
 			if (!confirmPassword.equals(pracController.getPracticeViewObject().getUserLogin().getPassword()))
 				throw new WrongValueException(confirmPasswordTextBox, "Password and confirmation do not match");
 			}

@@ -82,12 +82,12 @@
     </attribute>
     <n:div style="width:95%;horizontal-align:center;margin:20px 10px 5px 30px;">
 
-        <div if="${isLogoWithAdd}">
+        <div if="${isLogoWithoutAdd}">
             <n:table style="align:center;width:100%">
                 <n:tr>
                     <n:td style="cellspacing:0px;cellpadding:0px">
                         <image id="logoImage1"  width="800px" height="200px" style="margin-left:5px">
-                            <attribute name="onCreate">
+                            <!--<attribute name="onCreate">
                                 String logoUrl = com.nzion.util.Infrastructure.getPractice().getImageUrl().replaceFirst("/","");
                                 try{
                                 java.io.FileInputStream fileInputStream = new java.io.FileInputStream(logoUrl);
@@ -98,19 +98,7 @@
                                 org.zkoss.image.AImage aImage = new org.zkoss.image.AImage(logoUrl,fileInputStream);
                                 self.setContent(aImage);
                                 self.setVisible(true);
-                            </attribute>
-                        </image>
-                    </n:td>
-                </n:tr>
-
-            </n:table>
-        </div>
-
-        <div if="${isLogoWithoutAdd}">
-            <n:table style="align:center;width:100%">
-                <n:tr>
-                    <n:td width="17%" style="cellspacing:0px;cellpadding:0px">
-                        <image id="logoImage" style="margin-left:5px">
+                            </attribute>-->
                             <attribute name="onCreate">
                                 if(com.nzion.util.Infrastructure.getPractice().getImageUrl() != null){
                                 String logoUrl = com.nzion.util.Infrastructure.getPractice().getImageUrl().replaceFirst("/","");
@@ -119,6 +107,34 @@
                                 self.setContent(aImage);
                                 self.setVisible(true);
                                 }
+                            </attribute>
+                        </image>
+                    </n:td>
+                </n:tr>
+
+            </n:table>
+        </div>
+
+        <div if="${isLogoWithAdd}">
+            <n:table style="align:center;width:100%">
+                <n:tr>
+                    <n:td width="17%" style="cellspacing:0px;cellpadding:0px">
+                        <image id="logoImage" style="margin-left:5px">
+                            <!--<attribute name="onCreate">
+                                if(com.nzion.util.Infrastructure.getPractice().getImageUrl() != null){
+                                String logoUrl = com.nzion.util.Infrastructure.getPractice().getImageUrl().replaceFirst("/","");
+                                java.io.FileInputStream fileInputStream = new java.io.FileInputStream(logoUrl);
+                                org.zkoss.image.AImage aImage = new org.zkoss.image.AImage(logoUrl,fileInputStream);
+                                self.setContent(aImage);
+                                self.setVisible(true);
+                                }
+                            </attribute>-->
+                            <attribute name="onCreate">
+                                String logoUrl = com.nzion.util.Infrastructure.getPractice().getImageUrl().replaceFirst("/","");
+                                java.io.FileInputStream fileInputStream = new java.io.FileInputStream(logoUrl);
+                                org.zkoss.image.AImage aImage = new org.zkoss.image.AImage(logoUrl,fileInputStream);
+                                self.setContent(aImage);
+                                self.setVisible(true);
                             </attribute>
                         </image>
                     </n:td>

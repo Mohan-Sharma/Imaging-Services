@@ -20,6 +20,9 @@ import org.zkoss.bind.annotation.*;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zul.Filedownload;
+import org.zkoss.zul.ListModelList;
+import org.zkoss.zul.Listbox;
+
 import javax.sql.DataSource;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -95,8 +98,7 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
 
     }
 
-
-    public int updateLabRequisitionStatus(final LabRequisition labRequisition, boolean check){
+    public int updateLabRequisitionStatus(final LabRequisition labRequisition, boolean check, final Listbox listbox){
         if (!check) {
             UtilMessagesAndPopups.showConfirmation("Number of results uploaded does not match the number of tests. Do you want to mark the order as complete ?", new EventListener() {
                 @Override
@@ -130,6 +132,13 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
                             }
                         }catch (Exception e){
                             e.printStackTrace();
+                        }
+                        ListModelList listModelList = null;
+                        if(listbox != null){
+                            listModelList = (ListModelList)listbox.getModel();
+                        }
+                        if(listModelList != null){
+                            listModelList.remove(labRequisition);
                         }
                     }
                     if ("onNo".equalsIgnoreCase(evt.getName()))
@@ -171,6 +180,14 @@ public class LabOrderResultController extends OspedaleAutowirableComposer {
                 }
             }catch (Exception e){
                 e.printStackTrace();
+            }
+
+            ListModelList listModelList = null;
+            if(listbox != null){
+                listModelList = (ListModelList)listbox.getModel();
+            }
+            if(listModelList != null){
+                listModelList.remove(labRequisition);
             }
         }
 

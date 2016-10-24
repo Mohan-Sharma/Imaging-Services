@@ -12,13 +12,8 @@
         import com.nzion.domain.emr.lab.LabOrderRequest;
         LabRequisition labRequisition = arg.get("labRequisition");
         Listbox listbox = Executions.getCurrent().getArg().get("listbox");
-        ListModelList lml = null;
-        if(listbox != null){
-        lml = (ListModelList)listbox.getModel();
-        }
         labRequisition = commonCrudService.getById(LabRequisition.class,labRequisition.getId());
         long labOrderRequestId = labRequisition.getLabOrderRequest().getId();
-
         CommonCrudService commonCrudService = com.nzion.util.Infrastructure.getSpringBean("commonCrudService");
         LabOrderRequest labOrderRequest = commonCrudService.getById(LabOrderRequest.class,new Long(labRequisition.getLabOrderRequest().getId()));
         com.nzion.service.impl.FileBasedServiceImpl fileBasedServiceImpl = com.nzion.util.Infrastructure.getSpringBean("fileBasedServiceImpl");
@@ -211,14 +206,10 @@
                     }
                     }
                     if(check){
-                            labOrderResultController.updateLabRequisitionStatus(labRequisition, true);
+                            labOrderResultController.updateLabRequisitionStatus(labRequisition, true,listbox);
                         } else {
-                            labOrderResultController.updateLabRequisitionStatus(labRequisition, false);
+                            labOrderResultController.updateLabRequisitionStatus(labRequisition, false,listbox);
                         }
-                    if(lml != null){
-                      if (lml.indexOf(labRequisition) == -1) {}
-                        lml.remove(labRequisition);
-                    }
                         labOrderRequestWin.detach();
                         com.nzion.util.UtilMessagesAndPopups.showSuccess();
                     ]]></attribute>

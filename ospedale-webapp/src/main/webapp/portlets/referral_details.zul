@@ -126,10 +126,10 @@
                                 <listheader label="Referred Doctor"/>
                                 <listheader label="Doctor Name"
                                             onCreate='billingSearchController.setAscendingComparator(self,"consultant.firstName");billingSearchController.setDescendingComparator(self,"consultant.firstName")' />
-                                <listheader label="Invoice Amount" width="120px"
+                                <listheader label="Invoice Amount (KD)" width="140px"
                                             onCreate='billingSearchController.setAscendingComparator(self,"totalAmount.amount");billingSearchController.setDescendingComparator(self,"totalAmount.amount")' />
-                                <listheader label="Referral Amount" width="120px"/>
-                                <listheader label="Referral Paid" width="100px"/>
+                                <listheader label="Referral Amount (KD)" width="136px"/>
+                                <listheader label="Referral Paid (KD)" width="120px"/>
                                 <listheader label="Action" />
                             </listhead>
                             <listitem self="@{each='invoice'}" value="@{invoice}">

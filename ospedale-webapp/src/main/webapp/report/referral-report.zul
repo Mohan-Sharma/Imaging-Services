@@ -150,7 +150,7 @@
                             <listhead>
                                 <listheader label="Invoice Date" width="110px"
                                             onCreate='billingSearchController.setAscendingComparator(self,"invoiceDate");billingSearchController.setDescendingComparator(self,"invoiceDate")'/>
-                                <listheader label="Invoice Number"
+                                <listheader label="Invoice Number" width="110px"
                                             onCreate='billingSearchController.setAscendingComparator(self,"invoiceNumber");billingSearchController.setDescendingComparator(self,"invoiceNumber")' />
                                 <listheader label="Referred Clinic"/>
                                 <listheader label="Referred Doctor" width="110px" />
@@ -160,11 +160,11 @@
                                 <listheader label="Patient Name"/>
                                 <listheader label="Civil ID" />
                                 <listheader label="File Number" />
-                                <listheader label="Invoice Amount" width="110px"
+                                <listheader label="Invoice Amount (KD)" width="130px"
                                             onCreate='billingSearchController.setAscendingComparator(self,"totalAmount.amount");billingSearchController.setDescendingComparator(self,"totalAmount.amount")' />
-                                <listheader label="Referral Amount" width="110px"/>
-                                <listheader label="Referral Paid"/>
-                                <listheader label="Outstanding Amount" width="130px"/>
+                                <listheader label="Referral Amount (KD)" width="135px"/>
+                                <listheader label="Referral Paid (KD)" width="120px"/>
+                                <listheader label="Outstanding Amount (KD)" width="150px"/>
                             </listhead>
                             <listitem self="@{each='invoice'}" value="@{invoice}">
                                 <listcell label="@{invoice.invoiceDate,converter='com.nzion.view.component.DateConverter'}" />
@@ -231,7 +231,7 @@
                      exporter.exportWithHeader(header,items,
                             new String[]{"invoiceDateString", "invoiceNumber","labOrderId.referral.clinicName","referralDoctorFirstName","patient.afyaId","patient","patient.civilId","patient.fileNo",
                             "totalAmount.amount","totalReferralAmountTobePaid","totalReferralAmountPaid","outStandingAmountString"},
-                            new String[]{"Invoice Date","Invoice Number","Referred Clinic","Referred Doctor","Afya Id","Patient Name","Civil Id","File Number","Invoice Amount","Referral Amount","Referral Paid","OutStanding Amount"}, "referralReport.xlsx","REFERRAL REPORT",null);
+                            new String[]{"Invoice Date","Invoice Number","Referred Clinic","Referred Doctor","Afya Id","Patient Name","Civil Id","File Number","Invoice Amount (KD)","Referral Amount (KD)","Referral Paid (KD)","OutStanding Amount (KD)"}, "referralReport.xlsx","REFERRAL REPORT",null);
 
                  }
             ]]>

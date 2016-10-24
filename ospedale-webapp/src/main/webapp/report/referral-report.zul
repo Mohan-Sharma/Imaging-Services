@@ -213,20 +213,28 @@
             </panelchildren>
         </panel>
         <zscript>
-            void exportData() {
-            List items = new ArrayList();
-            if(UtilValidator.isNotEmpty(searchResultGrid.getSelectedItems())){
-            for(Object itm : searchResultGrid.getSelectedItems()){
-            com.nzion.domain.billing.Invoice invoice = (com.nzion.domain.billing.Invoice)((Listitem)itm).getValue();
-            items.add(invoice);
-            }
-            }
-            else {
-            items = billingSearchController.getInvoices();
-            }
-            if(com.nzion.util.UtilValidator.isNotEmpty(items))
-            exporter.export(items, new String[]{"invoiceDateString","invoiceNumber","labOrderId.referral.clinicName","referralDoctorFirstName","patient.afyaId","patient","patient.civilId","patient.fileNo","totalAmount.amount","totalReferralAmountTobePaid","totalReferralAmountPaid","outStandingAmountString"}, new String[]{"Invoice Date","Invoice Number","Referred Clinic","Referred Doctor","Afya ID","Patient Name","Civil ID","File Number","Invoice Amount","Referral Amount","Referral Paid","Outstanding Amount"}, "referralReport.csv");
-            }
+            <![CDATA[
+                void exportData(){
+                    List items = new ArrayList();
+                    if(UtilValidator.isNotEmpty(searchResultGrid.getSelectedItems())){
+                        for(Object itm : searchResultGrid.getSelectedItems()){
+                            com.nzion.domain.billing.Invoice inv = (com.nzion.domain.billing.Invoice)((Listitem)itm).getValue();
+                            items.add(inv);
+                        }
+                    }
+                    else {
+                        items = billingSearchController.getInvoices();
+                    }
+                    if(com.nzion.util.UtilValidator.isNotEmpty(items))
+                        if(content.length()> 0)
+                            header = new StringBuilder(content.substring(0, content.length() - 1));
+                     exporter.exportWithHeader(header,items,
+                            new String[]{"invoiceDateString", "invoiceNumber","labOrderId.referral.clinicName","referralDoctorFirstName","patient.afyaId","patient","patient.civilId","patient.fileNo",
+                            "totalAmount.amount","totalReferralAmountTobePaid","totalReferralAmountPaid","outStandingAmountString"},
+                            new String[]{"Invoice Date","Invoice Number","Referred Clinic","Referred Doctor","Afya Id","Patient Name","Civil Id","File Number","Invoice Amount","Referral Amount","Referral Paid","OutStanding Amount"}, "referralReport.xlsx","REFERRAL REPORT",null);
+
+                 }
+            ]]>
         </zscript>
     </window>
 </zk>            

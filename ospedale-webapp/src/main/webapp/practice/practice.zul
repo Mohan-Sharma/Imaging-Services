@@ -350,7 +350,7 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 			} */
 
 			public void validatePasswordAndConfirmPassword() {
-		//	com.nzion.util.UtilDisplay.validateCharacters(passwordTxtBox);
+			com.nzion.util.UtilDisplay.validateCharacters(passwordTxtBox);
 			if (!confirmPassword.equals(pracController.getPracticeViewObject().getUserLogin().getPassword()))
 				throw new WrongValueException(confirmPasswordTextBox, "Password and confirmation do not match");
 			}

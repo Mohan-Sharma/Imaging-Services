@@ -148,7 +148,7 @@
                         <listbox  id="searchResultGrid" model="@{billingSearchController.invoices,load-after='searchButton.onClick'}"
                                   checkmark="false" multiple="true">
                             <listhead>
-                                <listheader label="Invoice Date" width="110px"
+                                <listheader label="Invoice Date" width="100px"
                                             onCreate='billingSearchController.setAscendingComparator(self,"invoiceDate");billingSearchController.setDescendingComparator(self,"invoiceDate")'/>
                                 <listheader label="Invoice Number" width="110px"
                                             onCreate='billingSearchController.setAscendingComparator(self,"invoiceNumber");billingSearchController.setDescendingComparator(self,"invoiceNumber")' />
@@ -164,7 +164,7 @@
                                             onCreate='billingSearchController.setAscendingComparator(self,"totalAmount.amount");billingSearchController.setDescendingComparator(self,"totalAmount.amount")' />
                                 <listheader label="Referral Amount (KD)" width="135px"/>
                                 <listheader label="Referral Paid (KD)" width="120px"/>
-                                <listheader label="Outstanding Amount (KD)" width="150px"/>
+                                <listheader label="Outstanding Amount (KD)" width="155px"/>
                             </listhead>
                             <listitem self="@{each='invoice'}" value="@{invoice}">
                                 <listcell label="@{invoice.invoiceDate,converter='com.nzion.view.component.DateConverter'}" />
@@ -231,7 +231,7 @@
                      exporter.exportWithHeader(header,items,
                             new String[]{"invoiceDateString", "invoiceNumber","labOrderId.referral.clinicName","referralDoctorFirstName","patient.afyaId","patient","patient.civilId","patient.fileNo",
                             "totalAmount.amount","totalReferralAmountTobePaid","totalReferralAmountPaid","outStandingAmountString"},
-                            new String[]{"Invoice Date","Invoice Number","Referred Clinic","Referred Doctor","Afya Id","Patient Name","Civil Id","File Number","Invoice Amount (KD)","Referral Amount (KD)","Referral Paid (KD)","OutStanding Amount (KD)"}, "referralReport.xlsx","REFERRAL REPORT",null);
+                            new String[]{"Invoice Date","Invoice Number","Referred Clinic","Referred Doctor","Afya ID","Patient Name","Civil ID","File Number","Invoice Amount (KD)","Referral Amount (KD)","Referral Paid (KD)","OutStanding Amount (KD)"}, "referralReport.xlsx","REFERRAL REPORT",null);
 
                  }
             ]]>

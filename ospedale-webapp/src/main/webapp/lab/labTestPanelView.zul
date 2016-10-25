@@ -7,7 +7,7 @@
 </zscript>
 	<window id="labTestPanelViewWindow">
 	<screen width="100%" listtitle="List of Health Packages" addpage="newLabTestPanel"	entityclass="com.nzion.domain.emr.lab.LabTestPanel" addmodepopup="true"
-	fields="panelDescription,panelPneumonic,active" labels="Afya Health Package Name,Display Name,Active" searchfields="panelCode,panelDescription"
+	fields="panelDescription,panelPneumonic,gender,active" labels="Afya Health Package Name,Display Name,Gender,Active" searchfields="panelCode,panelDescription"
 	hideactivation="false" hidedeletebtn="true" hideaddbtn = "false" containername="contentArea"/>
 	</window>
 </zk>

@@ -44,6 +44,7 @@ public class LabTest extends IdGeneratingBaseEntity implements Serializable{
 	private Integer displayOrder;
 	private BigDecimal homeServiceAmount;
 	private BigDecimal billableAmount;
+	private String gender;
 
 	
 	@ManyToMany(targetEntity = Investigation.class,fetch = FetchType.EAGER)
@@ -183,5 +184,13 @@ public class LabTest extends IdGeneratingBaseEntity implements Serializable{
 
 	public void setBillableAmount(BigDecimal billableAmount) {
 		this.billableAmount = billableAmount;
+	}
+
+	public String getGender() {
+		return gender;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender != null ? gender : "Both";
 	}
 }

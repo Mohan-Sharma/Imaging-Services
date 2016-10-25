@@ -8,6 +8,7 @@
         import com.nzion.domain.emr.lab.LabTest;
         import com.nzion.domain.emr.lab.LabTestPanel;
         com.nzion.service.billing.BillingService billingService = com.nzion.util.Infrastructure.getSpringBean("billingService");
+        com.nzion.service.common.GenericHomeScreenService service = com.nzion.util.Infrastructure.getSpringBean("genericHomeScreenService");
         com.nzion.domain.billing.TariffCategory tariffCategory = null;
         if(tariffCategory == null)
             tariffCategory = arg.get("entity");
@@ -66,7 +67,26 @@
         <panel id="radiologyTest" visible="false">
             <caption label="Test"/>
             <panelchildren>
-                <listbox model="@{labTestList}" mold="paging" rows="12">
+                <div align="right">
+                    <textbox name="search" id="txtSearch" sclass="span2 search-query"
+                             onFocus="self.setValue(null);" onOK='Events.postEvent("onClick", searchBt, null);' />
+                    <button type="submit" zclass="btn" id="searchBt" label="Search">
+                        <attribute name="onClick">
+                            <![CDATA[
+                                String s = txtSearch.getValue();
+                                if (s == null || (s.trim().length() != 0 && s.trim().length() < 3)) {
+                                com.nzion.util.UtilMessagesAndPopups.showError("Please enter atleast " + 3 + " characters to search");
+                                return;
+                                }
+                                labTestList.clear();
+                                labTestList.addAll(service.search(s, com.nzion.domain.emr.lab.LabTest.class, "testPneumonic", true, new String[]{"testPneumonic", "department"}));
+                                labTestList = billingService.getPriceForLabTest(labTestList);
+                                Events.postEvent("onReloadRequest", labTestListBox, null);
+                            ]]>
+                        </attribute>
+                    </button>
+                </div>
+                <listbox id="labTestListBox" model="@{labTestList,load-after='searchBt.onClick,self.onReloadRequest'}" mold="paging" rows="12">
                     <listhead>
                         <listheader label="CPT Code" sort="auto(testCode)"/>
                         <listheader label="Department" sort="auto(department)"/>
@@ -99,7 +119,26 @@
         <panel id="healthPackage" visible="false">
             <caption label="Health Package"/>
             <panelchildren>
-                <listbox model="@{labTestPanelList}">
+                <div align="right">
+                    <textbox name="search" id="labTestPanelTxtSearch" sclass="span2 search-query"
+                             onFocus="self.setValue(null);" onOK='Events.postEvent("onClick", labTestPanelSearchBt, null);' />
+                    <button type="submit" zclass="btn" id="labTestPanelSearchBt" label="Search">
+                        <attribute name="onClick">
+                            <![CDATA[
+                                String s = labTestPanelTxtSearch.getValue();
+                                if (s == null || (s.trim().length() != 0 && s.trim().length() < 3)) {
+                                com.nzion.util.UtilMessagesAndPopups.showError("Please enter atleast " + 3 + " characters to search");
+                                return;
+                                }
+                                labTestPanelList.clear();
+                                labTestPanelList.addAll(service.search(s, com.nzion.domain.emr.lab.LabTestPanel.class, "panelPneumonic", true, new String[]{"panelPneumonic"}));
+                                labTestPanelList = billingService.getPriceForLabTestPanel(labTestPanelList);
+                                Events.postEvent("onReloadRequest", labTestPanelListBox, null);
+                            ]]>
+                        </attribute>
+                    </button>
+                </div>
+                <listbox id="labTestPanelListBox" model="@{labTestPanelList,load-after='labTestPanelSearchBt.onClick,self.onReloadRequest'}">
                     <listhead>
                        <!-- <listheader label="Test Code"/>-->
                         <listheader label="Display Name" sort="auto(panelPneumonic)" width="85%"/>

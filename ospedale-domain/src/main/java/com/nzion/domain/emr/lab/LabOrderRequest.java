@@ -64,6 +64,7 @@ public class LabOrderRequest extends IdGeneratingBaseEntity{
 
 	private String referralDoctorId;
 	private String referralDoctorName;
+	private String labTestList = "";
 
 
 	@ManyToMany(targetEntity=Laboratories.class,fetch=FetchType.EAGER)
@@ -350,5 +351,26 @@ public class LabOrderRequest extends IdGeneratingBaseEntity{
 
 	public void setReferralDoctorName(String referralDoctorName) {
 		this.referralDoctorName = referralDoctorName;
+	}
+
+	@Transient
+	public String getLabTestList() {
+
+		if(UtilValidator.isNotEmpty(getPatientLabOrders())){
+			Set<PatientLabOrder> patientLabOrders = getPatientLabOrders();
+			for(PatientLabOrder patientLabOrder : patientLabOrders){
+				if (patientLabOrder.getLabTest() != null){
+					labTestList = labTestList + "," + patientLabOrder.getLabTest().getTestDescription();
+				} else if (patientLabOrder.getLabTestPanel() != null){
+					labTestList = labTestList + "," + patientLabOrder.getLabTestPanel().getPanelDescription();
+				} else if (patientLabOrder.getLabTestProfile() != null){
+					labTestList = labTestList + "," + patientLabOrder.getLabTestProfile().getProfileName();
+				}
+			}
+		}
+		if (labTestList != ""){
+			labTestList = labTestList.substring(1);
+		}
+		return labTestList;
 	}
 }

@@ -31,7 +31,7 @@ public class LabTestPanel extends IdGeneratingBaseEntity implements Serializable
 	private BigDecimal homeServiceAmount;
 	private BigDecimal billableAmount;
 	private Integer displayOrder;
-	
+	private String gender;
 
 	private Set<LabTest> tests;
 
@@ -136,5 +136,13 @@ public class LabTestPanel extends IdGeneratingBaseEntity implements Serializable
 
 	public void setTurnaroundTime(String turnaroundTime) {
 		this.turnaroundTime = turnaroundTime != null ? turnaroundTime.equals("") ? null : turnaroundTime : turnaroundTime;
+	}
+
+	public String getGender() {
+		return gender;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender != null ? gender : "Both";
 	}
 }

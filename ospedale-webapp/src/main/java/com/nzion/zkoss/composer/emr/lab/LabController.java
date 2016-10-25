@@ -112,7 +112,7 @@ public class LabController extends OspedaleAutowirableComposer {
 	LabTest test = commonCrudService.save(labTest);
 	//test.setTestCode("Lab "+test.getId());
 	commonCrudService.merge(labTest);
-	root.getFellowIfAny("addLabTestPanelWindow", true).detach();
+//	root.getFellowIfAny("addLabTestPanelWindow", true).detach();
 	UtilMessagesAndPopups.showSuccess();
 	}
 

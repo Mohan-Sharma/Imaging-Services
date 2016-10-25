@@ -75,17 +75,32 @@
 
             </div>-->
             <div zclass="row-fluid">
-                <div zclass="span4">
+                <div zclass="span3">
                     <label value="Display Order" />
                     <intbox value="@{labPanelController.labTestPanel.displayOrder,save-when='Save.onClick'}"
                             sclass="span12" />
                 </div>
-                <div zclass="span4">
+                <div zclass="span3">
                     <label value="Turn Around Time  (in hrs)"/>
                     <intbox value="@{labPanelController.labTestPanel.turnaroundTime,save-when='Save.onClick'}" sclass="span12"/>
                 </div>
+                <div zclass="span3">
+                    <label value="Gender"/>
+                    <combobox id="gender" sclass="span12" selectedItem="@{labPanelController.labTestPanel.gender,save-when='Save.onClick'}" >
+                        <comboitem value="Both" label="Both"/>
+                        <comboitem value="Male" label="Male"/>
+                        <comboitem value="Female" label="Female"/>
+                        <attribute name="onCreate">
+                            if(self.getSelectedItem() == null)
+                            self.setValue("Both");
+                        </attribute>
+                        <attribute name="onChange">
+                            self.setSelectedItem(self.getSelectedItem());
+                        </attribute>
+                    </combobox>
+                </div>
                 <separator/> <separator/>
-                <div zclass="span4">
+                <div zclass="span3">
                     <checkbox label=" Prescription Required" >
                         <attribute name="onCreate">
                             self.setChecked(labPanelController.labTestPanel.isPrescriptionRequired());
@@ -99,6 +114,7 @@
                         </attribute>
                     </checkbox>
                 </div>
+
             </div>
             <!--<div zclass="row-fluid">
                 <div zclass="span12">

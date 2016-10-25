@@ -60,32 +60,32 @@
             <tabpanel>
                 <listbox model="@bind(vm.requisitionList)" mold="paging" autopaging="false" pageSize="30">
                     <listhead>
-                        <listheader label="Token" width="50px"/>
-                        <listheader label="Patient Name"/>
+                        <listheader label="Token" width="50px" sort="auto(token)"/>
+                        <listheader label="Patient Name" sort="auto(patient.firstName)"/>
                        <!-- <listheader label="Mobile Number"/>-->
-                        <listheader>
+                        <listheader sort="auto(labOrderRequest.startDate)">
                             <vbox>
-                                <label value="Appointment"/>
-                                <label value="Date"/>
+                                <label value="Appointment" zclass=" z-listheader-cnt"/>
+                                <label value="Date" zclass=" z-listheader-cnt"/>
                             </vbox>
                         </listheader>
-                        <listheader>
+                        <listheader sort="auto(labOrderRequest.startTime)">
                             <vbox>
-                                <label value="Appointment"/>
-                                <label value="Start Time"/>
+                                <label value="Appointment" zclass=" z-listheader-cnt"/>
+                                <label value="Start Time" zclass=" z-listheader-cnt"/>
                             </vbox>
                         </listheader>
-                        <listheader>
+                        <listheader sort="auto(labOrderRequest.endTime)">
                             <vbox>
-                                <label value="Appointment"/>
-                                <label value="End Time"/>
+                                <label value="Appointment" zclass=" z-listheader-cnt"/>
+                                <label value="End Time" zclass=" z-listheader-cnt"/>
                             </vbox>
                         </listheader>
                         <!--<listheader label="Phlebotomist"/>-->
                        <!-- <listheader label="Invoice Number"/>-->
-                        <listheader label="Status"/>
-                        <listheader label="Requested Date" />
-                        <listheader label="Test/Package" width="30%"/>
+                        <listheader label="Status" sort="auto(status.description)"/>
+                        <listheader label="Requested Date" sort="auto(createdTxTimestamp)"/>
+                        <listheader label="Test/Package" width="30%" sort="auto(labOrderRequest.labTestList)"/>
                         <listheader label="Action"/>
                     </listhead>
                     <template name="model" var="requisition">

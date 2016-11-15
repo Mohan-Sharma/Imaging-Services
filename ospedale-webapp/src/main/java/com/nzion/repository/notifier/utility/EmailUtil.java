@@ -4,6 +4,7 @@ import com.nzion.domain.Patient;
 import com.nzion.domain.Person;
 import com.nzion.domain.Schedule;
 import com.nzion.util.Infrastructure;
+import com.nzion.util.PortalRestServiceConsumer;
 import com.nzion.util.RestServiceConsumer;
 import com.nzion.util.UtilValidator;
 import freemarker.template.Configuration;
@@ -89,6 +90,7 @@ public class EmailUtil {
         Session session = authenticateAndGetSession(properties);
         String bodyOfEmail = EmailContentConstructor.getBodyAppointmentConfirmationEmail(schedule, patient, provider, clinicDetails);
         response = sendMail(session, properties,patient.getContacts().getEmail(),null,null, bodyOfEmail, EmailContentConstructor.setSubjectForPatientAppointment());*/
+        clinicDetails.put("baseUrl", PortalRestServiceConsumer.PORTAL_URL);
         String response = "";
         if (patient.getLanguage() != null) {
             clinicDetails.put("languagePreference", patient.getLanguage().getEnumCode());
@@ -144,6 +146,7 @@ public class EmailUtil {
         String bodyOfEmail = EmailContentConstructor.getBodyAppointmentCancelledMail(schedule, patient, provider, clinicDetails);
         response = sendMail(session, properties,patient.getContacts().getEmail(),null,null, bodyOfEmail, EmailContentConstructor.setSubjectForPatientAppointmentCancelledMail());
         return response;*/
+        clinicDetails.put("baseUrl", PortalRestServiceConsumer.PORTAL_URL);
         String response = "";
         if (patient.getLanguage() != null) {
             clinicDetails.put("languagePreference", patient.getLanguage().getEnumCode());
@@ -242,6 +245,7 @@ public class EmailUtil {
         MessageSource messageSource = Infrastructure.getSpringBean("messageSource");
         Configuration freemarkerConfiguration = Infrastructure.getSpringBean("freemarkerConfiguration");
         Locale locale = LocaleContextHolder.getLocale();
+        details.put("baseUrl", PortalRestServiceConsumer.PORTAL_URL);
         if((details.get("languagePreference") != null) && (details.get("languagePreference") != "")){
             locale = new Locale(details.get("languagePreference").toString());
         }

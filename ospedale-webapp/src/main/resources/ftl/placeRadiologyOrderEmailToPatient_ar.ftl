@@ -82,8 +82,19 @@
                     <tr>
                         <td width="519" style="border-bottom:solid 1px #CCCCCC;"><p style="margin:0px; text-align:center; font-family:Arial, Helvetica, sans-serif; font-size:14px;"> <a style="color:#3399CC; text-decoration:none;" href="http://www.afyaarabia.com/" target="_blank">www.afyaarabia.com</a> </p></td>
                     </tr>
-                    <tr>
+                    <#--<tr>
                         <td><p style="margin:0px; text-align:center; font-family:Arial, Helvetica, sans-serif; font-size:14px;"> <a style="color:#3399CC; text-decoration:none;" href="https://www.afyaarabia.com/afya-portal/#/AfyaServices/member-support">Customer Support</a> | <a style="color:#3399CC; text-decoration:none;" href="https://www.afyaarabia.com/afya-portal/#/AfyaServices/afya-mobile-app">Download App</a> | <a style="color:#3399CC; text-decoration:none;" href="https://www.afyaarabia.com/afya-portal/#/AboutAfya/contact-afya">Feedback</a> | <a style="color:#3399CC; text-decoration:none;" href="https://www.afyaarabia.com/afya-portal/#/AboutAfya/contact-afya">Contact Us </a></p> </td>
+                    </tr>-->
+                    <tr>
+                        <td><p style="margin:0px; text-align:center; font-family:Arial, Helvetica, sans-serif; font-size:14px;">  <a style="color:#3399CC; text-decoration:none;" href="https://itunes.apple.com/kw/app/afya-arabia-health-on-mobile/id1054869983?mt=8">Download Afya iOS App</a> | <a style="color:#3399CC; text-decoration:none;" href="https://play.google.com/store/apps/details?id=com.h3sys.afyaarabia">Download Afya Android App</a> | <a style="color:#3399CC; text-decoration:none;" href="https://www.afyaarabia.com/afya-portal/#!/AfyaServices/member-support">Customer Support</a>  | <a style="color:#3399CC; text-decoration:none;" href="https://www.afyaarabia.com/afya-portal/#!/AboutAfya/contact-afya">Feedback</a> | <a style="color:#3399CC; text-decoration:none;" href="https://www.afyaarabia.com/afya-portal/#!/AboutAfya/contact-afya">Contact Us </a></p> </td>
+                    </tr>
+                    <tr>
+                        <td><p style="margin-top: auto; text-align:center; font-family:Arial, Helvetica, sans-serif; font-size:14px;"><span style="vertical-align: 8px;">Connect with us&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                            <a target="_blank"   href="https://www.facebook.com/AfyaArabiaCommunity" ><img src="${baseUrl}/static/images/facebook.png" width="25" height="25" ></a>&nbsp;
+                            <a  target="_blank"  href="https://twitter.com/afyaarabia" target="_blank"><img src="${baseUrl}/static/images/twitter.png"  width="25" height="25"></a>&nbsp;
+                            <a target="_blank"   href="https://plus.google.com/u/0/114976212864957027567/posts" ><img  src="${baseUrl}/static/images/googleplus.png" width="25" height="25" ></a>&nbsp;
+                            <a target="_blank"  href="https://www.linkedin.com/company/10200075?trk=tyah&trkInfo=clickedVertical%3Acompany%2CclickedEntityId%3A10200075%2Cidx%3A1-1-1%2CtarId%3A1442942014580%2Ctas%3Aafya%20arab" target="_blank"><img src="${baseUrl}/static/images/linkedin.png" width="25" height="25"></a>&nbsp;
+                            <a target="_blank"  href="https://www.youtube.com/channel/UCQ_sSM_BsxsOEFG2B6dg79w" ><img  src="${baseUrl}/static/images/youtube.png" width="25" height="25"></a></p></td>&nbsp;
                     </tr>
                     <tr>
                         <td>&nbsp;</td>

@@ -61,14 +61,14 @@ try {
 			//MGM
 			String practiceName = practice.getPracticeName();
 			//String practiceName = invoice.getSchedule().getLocation().getName();
-			String clinicCity =  invoice.getLabOrderId().getLocation().getContacts().getPostalAddress().getCity();
-			String clinicAddress1 = invoice.getLabOrderId().getLocation().getContacts().getPostalAddress().getAddress1();
-			String clinicAddress2 = invoice.getLabOrderId().getLocation().getContacts().getPostalAddress().getAddress2();
-			String clinicCountry =  invoice.getLabOrderId().getLocation().getContacts().getPostalAddress().getCountryGeo();
-			String clinicPostalCode =  invoice.getLabOrderId().getLocation().getContacts().getPostalAddress().getPostalCode();
-			String stateProvinceGeo = invoice.getLabOrderId().getLocation().getContacts().getPostalAddress().getStateProvinceGeo();
-			String officePhone = invoice.getLabOrderId().getLocation().getContacts().getOfficePhone();
-			String email = invoice.getLabOrderId().getLocation().getContacts().getEmail();
+			String clinicCity = practice.getContacts().getPostalAddress().getCity();
+			String clinicAddress1 = practice.getContacts().getPostalAddress().getAddress1();
+			String clinicAddress2 = practice.getContacts().getPostalAddress().getAddress2();
+			String clinicCountry =  practice.getContacts().getPostalAddress().getCountryGeo();
+			String clinicPostalCode =  practice.getContacts().getPostalAddress().getPostalCode();
+			String stateProvinceGeo = practice.getContacts().getPostalAddress().getStateProvinceGeo();
+			String officePhone = practice.getContacts().getOfficePhone();
+			String email = practice.getContacts().getEmail();
 
 			String clinicAddress = practiceName+"\n"+clinicCity+"\n"+clinicAddress1+", "+clinicAddress2+"\n"+clinicPostalCode+", "+
 					stateProvinceGeo+", "+clinicCountry+"\nTel:"+officePhone;
@@ -225,15 +225,13 @@ try {
 				cell3.setBorder(Rectangle.NO_BORDER);
 				cell3.enableBorderSide(Rectangle.TOP);
 				cell3.enableBorderSide(Rectangle.LEFT);
-				cell3.addElement(new Paragraph("Doctor", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10f)));
+				cell3.addElement(new Paragraph(" ", FontFactory.getFont(FontFactory.HELVETICA, 10f)));
 
 				PdfPCell cell4 = new PdfPCell();
 				cell4.setBorder(Rectangle.NO_BORDER);
 				cell4.enableBorderSide(Rectangle.TOP);
 				cell4.enableBorderSide(Rectangle.RIGHT);
-				cell4.addElement(new Paragraph(invoice.getLabOrderId().getPhlebotomist().getSalutation()+" "+
-						invoice.getLabOrderId().getPhlebotomist().getFirstName()+" "
-						+invoice.getLabOrderId().getPhlebotomist().getLastName(), FontFactory.getFont(FontFactory.HELVETICA, 10f))); // how to get doctor name?
+				cell4.addElement(new Paragraph(" ", FontFactory.getFont(FontFactory.HELVETICA, 10f))); // how to get doctor name?
 
 				PdfPCell cell5 = new PdfPCell();
 				cell5.setBorder(Rectangle.NO_BORDER);
@@ -405,10 +403,12 @@ try {
 				PdfPCell cellOne = new PdfPCell();
 				cellOne.addElement(new Paragraph("Service Name", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10f)));
 				PdfPCell cellTwo = new PdfPCell();
+				serviceInfo.addCell(cellOne);
 
 				Paragraph quantity = new Paragraph("Quantity", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10f));
 				quantity.setAlignment(Element.ALIGN_CENTER);
 				cellTwo.addElement(quantity);
+				serviceInfo.addCell(cellTwo);
 
 				PdfPCell cellThree = new PdfPCell();
 				Paragraph unitPrice = new Paragraph("Unit Price", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10f));
@@ -416,39 +416,45 @@ try {
 				//cellThree.setHorizontalAlignment(Element.ALIGN_MIDDLE);
 				//cellThree.setVerticalAlignment(Element.ALIGN_MIDDLE);
 				cellThree.addElement(unitPrice);
+				serviceInfo.addCell(cellThree);
 
 				PdfPCell cellFour = new PdfPCell();
 				Paragraph grossAmount = new Paragraph("Gross Amount", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10f));
 				grossAmount.setAlignment(Element.ALIGN_CENTER);
-
 				cellFour.addElement(grossAmount);
+				serviceInfo.addCell(cellFour);
 
-				PdfPCell cellFive = new PdfPCell();
-				cellFive.addElement(new Paragraph(/*"PREMIUM CONSULTATION AFYA SMART SERVICE",*/ invoice.getInvoiceItems().get(0).
-						getItemType().getDescription(),
-						FontFactory.getFont(FontFactory.HELVETICA, 10f)));  // how to get service name??
+				BigDecimal totalGross = BigDecimal.ZERO;
+				for (InvoiceItem invoiceItem : invoice.getInvoiceItems()) {
+					PdfPCell cellFive = new PdfPCell();
+					cellFive.addElement(new Paragraph(/*"PREMIUM CONSULTATION AFYA SMART SERVICE",*/ invoiceItem.getDescription(),
+							FontFactory.getFont(FontFactory.HELVETICA, 10f)));  // how to get service name??
+					serviceInfo.addCell(cellFive);
 
-				PdfPCell cellSix = new PdfPCell();
-				//cellSix.setHorizontalAlignment(Element.ALIGN_CENTER);
-				Paragraph fQuantity = new Paragraph(invoice.getInvoiceItems().get(0).getQuantity().toString(), FontFactory.
-						getFont(FontFactory.HELVETICA, 10f));
-				fQuantity.setAlignment(Element.ALIGN_CENTER);
-				cellSix.addElement(fQuantity);   // how to get quantity??
+					PdfPCell cellSix = new PdfPCell();
+					//cellSix.setHorizontalAlignment(Element.ALIGN_CENTER);
+					Paragraph fQuantity = new Paragraph(invoiceItem.getQuantity().toString(), FontFactory.
+							getFont(FontFactory.HELVETICA, 10f));
+					fQuantity.setAlignment(Element.ALIGN_CENTER);
+					cellSix.addElement(fQuantity);   // how to get quantity??
+					serviceInfo.addCell(cellSix);
 
-				PdfPCell cellSeven = new PdfPCell();
-				Paragraph fUnitPrice = new Paragraph("KD "+
-						invoice.getInvoiceItems().get(0).getPrice().getAmount().toString(),
-						FontFactory.getFont(FontFactory.HELVETICA, 10f));
-				fUnitPrice.setAlignment(Element.ALIGN_RIGHT);
-				cellSeven.addElement(fUnitPrice);   // how to get unit price??
+					PdfPCell cellSeven = new PdfPCell();
+					Paragraph fUnitPrice = new Paragraph("KD " +
+							invoiceItem.getPrice().getAmount().toString(),
+							FontFactory.getFont(FontFactory.HELVETICA, 10f));
+					fUnitPrice.setAlignment(Element.ALIGN_RIGHT);
+					cellSeven.addElement(fUnitPrice);   // how to get unit price??
+					serviceInfo.addCell(cellSeven);
 
-
-
-				PdfPCell cellEight = new PdfPCell();
-				Paragraph fGrossAmt = new Paragraph("KD "+invoice.getTotalAmount().getAmount().toString(), FontFactory.
-						getFont(FontFactory.HELVETICA, 10f));
-				fGrossAmt.setAlignment(Element.ALIGN_RIGHT);
-				cellEight.addElement(fGrossAmt);   // how to get gross amount??
+					PdfPCell cellEight = new PdfPCell();
+					Paragraph fGrossAmt = new Paragraph("KD " + invoiceItem.getPrice().getAmount().toString(), FontFactory.
+							getFont(FontFactory.HELVETICA, 10f));
+					fGrossAmt.setAlignment(Element.ALIGN_RIGHT);
+					cellEight.addElement(fGrossAmt);   // how to get gross amount??
+					totalGross = totalGross.add(invoiceItem.getPrice().getAmount());
+					serviceInfo.addCell(cellEight);
+				}
 
 				PdfPCell cellNine = new PdfPCell();
 				cellNine.setBorder(Rectangle.NO_BORDER);
@@ -478,7 +484,7 @@ try {
 				//cellEleven.setFixedHeight(20f);
 
 				PdfPCell cellTwelve = new PdfPCell();
-				Paragraph grossAmount2 = new Paragraph("KD "+invoice.getTotalAmount().getAmount().toString(), FontFactory.
+				Paragraph grossAmount2 = new Paragraph("KD "+totalGross.toString(), FontFactory.
 						getFont(FontFactory.HELVETICA, 10f));
 				grossAmount2.setAlignment(Element.ALIGN_RIGHT);
 				cellTwelve.addElement(grossAmount2);   // how to get gross amount??*/
@@ -499,7 +505,7 @@ try {
 				//cellFifteen.setFixedHeight(20f);
 
 				PdfPCell cellSixteen = new PdfPCell();
-				Paragraph discount = new Paragraph("",
+				Paragraph discount = new Paragraph("KD 0.000",
 						FontFactory.getFont(FontFactory.HELVETICA, 10f));
 				discount.setAlignment(Element.ALIGN_RIGHT);
 				cellSixteen.addElement(discount);  // how to get discount??
@@ -522,12 +528,12 @@ try {
 				//cellNineteen.setFixedHeight(20f);
 
 				PdfPCell cellTwenty = new PdfPCell();
-				Paragraph netAmount = new Paragraph("KD "+invoice.getTotalAmount().getAmount().toString(),
+				Paragraph netAmount = new Paragraph("KD "+totalGross.toString(),
 						FontFactory.getFont(FontFactory.HELVETICA, 10f));
 				netAmount.setAlignment(Element.ALIGN_RIGHT);
 				cellTwenty.addElement(netAmount);  // how to get net amount??
 
-				serviceInfo.addCell(cellOne);
+				/*serviceInfo.addCell(cellOne);
 				//serviceInfo.addCell(cellOne);
 				serviceInfo.addCell(cellTwo);
 				serviceInfo.addCell(cellThree);
@@ -535,7 +541,7 @@ try {
 				serviceInfo.addCell(cellFive);
 				serviceInfo.addCell(cellSix);
 				serviceInfo.addCell(cellSeven);
-				serviceInfo.addCell(cellEight);
+				serviceInfo.addCell(cellEight);*/
 				serviceInfo.addCell(cellNine);
 				serviceInfo.addCell(cellTen);
 				serviceInfo.addCell(cellEleven);

@@ -26,6 +26,9 @@ public class LabOrderDto {
 
     private List<LabOrderItemDto> rows;
 
+    private String paymentGateWay;
+    private String refId;
+    private String paymentTrackId;
 
     public Date getAppointmentStartDate() {
         return appointmentStartDate;
@@ -129,5 +132,29 @@ public class LabOrderDto {
 
     public void setScheduleId(String scheduleId) {
         this.scheduleId = scheduleId;
+    }
+
+    public String getPaymentGateWay() {
+        return paymentGateWay;
+    }
+
+    public void setPaymentGateWay(String paymentGateWay) {
+        this.paymentGateWay = paymentGateWay;
+    }
+
+    public String getPaymentTrackId() {
+        return paymentTrackId;
+    }
+
+    public void setPaymentTrackId(String paymentTrackId) {
+        this.paymentTrackId = paymentTrackId;
+    }
+
+    public String getRefId() {
+        return refId;
+    }
+
+    public void setRefId(String refId) {
+        this.refId = refId;
     }
 }

@@ -694,6 +694,10 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
 
         Enumeration paymentMethod = commonCrudService.findUniqueByEquality(Enumeration.class, new String[]{"enumCode", "enumType"}, new Object[]{"ONLINE_PAYMENT", "PAYMENT_MODE"});
         InvoicePayment invoicePayment = new InvoicePayment(paymentMethod, invoice, invoice.getTotalAmount(), PaymentType.ONLINE_PAYMENT);
+        invoicePayment.setReferenceId(labOrderDto.getRefId());
+        invoicePayment.setPaymentId(labOrderDto.getPaymentId());
+        invoicePayment.setMerchantTrackId(labOrderDto.getPaymentTrackId());
+
         invoice.addInvoicePayment(invoicePayment);
         invoice.setLabOrderId(labOrderRequest);
         invoice.setMobileOrPatinetPortal(true);

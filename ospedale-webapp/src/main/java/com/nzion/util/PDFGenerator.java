@@ -146,7 +146,7 @@ try {
 
 			if (UtilValidator.isNotEmpty(map)){
 				//paymentMode = String.valueOf(map.get("payment_channel"));
-				paymentMode = "Online Payment";
+				paymentMode = "Advance Payment";
 				onlinePaymentRef = String.valueOf(map.get("isys_tracking_ref"));
 				//Date date = new SimpleDateFormat("yyyy-MM-dd hh:mm").parse(map.get("transaction_timestamp").toString().replace("T"," "));
 				//paymentDate = UtilDateTime.formatDateToDatetimeFormat(date);
@@ -603,7 +603,7 @@ try {
 				lcellEight.addElement(fPaymentDt);
 
 				PdfPCell lcellNine = new PdfPCell();
-				Paragraph fBankDetails = new Paragraph(invoicePayment.getBankName(), FontFactory.getFont(FontFactory.HELVETICA, 10f));
+				Paragraph fBankDetails = new Paragraph(invoicePayment.getPaymentChannel(), FontFactory.getFont(FontFactory.HELVETICA, 10f));
 				fBankDetails.setAlignment(Element.ALIGN_CENTER);
 				lcellNine.addElement(fBankDetails);
 

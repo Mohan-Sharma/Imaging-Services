@@ -152,7 +152,7 @@ try {
 				//Date date = new SimpleDateFormat("yyyy-MM-dd hh:mm").parse(map.get("transaction_timestamp").toString().replace("T"," "));
 				//paymentDate = UtilDateTime.formatDateToDatetimeFormat(date);
 				paymentDate = map.get("transaction_timestamp").toString();
-				amountPaid = new BigDecimal((Double)map.get("transaction_amount"), MathContext.DECIMAL64).setScale(3).toString();
+				amountPaid = new BigDecimal((Double)map.get("transaction_amount"), MathContext.DECIMAL64).setScale(3,RoundingMode.HALF_UP).toString();
 			}
 
 	//*********************************************************
@@ -449,7 +449,7 @@ try {
 					serviceInfo.addCell(cellSeven);
 
 					PdfPCell cellEight = new PdfPCell();
-					Paragraph fGrossAmt = new Paragraph("KD " + invoiceItem.getPrice().getAmount().toString(), FontFactory.
+					Paragraph fGrossAmt = new Paragraph("KD "+invoiceItem.getPrice().getAmount().setScale(3, RoundingMode.HALF_UP).toString(), FontFactory.
 							getFont(FontFactory.HELVETICA, 10f));
 					fGrossAmt.setAlignment(Element.ALIGN_RIGHT);
 					cellEight.addElement(fGrossAmt);   // how to get gross amount??
@@ -485,7 +485,7 @@ try {
 				//cellEleven.setFixedHeight(20f);
 
 				PdfPCell cellTwelve = new PdfPCell();
-				Paragraph grossAmount2 = new Paragraph("KD "+totalGross.toString(), FontFactory.
+				Paragraph grossAmount2 = new Paragraph("KD "+totalGross.setScale(3,RoundingMode.HALF_UP).toString(), FontFactory.
 						getFont(FontFactory.HELVETICA, 10f));
 				grossAmount2.setAlignment(Element.ALIGN_RIGHT);
 				cellTwelve.addElement(grossAmount2);   // how to get gross amount??*/
@@ -529,7 +529,7 @@ try {
 				//cellNineteen.setFixedHeight(20f);
 
 				PdfPCell cellTwenty = new PdfPCell();
-				Paragraph netAmount = new Paragraph("KD "+totalGross.toString(),
+				Paragraph netAmount = new Paragraph("KD "+totalGross.setScale(3,RoundingMode.HALF_UP).toString(),
 						FontFactory.getFont(FontFactory.HELVETICA, 10f));
 				netAmount.setAlignment(Element.ALIGN_RIGHT);
 				cellTwenty.addElement(netAmount);  // how to get net amount??

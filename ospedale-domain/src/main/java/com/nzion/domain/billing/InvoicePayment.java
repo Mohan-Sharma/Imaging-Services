@@ -60,6 +60,9 @@ public class InvoicePayment extends IdGeneratingBaseEntity {
 
     private String paymentId;
 
+    private String transactPaymentId;
+    private String paymentChannel;
+
 
     public InvoicePayment() {
         this.paymentDate = new Date();
@@ -258,5 +261,21 @@ public class InvoicePayment extends IdGeneratingBaseEntity {
     }
     public void setMerchantTrackId(String merchantTrackId) {
         this.merchantTrackId = merchantTrackId;
+    }
+
+    public String getTransactPaymentId() {
+        return transactPaymentId;
+    }
+
+    public void setTransactPaymentId(String transactPaymentId) {
+        this.transactPaymentId = transactPaymentId;
+    }
+
+    public String getPaymentChannel() {
+        return paymentChannel;
+    }
+
+    public void setPaymentChannel(String paymentChannel) {
+        this.paymentChannel = paymentChannel;
     }
 }

@@ -17,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
@@ -441,7 +442,7 @@ try {
 
 					PdfPCell cellSeven = new PdfPCell();
 					Paragraph fUnitPrice = new Paragraph("KD " +
-							invoiceItem.getPrice().getAmount().toString(),
+							invoiceItem.getPrice().getAmount().setScale(3, RoundingMode.HALF_UP).toString(),
 							FontFactory.getFont(FontFactory.HELVETICA, 10f));
 					fUnitPrice.setAlignment(Element.ALIGN_RIGHT);
 					cellSeven.addElement(fUnitPrice);   // how to get unit price??
@@ -587,10 +588,10 @@ try {
 
 				PdfPCell lcellSeven = new PdfPCell();
 
-				String referenceId = invoicePayment.getReferenceId() != null ? ", "+invoicePayment.getReferenceId() : "";
-				String merchantTrackId = invoicePayment.getMerchantTrackId() != null ? ", "+invoicePayment.getMerchantTrackId() : "";
-				String payId = invoicePayment.getPaymentId() != null ? invoicePayment.getPaymentId() : "";
-				String transactionDet = payId + merchantTrackId + referenceId;
+				String referenceId = invoicePayment.getReferenceId() != null ? ", Reference ID-"+invoicePayment.getReferenceId() : "";
+				String merchantTrackId = invoicePayment.getMerchantTrackId() != null ? "Payment Track ID-"+invoicePayment.getMerchantTrackId() : "";
+				String payId = invoicePayment.getTransactPaymentId() != null ? ", Payment ID-"+invoicePayment.getTransactPaymentId() : "";
+				String transactionDet = merchantTrackId + payId + referenceId;
 
 				Paragraph fAuthNumber = new Paragraph(transactionDet,
 						FontFactory.getFont(FontFactory.HELVETICA, 10f));

@@ -17,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
@@ -146,12 +147,12 @@ try {
 
 			if (UtilValidator.isNotEmpty(map)){
 				//paymentMode = String.valueOf(map.get("payment_channel"));
-				paymentMode = "Online Payment";
+				paymentMode = "Advance Payment";
 				onlinePaymentRef = String.valueOf(map.get("isys_tracking_ref"));
 				//Date date = new SimpleDateFormat("yyyy-MM-dd hh:mm").parse(map.get("transaction_timestamp").toString().replace("T"," "));
 				//paymentDate = UtilDateTime.formatDateToDatetimeFormat(date);
 				paymentDate = map.get("transaction_timestamp").toString();
-				amountPaid = new BigDecimal((Double)map.get("transaction_amount"), MathContext.DECIMAL64).setScale(3).toString();
+				amountPaid = new BigDecimal((Double)map.get("transaction_amount"), MathContext.DECIMAL64).setScale(3,RoundingMode.HALF_UP).toString();
 			}
 
 	//*********************************************************
@@ -441,14 +442,14 @@ try {
 
 					PdfPCell cellSeven = new PdfPCell();
 					Paragraph fUnitPrice = new Paragraph("KD " +
-							invoiceItem.getPrice().getAmount().toString(),
+							invoiceItem.getPrice().getAmount().setScale(3, RoundingMode.HALF_UP).toString(),
 							FontFactory.getFont(FontFactory.HELVETICA, 10f));
 					fUnitPrice.setAlignment(Element.ALIGN_RIGHT);
 					cellSeven.addElement(fUnitPrice);   // how to get unit price??
 					serviceInfo.addCell(cellSeven);
 
 					PdfPCell cellEight = new PdfPCell();
-					Paragraph fGrossAmt = new Paragraph("KD " + invoiceItem.getPrice().getAmount().toString(), FontFactory.
+					Paragraph fGrossAmt = new Paragraph("KD "+invoiceItem.getPrice().getAmount().setScale(3, RoundingMode.HALF_UP).toString(), FontFactory.
 							getFont(FontFactory.HELVETICA, 10f));
 					fGrossAmt.setAlignment(Element.ALIGN_RIGHT);
 					cellEight.addElement(fGrossAmt);   // how to get gross amount??
@@ -484,7 +485,7 @@ try {
 				//cellEleven.setFixedHeight(20f);
 
 				PdfPCell cellTwelve = new PdfPCell();
-				Paragraph grossAmount2 = new Paragraph("KD "+totalGross.toString(), FontFactory.
+				Paragraph grossAmount2 = new Paragraph("KD "+totalGross.setScale(3,RoundingMode.HALF_UP).toString(), FontFactory.
 						getFont(FontFactory.HELVETICA, 10f));
 				grossAmount2.setAlignment(Element.ALIGN_RIGHT);
 				cellTwelve.addElement(grossAmount2);   // how to get gross amount??*/
@@ -528,7 +529,7 @@ try {
 				//cellNineteen.setFixedHeight(20f);
 
 				PdfPCell cellTwenty = new PdfPCell();
-				Paragraph netAmount = new Paragraph("KD "+totalGross.toString(),
+				Paragraph netAmount = new Paragraph("KD "+totalGross.setScale(3,RoundingMode.HALF_UP).toString(),
 						FontFactory.getFont(FontFactory.HELVETICA, 10f));
 				netAmount.setAlignment(Element.ALIGN_RIGHT);
 				cellTwenty.addElement(netAmount);  // how to get net amount??
@@ -587,10 +588,10 @@ try {
 
 				PdfPCell lcellSeven = new PdfPCell();
 
-				String referenceId = invoicePayment.getReferenceId() != null ? ", "+invoicePayment.getReferenceId() : "";
-				String merchantTrackId = invoicePayment.getMerchantTrackId() != null ? ", "+invoicePayment.getMerchantTrackId() : "";
-				String payId = invoicePayment.getPaymentId() != null ? invoicePayment.getPaymentId() : "";
-				String transactionDet = payId + merchantTrackId + referenceId;
+				String referenceId = invoicePayment.getReferenceId() != null ? ", Reference ID-"+invoicePayment.getReferenceId() : "";
+				String merchantTrackId = invoicePayment.getMerchantTrackId() != null ? "Payment Track ID-"+invoicePayment.getMerchantTrackId() : "";
+				String payId = invoicePayment.getTransactPaymentId() != null ? ", Payment ID-"+invoicePayment.getTransactPaymentId() : "";
+				String transactionDet = merchantTrackId + payId + referenceId;
 
 				Paragraph fAuthNumber = new Paragraph(transactionDet,
 						FontFactory.getFont(FontFactory.HELVETICA, 10f));
@@ -603,7 +604,7 @@ try {
 				lcellEight.addElement(fPaymentDt);
 
 				PdfPCell lcellNine = new PdfPCell();
-				Paragraph fBankDetails = new Paragraph(invoicePayment.getBankName(), FontFactory.getFont(FontFactory.HELVETICA, 10f));
+				Paragraph fBankDetails = new Paragraph(invoicePayment.getPaymentChannel(), FontFactory.getFont(FontFactory.HELVETICA, 10f));
 				fBankDetails.setAlignment(Element.ALIGN_CENTER);
 				lcellNine.addElement(fBankDetails);
 

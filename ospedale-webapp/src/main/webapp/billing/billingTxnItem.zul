@@ -467,6 +467,7 @@
                         String payId = invoicePayment.getTransactPaymentId() != null ? ", Payment ID-"+invoicePayment.getTransactPaymentId() : "";
                         String transactionDet = merchantTrackId + payId + referenceId;
                         self.setValue(transactionDet);
+                            }
                         </attribute> 
                         </label>
                         </listcell>

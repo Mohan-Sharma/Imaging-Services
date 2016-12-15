@@ -446,6 +446,8 @@
                         	self.setValue(invoicePayment.getBankName());
                         if(com.nzion.util.UtilValidator.isNotEmpty(invoicePayment.getInsuranceName()))
                         	self.setValue(invoicePayment.getInsuranceName());
+                        if(com.nzion.util.UtilValidator.isNotEmpty(invoicePayment.getPaymentChannel()))
+                        self.setValue(invoicePayment.getPaymentChannel());
                         </attribute> 
                         </label>
                         </listcell>
@@ -458,6 +460,13 @@
                         	self.setValue(invoicePayment.getChequeOrDdNo());
                         if(com.nzion.util.UtilValidator.isNotEmpty(invoicePayment.getPolicyNo()))
                         	self.setValue(invoicePayment.getPolicyNo());
+
+                        if(com.nzion.util.UtilValidator.isNotEmpty(invoicePayment.getMerchantTrackId())){
+                        String referenceId = invoicePayment.getReferenceId() != null ? ", Reference ID-"+invoicePayment.getReferenceId() : "";
+                        String merchantTrackId = invoicePayment.getMerchantTrackId() != null ? "Payment Track ID-"+invoicePayment.getMerchantTrackId() : "";
+                        String payId = invoicePayment.getTransactPaymentId() != null ? ", Payment ID-"+invoicePayment.getTransactPaymentId() : "";
+                        String transactionDet = merchantTrackId + payId + referenceId;
+                        self.setValue(transactionDet);
                         </attribute> 
                         </label>
                         </listcell>

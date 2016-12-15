@@ -277,11 +277,13 @@ try {
 				PdfPCell cell13 = new PdfPCell();
 				cell13.setBorder(Rectangle.NO_BORDER);
 				cell13.enableBorderSide(Rectangle.LEFT);
-				cell13.addElement(new Paragraph("Patient Type", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10f)));
+				cell13.enableBorderSide(Rectangle.BOTTOM);
+				cell13.addElement(new Paragraph("Age/Gender", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10f)));
 
 				PdfPCell cell14 = new PdfPCell();
 				cell14.setBorder(Rectangle.NO_BORDER);
-				cell14.addElement(new Paragraph(patient.getPatientType(), FontFactory.getFont(FontFactory.HELVETICA, 10f)));
+				cell14.enableBorderSide(Rectangle.BOTTOM);
+				cell14.addElement(new Paragraph(patient.getAge() + "/" + patient.getGender(), FontFactory.getFont(FontFactory.HELVETICA, 10f)));
 
 		/*PdfPCell cell5 = new PdfPCell();
 		cell5.addElement(new Paragraph(""));
@@ -321,15 +323,17 @@ try {
 
 				PdfPCell cell15 = new PdfPCell();
 				cell15.setBorder(Rectangle.NO_BORDER);
+				cell15.enableBorderSide(Rectangle.BOTTOM);
 				cell15.enableBorderSide(Rectangle.LEFT);
-				cell15.addElement(new Paragraph("Employer Name", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10f)));
+				cell15.addElement(new Paragraph(""));
 
 				PdfPCell cell16 = new PdfPCell();
 				cell16.setBorder(Rectangle.NO_BORDER);
+				cell16.enableBorderSide(Rectangle.BOTTOM);
 				cell16.enableBorderSide(Rectangle.RIGHT);
-				cell16.addElement(new Paragraph("", FontFactory.getFont(FontFactory.HELVETICA, 10f))); // how to get employer name??
+				cell16.addElement(new Paragraph(""));
 
-				PdfPCell cell17 = new PdfPCell();
+				/*PdfPCell cell17 = new PdfPCell();
 				cell17.setBorder(Rectangle.NO_BORDER);
 				cell17.enableBorderSide(Rectangle.LEFT);
 				cell17.enableBorderSide(Rectangle.BOTTOM);
@@ -350,7 +354,7 @@ try {
 				cell20.setBorder(Rectangle.NO_BORDER);
 				cell20.enableBorderSide(Rectangle.BOTTOM);
 				cell20.enableBorderSide(Rectangle.RIGHT);
-				cell20.addElement(new Paragraph(""));
+				cell20.addElement(new Paragraph(""));*/
 
 
 
@@ -388,10 +392,10 @@ try {
 				headerInfo.addCell(cell15);
 				headerInfo.addCell(cell16);
 
-				headerInfo.addCell(cell17);
+				/*headerInfo.addCell(cell17);
 				headerInfo.addCell(cell18);
 				headerInfo.addCell(cell19);
-				headerInfo.addCell(cell20);
+				headerInfo.addCell(cell20);*/
 		/*table.addCell(cell17);
 		table.addCell(cell18);
 		table.addCell(cell19);
@@ -588,9 +592,9 @@ try {
 
 				PdfPCell lcellSeven = new PdfPCell();
 
-				String referenceId = invoicePayment.getReferenceId() != null ? ", Reference ID-"+invoicePayment.getReferenceId() : "";
-				String merchantTrackId = invoicePayment.getMerchantTrackId() != null ? "Payment Track ID-"+invoicePayment.getMerchantTrackId() : "";
-				String payId = invoicePayment.getTransactPaymentId() != null ? ", Payment ID-"+invoicePayment.getTransactPaymentId() : "";
+				String referenceId = UtilValidator.isNotEmpty(invoicePayment.getReferenceId()) ? ", Reference ID-"+invoicePayment.getReferenceId() : "";
+				String merchantTrackId = UtilValidator.isNotEmpty(invoicePayment.getMerchantTrackId()) ? "Payment Track ID-"+invoicePayment.getMerchantTrackId() : "";
+				String payId = UtilValidator.isNotEmpty(invoicePayment.getTransactPaymentId()) ? ", Payment ID-"+invoicePayment.getTransactPaymentId() : "";
 				String transactionDet = merchantTrackId + payId + referenceId;
 
 				Paragraph fAuthNumber = new Paragraph(transactionDet,

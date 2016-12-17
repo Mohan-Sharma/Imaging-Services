@@ -697,6 +697,8 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
         invoicePayment.setReferenceId(labOrderDto.getRefId());
         invoicePayment.setPaymentId(labOrderDto.getPaymentId());
         invoicePayment.setMerchantTrackId(labOrderDto.getPaymentTrackId());
+        invoicePayment.setPaymentChannel(labOrderDto.getPaymentChannel());
+        invoicePayment.setTransactPaymentId(labOrderDto.getTransactPaymentId());
 
         invoice.addInvoicePayment(invoicePayment);
         invoice.setLabOrderId(labOrderRequest);

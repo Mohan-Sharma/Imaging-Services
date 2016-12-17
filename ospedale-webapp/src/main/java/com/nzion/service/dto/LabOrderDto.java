@@ -29,6 +29,8 @@ public class LabOrderDto {
     private String paymentGateWay;
     private String refId;
     private String paymentTrackId;
+    private String transactPaymentId;
+    private String paymentChannel;
 
     public Date getAppointmentStartDate() {
         return appointmentStartDate;
@@ -156,5 +158,21 @@ public class LabOrderDto {
 
     public void setRefId(String refId) {
         this.refId = refId;
+    }
+
+    public String getTransactPaymentId() {
+        return transactPaymentId;
+    }
+
+    public void setTransactPaymentId(String transactPaymentId) {
+        this.transactPaymentId = transactPaymentId;
+    }
+
+    public String getPaymentChannel() {
+        return paymentChannel;
+    }
+
+    public void setPaymentChannel(String paymentChannel) {
+        this.paymentChannel = paymentChannel;
     }
 }

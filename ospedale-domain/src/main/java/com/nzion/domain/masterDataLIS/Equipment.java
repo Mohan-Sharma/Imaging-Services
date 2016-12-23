@@ -18,6 +18,7 @@ public class Equipment extends IdGeneratingBaseEntity {
     private Integer eqpCode;
     private String eqpName;
     private String eqpNameForPatient;
+    private String eqpNameForPatientAr;
     private String eqpAlias;
     private String eqpType;
     private String baudRate;
@@ -119,6 +120,14 @@ public class Equipment extends IdGeneratingBaseEntity {
 
     public void setEqpNameForPatient(String eqpNameForPatient) {
         this.eqpNameForPatient = eqpNameForPatient;
+    }
+
+    public String getEqpNameForPatientAr() {
+        return eqpNameForPatientAr;
+    }
+
+    public void setEqpNameForPatientAr(String eqpNameForPatientAr) {
+        this.eqpNameForPatientAr = eqpNameForPatientAr;
     }
 
     @Lob

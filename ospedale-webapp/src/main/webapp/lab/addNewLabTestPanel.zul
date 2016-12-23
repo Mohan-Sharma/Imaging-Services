@@ -52,6 +52,13 @@
                                 value="@{labController.labTestPanel.price,save-when='Save.onClick'}" sclass="span12"/>
                 </div>-->
             </div>
+            <div zclass="row-fluid">
+                 <div zclass="span6">
+                       <label value="Afya Health Package Name in Arabic" />
+                       <textbox value="@{labPanelController.labTestPanel.panelDescriptionAr, save-when='Save.onClick'}" sclass="span12"
+                            w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                 </div>
+            </div>
 
             <!--<div zclass="row-fluid">
                 <div zclass="span4">

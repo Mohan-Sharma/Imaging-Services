@@ -75,6 +75,11 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 						 <label value="Imaging Service Availability Time"/>
 						 <textbox value="@{vo.practice.labAvailabilityTime,save-when='Save.onClick'}" sclass="span12"/>
 					 </div>
+					 <div zclass="span3">
+					       <label value="Imaging Service Availability Time in Arabic"/>
+					       <textbox value="@{vo.practice.labAvailabilityTimeAr, save-when='Save.onClick'}" sclass="span10"/>
+					 </div>
+
 					</div>
 					<div zclass="row-fluid">
 		             <!--<div zclass="span2">

@@ -86,6 +86,8 @@ public class Practice extends IdGeneratingBaseEntity {
 
 	private String labAvailabilityTime;
 
+	private String labAvailabilityTimeAr;
+
 	private String isNotificationSentToAdmin;
 
 	private String labExperience;
@@ -303,6 +305,14 @@ public class Practice extends IdGeneratingBaseEntity {
 
 	public void setLabAvailabilityTime(String labAvailabilityTime) {
 		this.labAvailabilityTime = labAvailabilityTime;
+	}
+
+	public String getLabAvailabilityTimeAr() {
+		return labAvailabilityTimeAr;
+	}
+
+	public void setLabAvailabilityTimeAr(String labAvailabilityTimeAr) {
+		this.labAvailabilityTimeAr = labAvailabilityTimeAr;
 	}
 
 	public String getLabExperience() {

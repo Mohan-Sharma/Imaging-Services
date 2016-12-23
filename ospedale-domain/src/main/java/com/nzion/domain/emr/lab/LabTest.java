@@ -21,6 +21,8 @@ public class LabTest extends IdGeneratingBaseEntity implements Serializable{
 	private String testCode;
 	
 	private String testDescription;
+
+	private String testDescriptionAr;
 	
 	private String testPneumonic;
 	
@@ -85,6 +87,14 @@ public class LabTest extends IdGeneratingBaseEntity implements Serializable{
 
 	public void setTestDescription(String testDescription) {
 		this.testDescription = testDescription;
+	}
+
+	public String getTestDescriptionAr() {
+		return testDescriptionAr;
+	}
+
+	public void setTestDescriptionAr(String testDescriptionAr) {
+		this.testDescriptionAr = testDescriptionAr;
 	}
 
 	public String getTestPneumonic() {

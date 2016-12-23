@@ -19,6 +19,8 @@ public class LabTestPanel extends IdGeneratingBaseEntity implements Serializable
 	private String panelCode;
 	
 	private String panelDescription;
+
+	private String panelDescriptionAr;
 	
 	private String panelPneumonic;
 	
@@ -49,6 +51,14 @@ public class LabTestPanel extends IdGeneratingBaseEntity implements Serializable
 
 	public void setPanelDescription(String panelDescription) {
 		this.panelDescription = panelDescription;
+	}
+
+	public String getPanelDescriptionAr() {
+		return panelDescriptionAr;
+	}
+
+	public void setPanelDescriptionAr(String panelDescriptionAr) {
+		this.panelDescriptionAr = panelDescriptionAr;
 	}
 
 	public String getPanelPneumonic() {

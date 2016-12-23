@@ -59,6 +59,13 @@
                 </div>-->
             </div>
             <div zclass="row-fluid">
+                  <div zclass="span6">
+                        <label value="Afya Test Name in Arabic" />
+                        <textbox value="@{labController.labTest.testDescriptionAr, save-when='Save.onClick'}" sclass="span12" readonly="true"
+                            w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                  </div>
+            </div>
+            <div zclass="row-fluid">
                 <div zclass="span3">
                     <label value="Display Order"/>
                     <intbox value="@{labController.labTest.displayOrder,save-when='Save.onClick'}" sclass="span12"/>

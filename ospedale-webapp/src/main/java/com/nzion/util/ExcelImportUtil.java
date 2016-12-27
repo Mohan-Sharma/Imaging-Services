@@ -43,7 +43,7 @@ public class ExcelImportUtil {
             Sheet firstSheet = workbook.getSheetAt(0);
             Iterator<Row> iterator = firstSheet.iterator();
             int header = 0;
-            String query = "INSERT into lab_tariff (SERVICE_MAIN_GROUP,SERVICE_SUB_GROUP,INS_SERVICE_ID,TARIF_CATEGORY,PATIENT_CATEGORY,LABORATORY_SHARE,DOCTOR_SHARE,TECHNICIAN_SHARE,TEST_COST,MARKUP_AMOUNT,LOCATION_ID,FROM_DATE,THRU_DATE,home_service,LAB_TEST,LAB_PANEL,LAB_PROFILE)" +
+            String query = "INSERT into lab_tariff (SERVICE_MAIN_GROUP,SERVICE_SUB_GROUP,INS_SERVICE_ID,TARIF_CATEGORY,PATIENT_CATEGORY,LABORATORY_SHARE,DOCTOR_SHARE,TECHNICIAN_SHARE,TEST_COST,MARKUP_AMOUNT,LOCATION_ID,FROM_DATE,THRU_DATE,home_service,GENDER,LAB_TEST,LAB_PANEL,LAB_PROFILE)" +
                     " VALUES ";
 
             while (iterator.hasNext()) {
@@ -75,7 +75,7 @@ public class ExcelImportUtil {
                             }
                             if (cell != null) {
                                 BigDecimal billableAmount = new BigDecimal(cell.getNumericCellValue()).setScale(3, RoundingMode.HALF_UP);
-                                query = query + billableAmount + ",";
+                                query = query + billableAmount + ",'BOTH',";
                                 break;
                             }
                             break;

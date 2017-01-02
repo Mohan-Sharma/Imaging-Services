@@ -92,11 +92,11 @@
                     <intbox value="@{labPanelController.labTestPanel.turnaroundTime,save-when='Save.onClick'}" sclass="span12"/>
                 </div>
                 <div zclass="span3">
-                    <label value="Gender"/>
-                    <combobox id="gender" sclass="span12" selectedItem="@{labPanelController.labTestPanel.gender,save-when='Save.onClick'}" >
+                    <label value="Gender" visible="false"/>
+                    <combobox id="gender" sclass="span12" visible="false" selectedItem="@{labPanelController.labTestPanel.gender,save-when='Save.onClick'}" >
                         <comboitem value="Both" label="Both"/>
-                        <comboitem value="Male" label="Male"/>
-                        <comboitem value="Female" label="Female"/>
+                        <!--<comboitem value="Male" label="Male"/>
+                        <comboitem value="Female" label="Female"/>-->
                         <attribute name="onCreate">
                             if(self.getSelectedItem() == null)
                             self.setValue("Both");

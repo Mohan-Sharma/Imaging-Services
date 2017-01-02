@@ -96,6 +96,33 @@
                              maxlength="50" constraint="no empty" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
                 </div>
             </div>
+
+            <div zclass="row-fluid">
+                <div zclass="span2">
+                    <label value="Title(In Arabic)" style="text-align:left;" />
+                    <combobox selectedItem="@{providerController.provider.salutationAr,save-when='Save.onClick'}"
+                           id="titleAr" maxlength="20" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}">
+                          <comboitem label="الآنسة" value="الآنسة" />
+                          <comboitem label="يغيب" value="يغيب" />
+                          <comboitem label="السيد" value="السيد" />
+                          <comboitem label="السيدة" value="السيدة" />
+                          <comboitem label="الدكتور" value="الدكتور" />
+                          <comboitem label="ريال سعودى" value="ريال سعودى" />
+                          <comboitem label="حساب الاحتياطي الخاص" value="حساب الاحتياطي الخاص" />
+                    </combobox>
+                </div>
+                <div zclass="span5">
+                     <label value="First Name (In Arabic)" />
+                     <textbox value="@{providerController.provider.firstNameAr, save-when='Save.onClick'}"
+                        maxlength="50" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                </div>
+                <div zclass="span5">
+                     <label value="Last Name (In Arabic)" />
+                     <textbox value="@{providerController.provider.lastNameAr, save-when='Save.onClick'}"
+                         maxlength="50" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                </div>
+            </div>
+
             <div zclass="row-fluid">
                 <div zclass="span6">
                     <label value="Regd No" />
@@ -285,6 +312,12 @@
                 <div zclass="span12">
                     <label value="Visiting Hours : "></label>
                     <textbox cols="50" rows="2" value="@{providerController.provider.visitingHours,save-when='Save.onClick'}" sclass="span12" maxlength="200"></textbox>
+                </div>
+            </div>
+            <div zclass="row-fluid">
+                <div zclass="span12">
+                   <label value="Visiting Hours in Arabic: "></label>
+                   <textbox cols="50" rows="2" value="@{providerController.provider.visitingHoursAr,save-when='Save.onClick'}" sclass="span12" maxlength="200"></textbox>
                 </div>
             </div>
         </div>

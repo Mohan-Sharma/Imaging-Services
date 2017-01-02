@@ -75,11 +75,11 @@
                     <intbox value="@{labController.labTest.turnaroundTime,save-when='Save.onClick'}" sclass="span12"/>
                 </div>
                 <div zclass="span3">
-                    <label value="Gender"/>
-                    <combobox id="gender" sclass="span12" selectedItem="@{labController.labTest.gender,save-when='Save.onClick'}">
+                    <label value="Gender" visible="false"/>
+                    <combobox id="gender" sclass="span12" visible="false" selectedItem="@{labController.labTest.gender,save-when='Save.onClick'}">
                         <comboitem value="Both" label="Both"/>
-                        <comboitem value="Male" label="Male"/>
-                        <comboitem value="Female" label="Female"/>
+                        <!--<comboitem value="Male" label="Male"/>
+                        <comboitem value="Female" label="Female"/>-->
                         <!-- <attribute name="onCreate">
                              if(UtilValidator.isNotEmpty(gender))
                              self.setSelectedIndex(0);

@@ -49,7 +49,7 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 </zscript>
     <div style="padding:5px" zclass="page-header titled-well">
             <h:h1>
-                <h:small>New Imaging Service</h:small>
+                <h:small>Imaging Center Details</h:small>
             </h:h1>
     </div>
 <div zclass="container-fluid">
@@ -144,7 +144,7 @@ setPageTitle("Practices", "  " + (practice == null ? "New" : practice.getId()));
 						 </div>
 						<div zclass="span2">
 							<separator/><separator/>
-							<checkbox label=" Print address in output header" >
+							<checkbox label=" Print address in Invoice" >
 								<attribute name="onCreate">
 									self.setChecked(vo.practice.isLogoWithAddress());
 								</attribute>

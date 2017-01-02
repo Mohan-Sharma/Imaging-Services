@@ -42,6 +42,12 @@
                             w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" >
                       </textbox>
                  </div>
+                 <div zclass="span6">
+                       <label value="Department Name" style="text-align:right;"/>
+                       <textbox value="@{equipment.deptName, save-when='Save.onClick'}" id="deptName" sclass="span12" w:showError_="function(mesg){displayError(this,mesg);}"
+                            w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}" >
+                       </textbox>
+                 </div>
             </div>
             <div zclass="row-fluid">
                 <div zclass="span3">

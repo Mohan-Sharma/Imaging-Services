@@ -35,29 +35,30 @@
         <div zclass="container-fluid">
             <div zclass="row-fluid">
                 <div zclass="span6">
-                    <label value="Afya Health Package Name" mold="required"/>
+                    <label value="Afya Health Package Name" mold="required"/><label value="(In English)" style="font-weight: bold; font-size:0.8em;" />
                     <textbox value="@{labPanelController.labTestPanel.panelDescription,save-when='Save.onClick'}"
                              constraint="no empty:Panel Name Required" sclass="span12"
                              w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
                 </div>
                 <div zclass="span6">
-                    <label value="Display Name" mold="required"/>
-                    <textbox value="@{labPanelController.labTestPanel.panelPneumonic,save-when='Save.onClick'}"
-                             constraint="no empty:Display Name Required" sclass="span12"
-                             w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                    <label value="Afya Health Package Name" mold="required"/><label value="(In Arabic)" style="font-weight: bold; font-size:0.8em;" />
+                    <textbox value="@{labPanelController.labTestPanel.panelDescriptionAr, save-when='Save.onClick'}" sclass="span12"
+                        w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
                 </div>
                 <!--<div zclass="span2">
                     <label value="Price"/>
                     <decimalbox format="###.##" placeholder="0"
                                 value="@{labController.labTestPanel.price,save-when='Save.onClick'}" sclass="span12"/>
                 </div>-->
+
             </div>
             <div zclass="row-fluid">
-                 <div zclass="span6">
-                       <label value="Afya Health Package Name in Arabic" />
-                       <textbox value="@{labPanelController.labTestPanel.panelDescriptionAr, save-when='Save.onClick'}" sclass="span12"
-                            w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
-                 </div>
+                <div zclass="span6">
+                    <label value="Display Name" mold="required"/><label value="In Imaging" style="font-weight: bold; font-size:0.8em;" />
+                    <textbox value="@{labPanelController.labTestPanel.panelPneumonic,save-when='Save.onClick'}"
+                             constraint="no empty:Display Name Required" sclass="span12"
+                             w:showError_="function(mesg){displayError(this,mesg);}" w:clearErrorMessage="function(revalidate, remainError){clearErrorMessage(remainError,this);}"/>
+                </div>
             </div>
 
             <!--<div zclass="row-fluid">

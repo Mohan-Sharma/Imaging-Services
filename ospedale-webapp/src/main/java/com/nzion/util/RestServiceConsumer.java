@@ -10,6 +10,7 @@ import com.nzion.domain.emr.lab.LabRequisition;
 import com.nzion.dto.*;
 import com.nzion.service.dto.LabOrderDto;
 import com.nzion.service.dto.ServiceMasterDto;
+import com.nzion.superbill.dto.CommunicationLogDto;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
@@ -521,5 +522,41 @@ public class RestServiceConsumer {
             e.printStackTrace();
         }
         //return null;
+    }
+
+    public static String persistCommunicationLog(CommunicationLogDto communicationLogDto) {
+        Gson gson = new GsonBuilder().serializeNulls().setDateFormat("yyyy-MM-dd").create();
+        String communicationLogJsonString = gson.toJson(communicationLogDto);
+        RestTemplate restTemplate = new RestTemplate(RestServiceConsumer.getHttpComponentsClientHttpRequestFactory());
+
+        restTemplate.getMessageConverters()
+                .add(0, new StringHttpMessageConverter(Charset.forName("UTF-8")));
+
+        HttpHeaders headers = getHttpHeader();
+        HttpEntity<String> requestEntity = new HttpEntity<String>(communicationLogJsonString, headers);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(PORTAL_URL + "/anon/persistCommunicationLog", HttpMethod.POST, requestEntity, String.class);
+        return responseEntity.getBody();
+    }
+
+    public static boolean checkInAppDevice(String accountNumber){
+        try {
+            RestTemplate restTemplate = new RestTemplate(getHttpComponentsClientHttpRequestFactory());
+            HttpHeaders headers = getHttpHeader();
+
+            restTemplate.getMessageConverters()
+                    .add(0, new StringHttpMessageConverter(Charset.forName("UTF-8")));
+
+            HttpEntity<String> requestEntity = new HttpEntity<String>(headers);
+            ResponseEntity<String> responseEntity = restTemplate.exchange(PORTAL_URL+"/anon/checkInAppDevice?accountNumber={accountNumber}", HttpMethod.GET, requestEntity, String.class, accountNumber);
+            String labInf = responseEntity.getBody();
+            if (labInf.equals("false")){
+                return false;
+            } else {
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

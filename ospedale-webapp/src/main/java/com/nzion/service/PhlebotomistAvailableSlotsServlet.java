@@ -561,6 +561,12 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
                 radiologyDetails.put("mobileNumber", adminUserLogin.get("mobile_number"));
                 radiologyDetails.put("key", TemplateNames.PLACE_LAB_ORDER_SMS_TO_LAB_ADMIN.name());
                 radiologyDetails.put("forAdmin", new Boolean(true));
+                radiologyDetails.put("accountNumber", adminUserLogin.get("accountNumber") != null ? adminUserLogin.get("accountNumber").toString() : "");
+
+                radiologyDetails.put("receipentType", "ADMIN");
+                radiologyDetails.put("referenceID", orderRequest.getId().toString());
+                radiologyDetails.put("referenceType", "ORDER");
+
                 SmsUtil.sendStatusSms(orderRequest, radiologyDetails);
                 //for admin
                 if ((Infrastructure.getPractice().getIsNotificationSentToAdmin() != null) && (Infrastructure.getPractice().getIsNotificationSentToAdmin().equals("yes"))){
@@ -577,6 +583,10 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
                         } else {
                             radiologyDetails.put("languagePreference", languagePreference);
                         }
+                        radiologyDetails.put("receipentType", "ADMIN");
+                        radiologyDetails.put("referenceID", orderRequest.getId().toString());
+                        radiologyDetails.put("referenceType", "ORDER");
+                        radiologyDetails.put("accountNumber", map.get("accountNumber") != null ? map.get("accountNumber").toString() : "");
                         SmsUtil.sendStatusSms(orderRequest, radiologyDetails);
                     }
                 }
@@ -586,6 +596,10 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
 
                 radiologyDetails.put("key", TemplateNames.PLACE_LAB_ORDER_SMS_TO_PATIENT.name());
                 radiologyDetails.put("forAdmin", new Boolean(false));
+                radiologyDetails.put("receipentType", "PATIENT");
+                radiologyDetails.put("referenceID", orderRequest.getId().toString());
+                radiologyDetails.put("referenceType", "ORDER");
+                radiologyDetails.put("accountNumber", null);
                 SmsUtil.sendStatusSms(orderRequest, radiologyDetails);
 
                 //for email to patient
@@ -603,6 +617,10 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
                 radiologyDetails.put("stream", inputStreamSource);
                 radiologyDetails.put("attachment", new Boolean(true));
                 radiologyDetails.put("patient", orderRequest.getPatient());
+
+                radiologyDetails.put("receipentType", "PATIENT");
+                radiologyDetails.put("referenceID", orderRequest.getId().toString());
+                radiologyDetails.put("referenceType", "ORDER");
                 EmailUtil.sendNetworkContractStatusMail(radiologyDetails);
             } catch (Exception e){
                 e.printStackTrace();

@@ -3,6 +3,7 @@ package com.nzion.repository.notifier.utility;
 import com.nzion.domain.Patient;
 import com.nzion.domain.Person;
 import com.nzion.domain.Schedule;
+import com.nzion.superbill.dto.CommunicationLogDto;
 import com.nzion.util.Infrastructure;
 import com.nzion.util.PortalRestServiceConsumer;
 import com.nzion.util.RestServiceConsumer;
@@ -256,22 +257,30 @@ public class EmailUtil {
         Session session = authenticateAndGetSession(properties);
 
         details.put("subject", details.get("subject"));
-        List<String> emailList = new ArrayList<>();
+        //List<String> emailList = new ArrayList<>();
+        List<Map<String, Object>> mapList = new ArrayList<>();
         messageSource.getMessage(details.get("template").toString(), null, locale);
         freemarkerConfiguration.setLocale(locale);
+
+        String recipientType = details.get("receipentType") != null ? details.get("receipentType").toString() : "";
+        String referenceID = details.get("referenceID") != null ? details.get("referenceID").toString() : "";
+        String referenceType = details.get("referenceType") != null ? details.get("referenceType").toString() : "";
 
         if (details.get("patient") != null){
             Patient patient = (Patient)details.get("patient");
             if ((patient.getNotificationRequired() != null) && (patient.getNotificationRequired().equals("YES"))){
-                List<Map<String, Object>> mapList = RestServiceConsumer.getPatientContactsFromAfyaId(patient.getAfyaId());
-                if (details.get("email") != null){
+                mapList = RestServiceConsumer.getPatientContactsFromAfyaId(patient.getAfyaId());
+                /*if (details.get("email") != null){
                     emailList.add(details.get("email").toString());
-                }
+                }*/
                 Iterator iterator = mapList.iterator();
                 while (iterator.hasNext()){
                     Map<String, Object> map = (Map)iterator.next();
-                    if (map.get("contactType").equals("EMAIL")){
+                    /*if (map.get("contactType").equals("EMAIL")){
                         emailList.add((String)map.get("contactValue"));
+                    }*/
+                    if ((!map.get("contactType").equals("EMAIL")) || ((map.get("contactType").equals("EMAIL")) && (map.get("contactValue") == null))){
+                        iterator.remove();
                     }
                 }
             } else {
@@ -280,25 +289,49 @@ public class EmailUtil {
         }
 
         String text = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(messageSource.getMessage(details.get("template").toString(), null, locale), "UTF-8"), details);
+        String messsage = UtilValidator.isNotEmpty(text) ? text.substring(text.indexOf("margin-bottom:9px;") + 20, text.indexOf("<p style", text.indexOf("margin-bottom:9px;"))) : null;
         if ((details.get("attachment") != null) && (((Boolean)details.get("attachment")).equals(true)) && (details.get("stream") != null)){
-            if (emailList.size() > 0 ){
-                Iterator iterator = emailList.iterator();
+            if (mapList.size() > 0 ){
+                Iterator iterator = mapList.iterator();
                 while (iterator.hasNext()){
-                    String alternateEmail = iterator.next().toString();
-                    response = sendMailWithAttach(session, properties, alternateEmail, null, null, text, details.get("subject").toString(), (InputStreamSource)details.get("stream"));
+                    Map map = (Map)iterator.next();
+                    String alternateEmail = map.get("contactValue") != null ? map.get("contactValue").toString() : "";
+                    String patAccountNumber = map.get("accountNumber") != null ? String.valueOf(new Double(map.get("accountNumber").toString()).intValue()) : "";
+                    try {
+                        response = sendMailWithAttach(session, properties, alternateEmail, null, null, text, details.get("subject").toString(), (InputStreamSource)details.get("stream"));
+                        persistCommunicationLog(recipientType, messsage, "EMAIL", "IMAGING", Infrastructure.getPractice().getTenantId(), referenceID, referenceType, patAccountNumber, alternateEmail, "TO", null, null, null, null, response, details.get("template").toString());
+                    } catch (Exception e){
+                        e.printStackTrace();
+                        persistCommunicationLog(recipientType, messsage, "EMAIL", "IMAGING", Infrastructure.getPractice().getTenantId(), referenceID, referenceType, patAccountNumber, alternateEmail, "TO", null, null, null, null, e.getMessage(), details.get("template").toString());
+                    }
                 }
             } else {
                 response = sendMailWithAttach(session, properties, details.get("email").toString(), null, null, text, details.get("subject").toString(), (InputStreamSource)details.get("stream"));
+                persistCommunicationLog(recipientType, messsage, "EMAIL", "IMAGING", Infrastructure.getPractice().getTenantId(), referenceID, referenceType, null, null, "TO", null, null, null, null, response, details.get("template").toString());
             }
         } else {
-            if (emailList.size() > 0 ){
-                Iterator iterator = emailList.iterator();
+            if (mapList.size() > 0 ){
+                Iterator iterator = mapList.iterator();
                 while (iterator.hasNext()){
-                    String alternateEmail = iterator.next().toString();
-                    response = sendMail(session, properties, alternateEmail, null, null, text, details.get("subject").toString());
+                    Map map = (Map)iterator.next();
+                    String alternateEmail = map.get("contactValue") != null ? map.get("contactValue").toString() : "";
+                    String patAccountNumber = map.get("accountNumber") != null ? String.valueOf(new Double(map.get("accountNumber").toString()).intValue()) : "";
+                    try {
+                        response = sendMail(session, properties, alternateEmail, null, null, text, details.get("subject").toString());
+                        persistCommunicationLog(recipientType, messsage, "EMAIL", "IMAGING", Infrastructure.getPractice().getTenantId(), referenceID, referenceType, patAccountNumber, alternateEmail, "TO", null, null, null, null, response, details.get("template").toString());
+                    } catch (Exception e){
+                        e.printStackTrace();
+                        persistCommunicationLog(recipientType, messsage, "EMAIL", "IMAGING", Infrastructure.getPractice().getTenantId(), referenceID, referenceType, patAccountNumber, alternateEmail, "TO", null, null, null, null, e.getMessage(), details.get("template").toString());
+                    }
                 }
             } else {
-                response = sendMail(session, properties, details.get("email").toString(), null, null, text, details.get("subject").toString());
+                try {
+                    response = sendMail(session, properties, details.get("email").toString(), null, null, text, details.get("subject").toString());
+                    persistCommunicationLog(recipientType, messsage, "EMAIL", "IMAGING", Infrastructure.getPractice().getTenantId(), referenceID, referenceType, null, null, "TO", null, null, null, null, null, details.get("template").toString());
+                } catch (Exception e){
+                    e.printStackTrace();
+                    persistCommunicationLog(recipientType, messsage, "EMAIL", "IMAGING", Infrastructure.getPractice().getTenantId(), referenceID, referenceType, null, null, "TO", null, null, null, null, e.getMessage(), details.get("template").toString());
+                }
             }
         }
 
@@ -364,5 +397,26 @@ public class EmailUtil {
         SimpleDateFormat dateFormat = new SimpleDateFormat("h:mm a");
         return dateFormat.format(furnishedDate);
     }
-
+    public static void persistCommunicationLog(String recipientType,String message, String messageChannel, String tenantType, String tenantId,
+                                               String referenceID, String referenceType, String accountNumber, String sentToEmailId, String emailTarget,
+                                               String sentToMobileNumber, String sentToDeviceId, String isDelivered, String request, String response, String eventName){
+        CommunicationLogDto communicationLogDto = new CommunicationLogDto();
+        communicationLogDto.setReceipentType(recipientType);
+        communicationLogDto.setMessage(message);
+        communicationLogDto.setMessageChannel(messageChannel);
+        communicationLogDto.setTenantType(tenantType);
+        communicationLogDto.setTenantId(tenantId);
+        communicationLogDto.setReferenceId(referenceID);
+        communicationLogDto.setReferenceType(referenceType);
+        communicationLogDto.setAccountNumber(accountNumber);
+        communicationLogDto.setSentToEmailId(sentToEmailId);
+        communicationLogDto.setEmailTarget(emailTarget);
+        communicationLogDto.setSentToMobileNumber(sentToMobileNumber);
+        communicationLogDto.setSentToDeviceId(sentToDeviceId);
+        communicationLogDto.setIsDelivered(isDelivered);
+        communicationLogDto.setRequest(request);
+        communicationLogDto.setResponse(response);
+        communicationLogDto.setEventName(eventName);
+        RestServiceConsumer.persistCommunicationLog(communicationLogDto);
+    }
 }

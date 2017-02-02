@@ -4,6 +4,7 @@ import com.nzion.domain.Patient;
 import com.nzion.domain.Practice;
 import com.nzion.domain.Provider;
 import com.nzion.domain.emr.lab.LabOrderRequest;
+import com.nzion.superbill.dto.CommunicationLogDto;
 import com.nzion.util.Infrastructure;
 import com.nzion.util.RestServiceConsumer;
 import com.nzion.util.UtilValidator;
@@ -161,7 +162,7 @@ public class SmsUtil {
         String patientMobNumber = schedule.getPatient().getContacts().getMobileNumber() != null ? "("+ schedule.getPatient().getContacts().getMobileNumber() +")" : "";
         clinicDetails.put("patientMobNumber", patientMobNumber);
 
-        List<String> mobileList = new ArrayList<>();
+        List<Map<String, Object>> mobileList = new ArrayList<>();
 
         ResponseEntity<String> responseEntity = null;
         String message= null;
@@ -204,11 +205,12 @@ public class SmsUtil {
                 Iterator iterator = mapList.iterator();
                 while (iterator.hasNext()){
                     Map<String, Object> map = (Map)iterator.next();
-                    if ((map.get("contactType").equals("MOBILE")) && (map.get("contactValue") != null)){
-                        mobileList.add((String)map.get("contactValue"));
+                    if ((!map.get("contactType").equals("MOBILE")) || ((map.get("contactType").equals("MOBILE")) && (map.get("contactValue") == null))){
+                        //mobileList.add((String)map.get("contactValue"));
+                        iterator.remove();
                     }
                 }
-
+                mobileList = mapList;
                /* phoneNumber = constructPhoneNumber(schedule);
                 if(phoneNumber == null || !phoneNumber.matches("\\d+"))
                     return;*/
@@ -222,30 +224,49 @@ public class SmsUtil {
             //message = constructOTPMessage(detail);
             //The above methos was commented out and replaced by the below method to make use of
             // ResourceBundle created by Raghu
+
+            String recipientType = clinicDetails.get("receipentType") != null ? clinicDetails.get("receipentType").toString() : "";
+            String referenceID = clinicDetails.get("referenceID") != null ? clinicDetails.get("referenceID").toString() : "";
+            String referenceType = clinicDetails.get("referenceType") != null ? clinicDetails.get("referenceType").toString() : "";
+
             message = constructMessage(schedule, clinicDetails);
             if(message != null) {
                 if((clinicDetails.get("forAdmin") == null) || ((Boolean)clinicDetails.get("forAdmin")).equals(false)){
                     Iterator iterator = mobileList.iterator();
                     while (iterator.hasNext()){
-                        //String alternateMobile = "965" + iterator.next();
-                        String alternateMobile = iterator.next().toString();
+                        Map map = (Map)iterator.next();
+                        String alternateMobile = map.get("contactValue") != null ? String.valueOf(new Double(map.get("contactValue").toString()).intValue()) : "";
+                        String patAccountNumber = map.get("accountNumber") != null ? String.valueOf(new Double(map.get("accountNumber").toString()).intValue()) : "";
                         if((updateSmsCount) && (checkIfSmsAvailableForTenant(tenantId))) {
-                            responseEntity = restTemplate.exchange(SMS_SERVER_URL, HttpMethod.POST, requestEntity, String.class, SMS_UID, SMS_PASSWORD, senderName, language, alternateMobile, message);
-                            if (responseEntity.getStatusCode().equals(HttpStatus.OK)) {
-                                RestServiceConsumer.updateSMSCountForGivenTenant(tenantId);
+                            if ((patAccountNumber != null) && (RestServiceConsumer.checkInAppDevice(patAccountNumber))) {
+                                persistCommunicationLog(recipientType, message, "INAPP", "IMAGING", Infrastructure.getPractice().getTenantId(), referenceID, referenceType, patAccountNumber, null, null, alternateMobile, null, null, null, null, clinicDetails.get("key").toString());
+                            } else {
+                                responseEntity = restTemplate.exchange(SMS_SERVER_URL, HttpMethod.POST, requestEntity, String.class, SMS_UID, SMS_PASSWORD, senderName, language, alternateMobile, message);
+                                if (responseEntity.getStatusCode().equals(HttpStatus.OK)) {
+                                    RestServiceConsumer.updateSMSCountForGivenTenant(tenantId);
+                                }
+                                persistCommunicationLog(recipientType, message, "SMS", "IMAGING", Infrastructure.getPractice().getTenantId(), referenceID, referenceType, patAccountNumber, null, null, alternateMobile, null, null, null, responseEntity.getBody().toString(), clinicDetails.get("key").toString());
                             }
                         } else if (!updateSmsCount){
-                            responseEntity = restTemplate.exchange(SMS_SERVER_URL, HttpMethod.POST, requestEntity, String.class, SMS_UID, SMS_PASSWORD, senderName, language, alternateMobile, message);
+                            if ((patAccountNumber != null) && (RestServiceConsumer.checkInAppDevice(patAccountNumber))){
+                                persistCommunicationLog(recipientType, message, "INAPP", "IMAGING", Infrastructure.getPractice().getTenantId(), referenceID, referenceType, patAccountNumber, null, null, alternateMobile, null, null, null, null, clinicDetails.get("key").toString());
+                            } else {
+                                responseEntity = restTemplate.exchange(SMS_SERVER_URL, HttpMethod.POST, requestEntity, String.class, SMS_UID, SMS_PASSWORD, senderName, language, alternateMobile, message);
+                                persistCommunicationLog(recipientType, message, "SMS", "IMAGING", Infrastructure.getPractice().getTenantId(), referenceID, referenceType, patAccountNumber, null, null, alternateMobile, null, null, null, responseEntity.getBody().toString(), clinicDetails.get("key").toString());
+                            }
                         }
                     }
                 } else {
+                    String accountNumber = clinicDetails.get("accountNumber") != null ? clinicDetails.get("accountNumber").toString() : null;
                     if((updateSmsCount) && (checkIfSmsAvailableForTenant(tenantId))){
                         responseEntity = restTemplate.exchange(SMS_SERVER_URL, HttpMethod.POST, requestEntity, String.class, SMS_UID, SMS_PASSWORD, senderName, language, phoneNumber, message);
+                        persistCommunicationLog(recipientType, message, "SMS", "IMAGING", Infrastructure.getPractice().getTenantId(), referenceID, referenceType, accountNumber, null, null, phoneNumber, null, null, null, responseEntity.getBody().toString(), clinicDetails.get("key").toString());
                         if (responseEntity.getStatusCode().equals(HttpStatus.OK)) {
                             RestServiceConsumer.updateSMSCountForGivenTenant(tenantId);
                         }
                     } else if (!updateSmsCount){
                         responseEntity = restTemplate.exchange(SMS_SERVER_URL, HttpMethod.POST, requestEntity, String.class, SMS_UID, SMS_PASSWORD, senderName, language, phoneNumber, message);
+                        persistCommunicationLog(recipientType, message, "SMS", "IMAGING", Infrastructure.getPractice().getTenantId(), referenceID, referenceType, accountNumber, null, null, phoneNumber, null, null, null, responseEntity.getBody().toString(), clinicDetails.get("key").toString());
                     }
                 }
             }
@@ -338,5 +359,33 @@ public class SmsUtil {
             }
         }
         return tenantId;
+    }
+
+    public static void persistCommunicationLog(String recipientType,String message, String messageChannel, String tenantType, String tenantId,
+                                               String referenceID, String referenceType, String accountNumber, String sentToEmailId, String emailTarget,
+                                               String sentToMobileNumber, String sentToDeviceId, String isDelivered, String request, String response, String eventName){
+        CommunicationLogDto communicationLogDto = new CommunicationLogDto();
+        communicationLogDto.setReceipentType(recipientType);
+        communicationLogDto.setMessage(message);
+        communicationLogDto.setMessageChannel(messageChannel);
+        communicationLogDto.setTenantType(tenantType);
+        communicationLogDto.setTenantId(tenantId);
+        communicationLogDto.setReferenceId(referenceID);
+        communicationLogDto.setReferenceType(referenceType);
+        communicationLogDto.setAccountNumber(accountNumber);
+        communicationLogDto.setSentToEmailId(sentToEmailId);
+        communicationLogDto.setEmailTarget(emailTarget);
+        communicationLogDto.setSentToMobileNumber(sentToMobileNumber);
+        communicationLogDto.setSentToDeviceId(sentToDeviceId);
+        communicationLogDto.setIsDelivered(isDelivered);
+        communicationLogDto.setRequest(request);
+        communicationLogDto.setResponse(response);
+        communicationLogDto.setEventName(eventName);
+
+        try {
+            RestServiceConsumer.persistCommunicationLog(communicationLogDto);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

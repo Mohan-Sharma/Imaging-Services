@@ -621,6 +621,7 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
                 radiologyDetails.put("receipentType", "PATIENT");
                 radiologyDetails.put("referenceID", orderRequest.getId().toString());
                 radiologyDetails.put("referenceType", "ORDER");
+                radiologyDetails.put("bcc", RestServiceConsumer.AFYA_ACCOUNT);
                 EmailUtil.sendNetworkContractStatusMail(radiologyDetails);
             } catch (Exception e){
                 e.printStackTrace();

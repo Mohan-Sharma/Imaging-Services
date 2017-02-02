@@ -247,6 +247,7 @@ public class EmailUtil {
         Configuration freemarkerConfiguration = Infrastructure.getSpringBean("freemarkerConfiguration");
         Locale locale = LocaleContextHolder.getLocale();
         details.put("baseUrl", PortalRestServiceConsumer.PORTAL_URL);
+        String bcc = details.get("bcc") != null ? details.get("bcc").toString() : null;
         if((details.get("languagePreference") != null) && (details.get("languagePreference") != "")){
             locale = new Locale(details.get("languagePreference").toString());
         }
@@ -298,7 +299,7 @@ public class EmailUtil {
                     String alternateEmail = map.get("contactValue") != null ? map.get("contactValue").toString() : "";
                     String patAccountNumber = map.get("accountNumber") != null ? String.valueOf(new Double(map.get("accountNumber").toString()).intValue()) : "";
                     try {
-                        response = sendMailWithAttach(session, properties, alternateEmail, null, null, text, details.get("subject").toString(), (InputStreamSource)details.get("stream"));
+                        response = sendMailWithAttach(session, properties, alternateEmail, null, bcc, text, details.get("subject").toString(), (InputStreamSource)details.get("stream"));
                         persistCommunicationLog(recipientType, messsage, "EMAIL", "IMAGING", Infrastructure.getPractice().getTenantId(), referenceID, referenceType, patAccountNumber, alternateEmail, "TO", null, null, null, null, response, details.get("template").toString());
                     } catch (Exception e){
                         e.printStackTrace();
@@ -306,7 +307,7 @@ public class EmailUtil {
                     }
                 }
             } else {
-                response = sendMailWithAttach(session, properties, details.get("email").toString(), null, null, text, details.get("subject").toString(), (InputStreamSource)details.get("stream"));
+                response = sendMailWithAttach(session, properties, details.get("email").toString(), null, bcc, text, details.get("subject").toString(), (InputStreamSource)details.get("stream"));
                 persistCommunicationLog(recipientType, messsage, "EMAIL", "IMAGING", Infrastructure.getPractice().getTenantId(), referenceID, referenceType, null, null, "TO", null, null, null, null, response, details.get("template").toString());
             }
         } else {
@@ -317,7 +318,7 @@ public class EmailUtil {
                     String alternateEmail = map.get("contactValue") != null ? map.get("contactValue").toString() : "";
                     String patAccountNumber = map.get("accountNumber") != null ? String.valueOf(new Double(map.get("accountNumber").toString()).intValue()) : "";
                     try {
-                        response = sendMail(session, properties, alternateEmail, null, null, text, details.get("subject").toString());
+                        response = sendMail(session, properties, alternateEmail, null, bcc, text, details.get("subject").toString());
                         persistCommunicationLog(recipientType, messsage, "EMAIL", "IMAGING", Infrastructure.getPractice().getTenantId(), referenceID, referenceType, patAccountNumber, alternateEmail, "TO", null, null, null, null, response, details.get("template").toString());
                     } catch (Exception e){
                         e.printStackTrace();
@@ -326,7 +327,7 @@ public class EmailUtil {
                 }
             } else {
                 try {
-                    response = sendMail(session, properties, details.get("email").toString(), null, null, text, details.get("subject").toString());
+                    response = sendMail(session, properties, details.get("email").toString(), null, bcc, text, details.get("subject").toString());
                     persistCommunicationLog(recipientType, messsage, "EMAIL", "IMAGING", Infrastructure.getPractice().getTenantId(), referenceID, referenceType, null, null, "TO", null, null, null, null, null, details.get("template").toString());
                 } catch (Exception e){
                     e.printStackTrace();

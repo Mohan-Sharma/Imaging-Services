@@ -39,6 +39,7 @@ import java.lang.reflect.Type;
 public class RestServiceConsumer {
     static String PORTAL_URL = null;
     static String CLINIC_URL = null;
+    public static String AFYA_ACCOUNT = null;
     static {
         Properties properties = new Properties();
         try {
@@ -46,6 +47,7 @@ public class RestServiceConsumer {
             properties.load(RestServiceConsumer.class.getClassLoader().getResourceAsStream("application-"+profileName+".properties"));
             PORTAL_URL = (String)properties.get("PORTAL_SERVER_URL");
             CLINIC_URL = (String)properties.get("CLINIC_SERVER_URL");
+            AFYA_ACCOUNT = (String)properties.get("AFYA_ACCOUNT");
         } catch (IOException e) {
             e.printStackTrace();
         }

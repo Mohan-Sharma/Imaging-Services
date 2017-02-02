@@ -118,6 +118,10 @@ public class RescheduleLabOrderViewModel {
             clinicDetails.put("forDoctor", new Boolean(false));
             clinicDetails.put("forAdmin", new Boolean(false));
             clinicDetails.put("labName", Infrastructure.getPractice().getPracticeName());
+
+            clinicDetails.put("receipentType", "PATIENT");
+            clinicDetails.put("referenceID", updatedLabOrderRequest.getId().toString());
+            clinicDetails.put("referenceType", "ORDER");
             SmsUtil.sendStatusSms(updatedLabOrderRequest, clinicDetails);
         } catch (Exception e){
             e.printStackTrace();

@@ -127,6 +127,10 @@ public class RescheduleLabOrderServlet extends HttpServlet{
                 clinicDetails.put("mobileNumber", adminUserLogin.get("mobile_number"));
                 clinicDetails.put("key", TemplateNames.RESCHEDULE_LAB_ORDER_SMS_TO_LAB_ADMIN.name());
                 clinicDetails.put("forAdmin", new Boolean(true));
+
+                clinicDetails.put("receipentType", "ADMIN");
+                clinicDetails.put("referenceID", labOrderRequest.getId().toString());
+                clinicDetails.put("referenceType", "ORDER");
                 SmsUtil.sendStatusSms(labOrderRequest, clinicDetails);
 
                 /*clinicDetails.put("key", TemplateNames.RESCHEDULE_LAB_ORDER_SMS_TO_PHLEBOTOMIST.name());
@@ -145,6 +149,10 @@ public class RescheduleLabOrderServlet extends HttpServlet{
                         Map map = (Map) iterator.next();
                         clinicDetails.put("mobileNumber", map.get("mobile_number"));
                         clinicDetails.put("languagePreference", map.get("languagePreference"));
+                        clinicDetails.put("accountNumber", map.get("accountNumber") != null ? map.get("accountNumber").toString() : "");
+                        clinicDetails.put("receipentType", "ADMIN");
+                        clinicDetails.put("referenceID", labOrderRequest.getId().toString());
+                        clinicDetails.put("referenceType", "ORDER");
                         SmsUtil.sendStatusSms(labOrderRequest, clinicDetails);
                     }
                 }

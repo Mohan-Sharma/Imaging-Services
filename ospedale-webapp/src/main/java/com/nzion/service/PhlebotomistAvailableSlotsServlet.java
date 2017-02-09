@@ -565,7 +565,7 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
 
                 radiologyDetails.put("receipentType", "ADMIN");
                 radiologyDetails.put("referenceID", orderRequest.getId().toString());
-                radiologyDetails.put("referenceType", "ORDER");
+                radiologyDetails.put("referenceType", "Imaging Appointment Confirmed");
 
                 SmsUtil.sendStatusSms(orderRequest, radiologyDetails);
                 //for admin
@@ -585,7 +585,7 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
                         }
                         radiologyDetails.put("receipentType", "ADMIN");
                         radiologyDetails.put("referenceID", orderRequest.getId().toString());
-                        radiologyDetails.put("referenceType", "ORDER");
+                        radiologyDetails.put("referenceType", "Imaging Appointment Confirmed");
                         radiologyDetails.put("accountNumber", map.get("accountNumber") != null ? map.get("accountNumber").toString() : "");
                         SmsUtil.sendStatusSms(orderRequest, radiologyDetails);
                     }
@@ -598,7 +598,7 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
                 radiologyDetails.put("forAdmin", new Boolean(false));
                 radiologyDetails.put("receipentType", "PATIENT");
                 radiologyDetails.put("referenceID", orderRequest.getId().toString());
-                radiologyDetails.put("referenceType", "ORDER");
+                radiologyDetails.put("referenceType", "Imaging Appointment Confirmed");
                 radiologyDetails.put("accountNumber", null);
                 SmsUtil.sendStatusSms(orderRequest, radiologyDetails);
 
@@ -620,7 +620,7 @@ public class PhlebotomistAvailableSlotsServlet extends HttpServlet{
 
                 radiologyDetails.put("receipentType", "PATIENT");
                 radiologyDetails.put("referenceID", orderRequest.getId().toString());
-                radiologyDetails.put("referenceType", "ORDER");
+                radiologyDetails.put("referenceType", "Imaging Appointment Confirmed");
                 radiologyDetails.put("bcc", RestServiceConsumer.AFYA_ACCOUNT);
                 EmailUtil.sendNetworkContractStatusMail(radiologyDetails);
             } catch (Exception e){

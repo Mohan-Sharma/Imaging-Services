@@ -349,6 +349,15 @@
 		<url-pattern>/imagingServiceMaster/downloadAttachment</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>logoUrlFinderServlet</servlet-name>
+		<servlet-class>com.nzion.service.TenantLogoUrlFinderServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>logoUrlFinderServlet</servlet-name>
+		<url-pattern>/imagingServiceMaster/getTenantLogoURL</url-pattern>
+	</servlet-mapping>
+
 	<welcome-file-list>
 		<welcome-file>home.zul</welcome-file>
 	</welcome-file-list>

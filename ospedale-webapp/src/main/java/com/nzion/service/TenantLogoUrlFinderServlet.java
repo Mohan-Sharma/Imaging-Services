@@ -6,6 +6,7 @@ import com.nzion.domain.Practice;
 import com.nzion.hibernate.ext.multitenant.TenantIdHolder;
 import com.nzion.service.common.CommonCrudService;
 import com.nzion.util.UtilValidator;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
@@ -45,6 +46,7 @@ public class TenantLogoUrlFinderServlet extends HttpServlet {
         StringBuilder br = new StringBuilder();
         String pathOfImage = StringUtils.EMPTY;
         String tenantId = request.getParameter("labId");
+        java.io.FileInputStream fileInputStream = null;
         if(UtilValidator.isEmpty(tenantId)){
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "TenantId cannot be empty");
         }
@@ -55,11 +57,16 @@ public class TenantLogoUrlFinderServlet extends HttpServlet {
             if(UtilValidator.isNotEmpty(practice)){
                 br.append(request.getScheme()).append("://").append(request.getServerName()).append(":").append(request.getServerPort()).append(getServletContext().getContextPath()).append(practice.getImageUrl());
                 pathOfImage = br.toString();
+                if (UtilValidator.isNotEmpty(practice.getImageUrl())) {
+                    String logoUrl = practice.getImageUrl().replaceFirst("/", "");
+                    fileInputStream = new java.io.FileInputStream(logoUrl);
+                }
             }
             url.put("practiceName", practice.getPracticeName());
             url.put("tenantId", practice.getTenantId());
             url.put("logoUrl", pathOfImage);
             url.put("logoWithAddress", practice.isLogoWithAddress());
+            url.put("logoInputStream", IOUtils.toByteArray(fileInputStream));
         }
         PrintWriter writer = response.getWriter();
         ObjectMapper objectMapper = new ObjectMapper();
